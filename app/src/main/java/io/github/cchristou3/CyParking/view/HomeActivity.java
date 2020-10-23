@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking;
+package io.github.cchristou3.CyParking.view;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,14 +17,19 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.FirebaseApp;
 
-public class MainActivity extends AppCompatActivity {
+import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.repository.ParkingRepository;
+
+public class HomeActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FirebaseApp.initializeApp(this);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -43,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = navHostFragment.getNavController();
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        ParkingRepository.addDummyParkingData(); //TODO: Remove hardcoded data
+
     }
 
     @Override
@@ -60,6 +68,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateToParkingMapActivity(View view){
-        startActivity(new Intent(MainActivity.this, ParkingMapActivity.class));
+        startActivity(new Intent(HomeActivity.this, ParkingMapActivity.class));
     }
 }

@@ -2,15 +2,24 @@ package io.github.cchristou3.CyParking.pojo.parking;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.HashMap;
 import java.util.List;
 
 public class PrivateParking extends Parking {
+
+    @SerializedName("PricingList")
     private List<Integer> mPricingList;
+    @SerializedName("Capacity")
     private int mCapacity;
+    @SerializedName("AvailableSpaces")
     private int mAvailableSpaces;
+    @SerializedName("CapacityForDisabled")
     private int mCapacityForDisabled;
+    @SerializedName("AvailableSpacesForDisabled")
     private int mAvailableSpacesForDisabled;
+    @SerializedName("OpeningHours")
     private String mOpeningHours;
 
     public PrivateParking(HashMap<String, Double> mCoordinates, int mParkingID, List<Integer> mPricingList, int mCapacity, int mAvailalbleSpaces, int mCapacityForDisabled, int mAvailalbleSpacesForDisabled, String mOpeningHours) {
@@ -26,7 +35,15 @@ public class PrivateParking extends Parking {
     @NonNull
     @Override
     public String toString() {
-        return "Coordinates: " + super.getmCoordinates().toString();
+        return
+                "mCoordinates: " + getmCoordinates() +
+                        ", mParkingID: " + getmParkingID() +
+                        ", mPricingList: " + getmPricingList() +
+                        ", mCapacity: " + getmCapacity() +
+                        ", mAvailalbleSpaces: " + getmAvailableSpaces() +
+                        ", mCapacityForDisabled: " + getmCapacityForDisabled() +
+                        ", mAvailalbleSpacesForDisabled: " + getmAvailableSpacesForDisabled() +
+                        ", mOpeningHours: " + getmOpeningHours();
     }
 
     public List<Integer> getmPricingList() {

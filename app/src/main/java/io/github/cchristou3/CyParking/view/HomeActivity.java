@@ -20,7 +20,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.repository.ParkingRepository;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -49,7 +48,7 @@ public class HomeActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        ParkingRepository.addDummyParkingData(); //TODO: Remove hardcoded data
+        //ParkingRepository.addDummyParkingData(); //TODO: Remove hardcoded data
 
     }
 

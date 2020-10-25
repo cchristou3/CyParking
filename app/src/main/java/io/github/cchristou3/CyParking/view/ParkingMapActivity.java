@@ -1,6 +1,7 @@
 package io.github.cchristou3.CyParking.view;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -10,6 +11,9 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -40,12 +44,14 @@ import com.google.gson.Gson;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.pojo.parking.PrivateParking;
 import io.github.cchristou3.CyParking.repository.ParkingRepository;
 
-public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCallback {
+public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
+        GoogleMap.OnMarkerClickListener {
 
     // Constant variables
     public static final String TAG = "cchristou3-CyParking";
@@ -94,7 +100,7 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.activity_parking_map_fg_google_map);
         mapFragment.getMapAsync(this);
 
         // set flag to false and call registerCurrentLocationUpdates method
@@ -106,8 +112,6 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
         mLocationRequest.setInterval(INTERVAL_TIME);
         mRegistered = false;
         mDataHasBeenRetrieved = false;
-        registerCurrentLocationUpdates();
-
     }
 
     /**
@@ -121,12 +125,16 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        registerCurrentLocationUpdates();
-
         mGoogleMap = googleMap;
+        registerCurrentLocationUpdates();
 
         // Todo Create a custom InfoWindowsAdapter
         //mGoogleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this, mHashMapToValuesOfMarkersInScene));
+
+        // Add listeners to the markers + map
+        mGoogleMap.setOnMarkerClickListener(this);
+        mGoogleMap.setOnMapClickListener(this);
+
         mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
     }
 
@@ -151,13 +159,13 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
             for (DocumentChange dc : value.getDocumentChanges()) {
                 switch (dc.getType()) {
                     case ADDED:
-                        Log.d(TAG, "New parking: " + dc.getDocument().getData());
+                        //Log.d(TAG, "New parking: " + dc.getDocument().getData());
                         break;
                     case MODIFIED:
-                        Log.d(TAG, "Modified parking: " + dc.getDocument().getData());
+                        //Log.d(TAG, "Modified parking: " + dc.getDocument().getData());
                         break;
                     case REMOVED:
-                        Log.d(TAG, "Removed parking: " + dc.getDocument().getData());
+                        //Log.d(TAG, "Removed parking: " + dc.getDocument().getData());
                         break;
                 }
             }
@@ -229,23 +237,25 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
                     // Traverse through the fetched objects and add them to the map.
                     for (PrivateParking parking : privateParking) {
                         // Get the coordinates of the parking
-                        double parkingLatitude = parking.getmCoordinates().get(ParkingRepository.LATITUDE_KEY);
-                        double parkingLongitude = parking.getmCoordinates().get(ParkingRepository.LONGITUDE_KEY);
-                        LatLng parkingLatLng = new LatLng(parkingLatitude, parkingLongitude);
+                        try {
+                            double parkingLatitude = parking.getmCoordinates().get(ParkingRepository.LATITUDE_KEY);
+                            double parkingLongitude = parking.getmCoordinates().get(ParkingRepository.LONGITUDE_KEY);
+                            LatLng parkingLatLng = new LatLng(parkingLatitude, parkingLongitude);
+                            Log.d(TAG, "fetchPrivateParking: " + parking.toString());
+                            // Add a marker to the parking's coordinates
+                            Marker marker = mGoogleMap.addMarker(new MarkerOptions()
+                                    .position(parkingLatLng)
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
 
-                        // Add a marker to the parking's coordinates
-                        Marker marker = mGoogleMap.addMarker(new MarkerOptions()
-                                .title(parking.toString())
-                                .position(parkingLatLng)
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).snippet("Just a snippet example"));
-
-                        // Add to hashmap to keep track of each marker's corresponding PrivateParking object
-                        mHashMapToValuesOfMarkersInScene.put(marker, parking);
+                            // Add to hashmap to keep track of each marker's corresponding PrivateParking object
+                            mHashMapToValuesOfMarkersInScene.put(marker, parking);
+                        } catch (NullPointerException e) {
+                            Log.d(TAG, "Parking producing null coordinates!");
+                        }
                     }
-
                 }, error -> {
             // todo: inform the user
-            Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Unexpected error occurred!\n" + error.getMessage(), Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Volley error: " + error.getMessage());
         });
         requestQueue.add(requestForPrivateParking);
@@ -271,7 +281,7 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
                     fetchPrivateParking(mCurrentLatLngOfUser);
                 }
 
-                // Todo replace drawbale of my location
+                // Todo replace drawable of my location
                 Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_menu_gallery, null);
                 drawable.setAlpha(50); // = Opacity
                 Bitmap bitmapForMarker = drawableToBitmap(drawable);
@@ -280,11 +290,75 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
                         .title("Title")
                         .position(mCurrentLatLngOfUser)
                         .icon(BitmapDescriptorFactory.fromBitmap(bitmapForMarker)) // TODO: Replace with an actual icon
-                        .snippet("Current Location!"));
+                        .snippet("Current Location!")
+                        .title("Me"));
 
                 // Smoothly moves the camera to location
                 mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
             }
         };
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        Toast.makeText(this, "Map has been clicked!", Toast.LENGTH_SHORT).show();
+        Set<Marker> allKeysOfVisibleMarkers = mHashMapToValuesOfMarkersInScene.keySet();
+//        HashMap<String, Double> a = new HashMap<String, Double>() {
+//            {
+//                put(ParkingRepository.LATITUDE_KEY, latLng.latitude);
+//                put(ParkingRepository.LONGITUDE_KEY, latLng.longitude);
+//            }};
+//
+//        boolean containsValue = mHashMapToValuesOfMarkersInScene.containsValue(a);
+//        
+
+        for (Marker key : allKeysOfVisibleMarkers) { // Marker -> Data
+            if (mHashMapToValuesOfMarkersInScene.get(key) != null) {
+                // Check whether the map was clicked and not any of the markers
+                if (mHashMapToValuesOfMarkersInScene.get(key).getmCoordinates().get(ParkingRepository.LATITUDE_KEY) == latLng.latitude
+                        && mHashMapToValuesOfMarkersInScene.get(key).getmCoordinates().get(ParkingRepository.LONGITUDE_KEY) == latLng.latitude) {
+                    showDetails(key);
+                    return;
+                }
+            }
+        }
+        changeInfoLayoutVisibilityTo(View.GONE);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        showDetails(marker);
+        return false;
+    }
+
+    private void showDetails(Marker marker) {
+        Toast.makeText(this, "Marker has been clicked!", Toast.LENGTH_SHORT).show();
+        changeInfoLayoutVisibilityTo(View.VISIBLE);
+        // Get references to the view elements
+        TextView nameTextView = findViewById(R.id.activity_parking_map_txt_name);
+        TextView priceTextView = findViewById(R.id.activity_parking_map_txt_price);
+        TextView capacityTextView = findViewById(R.id.activity_parking_map_txt_capacity);
+        // Get the corresponding hash map object
+        PrivateParking dataOfSelectedMarker = mHashMapToValuesOfMarkersInScene.get(marker);
+
+        // Set their texts the according the clicked marker's data
+        String nameTextViewString = "Name: " + ((dataOfSelectedMarker != null) ? dataOfSelectedMarker.getmOpeningHours() : "Unavailable");
+        String capacityTextViewString = "Capacity: " + ((dataOfSelectedMarker != null) ? dataOfSelectedMarker.getmCapacity() : "Unavailable");
+        String priceTextViewString = "Price: " + ((dataOfSelectedMarker != null) ? dataOfSelectedMarker.getmAvailableSpaces() : "Unavailable");
+        nameTextView.setText(nameTextViewString);
+        capacityTextView.setText(capacityTextViewString);
+        priceTextView.setText(priceTextViewString);
+    }
+
+    private void changeInfoLayoutVisibilityTo(final int visibility) {
+        // Get a reference to the hidden info layout
+        LinearLayout infoLayout = findViewById(R.id.activity_parking_map_li_infoLayout);
+        // Check if the current visibility is already set with the given one (to avoid unnecessary actions)
+        if (infoLayout.getVisibility() != visibility)
+            infoLayout.setVisibility(visibility);
+    }
+
+    public void navigateToBookingActivity(View view) {
+        startActivity(new Intent(ParkingMapActivity.this, ParkingBookingActivity.class));
     }
 }

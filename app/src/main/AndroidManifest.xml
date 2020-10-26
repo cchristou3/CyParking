@@ -16,7 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CyParking">
-        <activity android:name=".view.ParkingBookingActivity"></activity>
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -29,18 +29,21 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity
-            android:name=".view.ParkingMapActivity"
-            android:label="@string/title_activity_parking_map" />
-        <activity
-            android:name=".view.HomeActivity"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.CyParking.NoActionBar">
+        <activity android:name=".view.parkingBooking.ParkingBookingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".view.parkingMap.ParkingMapActivity"
+            android:label="@string/title_activity_parking_map" />
+        <activity
+            android:name=".view.HomeActivity"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.CyParking.NoActionBar">
+
         </activity>
     </application>
 

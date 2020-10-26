@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.view;
+package io.github.cchristou3.CyParking.view.parkingMap;
 
 import android.Manifest;
 import android.content.Intent;
@@ -49,6 +49,7 @@ import java.util.Set;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.pojo.parking.PrivateParking;
 import io.github.cchristou3.CyParking.repository.ParkingRepository;
+import io.github.cchristou3.CyParking.view.parkingBooking.ParkingBookingActivity;
 
 public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener {
@@ -64,34 +65,12 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
     private LocationCallback mLocationCallback;
     private LocationRequest mLocationRequest;
 
-    HashMap<Marker, PrivateParking> mHashMapToValuesOfMarkersInScene = new HashMap<Marker, PrivateParking>();
-    private LatLng mCurrentLatLngOfUser;
-    private boolean mRegistered;
     // Activity variables
     private GoogleMap mGoogleMap;
     private boolean mDataHasBeenRetrieved;
-
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        Bitmap bitmap;
-
-        if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if (bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
-            }
-        }
-
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
-
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
-    }
+    private HashMap<Marker, PrivateParking> mHashMapToValuesOfMarkersInScene = new HashMap<Marker, PrivateParking>();
+    private LatLng mCurrentLatLngOfUser;
+    private boolean mRegistered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,28 +93,27 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
         mDataHasBeenRetrieved = false;
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mGoogleMap = googleMap;
-        registerCurrentLocationUpdates();
+    // TODO: Place all helper functions in a namespace
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        Bitmap bitmap;
 
-        // Todo Create a custom InfoWindowsAdapter
-        //mGoogleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this, mHashMapToValuesOfMarkersInScene));
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if (bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
 
-        // Add listeners to the markers + map
-        mGoogleMap.setOnMarkerClickListener(this);
-        mGoogleMap.setOnMapClickListener(this);
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
 
-        mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 
     @Override
@@ -261,42 +239,27 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
         requestQueue.add(requestForPrivateParking);
     }
 
-    // Gets triggered every time we receive info about the user's location
-    private LocationCallback getLocationCallback() {
-        return new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                if (locationResult == null)
-                    return;
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mGoogleMap = googleMap;
+        registerCurrentLocationUpdates();
 
-                Location receivedLocation = locationResult.getLastLocation();
-                mCurrentLatLngOfUser = new LatLng(receivedLocation.getLatitude(), receivedLocation.getLongitude());
+        // Todo Create a custom InfoWindowsAdapter
+        //mGoogleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this, mHashMapToValuesOfMarkersInScene));
 
-                // We fetch the data only once, when we receive our first location update.
-                // TODO: access the location from previous activity and fetch data from this
-                //  activity's onCreate method in order to reduce the loading time
-                if (!mDataHasBeenRetrieved) {
-                    mDataHasBeenRetrieved = true;
-                    fetchPrivateParking(mCurrentLatLngOfUser);
-                }
+        // Add listeners to the markers + map
+        mGoogleMap.setOnMarkerClickListener(this);
+        mGoogleMap.setOnMapClickListener(this);
 
-                // Todo replace drawable of my location
-                Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_menu_gallery, null);
-                drawable.setAlpha(50); // = Opacity
-                Bitmap bitmapForMarker = drawableToBitmap(drawable);
-
-                Marker marker = mGoogleMap.addMarker(new MarkerOptions()
-                        .title("Title")
-                        .position(mCurrentLatLngOfUser)
-                        .icon(BitmapDescriptorFactory.fromBitmap(bitmapForMarker)) // TODO: Replace with an actual icon
-                        .snippet("Current Location!")
-                        .title("Me"));
-
-                // Smoothly moves the camera to location
-                mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
-            }
-        };
+        mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
     }
 
     @Override
@@ -360,5 +323,48 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
 
     public void navigateToBookingActivity(View view) {
         startActivity(new Intent(ParkingMapActivity.this, ParkingBookingActivity.class));
+    }
+
+    // Gets triggered every time we receive info about the user's location
+    private LocationCallback getLocationCallback() {
+        return new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                if (locationResult == null)
+                    return;
+
+                Location receivedLocation = locationResult.getLastLocation();
+                mCurrentLatLngOfUser = new LatLng(receivedLocation.getLatitude(), receivedLocation.getLongitude());
+
+                // We fetch the data only once, when we receive our first location update.
+                // TODO: access the location from previous activity and fetch data from this
+                //  activity's onCreate method in order to reduce the loading time
+                if (!mDataHasBeenRetrieved) {
+                    mDataHasBeenRetrieved = true;
+                    fetchPrivateParking(mCurrentLatLngOfUser);
+                }
+
+                // Todo replace drawable of my location
+                try {
+                    Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_menu_gallery, null);
+                    drawable.setAlpha(50); // = Opacity
+                    Bitmap bitmapForMarker = drawableToBitmap(drawable);
+
+                    Marker marker = mGoogleMap.addMarker(new MarkerOptions()
+                            .title("Title")
+                            .position(mCurrentLatLngOfUser)
+                            .icon(BitmapDescriptorFactory.fromBitmap(bitmapForMarker)) // TODO: Replace with an actual icon
+                            .snippet("Current Location!")
+                            .title("Me"));
+
+                    // Smoothly moves the camera to location
+                    mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+                } catch (NullPointerException e) {
+                    Log.d(TAG, "onLocationResult: " + e.getMessage());
+                }
+
+            }
+        };
     }
 }

@@ -20,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.view.parkingMap.ParkingMapActivity;
 
 public class HomeActivity extends AppCompatActivity {
 

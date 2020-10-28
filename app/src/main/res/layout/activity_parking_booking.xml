@@ -118,6 +118,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
+        android:onClick="bookParking"
         android:text="BOOK"
         android:textSize="25sp"
         app:layout_constraintBottom_toBottomOf="@+id/space"

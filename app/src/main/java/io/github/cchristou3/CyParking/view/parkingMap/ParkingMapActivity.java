@@ -71,6 +71,7 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
     private HashMap<Marker, PrivateParking> mHashMapToValuesOfMarkersInScene = new HashMap<Marker, PrivateParking>();
     private LatLng mCurrentLatLngOfUser;
     private boolean mRegistered;
+    private PrivateParking mSelectedPrivateParking;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -291,6 +292,7 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
     @Override
     public boolean onMarkerClick(Marker marker) {
         showDetails(marker);
+        mSelectedPrivateParking = mHashMapToValuesOfMarkersInScene.get(marker);
         return false;
     }
 
@@ -322,7 +324,14 @@ public class ParkingMapActivity extends FragmentActivity implements OnMapReadyCa
     }
 
     public void navigateToBookingActivity(View view) {
-        startActivity(new Intent(ParkingMapActivity.this, ParkingBookingActivity.class));
+        if (mSelectedPrivateParking != null) {
+            Intent intentForBooking = new Intent(ParkingMapActivity.this, ParkingBookingActivity.class);
+            intentForBooking.putExtra("bookingDetails", mSelectedPrivateParking);
+            //startActivity();
+        } else {
+            Toast.makeText(this, "Oops something went wrong!", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     // Gets triggered every time we receive info about the user's location

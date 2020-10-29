@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
@@ -19,26 +20,46 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.pojo.parking.PrivateParking;
+import io.github.cchristou3.CyParking.repository.Utility;
+import io.github.cchristou3.CyParking.view.parkingMap.ParkingMapActivity;
 
 public class ParkingBookingActivity extends AppCompatActivity {
 
     private SimpleDateFormat mSimpleDateFormat;
     private ParkingBookingViewModel mParkingBookingViewModel;
 
-    // TODO: add to Helper method namespace
-    public static String getTimeOf(final int finalHours, int minute) {
-        final String finalMinutes = ((minute < 10) ? "0" : "") + minute;
-        return "" + finalHours + " : " + finalMinutes;
-    }
-
+    /**
+     * Initialises the activity.
+     * TODO: Builds the activity's Toolbar and Drawer navigation.
+     * Adds listeners to our UI's Buttons.
+     * Instantiates a ViewModel for the activity.
+     * Adds observers to our LiveData Objects
+     * TODO: Listens for changes in the Database for the specified document.
+     *
+     * @param savedInstanceState A bundle which contains info about previously stored data
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parking_booking);
+
+        // Access the Intent's extras
+        PrivateParking selectedParking = (PrivateParking) getIntent().getExtras().getParcelable(ParkingMapActivity.BOOKING_DETAILS_KEY);
+        Toast.makeText(this, selectedParking.toString(), Toast.LENGTH_SHORT).show();
+
+        // Get a reference to UI TextViews
+        TextView parkingname = findViewById(R.id.activity_parking_booking_txt_parking_name);
+        TextView parkingcapacity = findViewById(R.id.activity_parking_booking_txt_parking_capacity);
+        TextView parkingavailability = findViewById(R.id.activity_parking_booking_txt_parking_availability);
+
+        // Set their text to their corresponding value
+        parkingname.setText("ParkingID: " + Integer.toString(selectedParking.getmParkingID()));
+        parkingcapacity.setText("Capacity: " + Integer.toString(selectedParking.getmCapacity()));
+        parkingavailability.setText("AvailableSpaces: " + Integer.toString(selectedParking.getmAvailableSpaces()));
 
         // Instantiate a view model object for the activity
         mParkingBookingViewModel =
@@ -77,12 +98,18 @@ public class ParkingBookingActivity extends AppCompatActivity {
             mSimpleDateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
             DatePickerDialog datePickerDialog = new DatePickerDialog(ParkingBookingActivity.this,
                     (view, year1, month1, dayOfMonth) ->
-                            mParkingBookingViewModel.getmPickedDate().setValue(mSimpleDateFormat.format(getDate(year1, month1, dayOfMonth))),
+                            mParkingBookingViewModel.getmPickedDate().setValue(mSimpleDateFormat.format(Utility.getDateOf(year1, month1, dayOfMonth))),
                     year, month, day);
             datePickerDialog.show();
         });
     }
 
+    /**
+     * Validates the global LivaData objects.
+     * If they are valid, a booking object is created and stored in the database.
+     *
+     * @param view UI context
+     */
     public void bookParking(View view) {
         // Access parking operator's details via the Intent object
         String pickedDate = mParkingBookingViewModel.getmPickedDate().getValue();
@@ -107,29 +134,25 @@ public class ParkingBookingActivity extends AppCompatActivity {
         //PrivateParkingBooking parkingToBeBooked = new PrivateParkingBooking();
     }
 
+    /**
+     * Attaches an OnClickListener to the given button.
+     * OnClick: Creates a TimePickerDialog with its own OnTimeSetListener.
+     * OnTimeSetListener-onClick: Updates the value of the specified LiveData Object.
+     *
+     * @param timePickerButton      reference to a button in the layout
+     * @param stringMutableLiveData LiveData which handles persistence of a String
+     */
     private void attachListenerToTimePicker(@NotNull Button timePickerButton,
                                             @NotNull MutableLiveData<String> stringMutableLiveData) {
         timePickerButton.setOnClickListener(v -> {
             TimePickerDialog timePickerDialog = new TimePickerDialog(ParkingBookingActivity.this,
                     AlertDialog.THEME_HOLO_DARK, // TODO: useful for night mode THEME_HOLO_LIGHT
                     // Triggers textview Update
-                    (view, hourOfDay, minute) -> stringMutableLiveData.setValue(getTimeOf(hourOfDay, minute)),
+                    (view, hourOfDay, minute) -> stringMutableLiveData.setValue(Utility.getTimeOf(hourOfDay, minute)),
                     Calendar.getInstance().get(Calendar.HOUR),
                     Calendar.getInstance().get(Calendar.MINUTE),
                     true);
             timePickerDialog.show();
         });
-    }
-
-    public Date getDate(int year, int month, int day) {
-        final Calendar innerCalendar = Calendar.getInstance();
-        innerCalendar.set(Calendar.YEAR, year);
-        innerCalendar.set(Calendar.MONTH, month);
-        innerCalendar.set(Calendar.DAY_OF_MONTH, day);
-        innerCalendar.set(Calendar.HOUR_OF_DAY, 0);
-        innerCalendar.set(Calendar.MINUTE, 0);
-        innerCalendar.set(Calendar.SECOND, 0);
-        innerCalendar.set(Calendar.MILLISECOND, 0);
-        return innerCalendar.getTime();
     }
 }

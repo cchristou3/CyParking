@@ -3,7 +3,7 @@ package io.github.cchristou3.CyParking.pojo.parking;
 import java.util.HashMap;
 
 public class PublicParking extends Parking {
-    // TODO fill out with attributes of a public parking
+    // TODO: fill out with attributes of a public parking
 
     public PublicParking() {
     }

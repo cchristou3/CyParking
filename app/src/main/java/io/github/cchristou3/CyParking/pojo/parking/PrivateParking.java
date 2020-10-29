@@ -12,7 +12,7 @@ import java.util.List;
 
 public class PrivateParking extends Parking {
 
-    // TODO Replace with -> @ParcelField("")
+    // TODO: Replace with -> @ParcelField("")
 
     public static final Creator<PrivateParking> CREATOR = new Creator<PrivateParking>() {
         @Override

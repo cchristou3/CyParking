@@ -12,6 +12,17 @@
         android:layout_height="match_parent"
         tools:context="com.example.mapwithmarker.MapsMarkerActivity" />
 
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/activity_parking_map_pb_loadingMarkers"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        app:layout_constraintBottom_toBottomOf="@+id/activity_parking_map_fg_google_map"
+        app:layout_constraintEnd_toEndOf="@+id/activity_parking_map_fg_google_map"
+        app:layout_constraintStart_toStartOf="@+id/activity_parking_map_fg_google_map"
+        app:layout_constraintTop_toTopOf="@+id/activity_parking_map_fg_google_map" />
+
     <LinearLayout
         android:id="@+id/activity_parking_map_li_infoLayout"
         android:layout_width="match_parent"

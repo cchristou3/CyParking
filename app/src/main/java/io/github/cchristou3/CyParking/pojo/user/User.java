@@ -1,5 +1,13 @@
 package io.github.cchristou3.CyParking.pojo.user;
 
+/**
+ * purpose: POJO to be used to transfer and receive data
+ * via activities and HTTPS requests. Used to keep track of the user's
+ * data.
+ *
+ * @author Charalambos Christou
+ * @version 2.0 29/10/20
+ */
 public class User {
     private String[] mRoles;
     private String mCarNumberPlate;

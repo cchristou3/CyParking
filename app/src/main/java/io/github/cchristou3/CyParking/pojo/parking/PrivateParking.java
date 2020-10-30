@@ -10,9 +10,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * purpose: POJO to be used to transfer and receive data
+ * via activities / fragments and HTTPS requests. Further,
+ * associated with a Google Maps Marker in the ParkingMapFragment.
+ * This is a Subclass of Parking.
+ *
+ * @author Charalambos Christou
+ * @version 2.0 29/10/20
+ */
 public class PrivateParking extends Parking {
-
-    // TODO: Replace with -> @ParcelField("")
 
     public static final Creator<PrivateParking> CREATOR = new Creator<PrivateParking>() {
         @Override
@@ -25,112 +32,113 @@ public class PrivateParking extends Parking {
             return new PrivateParking[size];
         }
     };
-    @SerializedName("Capacity")
-    private int mCapacity;
-    @SerializedName("AvailableSpaces")
-    private int mAvailableSpaces;
-    @SerializedName("CapacityForDisabled")
-    private int mCapacityForDisabled;
-    @SerializedName("AvailableSpacesForDisabled")
-    private int mAvailableSpacesForDisabled;
-    @SerializedName("OpeningHours")
-    private String mOpeningHours;
-    @SerializedName("PricingList")
-    private ArrayList<Integer> mPricingList;
+    @SerializedName("capacity")
+    private int capacity;
+    @SerializedName("availableSpaces")
+    private int availableSpaces;
+    @SerializedName("capacityForDisabled")
+    private int capacityForDisabled;
+    @SerializedName("availableSpacesForDisabled")
+    private int availableSpacesForDisabled;
+    @SerializedName("openingHours")
+    private String openingHours;
+    @SerializedName("pricingList")
+    private ArrayList<Integer> pricingList;
 
-
-    public PrivateParking(HashMap<String, Double> mCoordinates, int mParkingID, ArrayList<Integer> mPricingList, int mCapacity, int mAvailalbleSpaces, int mCapacityForDisabled, int mAvailalbleSpacesForDisabled, String mOpeningHours) {
-        super(mCoordinates, mParkingID);
-        this.mPricingList = mPricingList;
-        this.mCapacity = mCapacity;
-        this.mAvailableSpaces = mAvailalbleSpaces;
-        this.mCapacityForDisabled = mCapacityForDisabled;
-        this.mAvailableSpacesForDisabled = mAvailalbleSpacesForDisabled;
-        this.mOpeningHours = mOpeningHours;
+    public PrivateParking() {
     }
 
+    public PrivateParking(HashMap<String, Double> coordinates, int parkingID, int capacity, int availableSpaces, int capacityForDisabled, int availableSpacesForDisabled, String openingHours, ArrayList<Integer> pricingList) {
+        super(coordinates, parkingID);
+        this.capacity = capacity;
+        this.availableSpaces = availableSpaces;
+        this.capacityForDisabled = capacityForDisabled;
+        this.availableSpacesForDisabled = availableSpacesForDisabled;
+        this.openingHours = openingHours;
+        this.pricingList = pricingList;
+    }
 
     protected PrivateParking(Parcel in) {
         super(in);
-        mCapacity = in.readInt();
-        mAvailableSpaces = in.readInt();
-        mCapacityForDisabled = in.readInt();
-        mAvailableSpacesForDisabled = in.readInt();
-        mOpeningHours = in.readString();
-        mPricingList = in.readArrayList(null);
+        capacity = in.readInt();
+        availableSpaces = in.readInt();
+        capacityForDisabled = in.readInt();
+        availableSpacesForDisabled = in.readInt();
+        openingHours = in.readString();
+        pricingList = in.readArrayList(null);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeInt(mCapacity);
-        dest.writeInt(mAvailableSpaces);
-        dest.writeInt(mCapacityForDisabled);
-        dest.writeInt(mAvailableSpacesForDisabled);
-        dest.writeString(mOpeningHours);
-        dest.writeList(mPricingList);
+        dest.writeInt(capacity);
+        dest.writeInt(availableSpaces);
+        dest.writeInt(capacityForDisabled);
+        dest.writeInt(availableSpacesForDisabled);
+        dest.writeString(openingHours);
+        dest.writeList(pricingList);
     }
 
     @NonNull
     @Override
     public String toString() {
         return
-                "mCoordinates: " + getmCoordinates() +
-                        ", mParkingID: " + getmParkingID() +
-                        ", mPricingList: " + getmPricingList() +
-                        ", mCapacity: " + getmCapacity() +
-                        ", mAvailalbleSpaces: " + getmAvailableSpaces() +
-                        ", mCapacityForDisabled: " + getmCapacityForDisabled() +
-                        ", mAvailalbleSpacesForDisabled: " + getmAvailableSpacesForDisabled() +
-                        ", mOpeningHours: " + getmOpeningHours();
+                "Coordinates: " + getCoordinates() +
+                        ", ParkingID: " + getParkingID() +
+                        ", PricingList: " + getPricingList() +
+                        ", Capacity: " + getCapacity() +
+                        ", AvailalbleSpaces: " + getAvailableSpaces() +
+                        ", CapacityForDisabled: " + getCapacityForDisabled() +
+                        ", AvailalbleSpacesForDisabled: " + getAvailableSpacesForDisabled() +
+                        ", OpeningHours: " + getOpeningHours();
     }
 
-    public List<Integer> getmPricingList() {
-        return mPricingList;
+    public List<Integer> getPricingList() {
+        return pricingList;
     }
 
-    public void setmPricingList(ArrayList<Integer> mPricingList) {
-        this.mPricingList = mPricingList;
+    public void setPricingList(ArrayList<Integer> pricingList) {
+        this.pricingList = pricingList;
     }
 
-    public int getmCapacity() {
-        return mCapacity;
+    public int getCapacity() {
+        return capacity;
     }
 
-    public void setmCapacity(int mCapacity) {
-        this.mCapacity = mCapacity;
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
 
-    public int getmAvailableSpaces() {
-        return mAvailableSpaces;
+    public int getAvailableSpaces() {
+        return availableSpaces;
     }
 
-    public void setmAvailableSpaces(int mAvailableSpaces) {
-        this.mAvailableSpaces = mAvailableSpaces;
+    public void setAvailableSpaces(int availableSpaces) {
+        this.availableSpaces = availableSpaces;
     }
 
-    public int getmCapacityForDisabled() {
-        return mCapacityForDisabled;
+    public int getCapacityForDisabled() {
+        return capacityForDisabled;
     }
 
-    public void setmCapacityForDisabled(int mCapacityForDisabled) {
-        this.mCapacityForDisabled = mCapacityForDisabled;
+    public void setCapacityForDisabled(int capacityForDisabled) {
+        this.capacityForDisabled = capacityForDisabled;
     }
 
-    public int getmAvailableSpacesForDisabled() {
-        return mAvailableSpacesForDisabled;
+    public int getAvailableSpacesForDisabled() {
+        return availableSpacesForDisabled;
     }
 
-    public void setmAvailableSpacesForDisabled(int mAvailableSpacesForDisabled) {
-        this.mAvailableSpacesForDisabled = mAvailableSpacesForDisabled;
+    public void setAvailableSpacesForDisabled(int availableSpacesForDisabled) {
+        this.availableSpacesForDisabled = availableSpacesForDisabled;
     }
 
-    public String getmOpeningHours() {
-        return mOpeningHours;
+    public String getOpeningHours() {
+        return openingHours;
     }
 
-    public void setmOpeningHours(String mOpeningHours) {
-        this.mOpeningHours = mOpeningHours;
+    public void setOpeningHours(String openingHours) {
+        this.openingHours = openingHours;
     }
 
 

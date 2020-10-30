@@ -6,40 +6,40 @@ const constants = require('./constants')
 module.exports.privateParkingConverter = {
     toFirestore: function (privateParking) {
         return {
-            Coordinates: privateParking.Coordinates,
-            ParkingID: privateParking.ParkingID,
-            PricingList: privateParking.PricingList,
-            Capacity: privateParking.Capacity,
-            AvailableSpaces: privateParking.AvailableSpaces,
-            CapacityForDisabled: privateParking.CapacityForDisabled,
-            AvailableSpacesForDisabled: privateParking.AvailableSpacesForDisabled,
-            OpeningHours: privateParking.OpeningHours
-        }
+            id: privateParking.id,
+            parking: {
+                coordinates: {
+                    latitude: privateParking.coordinates.latitude,
+                    longitude: privateParking.coordinates.longitude,
+                },
+                parkingID: privateParking.parkingID,
+                pricingList: privateParking.pricingList,
+                capacity: privateParking.capacity,
+                availableSpaces: privateParking.availableSpaces,
+                capacityForDisabled: privateParking.capacityForDisabled,
+                availableSpacesForDisabled: privateParking.availableSpacesForDisabled,
+                openingHours: privateParking.openingHours
+            }
+        };
     },
     fromFirestore: function (snapshot, options) {
         const data = snapshot.data(options);
         return {
-            Coordinates: data.Coordinates,
-            ParkingID: data.ParkingID,
-            PricingList: data.PricingList,
-            Capacity: data.Capacity,
-            AvailableSpaces: data.AvailableSpaces,
-            CapacityForDisabled: data.CapacityForDisabled,
-            AvailableSpacesForDisabled: data.AvailableSpacesForDisabled,
-            OpeningHours: data.OpeningHours
+            id: snapshot.id,
+            parking: snapshot.data()
         };
     }
 }
 
 // Determines whether the given location is inside the range
-const nearbyUser = function (parking, userLatitude, userLongitude) {
+const nearbyUser = function (parkingObject, userLatitude, userLongitude) {
     // User's lat lng
     var lat1 = userLatitude
     var lon1 = userLongitude;
 
     // Parking's lat lng
-    var lat2 = parking.Coordinates.latitude;
-    var lon2 = parking.Coordinates.longitude;
+    var lat2 = parkingObject.parking.coordinates.latitude;
+    var lon2 = parkingObject.parking.coordinates.longitude;
     
     // Calculate the distance between the two points (User and current parking)
     // Reference: http://www.movable-type.co.uk/scripts/latlong.html
@@ -55,7 +55,7 @@ const nearbyUser = function (parking, userLatitude, userLongitude) {
 
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c; // d is the total distance in metres
-
+    
     return (d <= constants.MAXIMUM_DISTANCE_FROM_USER);
 }
 module.exports.nearbyUser = nearbyUser;

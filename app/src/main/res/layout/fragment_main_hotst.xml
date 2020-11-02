@@ -19,7 +19,7 @@
             android:theme="@style/Theme.CyParking.AppBarOverlay">
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
+                android:id="@+id/fragment_main_host_tb_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
@@ -35,7 +35,7 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/nav_host_fragment"
+                android:id="@+id/fragment_main_host_fcv_nav_host_fragment"
                 android:name="androidx.navigation.fragment.NavHostFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -50,7 +50,7 @@
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
+        android:id="@+id/fragment_main_host_nv_nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"

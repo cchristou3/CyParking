@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.view.parkingBooking;
+package io.github.cchristou3.CyParking.view.ui.booking;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -37,11 +37,11 @@ import java.util.Locale;
 import java.util.Objects;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.pojo.parking.PrivateParking;
-import io.github.cchristou3.CyParking.pojo.parking.PrivateParkingResultSet;
-import io.github.cchristou3.CyParking.pojo.parking.booking.PrivateParkingBooking;
-import io.github.cchristou3.CyParking.repository.ParkingRepository;
-import io.github.cchristou3.CyParking.repository.Utility;
+import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParking;
+import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParkingResultSet;
+import io.github.cchristou3.CyParking.view.data.pojo.parking.booking.PrivateParkingBooking;
+import io.github.cchristou3.CyParking.view.data.repository.ParkingRepository;
+import io.github.cchristou3.CyParking.view.data.repository.Utility;
 
 /**
  * purpose: View parking details, (TODO:) choose a payment method
@@ -118,12 +118,12 @@ public class ParkingBookingFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Get references to the UI elements
-        TextView parkingName = mView.findViewById(R.id.activity_parking_booking_txt_parking_name);
-        TextView parkingCapacity = mView.findViewById(R.id.activity_parking_booking_txt_parking_capacity);
-        parkingAvailability = mView.findViewById(R.id.activity_parking_booking_txt_parking_availability);
-        TextView datePickerTextView = mView.findViewById(R.id.activity_parking_booking_txt_date);
-        Button datePickerButton = mView.findViewById(R.id.activity_parking_booking_btn_date_button);
-        TextView startingTimeTextView = mView.findViewById(R.id.activity_parking_booking_txt_starting_time);
+        TextView parkingName = mView.findViewById(R.id.fragment_parking_booking_txt_parking_name);
+        TextView parkingCapacity = mView.findViewById(R.id.fragment_parking_booking_txt_parking_capacity);
+        parkingAvailability = mView.findViewById(R.id.fragment_parking_booking_txt_parking_availability);
+        TextView datePickerTextView = mView.findViewById(R.id.fragment_parking_booking_txt_date);
+        Button datePickerButton = mView.findViewById(R.id.fragment_parking_booking_btn_date_button);
+        TextView startingTimeTextView = mView.findViewById(R.id.fragment_parking_booking_txt_starting_time);
 
         // Set their text to their corresponding value
         final String parkingID = "ParkingID: " + mSelectedParking.getParking().getParkingID();
@@ -138,9 +138,9 @@ public class ParkingBookingFragment extends Fragment {
                 new ViewModelProvider(this).get(ParkingBookingViewModel.class);
 
 
-        Button startingTimePickerButton = mView.findViewById(R.id.activity_parking_booking_btn_starting_time_button);
-        TextView endingTimeTextView = mView.findViewById(R.id.activity_parking_booking_txt_ending_time);
-        Button endingTimePickerButton = mView.findViewById(R.id.activity_parking_booking_btn_ending_time_button);
+        Button startingTimePickerButton = mView.findViewById(R.id.fragment_parking_booking_btn_starting_time_button);
+        TextView endingTimeTextView = mView.findViewById(R.id.fragment_parking_booking_txt_ending_time);
+        Button endingTimePickerButton = mView.findViewById(R.id.fragment_parking_booking_btn_ending_time_button);
 
         // Set up LiveData's Observers
         mParkingBookingViewModel.getmPickedDate().observe(getViewLifecycleOwner(), datePickerTextView::setText);

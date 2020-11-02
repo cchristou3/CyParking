@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.pojo.parking.booking;
+package io.github.cchristou3.CyParking.view.data.pojo.parking.booking;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import java.util.Date;
 import java.util.HashMap;
 
-import io.github.cchristou3.CyParking.pojo.parking.Parking;
+import io.github.cchristou3.CyParking.view.data.pojo.parking.Parking;
 
 /**
  * purpose: POJO to be used to transfer and receive data

@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.view;
+package io.github.cchristou3.CyParking.view.ui;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 
-import static io.github.cchristou3.CyParking.view.ParkingMapFragment.LOCATION_PERMISSION_REQUEST_CODE;
+import static io.github.cchristou3.CyParking.view.ui.ParkingMapFragment.LOCATION_PERMISSION_REQUEST_CODE;
 
 /**
  * purpose: Show to the user all available options

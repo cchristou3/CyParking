@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.pojo.user;
+package io.github.cchristou3.CyParking.view.data.pojo.user;
 
 /**
  * purpose: POJO to be used to transfer and receive data

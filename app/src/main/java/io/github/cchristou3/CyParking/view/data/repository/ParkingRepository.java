@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.repository;
+package io.github.cchristou3.CyParking.view.data.repository;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import io.github.cchristou3.CyParking.pojo.parking.PrivateParking;
-import io.github.cchristou3.CyParking.pojo.parking.booking.PrivateParkingBooking;
+import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParking;
+import io.github.cchristou3.CyParking.view.data.pojo.parking.booking.PrivateParkingBooking;
 
 /**
  * purpose: contain all methods to access cloud / local database
@@ -22,6 +22,9 @@ import io.github.cchristou3.CyParking.pojo.parking.booking.PrivateParkingBooking
  */
 public class ParkingRepository {
 
+    // Keys related to the parking
+    public static final String LATITUDE_KEY = "latitude";
+    public static final String LONGITUDE_KEY = "longitude";
     // Firebase Firestore paths (nodes)
     private static final String PRIVATE_PARKING = "private_parking";
     private static final String PRIVATE_PARKING_BOOKING = "private_parking_bookings";
@@ -56,10 +59,6 @@ public class ParkingRepository {
         // Delete the booking info to the database
         FirebaseFirestore.getInstance().collection(PRIVATE_PARKING_BOOKING).document(idOfBookingToBeCancelled).delete();
     }
-
-    // Keys related to the parking
-    public static final String LATITUDE_KEY = "latitude";
-    public static final String LONGITUDE_KEY = "longitude";
 
     /**
      * Adds hard-coded data to the firebase's PRIVATE_PARKING node.

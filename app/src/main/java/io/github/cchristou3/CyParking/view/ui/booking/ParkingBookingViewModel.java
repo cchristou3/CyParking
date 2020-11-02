@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.view.parkingBooking;
+package io.github.cchristou3.CyParking.view.ui.booking;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -8,7 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import io.github.cchristou3.CyParking.repository.Utility;
+import io.github.cchristou3.CyParking.view.data.repository.Utility;
 
 /**
  * A ViewModel implementation, adopted to the ParkingBookingFragment fragment.

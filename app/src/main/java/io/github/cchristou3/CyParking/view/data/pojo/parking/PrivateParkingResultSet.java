@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.pojo.parking;
+package io.github.cchristou3.CyParking.view.data.pojo.parking;
 
 import android.os.Parcel;
 import android.os.Parcelable;

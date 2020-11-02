@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.pojo.parking;
+package io.github.cchristou3.CyParking.view.data.pojo.parking;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -18,6 +18,17 @@ import java.util.Map;
  */
 public class Parking implements Parcelable {
 
+    public static final Creator<Parking> CREATOR = new Creator<Parking>() {
+        @Override
+        public Parking createFromParcel(Parcel in) {
+            return new Parking(in);
+        }
+
+        @Override
+        public Parking[] newArray(int size) {
+            return new Parking[size];
+        }
+    };
     @SerializedName("coordinates")
     private HashMap<String, Double> coordinates;
     @SerializedName("parkingID")
@@ -30,18 +41,6 @@ public class Parking implements Parcelable {
         this.coordinates = coordinates;
         this.parkingID = parkingID;
     }
-
-    public static final Creator<Parking> CREATOR = new Creator<Parking>() {
-        @Override
-        public Parking createFromParcel(Parcel in) {
-            return new Parking(in);
-        }
-
-        @Override
-        public Parking[] newArray(int size) {
-            return new Parking[size];
-        }
-    };
 
     protected Parking(Parcel in) {
         // Read the size of the passed hash map

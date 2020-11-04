@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * purpose: POJO to be used to transfer and receive data
+ * Purpose: <p>POJO to be used to transfer and receive data
  * via activities / fragments and HTTPS requests.
- * This is a Base class.
+ * This is a Base class.</p>
  *
  * @author Charalambos Christou
  * @version 2.0 29/10/20
@@ -34,7 +34,7 @@ public class Parking implements Parcelable {
     @SerializedName("parkingID")
     private int parkingID;
 
-    Parking() {
+    public Parking() {
     }
 
     public Parking(HashMap<String, Double> coordinates, int parkingID) {

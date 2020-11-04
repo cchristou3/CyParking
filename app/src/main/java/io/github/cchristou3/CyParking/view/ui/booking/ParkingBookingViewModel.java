@@ -8,11 +8,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import io.github.cchristou3.CyParking.view.data.repository.Utility;
+import io.github.cchristou3.CyParking.view.utility.Utility;
 
 /**
- * A ViewModel implementation, adopted to the ParkingBookingFragment fragment.
- * purpose: Data persistence during orientation changes.
+ * <p>A ViewModel implementation, adopted to the ParkingBookingFragment fragment.
+ * Purpose: Data persistence during orientation changes.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 29/10/20

@@ -6,8 +6,8 @@ import android.os.Parcelable;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * purpose: POJO to be used to transfer and receive data
- * via activities / fragments and HTTPS requests (through GSON).
+ * Purpose: <p>POJO to be used to transfer and receive data
+ * via activities / fragments and HTTPS requests (through GSON).</p>
  *
  * @author Charalambos Christou
  * @version 1.0 30/10/20

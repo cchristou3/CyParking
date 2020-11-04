@@ -15,7 +15,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import io.github.cchristou3.CyParking.R;
 
 /**
- * purpose: To host the two tabs (Sign in, Sign up) and provide to both the same instance of
+ * Purpose: <p>To host the two tabs (Sign in, Sign up) and provide to both the same instance of</p>
  * LoginViewModel.
  *
  * @author Charalambos Christou

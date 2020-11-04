@@ -3,7 +3,7 @@ package io.github.cchristou3.CyParking.view.ui.login;
 import androidx.annotation.Nullable;
 
 /**
- * purpose: Authentication result : success (user details) or error message.
+ * Purpose: <p>Authentication result : success (user details) or error message.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 1/11/20

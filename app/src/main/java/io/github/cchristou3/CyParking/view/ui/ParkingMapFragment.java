@@ -54,12 +54,12 @@ import java.util.HashMap;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParkingResultSet;
 import io.github.cchristou3.CyParking.view.data.repository.ParkingRepository;
-import io.github.cchristou3.CyParking.view.data.repository.Utility;
+import io.github.cchristou3.CyParking.view.utility.Utility;
 
 /**
- * purpose: View all nearby parking.
+ * Purpose: <p>View all nearby parking.
  * The user can select a parking and view more details.
- * Lastly, there is an option to book a specific parking.
+ * Lastly, there is an option to book a specific parking.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 29/10/20
@@ -108,6 +108,7 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
     private GoogleMap mGoogleMap;
     private LatLng mCurrentLatLngOfUser;
     private boolean mRegistered;
+
     // Fragment variables
     private View mView;
     private PrivateParkingResultSet mSelectedPrivateParking;
@@ -146,7 +147,6 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
 
     /**
      * Initialises the activity.
-     * TODO: Builds the activity's Toolbar and Drawer navigation.
      * Requests a Support Fragment to place the Google Map.
      * Retrieves the location of the user from previous activity and sends a HTTPS request
      * to the backend to retrieve all nearby parking. While retrieving the data, a loading progress
@@ -230,6 +230,7 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
                 return;
             } else if (error != null) {
                 Log.w(TAG, "listen:error", error);
+                // TODO: Show feedback to user
                 return;
             }
             if (value != null) {
@@ -365,8 +366,9 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
                             Log.d(TAG, "Parking producing null coordinates!");
                         }
                     }
-                }, error -> {
+                }, error -> {// No wifi?
             // TODO: inform the user
+            // Plan B: Reload map
             Toast.makeText(requireContext(), "Unexpected error occurred!\n" + error.getMessage(), Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Volley error: " + error.getMessage());
         });

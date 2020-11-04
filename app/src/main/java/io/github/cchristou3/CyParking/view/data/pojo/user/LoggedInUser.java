@@ -1,7 +1,7 @@
-package io.github.cchristou3.CyParking.view.data.model;
+package io.github.cchristou3.CyParking.view.data.pojo.user;
 
 /**
- * purpose: Data class that captures user information for logged in users retrieved from LoginRepository
+ * Purpose: <p>Data class that captures user information for logged in users retrieved from LoginRepository</p>
  *
  * @author Charalambos Christou
  * @version 1.0 1/11/20

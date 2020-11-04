@@ -1,7 +1,7 @@
 package io.github.cchristou3.CyParking.view.ui.login;
 
 /**
- * purpose: Class exposing authenticated user details to the UI.
+ * Purpose:<p> Class exposing authenticated user details to the UI.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 1/11/20

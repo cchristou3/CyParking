@@ -8,8 +8,8 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import io.github.cchristou3.CyParking.R;
 
 /**
- * purpose: A [FragmentPagerAdapter] that returns a fragment corresponding to
- * one of the sections/tabs/pages.
+ * Purpose: <p>A [FragmentPagerAdapter] that returns a fragment corresponding to
+ * one of the sections/tabs/pages.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 1/11/20

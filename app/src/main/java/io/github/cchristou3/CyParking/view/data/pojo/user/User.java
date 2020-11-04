@@ -1,9 +1,9 @@
 package io.github.cchristou3.CyParking.view.data.pojo.user;
 
 /**
- * purpose: POJO to be used to transfer and receive data
+ * Purpose: <p>POJO to be used to transfer and receive data
  * via activities and HTTPS requests. Used to keep track of the user's
- * data.
+ * data.</p>
  *
  * @author Charalambos Christou
  * @version 2.0 29/10/20

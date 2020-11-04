@@ -30,7 +30,7 @@ import io.github.cchristou3.CyParking.R;
 import static io.github.cchristou3.CyParking.view.ui.ParkingMapFragment.LOCATION_PERMISSION_REQUEST_CODE;
 
 /**
- * purpose: Show to the user all available options
+ * Purpose: <p>Show to the user all available options</p>
  *
  * @author Charalambos Christou
  * @version 1.0 29/10/20

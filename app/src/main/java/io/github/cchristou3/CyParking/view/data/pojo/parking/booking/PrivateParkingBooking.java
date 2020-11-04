@@ -3,16 +3,18 @@ package io.github.cchristou3.CyParking.view.data.pojo.parking.booking;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
 
 import io.github.cchristou3.CyParking.view.data.pojo.parking.Parking;
+import io.github.cchristou3.CyParking.view.utility.ShaUtility;
 
 /**
- * purpose: POJO to be used to transfer and receive data
+ * Purpose: <p>POJO to be used to transfer and receive data
  * via activities / fragments and HTTPS requests. Holds needed
  * info to execute a "booking transaction" in ParkingBookingFragment.
- * This is a Subclass of Parking.
+ * This is a Subclass of Parking.</p>
  *
  * @author Charalambos Christou
  * @version 2.0 29/10/20
@@ -31,16 +33,21 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         }
     };
 
-    private final String parkingOperatorID;
-    private final String parkingName;
-    private final String userID;
-    private final String username;
-    private final Date dateOfBooking;
-    private final String startingTime;
-    private final String endingTime;
-    private final double price;
+    private String parkingOperatorID;
+    private String parkingName;
+    private String userID;
+    private String username;
+    private Date dateOfBooking;
+    private String startingTime;
+    private String endingTime;
+    private double price;
+    private boolean isCompleted;
 
-    public PrivateParkingBooking(HashMap<String, Double> coordinates, int parkingID, String parkingOperatorID, String parkingName, String userID, String username, Date dateOfBooking, String startingTime, String endingTime, double price) {
+    public PrivateParkingBooking() {
+        super();
+    }
+
+    public PrivateParkingBooking(HashMap<String, Double> coordinates, int parkingID, String parkingOperatorID, String parkingName, String userID, String username, Date dateOfBooking, String startingTime, String endingTime, double price, boolean isCompleted) {
         super(coordinates, parkingID);
         this.parkingOperatorID = parkingOperatorID;
         this.parkingName = parkingName;
@@ -50,6 +57,7 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         this.startingTime = startingTime;
         this.endingTime = endingTime;
         this.price = price;
+        this.isCompleted = isCompleted;
     }
 
     protected PrivateParkingBooking(Parcel in) {
@@ -62,6 +70,7 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         endingTime = in.readString();
         startingTime = in.readString();
         price = in.readDouble();
+        isCompleted = (in.readInt() == 1);
     }
 
     @Override
@@ -80,6 +89,7 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         dest.writeString(endingTime);
         dest.writeString(startingTime);
         dest.writeDouble(price);
+        dest.writeInt(isCompleted ? 1 : 0);
     }
 
     public String getParkingOperatorID() {
@@ -112,5 +122,22 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
 
     public double getPrice() {
         return price;
+    }
+
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+
+    public String generateUniqueId() {
+        // Create a long and unique id
+        String id = parkingOperatorID + parkingName + userID + username + dateOfBooking + startingTime + endingTime +
+                price + getCoordinates().values().toString().trim();
+        // Hash (SHA256) it to has a fixed length of 32 characters
+        String hashedId = id;
+        try {
+            hashedId = ShaUtility.digest(id.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+        }
+        return hashedId;
     }
 }

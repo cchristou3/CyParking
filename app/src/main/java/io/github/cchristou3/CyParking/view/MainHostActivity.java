@@ -18,9 +18,9 @@ import com.google.firebase.FirebaseApp;
 import io.github.cchristou3.CyParking.R;
 
 /**
- * Main host activity of the Application.
- * purpose: Build the drawer navigation and action bar
- * of all fragments which it is the host of.
+ * <p>Main host activity of the Application.
+ * Purpose: Build the drawer navigation and action bar
+ * of all fragments which it is the host of.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 30/10/20
@@ -51,7 +51,7 @@ public class MainHostActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
+                R.id.nav_home, R.id.nav_view_bookings, R.id.nav_slideshow)
                 .setOpenableLayout(drawer)
                 .build();
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_main_host_fcv_nav_host_fragment);

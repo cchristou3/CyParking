@@ -19,7 +19,7 @@
         tools:context=".view.ui.ParkingMapFragment" />
 
     <androidx.core.widget.ContentLoadingProgressBar
-        android:visibility="gone"
+        android:visibility="visible"
         android:id="@+id/fragment_parking_map_pb_loadingMarkers"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"

@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.view.data.repository;
+package io.github.cchristou3.CyParking.view.utility;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,7 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * purpose: contain all helper / utility methods which the application needs.
+ * Purpose: <p>Contain all helper / utility methods which the application needs.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 29/10/20

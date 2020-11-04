@@ -3,7 +3,7 @@ package io.github.cchristou3.CyParking.view.ui.login;
 import androidx.annotation.Nullable;
 
 /**
- * purpose: Data validation state of the login form.
+ * Purpose: <p>Data validation state of the login form.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 1/11/20

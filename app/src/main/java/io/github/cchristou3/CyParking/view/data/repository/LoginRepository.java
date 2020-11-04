@@ -17,14 +17,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.github.cchristou3.CyParking.view.data.model.LoggedInUser;
+import io.github.cchristou3.CyParking.view.data.pojo.user.LoggedInUser;
 import io.github.cchristou3.CyParking.view.ui.login.LoggedInUserView;
 import io.github.cchristou3.CyParking.view.ui.login.LoginResult;
 
 /**
- * purpose: Class that handles authentication w/ login credentials and retrieves user information.
+ * Purpose: <p>Class that handles authentication w/ login credentials and retrieves user information.
  * Further, it requests authentication and user information from the remote data source and
- * maintains an in-memory cache of login status and user credentials information.
+ * maintains an in-memory cache of login status and user credentials information.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 1/11/20
@@ -160,6 +160,8 @@ public class LoginRepository {
      */
     public void register(String username, String password, MutableLiveData<LoginResult> loginResult,
                          boolean isUser, boolean isOperator, Context context) {
+        if (!isUser && !isOperator)
+            throw new IllegalArgumentException("At least one of the given roles must be selected!");
         // handle registration. A registered User is also a loggedInUser
         // Handle loggedInUser authentication
         dataSource.createUserWithEmailAndPassword(username, password)

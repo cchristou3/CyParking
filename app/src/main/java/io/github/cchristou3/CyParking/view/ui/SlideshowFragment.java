@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 import io.github.cchristou3.CyParking.R;
 
 /**
- * purpose: Going to get replaced with another Navigation option
+ * Purpose: <p>Going to get replaced with another Navigation option</p>
  *
  * @author Charalambos Christou
  * @version 1.0 29/10/20

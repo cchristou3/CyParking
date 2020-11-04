@@ -9,8 +9,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import io.github.cchristou3.CyParking.view.data.repository.LoginRepository;
 
 /**
- * purpose: ViewModel provider factory to instantiate LoginViewModel.
- * Required given LoginViewModel has a non-empty constructor
+ * Purpose: <p>ViewModel provider factory to instantiate LoginViewModel.
+ * Required given LoginViewModel has a non-empty constructor</p>
  *
  * @author Charalambos Christou
  * @version 1.0 1/11/20

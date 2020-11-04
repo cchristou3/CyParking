@@ -37,10 +37,10 @@ import io.github.cchristou3.CyParking.view.MainHostActivity;
 import io.github.cchristou3.CyParking.view.ui.support.DescriptionDialog;
 
 /**
- * A simple {@link Fragment} subclass.
- * purpose: Use the {@link LoginFragment#newInstance} factory method to
+ * <p>A simple {@link Fragment} subclass.
+ * Purpose: Use the {@link LoginFragment#newInstance} factory method to
  * create an instance of this fragment.
- * Can be used for both logging in and signing up.
+ * Can be used for both logging in and signing up.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 1/11/20

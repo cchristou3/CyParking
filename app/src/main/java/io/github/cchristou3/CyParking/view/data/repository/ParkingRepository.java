@@ -1,7 +1,10 @@
 package io.github.cchristou3.CyParking.view.data.repository;
 
+import android.widget.TextView;
+
+import androidx.fragment.app.FragmentActivity;
+
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.jetbrains.annotations.NotNull;
@@ -10,12 +13,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParking;
+import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParkingResultSet;
 import io.github.cchristou3.CyParking.view.data.pojo.parking.booking.PrivateParkingBooking;
 
 /**
- * purpose: contain all methods to access cloud / local database
+ * Purpose: <p>contain all methods to access cloud / local database</p>
  *
  * @author Charalambos Christou
  * @version 1.0 29/10/20
@@ -45,9 +50,12 @@ public class ParkingRepository {
      * @param privateParkingBookingToBeStored Holds all necessary info about a booking of a private parking
      * @return A Task<DocumentReference> object which listeners can be attached to
      */
-    public static Task<DocumentReference> bookParking(@NotNull PrivateParkingBooking privateParkingBookingToBeStored) {
+    public static Task<Void> bookParking(@NotNull PrivateParkingBooking privateParkingBookingToBeStored) {
         // Add the booking info to the database
-        return FirebaseFirestore.getInstance().collection(PRIVATE_PARKING_BOOKING).add(privateParkingBookingToBeStored);
+        return FirebaseFirestore.getInstance()
+                .collection(PRIVATE_PARKING_BOOKING)
+                .document(privateParkingBookingToBeStored.generateUniqueId())
+                .set(privateParkingBookingToBeStored);
     }
 
     /**
@@ -57,7 +65,29 @@ public class ParkingRepository {
      */
     public static void cancelParking(@NotNull String idOfBookingToBeCancelled) {
         // Delete the booking info to the database
-        FirebaseFirestore.getInstance().collection(PRIVATE_PARKING_BOOKING).document(idOfBookingToBeCancelled).delete();
+        FirebaseFirestore.getInstance()
+                .collection(PRIVATE_PARKING_BOOKING)
+                .document(idOfBookingToBeCancelled).delete();
+    }
+
+    /**
+     * An observer is attached to the current document, to listen for changes (number of available spaces).
+     * Removal of observer is self-managed by the hosting activity.
+     *
+     * @param parkingAvailability The TextView which will get updated.
+     * @param selectedParking     The Parking whose changes will be listen to.
+     * @param owner               The Activity which will handle the listener's removal.
+     */
+    public static void observeSelectedParking(TextView parkingAvailability, PrivateParkingResultSet selectedParking, FragmentActivity owner) {
+        FirebaseFirestore.getInstance().collection("private_parking")
+                .document(selectedParking.getDocumentID())
+                .addSnapshotListener(owner, (value, error) -> {
+                    if (error != null) return;
+                    final String updatedParkingSlots = "AvailableSpaces: " + Objects.requireNonNull(Objects.requireNonNull(value)
+                            .toObject(PrivateParking.class)).getAvailableSpaces();
+
+                    parkingAvailability.setText(updatedParkingSlots);
+                });
     }
 
     /**

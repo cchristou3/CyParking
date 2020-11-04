@@ -11,7 +11,8 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.view.data.repository.LoginRepository;
 
 /**
- * purpose: Data persistence when orientation changes. Shared amongst all tab fragments.
+ * Purpose: <p>Data persistence when orientation changes. Shared amongst all tab fragments.
+ * Used when the user tries to login/register.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 1/11/20
@@ -55,7 +56,11 @@ public class LoginViewModel extends ViewModel {
      */
     public void register(String username, String password, boolean isUser, boolean isOperator, Context context) {
         // can be launched in a separate asynchronous job
-        loginRepository.register(username, password, loginResult, isUser, isOperator, context);
+        try {
+            loginRepository.register(username, password, loginResult, isUser, isOperator, context);
+        } catch (IllegalArgumentException e) {
+            loginResult.setValue(new LoginResult(e.getMessage()));
+        }
     }
 
     /**

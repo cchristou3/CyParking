@@ -11,10 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * purpose: POJO to be used to transfer and receive data
+ * Purpose: <p>POJO to be used to transfer and receive data
  * via activities / fragments and HTTPS requests. Further,
  * associated with a Google Maps Marker in the ParkingMapFragment.
- * This is a Subclass of Parking.
+ * This is a Subclass of Parking.</p>
  *
  * @author Charalambos Christou
  * @version 2.0 29/10/20

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +22,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -41,11 +40,13 @@ import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParking;
 import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParkingResultSet;
 import io.github.cchristou3.CyParking.view.data.pojo.parking.booking.PrivateParkingBooking;
 import io.github.cchristou3.CyParking.view.data.repository.ParkingRepository;
-import io.github.cchristou3.CyParking.view.data.repository.Utility;
+import io.github.cchristou3.CyParking.view.utility.Utility;
+
+import static io.github.cchristou3.CyParking.view.ui.ParkingMapFragment.TAG;
 
 /**
- * purpose: View parking details, (TODO:) choose a payment method
- * and book the specific parking for a specific date and time.
+ * Purpose: <p>View parking details, (TODO:) choose a payment method
+ * and book the specific parking for a specific date and time.</p>
  *
  * @author Charalambos Christou
  * @version 1.0 29/10/20
@@ -182,18 +183,14 @@ public class ParkingBookingFragment extends Fragment {
         });
     }
 
+    /**
+     * An observer is attached to the current document, to listen for changes (number of available spaces).
+     * Removal of observer is self-managed by the hosting activity.
+     */
     @Override
     public void onStart() {
         super.onStart();
-        FirebaseFirestore.getInstance().collection("private_parking")
-                .document(mSelectedParking.getDocumentID())
-                .addSnapshotListener(requireActivity(), (value, error) -> {
-                    if (error != null) return;
-                    final String updatedParkingSlots = "AvailableSpaces: " + Objects.requireNonNull(Objects.requireNonNull(value)
-                            .toObject(PrivateParking.class)).getAvailableSpaces();
-
-                    parkingAvailability.setText(updatedParkingSlots);
-                });
+        ParkingRepository.observeSelectedParking(parkingAvailability, mSelectedParking, requireActivity());
     }
 
     /**
@@ -214,9 +211,21 @@ public class ParkingBookingFragment extends Fragment {
         int endingMinutes = Integer.parseInt(pickedEndingTime.substring(5, 7)); // Access last two digits
 
         Date pickedDateObject = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).parse(Objects.requireNonNull(pickedDate));
+        Log.d(TAG, "bookParking: Starting time: " + startingHours + " : " + startingMinutes);
+        Log.d(TAG, "bookParking: Ending time: " + endingHours + " : " + endingMinutes);
+
+
+        Calendar currentDate = Calendar.getInstance();
+        currentDate.setTime(Calendar.getInstance().getTime());
+        currentDate.set(Calendar.HOUR_OF_DAY, 0);
+        currentDate.set(Calendar.MINUTE, 0);
+        currentDate.set(Calendar.SECOND, 0);
+        currentDate.set(Calendar.MILLISECOND, 0);
+        Log.d(TAG, "bookParking: today date: " + currentDate.getTime());
+        Log.d(TAG, "bookParking: picked date: " + pickedDateObject);
 
         if (((startingHours == endingHours && startingMinutes < endingMinutes) || (startingHours < endingHours))
-                && Objects.requireNonNull(pickedDateObject).compareTo(Calendar.getInstance().getTime()) >= 0) {
+                && Objects.requireNonNull(pickedDateObject).compareTo(currentDate.getTime()) >= 0) {
             // Proceed with transaction and create a booking
             // Create a new PrivateParkingBooking instance which will hold all data of the booking.
             FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
@@ -229,15 +238,17 @@ public class ParkingBookingFragment extends Fragment {
             PrivateParkingBooking privateParkingBooking = new PrivateParkingBooking(
                     parking.getCoordinates(), parking.getParkingID(), Integer.toString(parking.getParkingID()),
                     Integer.toString(parking.getParkingID()), userID, username,
-                    pickedDateObject, pickedStartingTime, pickedEndingTime, 2.0);
+                    pickedDateObject, pickedStartingTime, pickedEndingTime, 2.0, false);
 
             // Store to the database
-            Task<DocumentReference> docRef = ParkingRepository.bookParking(privateParkingBooking);
+            Task<Void> docRef = ParkingRepository.bookParking(privateParkingBooking);
             docRef.addOnCompleteListener(task -> {
                 // Inform the user booking was successful and offer a temporary UNDO option
                 if (task.isSuccessful())
                     Snackbar.make(mView, "Parking has been booked successfully!", Snackbar.LENGTH_LONG)
-                            .setAction("UNDO", v -> ParkingRepository.cancelParking(task.getResult().getId())).show();
+                            .setAction("UNDO", v -> ParkingRepository.cancelParking(privateParkingBooking.generateUniqueId())).show();
+
+                // TODO: Generate QR Code
             });
         } else {  // Otherwise, inform the user he inputted incorrect data
             Toast.makeText(getContext(), "The start time must be less than the ending time!", Toast.LENGTH_SHORT).show();

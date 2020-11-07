@@ -126,12 +126,12 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
 
         public MyViewHolder(View view) {
             super(view);
-            status = view.findViewById(R.id.booking_item_txt_status);
-            price = view.findViewById(R.id.booking_item_txt_price);
-            parking_name = view.findViewById(R.id.booking_item_txt_parking_name);
-            date = view.findViewById(R.id.booking_item_txt_date);
-            time = view.findViewById(R.id.booking_item_txt_time);
-            cancelButton = view.findViewById(R.id.booking_item_btn_cancel);
+            status = view.findViewById(R.id.booking_placeholder_item_txt_status);
+            price = view.findViewById(R.id.booking_placeholder_item_txt_price);
+            parking_name = view.findViewById(R.id.booking_placeholder_item_txt_parking_name);
+            date = view.findViewById(R.id.booking_placeholder_item_txt_date);
+            time = view.findViewById(R.id.booking_placeholder_item_txt_time);
+            cancelButton = view.findViewById(R.id.booking_placeholder_item_btn_cancel);
             cancelButton.setTag(this);
             cancelButton.setOnClickListener(mOnItemClickListener);
         }

@@ -10,16 +10,18 @@ import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import org.jetbrains.annotations.NotNull;
@@ -37,12 +39,16 @@ import static io.github.cchristou3.CyParking.view.ui.ParkingMapFragment.TAG;
  * Purpose: <p>Shows pending / completed bookings of the user / operator?</p>
  *
  * @author Charalambos Christou
- * @version 2.0 05/11/20
+ * @version 3.0 07/11/20
  */
+// TODO: If placeholder animation is taking a long time ~seconds
+//  show dialog to user to check his connectivity
 public class ViewBookingsFragment extends Fragment {
 
+    // Constant variables
     private static final int INITIAL_DATA_RETRIEVAL = 0;
     private static final int LISTENING_TO_DATA_CHANGES = 1;
+
     // Fragment variables
     private ArrayList<PrivateParkingBooking> privateParkingBookingArrayList;
     private final View.OnClickListener mOnItemClickListener = new View.OnClickListener() {
@@ -61,6 +67,11 @@ public class ViewBookingsFragment extends Fragment {
     };
     private int databaseDataState;
     private BookingAdapter bookingAdapter;
+    private ShimmerFrameLayout mShimmerViewContainer;
+    private MutableLiveData<List<PrivateParkingBooking>> bookingListMutableLiveData;
+    private Button pendingButton;
+    private Button completedButton;
+    private ListenerRegistration mListenerRegistration;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,37 +91,50 @@ public class ViewBookingsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // Get a reference of the loading bar from the layout
-        final ContentLoadingProgressBar loadingProgressBar = view.findViewById(R.id.fragment_view_bookings_pb_loadingBookings);
-        loadingProgressBar.getIndeterminateDrawable().setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
-        loadingProgressBar.show(); // Show the progress bar to the user
+        // Get a reference of the placeholder container from the layout
+        mShimmerViewContainer = view.findViewById(R.id.fragment_view_bookings_sfl_shimmer_view_container);
 
         // Initialize the fragment's ViewModel
-        final ViewBookingsViewModel viewBookingsViewModel = new ViewModelProvider(requireActivity()).get(ViewBookingsViewModel.class);
-        final MutableLiveData<List<PrivateParkingBooking>> bookingListMutableLiveData =
+        ViewBookingsViewModel viewBookingsViewModel = new ViewModelProvider(requireActivity()).get(ViewBookingsViewModel.class);
+        bookingListMutableLiveData =
                 viewBookingsViewModel.getBookingListMutableLiveData();
 
-        final Button pendingButton = view.findViewById(R.id.fragment_view_bookings_btn_pending);
-        final Button completedButton = view.findViewById(R.id.fragment_view_bookings_btn_completed);
+        pendingButton = view.findViewById(R.id.fragment_view_bookings_btn_pending);
+        completedButton = view.findViewById(R.id.fragment_view_bookings_btn_completed);
         // TODO: Add appropriate listeners to the above filtering buttons
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         // Check whether the user is logged in
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            // Show placeholder layout and hide the filter buttons
+            mShimmerViewContainer.startShimmerAnimation();
+            pendingButton.setVisibility(View.GONE);
+            completedButton.setVisibility(View.GONE);
             // Retrieve all bookings which belong to this user and listen to changes
-            ParkingRepository.retrieveUserBookings(FirebaseAuth.getInstance().getCurrentUser().getUid())
+            mListenerRegistration = ParkingRepository.retrieveUserBookings(FirebaseAuth.getInstance().getCurrentUser().getUid())
                     .addSnapshotListener((value, error) -> {
                         if (error != null || value == null) return; // TODO: Inform user
                         if (!value.isEmpty()) {
                             switch (databaseDataState) {
                                 case INITIAL_DATA_RETRIEVAL: { // Happens when we first attach the listener
+                                    Log.d(TAG, "INITIAL_DATA_RETRIEVAL: ");
                                     // Fill the list with all the retrieved documents
-                                    InitializeBookingList(view, value, bookingListMutableLiveData);
-                                    // Hide the loading bar and move on to the next state
+                                    InitializeBookingList(getView(), value, bookingListMutableLiveData);
+                                    // Hide the placeholder container and move on to the next state
+                                    mShimmerViewContainer.stopShimmerAnimation();
+                                    mShimmerViewContainer.setVisibility(View.GONE);
+                                    // Show filter buttons
+                                    pendingButton.setVisibility(View.VISIBLE);
+                                    completedButton.setVisibility(View.VISIBLE);
                                     databaseDataState = LISTENING_TO_DATA_CHANGES;
-                                    loadingProgressBar.hide();
                                     break;
                                 }
                                 case LISTENING_TO_DATA_CHANGES:
+                                    Log.d(TAG, "LISTENING_TO_DATA_CHANGES: ");
                                     /* Amend the list's contents: More efficient.
                                        Instead of creating a new list and re-adding all elements.
                                        We simply add/update/remove the objects that got added/updated/removed */
@@ -124,6 +148,13 @@ public class ViewBookingsFragment extends Fragment {
                         }
                     });
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mListenerRegistration != null) mListenerRegistration.remove();
+        mShimmerViewContainer.stopShimmerAnimation();
     }
 
     private void UpdateBookingList(QuerySnapshot value, MutableLiveData<List<PrivateParkingBooking>> mutableLiveData) {
@@ -160,29 +191,52 @@ public class ViewBookingsFragment extends Fragment {
         }
         // Set the retrieved data as the value of the LiveData
         mutableLiveData.setValue(privateParkingBookingArrayList);
-        // Create new adapter and pass the fetched data.
-        bookingAdapter = new BookingAdapter(privateParkingBookingArrayList);
-        // Pass an onItemClickListener to the adapter
-        bookingAdapter.setOnItemClickListener(mOnItemClickListener);
 
         // Set up RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.fragment_view_bookings_rv_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setHasFixedSize(true);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        // Create new adapter and pass the fetched data.
+        bookingAdapter = new BookingAdapter(privateParkingBookingArrayList);
+        // Pass an onItemClickListener to the adapter
+        bookingAdapter.setOnItemClickListener(mOnItemClickListener);
+        bookingAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                Log.d(TAG, "onItemRangeMoved: ");
+                if (fromPosition >= 2)
+                    recyclerView.smoothScrollToPosition(0);
+            }
+        });
+
         // Set the recyclerview's adapter
         recyclerView.setAdapter(bookingAdapter);
     }
 
+    /**
+     * Searches the list for the specified PrivateParkingBooking and updates it accordingly
+     *
+     * @param bookingArrayList      List of all the bookings of the current logged in user
+     * @param privateParkingBooking The booking which got changed
+     */
     public void findAndUpdateBooking(@NotNull ArrayList<PrivateParkingBooking> bookingArrayList, PrivateParkingBooking privateParkingBooking) {
         // Traverse the booking list, searching for an object
         for (int i = 0; i < bookingArrayList.size(); i++) {
+            // If there was a matching
             if (bookingArrayList.get(i).generateUniqueId()
                     .equals(privateParkingBooking.generateUniqueId())) {
-                // Update its contents with the newly retrieved ones
-                bookingArrayList.get(i).updateContents(privateParkingBooking);
-                // Inform the adapter to update the current view slot
-                bookingAdapter.notifyItemChanged(i);
-                return;
+                // If it was changed from "Pending" to "Completed", move it at the end of the list
+                if (!bookingArrayList.get(i).isCompleted() && privateParkingBooking.isCompleted()) {
+                    // Remove item and notify the adapter
+                    bookingArrayList.remove(i);
+                    bookingAdapter.notifyItemRemoved(i);
+                    // Add the item at the end of the list and notify the adapter
+                    bookingArrayList.add(bookingArrayList.size() - 1, privateParkingBooking);
+                    bookingAdapter.notifyItemInserted(bookingArrayList.size() - 1);
+                }
+                return; // Finish iterating
             }
         }
     }

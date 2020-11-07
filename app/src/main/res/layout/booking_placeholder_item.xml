@@ -16,68 +16,71 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
+        <View
             android:id="@+id/booking_placeholder_item_txt_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="160dp"
+            android:layout_height="@dimen/placeholder_text_height"
             android:layout_marginTop="30dp"
-            android:text="Status"
-            android:textSize="20sp"
+            android:background="@color/placeholder_bg"
+            android:textColor="@color/placeholder_bg"
             app:layout_constraintStart_toStartOf="@+id/booking_placeholder_item_txt_parking_name"
             app:layout_constraintTop_toTopOf="parent" />
 
 
-        <TextView
+        <View
             android:id="@+id/booking_placeholder_item_txt_price"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Price"
-            android:textSize="20sp"
+            android:layout_width="70dp"
+            android:layout_height="@dimen/placeholder_text_height"
+            android:background="@color/placeholder_bg"
+            android:textColor="@color/placeholder_bg"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/booking_placeholder_item_txt_parking_name"
             app:layout_constraintTop_toTopOf="@+id/booking_placeholder_item_txt_parking_name" />
 
-        <TextView
+        <View
             android:id="@+id/booking_placeholder_item_txt_parking_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="130dp"
+            android:layout_height="@dimen/placeholder_text_height"
             android:layout_marginLeft="30dp"
             android:layout_marginTop="20dp"
-            android:text="Parking name"
-            android:textSize="20sp"
+            android:background="@color/placeholder_bg"
+            android:textColor="@color/placeholder_bg"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/booking_placeholder_item_txt_status" />
 
-        <TextView
+        <View
             android:id="@+id/booking_placeholder_item_txt_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="100dp"
+            android:layout_height="@dimen/placeholder_text_height"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="30dp"
-            android:text="Date"
-            android:textSize="20sp"
+            android:background="@color/placeholder_bg"
+            android:textColor="@color/placeholder_bg"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/booking_placeholder_item_txt_parking_name"
             app:layout_constraintTop_toBottomOf="@+id/booking_placeholder_item_txt_time" />
 
-        <TextView
+        <View
             android:id="@+id/booking_placeholder_item_txt_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="150dp"
+            android:layout_height="@dimen/placeholder_text_height"
             android:layout_marginTop="20dp"
-            android:text="Time"
-            android:textSize="20sp"
+            android:background="@color/placeholder_bg"
+            android:textColor="@color/placeholder_bg"
             app:layout_constraintStart_toStartOf="@+id/booking_placeholder_item_txt_parking_name"
             app:layout_constraintTop_toBottomOf="@+id/booking_placeholder_item_txt_parking_name" />
 
-        <ImageButton
+        <View
             android:id="@+id/booking_placeholder_item_btn_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ic_cancel_booking"
-            android:contentDescription="Cancel"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="@dimen/placeholder_image"
+            android:layout_height="@dimen/placeholder_image"
+            android:layout_marginTop="@dimen/padding_10"
+            android:layout_marginEnd="@dimen/padding_10"
+            android:layout_marginRight="@dimen/padding_10"
+            android:background="@color/placeholder_bg"
+            android:contentDescription="@string/cancel"
             android:padding="35dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

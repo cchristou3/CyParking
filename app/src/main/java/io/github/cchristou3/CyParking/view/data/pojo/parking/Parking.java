@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +16,7 @@ import java.util.Map;
  * This is a Base class.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 29/10/20
+ * @version 3.0 07/11/20
  */
 public class Parking implements Parcelable {
 
@@ -35,7 +37,7 @@ public class Parking implements Parcelable {
     private int parkingID;
 
     public Parking() {
-    }
+    }  //  no-argument constructor to be used by GSON
 
     public Parking(HashMap<String, Double> coordinates, int parkingID) {
         this.coordinates = coordinates;
@@ -63,7 +65,7 @@ public class Parking implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NotNull Parcel dest, int flags) {
         // set up coordinates hash map as well
         HashMap<String, Double> map = getCoordinates();
         dest.writeInt(map.size()); // store the size of the map
@@ -74,6 +76,13 @@ public class Parking implements Parcelable {
         dest.writeInt(parkingID);
     }
 
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    // Getters & Setters
     public HashMap<String, Double> getCoordinates() {
         return coordinates;
     }
@@ -90,10 +99,11 @@ public class Parking implements Parcelable {
         this.parkingID = parkingID;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    /**
+     * To be overridden by its subclasses
+     * Combines the class' attribute values to create a unique id for the object
+     */
+    public String generateUniqueId() {
+        return "";
     }
-
-
 }

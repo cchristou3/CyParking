@@ -24,8 +24,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
@@ -49,7 +47,7 @@ import static io.github.cchristou3.CyParking.view.ui.ParkingMapFragment.TAG;
  * and book the specific parking for a specific date and time.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 29/10/20
+ * @version 3.0 07/11/20
  */
 public class ParkingBookingFragment extends Fragment {
 
@@ -68,27 +66,11 @@ public class ParkingBookingFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*
-         * By registering the EventBus we have access to both ongoing and sticky events.
-         * The onResultReceived method is our subscriber.
-         * If "sticky" is set to true, the subscriber method delivers the most recent sticky event (posted with
-         * {@link EventBus#postSticky(Object)}) to this subscriber (if event available).
-         */
-        EventBus.getDefault().register(this);
-        // onResultReceived gets invoked, no need to further listen for updates. Thus, unregister.
-        EventBus.getDefault().unregister(this);
-    }
-
-    /**
-     * Our event subscriber method. In this case, the event is the POJO PrivateParking.
-     * Receives the latest event that was posted using EventBus.getInstance().postSticky([object]),
-     * once the EventBus is registered.
-     *
-     * @param privateParking The PrivateParking instance which was selected in the previous fragment (ParkingMapFragment)
-     */
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void onResultReceived(PrivateParkingResultSet privateParking) {
-        mSelectedParking = privateParking;
+        try {
+            mSelectedParking = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(PrivateParkingResultSet.class));
+        } catch (ClassCastException | NullPointerException e) {
+            Log.e(TAG, "onCreateView: ", e); // TODO: Plan B
+        }
     }
 
     /**
@@ -214,7 +196,7 @@ public class ParkingBookingFragment extends Fragment {
         Log.d(TAG, "bookParking: Starting time: " + startingHours + " : " + startingMinutes);
         Log.d(TAG, "bookParking: Ending time: " + endingHours + " : " + endingMinutes);
 
-
+        // Access the current date
         Calendar currentDate = Calendar.getInstance();
         currentDate.setTime(Calendar.getInstance().getTime());
         currentDate.set(Calendar.HOUR_OF_DAY, 0);
@@ -238,7 +220,7 @@ public class ParkingBookingFragment extends Fragment {
             PrivateParkingBooking privateParkingBooking = new PrivateParkingBooking(
                     parking.getCoordinates(), parking.getParkingID(), Integer.toString(parking.getParkingID()),
                     Integer.toString(parking.getParkingID()), userID, username,
-                    pickedDateObject, pickedStartingTime, pickedEndingTime, 2.0, false);
+                    pickedDateObject, pickedStartingTime, pickedEndingTime, 2.0);
 
             // Store to the database
             Task<Void> docRef = ParkingRepository.bookParking(privateParkingBooking);
@@ -268,7 +250,7 @@ public class ParkingBookingFragment extends Fragment {
         timePickerButton.setOnClickListener(v -> {
             TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
                     AlertDialog.THEME_HOLO_DARK, // TODO: useful for night mode THEME_HOLO_LIGHT
-                    // Triggers textview Update
+                    // Triggers TextView's Update
                     (view, hourOfDay, minute) -> stringMutableLiveData.setValue(Utility.getTimeOf(hourOfDay, minute)),
                     Calendar.getInstance().get(Calendar.HOUR),
                     Calendar.getInstance().get(Calendar.MINUTE),

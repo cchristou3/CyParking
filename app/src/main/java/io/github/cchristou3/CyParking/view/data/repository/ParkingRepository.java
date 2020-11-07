@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +24,7 @@ import io.github.cchristou3.CyParking.view.data.pojo.parking.booking.PrivatePark
  * Purpose: <p>contain all methods to access cloud / local database</p>
  *
  * @author Charalambos Christou
- * @version 1.0 29/10/20
+ * @version 2.0 07/11/20
  */
 public class ParkingRepository {
 
@@ -35,13 +36,28 @@ public class ParkingRepository {
     private static final String PRIVATE_PARKING_BOOKING = "private_parking_bookings";
 
     /**
+     * Returns the bookings of the specified userId,
+     * starting from the "Pending" ones and finishing with the "Completed" ones
+     *
+     * @param userId The is of the Firebase user
+     * @return A query which returns all the bookings of the specified userId
+     */
+    @NotNull
+    public static Query retrieveUserBookings(String userId) {
+        return FirebaseFirestore.getInstance()
+                .collection("private_parking_bookings")
+                .whereEqualTo("userID", userId)
+                .orderBy("completed", Query.Direction.ASCENDING); // Show pending bookings first
+    }
+
+    /**
      * Stores to the database's PRIVATE_PARKING node the specified object
      *
      * @param privateParkingToBeStored Stores all necessary info about the private parking
      */
     public static void addParking(@NotNull PrivateParking privateParkingToBeStored) {
         // Add the info to the database
-        FirebaseFirestore.getInstance().collection(PRIVATE_PARKING).add(privateParkingToBeStored);
+        FirebaseFirestore.getInstance().collection(PRIVATE_PARKING).document(privateParkingToBeStored.generateUniqueId()).set(privateParkingToBeStored);
     }
 
     /**
@@ -116,22 +132,11 @@ public class ParkingRepository {
                 }, 1, 100, 50, 10, 5, "9:00-16:00", new ArrayList<>()),
                 new PrivateParking(new HashMap<String, Double>() {
                     {
-                        put(LATITUDE_KEY, 34.0);
-                        put(LONGITUDE_KEY, 30.0);
+                        put(LATITUDE_KEY, 34.921800);
+                        put(LONGITUDE_KEY, 33.623560);
                     }
-                }, 1, 100, 50, 10, 5, "9:00-16:00", new ArrayList<>()),
-                new PrivateParking(new HashMap<String, Double>() {
-                    {
-                        put(LATITUDE_KEY, 34.0);
-                        put(LONGITUDE_KEY, 30.0);
-                    }
-                }, 1, 100, 50, 10, 5, "9:00-16:00", new ArrayList<>()),
-                new PrivateParking(new HashMap<String, Double>() {
-                    {
-                        put(LATITUDE_KEY, 34.0);
-                        put(LONGITUDE_KEY, 30.0);
-                    }
-                }, 1, 100, 50, 10, 5, "9:00-16:00", new ArrayList<>())));
+                }, 1, 100, 50, 10, 5, "9:00-16:00", new ArrayList<>())
+        ));
         for (PrivateParking parking : privateParkingList) {
             addParking(parking);
         }

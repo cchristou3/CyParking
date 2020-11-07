@@ -2,10 +2,10 @@ package io.github.cchristou3.CyParking.view.ui.viewBooking;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,15 +13,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.List;
 import java.util.Locale;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.view.data.pojo.parking.booking.PrivateParkingBooking;
-
-import static io.github.cchristou3.CyParking.view.ui.ParkingMapFragment.TAG;
 
 /**
  * Purpose: <p> Handles how each item of the RecyclerView will look like. </p>
@@ -45,6 +42,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
     }
 
     // Create new views (invoked by the layout manager)
+    @NotNull
     @Override
     public BookingAdapter.MyViewHolder onCreateViewHolder(@NotNull ViewGroup parent,
                                                           int viewType) {
@@ -52,8 +50,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.booking_item, parent, false);
 
-        MyViewHolder vh = new MyViewHolder(v);
-        return vh;
+        return new MyViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -65,13 +62,9 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
 
         final PrivateParkingBooking privateParkingBooking = mDataset.get(position);
         final String price = Double.toString(privateParkingBooking.getPrice());
-        CharSequence date = "Date: ".concat(privateParkingBooking.getDateOfBooking().toString());
-        try {
-            // Parse to a format without time, only date
-            date = "Date:" + new SimpleDateFormat("dd/MM/yy",
-                    Locale.getDefault()).parse(privateParkingBooking.getDateOfBooking().toString());
-        } catch (ParseException e) {
-        }
+        final CharSequence date = "Date: " + DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
+                .format(privateParkingBooking.getDateOfBooking());
+
         final String time = "Time: " + privateParkingBooking.getStartingTime()
                 .concat(" - ").concat(privateParkingBooking.getEndingTime());
         final String status = "Status: " + (privateParkingBooking.isCompleted() ? "Completed" : "Pending");
@@ -79,6 +72,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
         holder.status.setText(status);
         holder.price.setText(price);
         holder.parking_name.setText(parkingName);
+        holder.date.setText(date);
         holder.time.setText(time);
     }
 
@@ -94,7 +88,6 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                Log.d(TAG, "onScrollStateChanged: Called " + newState);
                 onAttach = false;
                 super.onScrollStateChanged(recyclerView, newState);
             }
@@ -129,6 +122,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
         public TextView parking_name;
         public TextView date;
         public TextView time;
+        public ImageButton cancelButton;
 
         public MyViewHolder(View view) {
             super(view);
@@ -137,8 +131,9 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
             parking_name = view.findViewById(R.id.booking_item_txt_parking_name);
             date = view.findViewById(R.id.booking_item_txt_date);
             time = view.findViewById(R.id.booking_item_txt_time);
-            view.setTag(this);
-            view.setOnClickListener(mOnItemClickListener);
+            cancelButton = view.findViewById(R.id.booking_item_btn_cancel);
+            cancelButton.setTag(this);
+            cancelButton.setOnClickListener(mOnItemClickListener);
         }
 
     }

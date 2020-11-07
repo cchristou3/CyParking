@@ -33,7 +33,7 @@
     <LinearLayout
         android:id="@+id/fragment_parking_map_li_infoLayout"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="110dp"
         android:layout_marginLeft="7dp"
         android:layout_marginRight="7dp"
         android:layout_marginBottom="7dp"
@@ -50,11 +50,13 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="1.5"
+            android:layout_weight="2"
             android:gravity="center"
             android:orientation="vertical">
 
             <TextView
+                android:maxLength="17"
+                android:text="122212121212121121212123123123"
                 android:id="@+id/fragment_parking_map_txt_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -63,6 +65,8 @@
                 app:layout_constraintBottom_toBottomOf="@+id/activity_parking_map_fg_google_map" />
 
             <TextView
+                android:maxLength="17"
+                android:text="122212121212121121212123123123"
                 android:id="@+id/fragment_parking_map_txt_capacity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -71,6 +75,8 @@
                 app:layout_constraintBottom_toBottomOf="@+id/activity_parking_map_fg_google_map" />
 
             <TextView
+                android:maxLength="17"
+                android:text="122212121212121121212123123123"
                 android:id="@+id/fragment_parking_map_txt_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -80,9 +86,19 @@
 
         </LinearLayout>
 
+        <ImageButton
+            android:id="@+id/fragment_parking_map_imgbtn_directions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/ic_directions"
+            android:contentDescription="directions"
+            android:padding="27dp" />
+
         <Button
             android:id="@+id/fragment_parking_map_btn_booking"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
@@ -92,6 +108,7 @@
             android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:text="Book" />
+
     </LinearLayout>
 
 

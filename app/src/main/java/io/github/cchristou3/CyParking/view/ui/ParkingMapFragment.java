@@ -1,10 +1,12 @@
 package io.github.cchristou3.CyParking.view.ui;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,13 +47,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParking;
 import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParkingResultSet;
 import io.github.cchristou3.CyParking.view.data.repository.ParkingRepository;
 import io.github.cchristou3.CyParking.view.utility.Utility;
@@ -62,7 +64,7 @@ import io.github.cchristou3.CyParking.view.utility.Utility;
  * Lastly, there is an option to book a specific parking.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 29/10/20
+ * @version 3.0 07/11/20
  */
 
 // TODO: Save state of info layout and clicked marker when orientation is changed
@@ -74,7 +76,7 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 321;
     public static final long INTERVAL_TIME = 5000L;
     private static final int ZOOM_LEVEL = 16;
-    final private HashMap<Marker, PrivateParkingResultSet> mHashMapToValuesOfMarkersInScene = new HashMap<>();
+
     // Location related variables
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationCallback mLocationCallback;
@@ -93,8 +95,6 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
         public void onMapReady(GoogleMap googleMap) {
             mGoogleMap = googleMap;
             registerCurrentLocationUpdates();
-            // TODO: Create a custom InfoWindowsAdapter
-            //mGoogleMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this, mHashMapToValuesOfMarkersInScene));
 
             // Add listeners to the markers + map
             mGoogleMap.setOnMarkerClickListener(ParkingMapFragment.this);
@@ -104,15 +104,16 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
             mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
         }
     };
+
+    // Fragment's variables
+    final private HashMap<Marker, PrivateParkingResultSet> mHashMapToValuesOfMarkersInScene = new HashMap<>();
     private boolean triggeredFirstDatabaseUpdate;
     private GoogleMap mGoogleMap;
     private LatLng mCurrentLatLngOfUser;
     private boolean mRegistered;
-
-    // Fragment variables
-    private View mView;
     private PrivateParkingResultSet mSelectedPrivateParking;
     private ContentLoadingProgressBar mContentLoadingProgressBar;
+    private Marker mUserMarker;
 
     /**
      * Initialises the fragment. Uses the EventBus, to get access to data send by the previous fragment.
@@ -122,27 +123,11 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*
-         * By registering the EventBus we have access to both ongoing and sticky events.
-         * The onResultReceived method is our subscriber.
-         * If "sticky" is set to true, the subscriber method delivers the most recent sticky event (posted with
-         * {@link EventBus#postSticky(Object)}) to this subscriber (if event available).
-         */
-        EventBus.getDefault().register(this);
-        // onResultReceived gets invoked, no need to further listen for updates. Thus, unregister.
-        EventBus.getDefault().unregister(this);
-    }
-
-    /**
-     * Our event subscriber method. In this case, the event is the POJO PrivateParking.
-     * Receives the latest event that was posted using EventBus.getInstance().postSticky([object]),
-     * once the EventBus is registered.
-     *
-     * @param latLng The latitude and longitude of the user which were acquired in the previous fragment (HomeFragment)
-     */
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void onResultReceived(LatLng latLng) {
-        mCurrentLatLngOfUser = latLng;
+        try {
+            mCurrentLatLngOfUser = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(LatLng.class));
+        } catch (ClassCastException | NullPointerException e) {
+            Log.e(TAG, "onCreateView: ", e); // TODO: Plan B
+        }
     }
 
     /**
@@ -161,7 +146,7 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mView = inflater.inflate(R.layout.fragment_parking_map, container, false);
+        final View view = inflater.inflate(R.layout.fragment_parking_map, container, false);
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
         mLocationCallback = getLocationCallback();
@@ -172,25 +157,43 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
         mRegistered = false;
         triggeredFirstDatabaseUpdate = false;
 
-        mView.findViewById(R.id.fragment_parking_map_btn_booking).setOnClickListener(v -> {
+        view.findViewById(R.id.fragment_parking_map_imgbtn_directions).setOnClickListener(v -> {
+            if (mSelectedPrivateParking == null) return;
+            try {
+                // Access the coordinates of the selected marker
+                final HashMap<String, Double> coordinatesOfSelectedParking = mSelectedPrivateParking.getParking().getCoordinates();
+                double selectedParkingLatitude = Objects.requireNonNull(coordinatesOfSelectedParking.get(ParkingRepository.LATITUDE_KEY));
+                double selectedParkingLongitude = Objects.requireNonNull(coordinatesOfSelectedParking.get(ParkingRepository.LONGITUDE_KEY));
+                // Create Uri (query string) for a Google Maps Intent
+                // :q= indicates that we request for directions
+                Uri gmmIntentUri = Uri.parse("google.navigation:q=" + selectedParkingLatitude
+                        + "," + selectedParkingLongitude);
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                mapIntent.setPackage("com.google.android.apps.maps");
+                // Launch Google Maps activity
+                startActivity(mapIntent);
+            } catch (NullPointerException e) {
+                // TODO: Inform user
+            }
+        });
+
+        view.findViewById(R.id.fragment_parking_map_btn_booking).setOnClickListener(v -> {
             if (mSelectedPrivateParking != null) {
                 // Navigate to the ParkingBookingFragment
                 Log.d(TAG, "onCreateView: " + mSelectedPrivateParking.getDocumentID());
                 EventBus.getDefault().postSticky(mSelectedPrivateParking);
-                Navigation.findNavController(mView).navigate(R.id.action_nav_parking_map_fragment_to_parking_booking_fragment);
+                Navigation.findNavController(view).navigate(R.id.action_nav_parking_map_fragment_to_parking_booking_fragment);
             } else {
                 Toast.makeText(requireContext(), "Oops something went wrong!", Toast.LENGTH_SHORT).show();
             }
         });
 
         // Show a progress bar to inform the user that the data is loading
-        mContentLoadingProgressBar = mView.findViewById(R.id.fragment_parking_map_pb_loadingMarkers);
+        mContentLoadingProgressBar = view.findViewById(R.id.fragment_parking_map_pb_loadingMarkers);
         mContentLoadingProgressBar.getIndeterminateDrawable().setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
         mContentLoadingProgressBar.show();
 
-        fetchPrivateParking(mCurrentLatLngOfUser);
-
-        return mView;
+        return view;
     }
 
     /**
@@ -213,12 +216,11 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
     /**
      * Gets invoked after onCreate Callback.
      * Initialises an observer to a node of the database. When changes occur on specified node,
-     * parking data is being re-fetched.
+     * parking data is being updated.
      */
     @Override
     public void onStart() {
         super.onStart();
-
         // Initialize a firebase firestore observer to inform us about changes in the DB
         // By passing the activity (this), the listener will get removed automatically when the
         // activity calls onStop()
@@ -226,6 +228,9 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
         FirebaseFirestore.getInstance().collection("private_parking").addSnapshotListener(requireActivity(), (value, error) -> {
             // ref: https://firebase.google.com/docs/firestore/query-data/listen#view_changes_between_snapshots
             if (!triggeredFirstDatabaseUpdate) { // To ensure that when we add the listener, the block of code will not get executed
+                // Fetch initial data via HTTPs request, the filtering will be done by a cloud function
+                if (mCurrentLatLngOfUser == null) return;
+                fetchPrivateParking(mCurrentLatLngOfUser);
                 triggeredFirstDatabaseUpdate = true;
                 return;
             } else if (error != null) {
@@ -234,25 +239,68 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
                 return;
             }
             if (value != null) {
+                // TODO: Check whether the Added/Modified/Removed document's object
+                //  is nearby the user.
+                // Traverse through all the document changes
                 for (DocumentChange dc : value.getDocumentChanges()) {
+                    // Access the document which was changed
+                    // Convert it to a PrivateParking instance and access its Lat Lng attributes
+                    final PrivateParking newParking = dc.getDocument().toObject(PrivateParking.class);
+                    Log.d(TAG, "onStart: " + newParking.toString());
+                    final double parkingLatitude = Objects.requireNonNull(newParking.getCoordinates().get(ParkingRepository.LATITUDE_KEY));
+                    final double parkingLongitude = Objects.requireNonNull(newParking.getCoordinates().get(ParkingRepository.LONGITUDE_KEY));
+
                     switch (dc.getType()) {
-                        case ADDED:
-                            //Log.d(TAG, "New parking: " + dc.getDocument().getData());
+                        case ADDED: // If the document was newly added
+                            LatLng parkingLatLng = new LatLng(parkingLatitude, parkingLongitude);
+                            // Add a marker to the parking's coordinates
+                            Marker marker = mGoogleMap.addMarker(new MarkerOptions()
+                                    .position(parkingLatLng)
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                            // Add to hashmap to keep track of each marker's corresponding PrivateParking object
+                            mHashMapToValuesOfMarkersInScene.put(marker, new PrivateParkingResultSet(dc.getDocument().getId(), newParking));
                             break;
-                        case MODIFIED:
-                            //Log.d(TAG, "Modified parking: " + dc.getDocument().getData());
-                            break;
-                        case REMOVED:
-                            //Log.d(TAG, "Removed parking: " + dc.getDocument().getData());
+                        default:
+                            // Either modified or removed
+                            // Traverse the markers
+                            for (Marker markerOfParking : mHashMapToValuesOfMarkersInScene.keySet()) { // the key is of type Marker
+                                // Access the marker's corresponding PrivateParking
+                                final PrivateParkingResultSet oldParkingResultSet = mHashMapToValuesOfMarkersInScene.get(markerOfParking);
+                                final PrivateParking oldParkingObject = Objects.requireNonNull(oldParkingResultSet).getParking();
+                                // Check whether it's null
+                                if (oldParkingObject != null) {
+                                    // Access the marker's latitude and longitude
+                                    final double markerLat = Objects.requireNonNull(oldParkingObject
+                                            .getCoordinates().get(ParkingRepository.LATITUDE_KEY));
+                                    final double markerLng = Objects.requireNonNull(oldParkingObject
+                                            .getCoordinates().get(ParkingRepository.LONGITUDE_KEY));
+                                    // Check if the marker's lat & lng are the same with the same with the coordinates
+                                    // of the private parking that got changed
+                                    if (markerLat == parkingLatitude && markerLng == parkingLongitude) {
+                                        // then update the private parking's content
+                                        if (dc.getType() == DocumentChange.Type.MODIFIED) {
+                                            mHashMapToValuesOfMarkersInScene.put(markerOfParking, new PrivateParkingResultSet(dc.getDocument().getId(), newParking));
+                                            if (getView().findViewById(R.id.fragment_parking_map_li_infoLayout).getVisibility() == View.VISIBLE) {
+                                                showDetails(markerOfParking);
+                                            }
+                                        } else { // REMOVED
+                                            // Remove it from the hashmap
+                                            mHashMapToValuesOfMarkersInScene.remove(markerOfParking);
+                                            // Remove its marker from the map
+                                            markerOfParking.remove();
+                                            // If its info was showing, hide it and inform the user
+                                            changeInfoLayoutVisibilityTo(View.GONE);
+                                            Toast.makeText(getContext(), "Unfortunately, the parking got removed!", Toast.LENGTH_SHORT).show();
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
                             break;
                     }
                 }
             }
-            if (mCurrentLatLngOfUser != null && ParkingMapFragment.this.isAdded()) { // re-fetch the data from the server
-                Log.d(TAG, "onStart: Fetching data");
-                fetchPrivateParking(mCurrentLatLngOfUser);
-                Toast.makeText(requireContext(), "Database change triggered!", Toast.LENGTH_SHORT).show();
-            }
+            // TODO: Do not show info layout when clicked on the user
         });
     }
 
@@ -379,6 +427,24 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
     }
 
     /**
+     * Checks if we have any marker on the map which has the same LatLng
+     * as the given LatLng.
+     *
+     * @param latLng The coordinates of an object/event on the map.
+     * @return True, if we have any marker which has the same coordinates. Otherwise, false.
+     */
+    public boolean mapContainsTheseCoordinates(LatLng latLng) {
+        // Create a hash map based on clicked location
+        final HashMap<String, Double> mapOfClickedLocation = new HashMap<String, Double>() {
+            {
+                put(ParkingRepository.LATITUDE_KEY, latLng.latitude);
+                put(ParkingRepository.LONGITUDE_KEY, latLng.longitude);
+            }
+        };
+        return mHashMapToValuesOfMarkersInScene.containsValue(mapOfClickedLocation);
+    }
+
+    /**
      * Gets triggered whenever the user taps on the map.
      * If the user did not tapped on a marker or the the user
      * then the info plane is hidden.
@@ -387,16 +453,10 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
      */
     @Override
     public void onMapClick(@NotNull LatLng latLng) {
-        // Create a hash map based on clicked location
-        final HashMap<String, Double> mapOfClickedLocation = new HashMap<String, Double>() {
-            {
-                put(ParkingRepository.LATITUDE_KEY, latLng.latitude);
-                put(ParkingRepository.LONGITUDE_KEY, latLng.longitude);
-            }
-        };
+        Log.d(TAG, "onMapClick: ");
         // Check whether the same coordinates exist inside our global hash map
         // If not then the user did not tap any of the markers. Thus, we hide the info layout.
-        boolean containsValue = mHashMapToValuesOfMarkersInScene.containsValue(mapOfClickedLocation);
+        boolean containsValue = mapContainsTheseCoordinates(latLng);
         if (!containsValue) changeInfoLayoutVisibilityTo(View.GONE);
     }
 
@@ -410,6 +470,12 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
      */
     @Override
     public boolean onMarkerClick(Marker marker) {
+        Log.d(TAG, "onMarkerClick: ");
+        // If the marker of the user is clicked, ignore it
+        if (marker.getTag() != null) {
+            changeInfoLayoutVisibilityTo(View.GONE);
+            return false;
+        }
         showDetails(marker);
         mSelectedPrivateParking = mHashMapToValuesOfMarkersInScene.get(marker);
         return false;
@@ -436,26 +502,29 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
                 mCurrentLatLngOfUser = new LatLng(receivedLocation.getLatitude(), receivedLocation.getLongitude());
 
                 // TODO: replace drawable of my location
-                Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_menu_gallery, null);
+                Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_user_location, null);
                 if (drawable != null) {
-                    drawable.setAlpha(50); // = Opacity
+                    drawable.setAlpha(95); // = Opacity
                     Bitmap bitmapForMarker = Utility.drawableToBitmap(drawable);
 
-                    // TODO: Keep track of the user's marker. When thier location changes, remove current one
-                    //  and add a new one.
-                    Marker marker = mGoogleMap.addMarker(new MarkerOptions()
+                    // Keep track of the user's marker. When their location changes, remove current one
+                    // and add a new one.
+                    if (mUserMarker != null) mUserMarker.remove();
+
+                    mUserMarker = mGoogleMap.addMarker(new MarkerOptions()
                             .title("Title")
                             .position(mCurrentLatLngOfUser)
                             .icon(BitmapDescriptorFactory.fromBitmap(bitmapForMarker)) // TODO: Replace with an actual icon
                             .snippet("Current Location!")
                             .title("Me"));
+                    // Add a tag to it, to differentiate it from the other markers on the map
+                    mUserMarker.setTag(new Object());
 
                     // Smoothly moves the camera to location
-                    mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+                    mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(mUserMarker.getPosition()));
                 } else {
                     Log.d(TAG, "onLocationResult: Drawable was null!");
                 }
-
             }
         };
     }
@@ -470,15 +539,16 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
         Toast.makeText(requireContext(), "Marker has been clicked!", Toast.LENGTH_SHORT).show();
         changeInfoLayoutVisibilityTo(View.VISIBLE);
         // Get references to the view elements
-        TextView nameTextView = mView.findViewById(R.id.fragment_parking_map_txt_name);
-        TextView priceTextView = mView.findViewById(R.id.fragment_parking_map_txt_price);
-        TextView capacityTextView = mView.findViewById(R.id.fragment_parking_map_txt_capacity);
+        final View view = getView();
+        TextView nameTextView = view.findViewById(R.id.fragment_parking_map_txt_name);
+        TextView priceTextView = view.findViewById(R.id.fragment_parking_map_txt_price);
+        TextView capacityTextView = view.findViewById(R.id.fragment_parking_map_txt_capacity);
         // Get the corresponding hash map object
         PrivateParkingResultSet dataOfSelectedMarker = mHashMapToValuesOfMarkersInScene.get(marker);
 
         // Set their texts the according the clicked marker's data
-        String nameTextViewString = "Opening hours: " + ((dataOfSelectedMarker != null) ? dataOfSelectedMarker.getParking().getOpeningHours() : "Unavailable");
-        String capacityTextViewString = "Capacity: " + ((dataOfSelectedMarker != null) ?
+        String nameTextViewString = "Open: " + ((dataOfSelectedMarker != null) ? dataOfSelectedMarker.getParking().getOpeningHours() : "Unavailable");
+        String capacityTextViewString = "Status: " + ((dataOfSelectedMarker != null) ?
                 dataOfSelectedMarker.getParking().getAvailableSpaces() + " / " + dataOfSelectedMarker.getParking().getCapacity() : "Unavailable");
         String priceTextViewString = "Price: " + ((dataOfSelectedMarker != null) ? dataOfSelectedMarker.getParking().getPricingList() : "Unavailable");
         nameTextView.setText(nameTextViewString);
@@ -493,11 +563,14 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
      */
     private void changeInfoLayoutVisibilityTo(final int visibility) {
         // Get a reference to the hidden info layout
-        LinearLayout infoLayout = mView.findViewById(R.id.fragment_parking_map_li_infoLayout);
+        LinearLayout infoLayout = getView().findViewById(R.id.fragment_parking_map_li_infoLayout);
         // Check if the current visibility is already set with the given one (to avoid unnecessary actions)
         if (infoLayout.getVisibility() != visibility) infoLayout.setVisibility(visibility);
     }
 
+    /**
+     * Adjust zoom level once the map has been loaded
+     */
     @Override
     public void onMapLoaded() {
         Log.d(TAG, "onMapLoaded: Zooming...");

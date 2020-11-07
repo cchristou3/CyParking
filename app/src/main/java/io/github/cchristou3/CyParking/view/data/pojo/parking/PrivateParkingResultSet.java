@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
  * via activities / fragments and HTTPS requests (through GSON).</p>
  *
  * @author Charalambos Christou
- * @version 1.0 30/10/20
+ * @version 3.0 07/11/20
  */
 public class PrivateParkingResultSet implements Parcelable {
 
@@ -38,6 +38,11 @@ public class PrivateParkingResultSet implements Parcelable {
         parking = in.readParcelable(PrivateParking.class.getClassLoader());
     }
 
+    public PrivateParkingResultSet(String documentID, PrivateParking parking) {
+        this.documentID = documentID;
+        this.parking = parking;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(documentID);
@@ -49,6 +54,7 @@ public class PrivateParkingResultSet implements Parcelable {
         return 0;
     }
 
+    // Getters
     public String getDocumentID() {
         return documentID;
     }

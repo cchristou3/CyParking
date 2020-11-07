@@ -14,12 +14,12 @@ import io.github.cchristou3.CyParking.view.data.pojo.parking.booking.PrivatePark
  * @author Charalambos Christou
  * @version 1.0 05/11/20
  */
-public class ViewParkingViewModel extends ViewModel {
+public class ViewBookingsViewModel extends ViewModel {
 
-    // TODO: Bind with ViewBookingFragment & initialize livedata here
-    private MutableLiveData<List<PrivateParkingBooking>> listMutableLiveData;
+    final private MutableLiveData<List<PrivateParkingBooking>> bookingListMutableLiveData =
+            new MutableLiveData<>();
 
-    public MutableLiveData<List<PrivateParkingBooking>> getListMutableLiveData() {
-        return listMutableLiveData;
+    public MutableLiveData<List<PrivateParkingBooking>> getBookingListMutableLiveData() {
+        return bookingListMutableLiveData;
     }
 }

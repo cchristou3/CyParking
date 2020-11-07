@@ -6,6 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".view.ui.viewBooking.ViewBookingsFragment">
 
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/fragment_view_bookings_pb_loadingBookings"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/fragment_view_bookings_rv_recyclerview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/fragment_view_bookings_rv_recyclerview" />
+
     <Button
         android:id="@+id/fragment_view_bookings_btn_pending"
         android:layout_width="0dp"

@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
@@ -19,7 +18,7 @@ import io.github.cchristou3.CyParking.R;
  * LoginViewModel.
  *
  * @author Charalambos Christou
- * @version 1.0 1/11/20
+ * @version 2.0 07/11/20
  */
 public class AuthenticationFragment extends Fragment {
 
@@ -30,16 +29,12 @@ public class AuthenticationFragment extends Fragment {
                              Bundle savedInstanceState) {
         View mView = inflater.inflate(R.layout.fragment_authentication, container, false);
 
-        LoginViewModel sharedLoginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
-                .get(LoginViewModel.class);
-
         // Inflate the layout for this fragment
-        AuthenticationAdapter sectionsPagerAdapter = new AuthenticationAdapter(requireActivity(),
-                sharedLoginViewModel);
+        AuthenticationAdapter sectionsPagerAdapter = new AuthenticationAdapter(getChildFragmentManager(),
+                getLifecycle());
         ViewPager2 viewPager = mView.findViewById(R.id.fragment_authentication_vp2_view_pager_2);
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabLayout = mView.findViewById(R.id.fragment_authentication_tl_tabs);
-
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) -> {
                     tab.setText((position == 0) ? "Sign in" : "Sign up");
@@ -47,7 +42,5 @@ public class AuthenticationFragment extends Fragment {
                 }
         ).attach();
         return mView;
-
     }
-
 }

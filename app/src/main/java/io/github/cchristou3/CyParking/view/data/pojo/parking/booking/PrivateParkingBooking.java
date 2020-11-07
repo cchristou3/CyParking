@@ -3,7 +3,10 @@ package io.github.cchristou3.CyParking.view.data.pojo.parking.booking;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.UnsupportedEncodingException;
+import androidx.annotation.Nullable;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Date;
 import java.util.HashMap;
 
@@ -17,7 +20,7 @@ import io.github.cchristou3.CyParking.view.utility.ShaUtility;
  * This is a Subclass of Parking.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 29/10/20
+ * @version 3.0 07/11/20
  */
 public class PrivateParkingBooking extends Parking implements Parcelable {
 
@@ -41,13 +44,14 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
     private String startingTime;
     private String endingTime;
     private double price;
-    private boolean isCompleted;
+    private boolean completed;
 
     public PrivateParkingBooking() {
         super();
     }
 
-    public PrivateParkingBooking(HashMap<String, Double> coordinates, int parkingID, String parkingOperatorID, String parkingName, String userID, String username, Date dateOfBooking, String startingTime, String endingTime, double price, boolean isCompleted) {
+
+    public PrivateParkingBooking(HashMap<String, Double> coordinates, int parkingID, String parkingOperatorID, String parkingName, String userID, String username, Date dateOfBooking, String startingTime, String endingTime, double price, boolean completed) {
         super(coordinates, parkingID);
         this.parkingOperatorID = parkingOperatorID;
         this.parkingName = parkingName;
@@ -57,7 +61,20 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         this.startingTime = startingTime;
         this.endingTime = endingTime;
         this.price = price;
-        this.isCompleted = isCompleted;
+        this.completed = completed;
+    }
+
+    public PrivateParkingBooking(HashMap<String, Double> coordinates, int parkingID, String parkingOperatorID, String parkingName, String userID, String username, Date dateOfBooking, String startingTime, String endingTime, double price) {
+        super(coordinates, parkingID);
+        this.parkingOperatorID = parkingOperatorID;
+        this.parkingName = parkingName;
+        this.userID = userID;
+        this.username = username;
+        this.dateOfBooking = dateOfBooking;
+        this.startingTime = startingTime;
+        this.endingTime = endingTime;
+        this.price = price;
+        this.completed = getInitialBookingStatus();
     }
 
     protected PrivateParkingBooking(Parcel in) {
@@ -70,7 +87,32 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         endingTime = in.readString();
         startingTime = in.readString();
         price = in.readDouble();
-        isCompleted = (in.readInt() == 1);
+        completed = (in.readInt() == 1);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (!(obj instanceof PrivateParkingBooking)) return false;
+        PrivateParkingBooking booking = (PrivateParkingBooking) obj;
+        return this.generateUniqueId().equals(booking.generateUniqueId());
+    }
+
+    public void updateContents(PrivateParkingBooking privateParkingBooking) {
+        setCoordinates(privateParkingBooking.getCoordinates());
+        setParkingID(privateParkingBooking.getParkingID());
+        this.parkingOperatorID = privateParkingBooking.parkingOperatorID;
+        this.parkingName = privateParkingBooking.parkingName;
+        this.userID = privateParkingBooking.userID;
+        this.username = privateParkingBooking.username;
+        this.dateOfBooking = privateParkingBooking.dateOfBooking;
+        this.startingTime = privateParkingBooking.startingTime;
+        this.endingTime = privateParkingBooking.endingTime;
+        this.price = privateParkingBooking.price;
+        this.completed = privateParkingBooking.completed;
+    }
+
+    public boolean getInitialBookingStatus() {
+        return false;
     }
 
     @Override
@@ -79,7 +121,7 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NotNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeLong(dateOfBooking.getTime());
         dest.writeString(parkingOperatorID);
@@ -89,7 +131,7 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         dest.writeString(endingTime);
         dest.writeString(startingTime);
         dest.writeDouble(price);
-        dest.writeInt(isCompleted ? 1 : 0);
+        dest.writeInt(completed ? 1 : 0);
     }
 
     public String getParkingOperatorID() {
@@ -125,19 +167,33 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
     }
 
     public boolean isCompleted() {
-        return isCompleted;
+        return completed;
     }
 
+    /**
+     * Create a new string which consists of the following attributes:
+     * parkingID, parkingOperatorID, parkingName, userID, username,
+     * dateOfBooking, startingTime, endingTime, price, coordinates.
+     * <p>
+     * Not Included: completed
+     * <p>
+     * Then, hash the generated string and return it.
+     * <p>
+     * NOTE: Two PrivateParkingBooking objects which have the same values for the data members
+     * mentioned above but different "completed" values, will indeed generate the same digest.
+     * E.g. The following Objects have the same data values, except for the "completed" attribute.
+     * p1   =    new PrivateParkingBooking(coordinates, ... , completed = true)
+     * p2   =    new PrivateParkingBooking(coordinates, ... , completed = false)
+     * p1.generateUniqueId() == p2.generateUniqueId() -> true
+     *
+     * @return the hashed version of the parking's generated id
+     */
+    @Override
     public String generateUniqueId() {
         // Create a long and unique id
-        String id = parkingOperatorID + parkingName + userID + username + dateOfBooking + startingTime + endingTime +
-                price + getCoordinates().values().toString().trim();
+        String id = getParkingID() + parkingOperatorID + parkingName + userID + username + dateOfBooking + startingTime + endingTime +
+                price + getCoordinates().values().toString();
         // Hash (SHA256) it to has a fixed length of 32 characters
-        String hashedId = id;
-        try {
-            hashedId = ShaUtility.digest(id.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-        }
-        return hashedId;
+        return ShaUtility.digest(id);
     }
 }

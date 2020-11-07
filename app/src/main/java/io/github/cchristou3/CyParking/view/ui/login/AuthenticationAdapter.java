@@ -2,31 +2,31 @@ package io.github.cchristou3.CyParking.view.ui.login;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
-
-import io.github.cchristou3.CyParking.R;
 
 /**
  * Purpose: <p>A [FragmentPagerAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/pages.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 1/11/20
+ * @version 3.0 07/11/20
  */
 public class AuthenticationAdapter extends FragmentStateAdapter {
 
-    private final LoginViewModel mLoginViewModel;
+    // Adapter's constants
+    public static final short LOGIN_PAGE = 0;
+    public static final short REGISTRATION_PAGE = 1;
 
     /**
      * AuthenticationAdapter's public Constructor
      *
-     * @param fragmentActivity The FragmentActivity which hosts the tabs.
-     * @param mLoginViewModel  The LoginViewModel which will be shared by all tabs.
+     * @param fragmentManager The host's fragment manager
+     * @param lifecycle       The current lifecycle
      */
-    public AuthenticationAdapter(FragmentActivity fragmentActivity, LoginViewModel mLoginViewModel) {
-        super(fragmentActivity);
-        this.mLoginViewModel = mLoginViewModel;
+    public AuthenticationAdapter(FragmentManager fragmentManager, Lifecycle lifecycle) {
+        super(fragmentManager, lifecycle);
     }
 
     /**
@@ -37,8 +37,8 @@ public class AuthenticationAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         return (position == 0) ?
-                LoginFragment.newInstance(true, R.layout.fragment_login, mLoginViewModel) :
-                LoginFragment.newInstance(false, R.layout.fragment_login, mLoginViewModel);
+                LoginFragment.newInstance(LOGIN_PAGE) :
+                LoginFragment.newInstance(REGISTRATION_PAGE);
     }
 
     /**
@@ -48,5 +48,6 @@ public class AuthenticationAdapter extends FragmentStateAdapter {
     public int getItemCount() {
         return 2;
     }
+
 
 }

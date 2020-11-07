@@ -6,9 +6,13 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import io.github.cchristou3.CyParking.view.utility.ShaUtility;
 
 /**
  * Purpose: <p>POJO to be used to transfer and receive data
@@ -17,7 +21,7 @@ import java.util.List;
  * This is a Subclass of Parking.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 29/10/20
+ * @version 3.0 07/11/20
  */
 public class PrivateParking extends Parking {
 
@@ -32,6 +36,7 @@ public class PrivateParking extends Parking {
             return new PrivateParking[size];
         }
     };
+
     @SerializedName("capacity")
     private int capacity;
     @SerializedName("availableSpaces")
@@ -46,7 +51,7 @@ public class PrivateParking extends Parking {
     private ArrayList<Integer> pricingList;
 
     public PrivateParking() {
-    }
+    }  //  no-argument constructor to be used by GSON
 
     public PrivateParking(HashMap<String, Double> coordinates, int parkingID, int capacity, int availableSpaces, int capacityForDisabled, int availableSpacesForDisabled, String openingHours, ArrayList<Integer> pricingList) {
         super(coordinates, parkingID);
@@ -69,7 +74,7 @@ public class PrivateParking extends Parking {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NotNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(capacity);
         dest.writeInt(availableSpaces);
@@ -77,6 +82,11 @@ public class PrivateParking extends Parking {
         dest.writeInt(availableSpacesForDisabled);
         dest.writeString(openingHours);
         dest.writeList(pricingList);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @NonNull
@@ -93,6 +103,7 @@ public class PrivateParking extends Parking {
                         ", OpeningHours: " + getOpeningHours();
     }
 
+    // Getters & Setters
     public List<Integer> getPricingList() {
         return pricingList;
     }
@@ -141,10 +152,16 @@ public class PrivateParking extends Parking {
         this.openingHours = openingHours;
     }
 
-
+    /**
+     * Could be used as an alternative DocumentID for the Firestore database
+     *
+     * @return A digest unique to each object
+     */
     @Override
-    public int describeContents() {
-        return 0;
+    public String generateUniqueId() {
+        // Create a long and unique id
+        String id = getCoordinates().values().toString() + getParkingID();
+        // Hash (SHA256) it to has a fixed length of 32 characters and return its value
+        return ShaUtility.digest(id);
     }
-
 }

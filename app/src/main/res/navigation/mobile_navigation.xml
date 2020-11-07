@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/nav_home">
+    app:startDestination="@id/nav_authentication_fragment">
 
     <fragment
         android:id="@+id/nav_home"
@@ -50,16 +50,17 @@
         android:name="io.github.cchristou3.CyParking.view.ui.booking.ParkingBookingFragment"
         android:label="Booking Parking"
         tools:layout="@layout/fragment_parking_booking" />
-    <fragment
-        android:id="@+id/nav_login_Fragment"
-        android:name="io.github.cchristou3.CyParking.view.ui.login.LoginFragment"
-        android:label="fragment_login"
-        tools:layout="@layout/fragment_login" />
+
     <fragment
         android:id="@+id/nav_authentication_fragment"
         android:name="io.github.cchristou3.CyParking.view.ui.login.AuthenticationFragment"
         android:label="fragment_authentication"
         tools:layout="@layout/fragment_authentication" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="io.github.cchristou3.CyParking.view.ui.login.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" />
 
 
 </navigation>

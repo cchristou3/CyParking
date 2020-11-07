@@ -21,15 +21,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.IdRes;
-import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.ViewModelProvider;
 
+import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import io.github.cchristou3.CyParking.R;
@@ -43,18 +45,16 @@ import io.github.cchristou3.CyParking.view.ui.support.DescriptionDialog;
  * Can be used for both logging in and signing up.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 1/11/20
+ * @version 2.0 07/11/20
  */
 public class LoginFragment extends Fragment {
 
     // Constant variables
-    public static String LAYOUT_RED_ID_ARG = "layoutResId";
-    public static String IS_LOGIN_FRAGMENT = "isLoginFragment";
+    public static final String PAGE_TYPE_KEY = "PAGE_TYPE_KEY";
     private final int[] resIdsForRoleArea = new int[]{R.id.fragment_login_txt_roles_header, R.id.fragment_login_txt_role_one_title, R.id.fragment_login_cb_role_one_checkbox, R.id.fragment_login_btn_dialog_one_button, R.id.fragment_login_txt_role_two_title, R.id.fragment_login_cb_role_two_checkbox, R.id.fragment_login_btn_dialog_two_button};
     // Fragment variables
     private LoginViewModel loginViewModel;
-    private Integer layoutResId;
-    private boolean isLoginFragment;
+    private short pageType;
     private EditText usernameEditText;
     private EditText passwordEditText;
 
@@ -64,18 +64,15 @@ public class LoginFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param isLoginFragment true if the fragment is going to be used for login in purposes. False, if used for registration.
-     * @param layoutResId     The ResId of the layout.
+     * @param pageType The type of the page (LOGIN_PAGE, REGISTRATION_PAGE)
      * @return A new instance of fragment AuthenticationFragment.
      */
     @NotNull
-    public static LoginFragment newInstance(boolean isLoginFragment, @LayoutRes Integer layoutResId, LoginViewModel loginViewModel) {
+    public static LoginFragment newInstance(short pageType) {
         LoginFragment loginFragment = new LoginFragment();
         Bundle args = new Bundle();
-        args.putInt(LAYOUT_RED_ID_ARG, layoutResId);
-        args.putBoolean(IS_LOGIN_FRAGMENT, isLoginFragment);
+        args.putShort(PAGE_TYPE_KEY, pageType);
         loginFragment.setArguments(args);
-        loginFragment.setLoginViewModel(loginViewModel);
         return loginFragment;
     }
 
@@ -88,8 +85,7 @@ public class LoginFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.layoutResId = getArguments().getInt(LAYOUT_RED_ID_ARG);
-            this.isLoginFragment = getArguments().getBoolean(IS_LOGIN_FRAGMENT);
+            this.pageType = getArguments().getShort(PAGE_TYPE_KEY);
         }
     }
 
@@ -106,7 +102,31 @@ public class LoginFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(layoutResId, container, false);
+        // If there is an event send of type LoginViewModel
+        // then retrieve it and initialize this fragment's ViewModel
+        try {
+            loginViewModel = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(LoginViewModel.class));
+        } catch (ClassCastException | NullPointerException e) {
+            //Log.e(TAG, "onCreateView: ", e);
+            // Otherwise, initialize this fragment's ViewModel
+            // and send it to the sticky event bucket.
+            initializeAndPostViewModel();
+        }
+        // Result: all fragments which retrieve events of type LoginViewModel
+        // share the same LoginViewModel instance.
+        // In this case, both Login and Register fragments share the same instance of LoginViewModel.
+
+        return inflater.inflate(R.layout.fragment_login, container, false);
+    }
+
+    /**
+     * Initialize the fragment's LoginViewModel and Post it as an event for future fragments
+     * to obtain it.
+     */
+    public void initializeAndPostViewModel() {
+        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
+                .get(LoginViewModel.class);
+        EventBus.getDefault().postSticky(loginViewModel);
     }
 
     /**
@@ -119,7 +139,15 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initFragment(view);
+    }
 
+    /**
+     * Sets up the logic of the fragment
+     *
+     * @param view The view of the fragment
+     */
+    private void initFragment(@NotNull View view) {
         // Get references to the UI elements
         usernameEditText = view.findViewById(R.id.fragment_login_et_email);
         passwordEditText = view.findViewById(R.id.fragment_login_et_password);
@@ -175,52 +203,60 @@ public class LoginFragment extends Fragment {
             usernameEditText.addTextChangedListener(afterTextChangedListener);
             passwordEditText.addTextChangedListener(afterTextChangedListener);
 
-            View.OnClickListener onClickListener;
-            int buttonTextResId;
-            if (!isLoginFragment) { // User is registering
-                // Set up the UI and listeners for registration
-                buttonTextResId = R.string.sign_up; // Set corresponding id string
-                // Add listeners to the checkboxes
-                CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (buttonView, isChecked) ->
-                        loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
-                                passwordEditText.getText().toString(), userCheckbox.isChecked(), operatorCheckbox.isChecked());
-                userCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
-                operatorCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
-                onClickListener = v -> {  // Set corresponding listener for the sign up button
-                    loadingProgressBar.setVisibility(View.VISIBLE);
-                    loginViewModel.register(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString(), userCheckbox.isChecked(), operatorCheckbox.isChecked(), requireContext());
-                };
-                final Button roleOneDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_one_button);
-                final Button roleTwoDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_two_button);
-                // Add listeners to the "description" buttons
-                roleOneDescriptionButton.setOnClickListener(getRoleDescriptionOnClickListener(R.id.fragment_login_txt_role_one_title));
-                roleTwoDescriptionButton.setOnClickListener(getRoleDescriptionOnClickListener(R.id.fragment_login_txt_role_two_title));
-            } else {
-                // Set up the UI and listeners for logging in
-                // Hide unnecessary UI elements
-                hideRoleArea(view);
-                buttonTextResId = R.string.sign_in; // Set corresponding id string
-                // Pressing the "enter" on the keyboard will automatically trigger the login method
-                passwordEditText.setOnEditorActionListener((v, actionId, event) -> {
-                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+            View.OnClickListener onClickListener = null;
+            int buttonTextResId = 0;
+
+            switch (pageType) {
+                case AuthenticationAdapter.LOGIN_PAGE:
+                    // Set up the UI and listeners for logging in
+                    // Hide unnecessary UI elements
+                    hideRoleArea(view);
+                    buttonTextResId = R.string.sign_in; // Set corresponding id string
+                    // Pressing the "enter" on the keyboard will automatically trigger the login method
+                    passwordEditText.setOnEditorActionListener((v, actionId, event) -> {
+                        if (actionId == EditorInfo.IME_ACTION_DONE) {
+                            loginViewModel.login(usernameEditText.getText().toString(),
+                                    passwordEditText.getText().toString());
+                        }
+                        return false;
+                    });
+                    onClickListener = v -> { // Set corresponding listener for the login button
+                        loadingProgressBar.setVisibility(View.VISIBLE);
                         loginViewModel.login(usernameEditText.getText().toString(),
                                 passwordEditText.getText().toString());
-                    }
-                    return false;
-                });
-                onClickListener = v -> { // Set corresponding listener for the login button
-                    loadingProgressBar.setVisibility(View.VISIBLE);
-                    loginViewModel.login(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString());
-                };
+                    };
+                    break;
+                case AuthenticationAdapter.REGISTRATION_PAGE:
+                    // User is registering
+                    // Set up the UI and listeners for registration
+                    buttonTextResId = R.string.sign_up; // Set corresponding id string
+                    // Add listeners to the checkboxes
+                    CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (buttonView, isChecked) ->
+                            loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
+                                    passwordEditText.getText().toString(), userCheckbox.isChecked(), operatorCheckbox.isChecked());
+                    userCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
+                    operatorCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
+                    onClickListener = v -> {  // Set corresponding listener for the sign up button
+                        loadingProgressBar.setVisibility(View.VISIBLE);
+                        loginViewModel.register(usernameEditText.getText().toString(),
+                                passwordEditText.getText().toString(), userCheckbox.isChecked(), operatorCheckbox.isChecked(), requireContext());
+                    };
+                    final Button roleOneDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_one_button);
+                    final Button roleTwoDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_two_button);
+                    // Add listeners to the "description" buttons
+                    roleOneDescriptionButton.setOnClickListener(getRoleDescriptionOnClickListener(R.id.fragment_login_txt_role_one_title));
+                    roleTwoDescriptionButton.setOnClickListener(getRoleDescriptionOnClickListener(R.id.fragment_login_txt_role_two_title));
+                    break;
+                default:
+                    throw new IllegalStateException("The page type must be one of those:\n" +
+                            "LOGIN_PAGE\n" +
+                            "REGISTRATION_PAGE");
             }
             // Set the button's text
             loginButton.setText(buttonTextResId);
             // Set the button's onClick listener
             loginButton.setOnClickListener(onClickListener);
         }
-
     }
 
     /**
@@ -262,20 +298,22 @@ public class LoginFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        /* For some unknown reason, when the device's night mode changes while the app is running,
+        //Log.i(TAG, ((isLoginFragment)? "Login" : "Register")+" onResume");
+        /* For some unknown reason, when the device's night mode changes (or changing orientation) while the app is running,
          * it causes the loginViewModel to become null. For now we've added two checks, one in onViewCreated callback
          * and another one here which prompts the user to either restart the activity or exit the app.
          * TODO: Find the root of this issue */
-        if (loginViewModel == null) {
+        if (loginViewModel == null && !isDetached()) {
             new AlertDialog.Builder(getContext()) // create an alert dialog builder
                     .setTitle("Oops!")
                     .setMessage("Something went wrong with the application. Would you like to restart it?")
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setPositiveButton(android.R.string.yes, (dialog, which) -> {
-                        /* OK. do nothing, just inform the user */
+                        /* Restart the applicatiion */
                         requireActivity().finish();
                         startActivity(new Intent(getActivity(), MainHostActivity.class));
-                    }).setNegativeButton(android.R.string.no, (dialog, which) -> requireActivity().finish()).show();
+                    }).setNegativeButton(android.R.string.no, (dialog, which) -> requireActivity().finish()
+            ).show();
 
         } else {
             final String email = loginViewModel.getEmailState().getValue();
@@ -339,12 +377,5 @@ public class LoginFragment extends Fragment {
                     errorString,
                     Toast.LENGTH_LONG).show();
         }
-    }
-
-    /**
-     * Setter
-     */
-    public void setLoginViewModel(LoginViewModel loginViewModel) {
-        this.loginViewModel = loginViewModel;
     }
 }

@@ -5,8 +5,12 @@ import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.Calendar;
 import java.util.Date;
+
+import io.github.cchristou3.CyParking.view.ui.ParkingMapFragment;
 
 /**
  * Purpose: <p>Contain all helper / utility methods which the application needs.</p>
@@ -15,6 +19,41 @@ import java.util.Date;
  * @version 1.0 29/10/20
  */
 public class Utility {
+
+    /**
+     * Checks whether the specified lat and lng are inside the user's range
+     *
+     * @param userLatLng The lat and lng of the user
+     * @param parkingLat The Lat of the private parking
+     * @param parkingLng The Lng of the private parking
+     * @return True, if yes. Otherwise, false.
+     */
+    public static boolean isNearbyUser(LatLng userLatLng, double parkingLat, double parkingLng) {
+        // User's lat lng
+        double lat1 = userLatLng.latitude;
+        double lon1 = userLatLng.longitude;
+
+        // Parking's lat lng
+        double lat2 = parkingLat;
+        double lon2 = parkingLng;
+
+        // Calculate the distance between the two points (User and current parking)
+        // Reference: http://www.movable-type.co.uk/scripts/latlong.html
+        final double R = 6371e3; // metres
+        double phi1 = lat1 * Math.PI / 180; // φ, λ in radians
+        double phi2 = lat2 * Math.PI / 180;
+        double deltaPhi = (lat2 - lat1) * Math.PI / 180;
+        double deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+        double a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+                Math.cos(phi1) * Math.cos(phi2) *
+                        Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double d = R * c; // d is the total distance in metres
+
+        return (d <= ParkingMapFragment.MAXIMUM_METERS_FROM_USER);
+    }
 
     /**
      * Creates a Bitmap object based on a specified drawable

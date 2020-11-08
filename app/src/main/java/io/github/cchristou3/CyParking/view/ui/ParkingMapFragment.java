@@ -76,6 +76,7 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 321;
     public static final long INTERVAL_TIME = 5000L;
     private static final int ZOOM_LEVEL = 16;
+    public static final double MAXIMUM_METERS_FROM_USER = 1000.0D;
 
     // Location related variables
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -243,13 +244,22 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
                 //  is nearby the user.
                 // Traverse through all the document changes
                 for (DocumentChange dc : value.getDocumentChanges()) {
+                    // Directly access the Parking's coordinates
+                    // -> Faster than getting the object via toObject and accessing its coordinates from there.
+                    try {
+                        final double prkLat = (((HashMap<String, Double>) Objects.requireNonNull(dc.getDocument().get("coordinates"))).get(ParkingRepository.LATITUDE_KEY));
+                        final double prkLng = (((HashMap<String, Double>) Objects.requireNonNull(dc.getDocument().get("coordinates"))).get(ParkingRepository.LONGITUDE_KEY));
+                        // and check whether it is nearby the user.
+                        // If not, then move on to the next document which got changed
+                        if (!Utility.isNearbyUser(mCurrentLatLngOfUser, prkLat, prkLng)) continue;
+                    } catch (ClassCastException e) {
+                        Log.e(TAG, "onStart: ", e);
+                    }
                     // Access the document which was changed
                     // Convert it to a PrivateParking instance and access its Lat Lng attributes
                     final PrivateParking newParking = dc.getDocument().toObject(PrivateParking.class);
-                    Log.d(TAG, "onStart: " + newParking.toString());
                     final double parkingLatitude = Objects.requireNonNull(newParking.getCoordinates().get(ParkingRepository.LATITUDE_KEY));
                     final double parkingLongitude = Objects.requireNonNull(newParking.getCoordinates().get(ParkingRepository.LONGITUDE_KEY));
-
                     switch (dc.getType()) {
                         case ADDED: // If the document was newly added
                             LatLng parkingLatLng = new LatLng(parkingLatitude, parkingLongitude);

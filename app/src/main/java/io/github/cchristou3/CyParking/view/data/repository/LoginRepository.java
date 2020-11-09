@@ -9,7 +9,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +40,6 @@ public class LoginRepository {
     // private constructor : singleton access
     private LoginRepository(FirebaseAuth dataSource) {
         this.dataSource = dataSource;
-
     }
 
     /**
@@ -80,8 +78,8 @@ public class LoginRepository {
                                                                            @Nullable Context context) {
         return task -> {
             if (task.isSuccessful()) {
-                FirebaseUser user = dataSource.getCurrentUser();
-                LoggedInUser loggedInUser = new LoggedInUser(user.getEmail(), user.getUid());
+                LoggedInUser loggedInUser = new LoggedInUser(dataSource.getCurrentUser().getEmail(),
+                        dataSource.getCurrentUser().getUid());
                 setLoggedInUser(loggedInUser);
 
                 // Save the user's roles locally using SharedPreferences
@@ -97,11 +95,11 @@ public class LoginRepository {
                     if (isOperator) setOfRoles.add("Operator");
 
                     // Each user in the database has a unique Uid
-                    editor.putStringSet(user.getUid(), setOfRoles);
+                    editor.putStringSet(dataSource.getCurrentUser().getUid(), setOfRoles);
                     editor.apply();
                 }
                 loginResult.setValue(new LoginResult(new LoggedInUserView(
-                        user.getEmail(), isUser, isOperator)));
+                        dataSource.getCurrentUser().getEmail(), isUser, isOperator)));
             } else {
                 loginResult.setValue(new LoginResult(task.getException().getMessage()));
             }

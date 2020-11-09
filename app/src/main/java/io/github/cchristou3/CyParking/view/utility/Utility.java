@@ -7,6 +7,8 @@ import android.graphics.drawable.Drawable;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -28,22 +30,14 @@ public class Utility {
      * @param parkingLng The Lng of the private parking
      * @return True, if yes. Otherwise, false.
      */
-    public static boolean isNearbyUser(LatLng userLatLng, double parkingLat, double parkingLng) {
-        // User's lat lng
-        double lat1 = userLatLng.latitude;
-        double lon1 = userLatLng.longitude;
-
-        // Parking's lat lng
-        double lat2 = parkingLat;
-        double lon2 = parkingLng;
-
+    public static boolean isNearbyUser(@NotNull LatLng userLatLng, double parkingLat, double parkingLng) {
         // Calculate the distance between the two points (User and current parking)
         // Reference: http://www.movable-type.co.uk/scripts/latlong.html
         final double R = 6371e3; // metres
-        double phi1 = lat1 * Math.PI / 180; // φ, λ in radians
-        double phi2 = lat2 * Math.PI / 180;
-        double deltaPhi = (lat2 - lat1) * Math.PI / 180;
-        double deltaLambda = (lon2 - lon1) * Math.PI / 180;
+        double phi1 = userLatLng.latitude * Math.PI / 180; // φ, λ in radians
+        double phi2 = parkingLat * Math.PI / 180;
+        double deltaPhi = (parkingLat - userLatLng.latitude) * Math.PI / 180;
+        double deltaLambda = (parkingLng - userLatLng.longitude) * Math.PI / 180;
 
         double a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
                 Math.cos(phi1) * Math.cos(phi2) *
@@ -91,8 +85,7 @@ public class Utility {
      * @return A string of the format "__ : __" where _ is a digit.
      */
     public static String getTimeOf(int finalHours, int minute) {
-        final String finalMinutes = ((minute < 10) ? "0" : "") + minute;
-        return "" + finalHours + " : " + finalMinutes;
+        return "" + finalHours + " : " + ((minute < 10) ? "0" : "") + minute;
     }
 
     /**

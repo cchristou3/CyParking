@@ -45,9 +45,8 @@ public class DescriptionDialog extends DialogFragment {
      * @return
      */
     public static int getStyleConfiguration(int nightModeFlags) {
-        if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
-            return R.style.CustomDialogDark;
-        }
+        if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) return R.style.CustomDialogDark;
+
         return R.style.CustomDialog; // UI_MODE_NIGHT_NO or UI_MODE_NIGHT_UNDEFINED
     }
 
@@ -64,7 +63,7 @@ public class DescriptionDialog extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.dialog_role_description, container, false);
+        final View root = inflater.inflate(R.layout.dialog_role_description, container, false);
         getDialog().setTitle(mTitle);
         ((TextView) root.findViewById(R.id.dialog_role_description_txt_description)).setText(mDescription);
         ((Button) root.findViewById(R.id.dialog_role_description_btn_dismiss)).setOnClickListener((View.OnClickListener) v -> dismiss());

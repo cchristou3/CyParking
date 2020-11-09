@@ -57,7 +57,8 @@ public class ParkingRepository {
      */
     public static void addParking(@NotNull PrivateParking privateParkingToBeStored) {
         // Add the info to the database
-        FirebaseFirestore.getInstance().collection(PRIVATE_PARKING).document(privateParkingToBeStored.generateUniqueId()).set(privateParkingToBeStored);
+        FirebaseFirestore.getInstance().collection(PRIVATE_PARKING)
+                .document(privateParkingToBeStored.generateUniqueId()).set(privateParkingToBeStored);
     }
 
     /**

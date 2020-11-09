@@ -27,9 +27,6 @@ public class LoginViewModel extends ViewModel {
     private final LoginRepository loginRepository;
     private boolean isUserSigningIn = true; // First fragment which appears to the user is the "sign in" tab
 
-    /**
-     * Getters & Setters
-     */
     LoginViewModel(LoginRepository loginRepository) {
         this.loginRepository = loginRepository;
     }
@@ -103,13 +100,9 @@ public class LoginViewModel extends ViewModel {
      * @return true if it passes the criteria.
      */
     private boolean isUserNameValid(String username) {
-        if (username == null) return false;
+        if (username == null || username.trim().isEmpty()) return false;
 
-        if (username.contains("@")) {
-            return Patterns.EMAIL_ADDRESS.matcher(username).matches();
-        } else {
-            return !username.trim().isEmpty();
-        }
+        return Patterns.EMAIL_ADDRESS.matcher(username).matches();
     }
 
     /**
@@ -121,6 +114,10 @@ public class LoginViewModel extends ViewModel {
     private boolean isPasswordValid(String password) {
         return password != null && password.trim().length() > 5;
     }
+
+    /**
+     * Getters & Setters
+     */
 
     public boolean isUserSigningIn() {
         return isUserSigningIn;

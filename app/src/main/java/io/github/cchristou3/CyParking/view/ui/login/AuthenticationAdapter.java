@@ -49,5 +49,4 @@ public class AuthenticationAdapter extends FragmentStateAdapter {
         return 2;
     }
 
-
 }

@@ -39,10 +39,9 @@ public class HomeFragment extends Fragment {
 
     // Fragment variables
     private com.google.android.gms.location.FusedLocationProviderClient mFusedLocationProviderClient;
-    private View mView;
 
     /**
-     * Inflates our fragment's view. Saves a reference to the fragment's view
+     * Inflates our fragment's view.
      *
      * @param inflater           Inflater which will inflate our view
      * @param container          The parent view
@@ -51,8 +50,7 @@ public class HomeFragment extends Fragment {
      */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        mView = inflater.inflate(R.layout.fragment_home, container, false);
-        return mView;
+        return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
     /**
@@ -78,9 +76,6 @@ public class HomeFragment extends Fragment {
      * inform the user about the error.
      */
     private void getLastKnownLocationOfUser(View view) {
-        LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setNumUpdates(1);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= 23) // Marshmallow
@@ -88,17 +83,20 @@ public class HomeFragment extends Fragment {
         } else { // no need to ask for permission
             // start to find location...
             if (mFusedLocationProviderClient != null) {
-                mFusedLocationProviderClient.requestLocationUpdates(locationRequest, new LocationCallback() {
-                    @Override
-                    public void onLocationResult(LocationResult locationResult) {
-                        if (locationResult != null) {
-                            // Access the user's latest location
-                            Location userLatestLocation = locationResult.getLastLocation();
-                            // Pass it to the ParkingMapFragment
-                            EventBus.getDefault().postSticky(new LatLng(userLatestLocation.getLatitude(), userLatestLocation.getLongitude()));
-                            // Navigate to the ParkingMapFragment
-                            Navigation.findNavController(view).navigate(R.id.action_home_to_parking_map);
-                        } else {
+                mFusedLocationProviderClient.requestLocationUpdates(new LocationRequest()
+                                .setNumUpdates(1)
+                                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY),
+                        new LocationCallback() {
+                            @Override
+                            public void onLocationResult(LocationResult locationResult) {
+                                if (locationResult != null) {
+                                    // Access the user's latest location
+                                    Location userLatestLocation = locationResult.getLastLocation();
+                                    // Pass it to the ParkingMapFragment
+                                    EventBus.getDefault().postSticky(new LatLng(userLatestLocation.getLatitude(), userLatestLocation.getLongitude()));
+                                    // Navigate to the ParkingMapFragment
+                                    Navigation.findNavController(view).navigate(R.id.action_home_to_parking_map);
+                                } else {
                             // Inform the user something wrong happened
                             Toast.makeText(getActivity(), "Your location could not be processed! Check your GPS settings!", Toast.LENGTH_SHORT).show();
                         }
@@ -125,12 +123,12 @@ public class HomeFragment extends Fragment {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                 // start to find location..
-                getLastKnownLocationOfUser(mView);
+                getLastKnownLocationOfUser(requireView());
 
             } else { // if permission is not granted
 
                 // decide what you want to do if you don't get permissions
-                Toast.makeText(getActivity(), "Permission is not granted!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Permission is not granted!", Toast.LENGTH_SHORT).show();
             }
         }
     }

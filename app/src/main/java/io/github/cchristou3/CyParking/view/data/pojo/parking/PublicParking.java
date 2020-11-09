@@ -16,7 +16,8 @@ public class PublicParking extends Parking {
     public PublicParking() {
     }
 
-    public PublicParking(HashMap<String, Double> mCoordinates, int mParkingID) {
-        super(mCoordinates, mParkingID);
+    public PublicParking(HashMap<String, Double> coordinates, int parkingID) {
+        this.coordinates = coordinates;
+        this.parkingID = parkingID;
     }
 }

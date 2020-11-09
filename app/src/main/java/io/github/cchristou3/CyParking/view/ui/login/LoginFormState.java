@@ -25,7 +25,7 @@ class LoginFormState {
      * @param passwordError The id of the error related to the password.
      * @param roleError     The id of the error related to the role.
      */
-    LoginFormState(@org.jetbrains.annotations.Nullable Integer usernameError, @Nullable Integer passwordError, @Nullable Integer roleError) {
+    LoginFormState(@Nullable Integer usernameError, @Nullable Integer passwordError, @Nullable Integer roleError) {
         this.usernameError = usernameError;
         this.passwordError = passwordError;
         this.roleError = roleError;

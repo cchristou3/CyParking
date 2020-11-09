@@ -32,9 +32,9 @@ public class Parking implements Parcelable {
         }
     };
     @SerializedName("coordinates")
-    private HashMap<String, Double> coordinates;
+    protected HashMap<String, Double> coordinates;
     @SerializedName("parkingID")
-    private int parkingID;
+    protected int parkingID;
 
     public Parking() {
     }  //  no-argument constructor to be used by GSON

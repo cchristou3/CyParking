@@ -298,11 +298,6 @@ public class LoginFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        //Log.i(TAG, ((isLoginFragment)? "Login" : "Register")+" onResume");
-        /* For some unknown reason, when the device's night mode changes (or changing orientation) while the app is running,
-         * it causes the loginViewModel to become null. For now we've added two checks, one in onViewCreated callback
-         * and another one here which prompts the user to either restart the activity or exit the app.
-         * TODO: Find the root of this issue */
         if (loginViewModel == null && !isDetached()) {
             new AlertDialog.Builder(getContext()) // create an alert dialog builder
                     .setTitle("Oops!")
@@ -316,10 +311,8 @@ public class LoginFragment extends Fragment {
             ).show();
 
         } else {
-            final String email = loginViewModel.getEmailState().getValue();
-            final String password = loginViewModel.getPasswordState().getValue();
-            usernameEditText.setText(email);
-            passwordEditText.setText(password);
+            usernameEditText.setText(loginViewModel.getEmailState().getValue());
+            passwordEditText.setText(loginViewModel.getPasswordState().getValue());
         }
     }
 

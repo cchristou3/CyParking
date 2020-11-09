@@ -22,27 +22,27 @@ public class User {
         this.mUserID = mUserID;
     }
 
-    public String[] getmRoles() {
+    public String[] getRoles() {
         return mRoles;
     }
 
-    public void setmRoles(String[] mRoles) {
+    public void setRoles(String[] mRoles) {
         this.mRoles = mRoles;
     }
 
-    public String getmCarNumberPlate() {
+    public String getCarNumberPlate() {
         return mCarNumberPlate;
     }
 
-    public void setmCarNumberPlate(String mCarNumberPlate) {
+    public void setCarNumberPlate(String mCarNumberPlate) {
         this.mCarNumberPlate = mCarNumberPlate;
     }
 
-    public int getmUserID() {
+    public int getUserID() {
         return mUserID;
     }
 
-    public void setmUserID(int mUserID) {
+    public void setUserID(int mUserID) {
         this.mUserID = mUserID;
     }
 }

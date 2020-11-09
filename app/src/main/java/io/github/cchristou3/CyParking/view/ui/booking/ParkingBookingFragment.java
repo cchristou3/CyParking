@@ -52,9 +52,7 @@ import static io.github.cchristou3.CyParking.view.ui.ParkingMapFragment.TAG;
 public class ParkingBookingFragment extends Fragment {
 
     // Fragment variables
-    private SimpleDateFormat mSimpleDateFormat;
     private ParkingBookingViewModel mParkingBookingViewModel;
-    private View mView;
     private PrivateParkingResultSet mSelectedParking;
     private TextView parkingAvailability;
 
@@ -85,8 +83,7 @@ public class ParkingBookingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mView = inflater.inflate(R.layout.fragment_parking_booking, container, false);
-        return mView;
+        return inflater.inflate(R.layout.fragment_parking_booking, container, false);
     }
 
     /**
@@ -101,12 +98,12 @@ public class ParkingBookingFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Get references to the UI elements
-        TextView parkingName = mView.findViewById(R.id.fragment_parking_booking_txt_parking_name);
-        TextView parkingCapacity = mView.findViewById(R.id.fragment_parking_booking_txt_parking_capacity);
-        parkingAvailability = mView.findViewById(R.id.fragment_parking_booking_txt_parking_availability);
-        TextView datePickerTextView = mView.findViewById(R.id.fragment_parking_booking_txt_date);
-        Button datePickerButton = mView.findViewById(R.id.fragment_parking_booking_btn_date_button);
-        TextView startingTimeTextView = mView.findViewById(R.id.fragment_parking_booking_txt_starting_time);
+        TextView parkingName = view.findViewById(R.id.fragment_parking_booking_txt_parking_name);
+        TextView parkingCapacity = view.findViewById(R.id.fragment_parking_booking_txt_parking_capacity);
+        parkingAvailability = view.findViewById(R.id.fragment_parking_booking_txt_parking_availability);
+        TextView datePickerTextView = view.findViewById(R.id.fragment_parking_booking_txt_date);
+        Button datePickerButton = view.findViewById(R.id.fragment_parking_booking_btn_date_button);
+        TextView startingTimeTextView = view.findViewById(R.id.fragment_parking_booking_txt_starting_time);
 
         // Set their text to their corresponding value
         final String parkingID = "ParkingID: " + mSelectedParking.getParking().getParkingID();
@@ -121,36 +118,36 @@ public class ParkingBookingFragment extends Fragment {
                 new ViewModelProvider(this).get(ParkingBookingViewModel.class);
 
 
-        Button startingTimePickerButton = mView.findViewById(R.id.fragment_parking_booking_btn_starting_time_button);
-        TextView endingTimeTextView = mView.findViewById(R.id.fragment_parking_booking_txt_ending_time);
-        Button endingTimePickerButton = mView.findViewById(R.id.fragment_parking_booking_btn_ending_time_button);
+        Button startingTimePickerButton = view.findViewById(R.id.fragment_parking_booking_btn_starting_time_button);
+        TextView endingTimeTextView = view.findViewById(R.id.fragment_parking_booking_txt_ending_time);
+        Button endingTimePickerButton = view.findViewById(R.id.fragment_parking_booking_btn_ending_time_button);
 
         // Set up LiveData's Observers
-        mParkingBookingViewModel.getmPickedDate().observe(getViewLifecycleOwner(), datePickerTextView::setText);
-        mParkingBookingViewModel.getmPickedStartingTime().observe(getViewLifecycleOwner(), startingTimeTextView::setText);
-        mParkingBookingViewModel.getmPickedEndingTime().observe(getViewLifecycleOwner(), endingTimeTextView::setText);
-        datePickerTextView.setText(mParkingBookingViewModel.getmPickedDate().getValue());
-        startingTimeTextView.setText(mParkingBookingViewModel.getmPickedStartingTime().getValue());
-        endingTimeTextView.setText(mParkingBookingViewModel.getmPickedEndingTime().getValue());
+        mParkingBookingViewModel.getPickedDate().observe(getViewLifecycleOwner(), datePickerTextView::setText);
+        mParkingBookingViewModel.getPickedStartingTime().observe(getViewLifecycleOwner(), startingTimeTextView::setText);
+        mParkingBookingViewModel.getPickedEndingTime().observe(getViewLifecycleOwner(), endingTimeTextView::setText);
+        datePickerTextView.setText(mParkingBookingViewModel.getPickedDate().getValue());
+        startingTimeTextView.setText(mParkingBookingViewModel.getPickedStartingTime().getValue());
+        endingTimeTextView.setText(mParkingBookingViewModel.getPickedEndingTime().getValue());
 
         // Set up time pickers' listeners
-        attachListenerToTimePicker(startingTimePickerButton, mParkingBookingViewModel.getmPickedStartingTime());
-        attachListenerToTimePicker(endingTimePickerButton, mParkingBookingViewModel.getmPickedEndingTime());
+        startingTimePickerButton.setOnClickListener(getListenerForTimePicker(mParkingBookingViewModel.getPickedStartingTime()));
+        endingTimePickerButton.setOnClickListener(getListenerForTimePicker(mParkingBookingViewModel.getPickedEndingTime()));
 
         // Set up date picker listener
         datePickerButton.setOnClickListener(v -> {
             // Access the current date via the a Calendar object
-            final Calendar calendar = Calendar.getInstance();
-            final int year = calendar.get(Calendar.YEAR);
-            final int month = calendar.get(Calendar.MONTH);
-            final int day = calendar.get(Calendar.DAY_OF_MONTH);
+            final int year = Calendar.getInstance().get(Calendar.YEAR);
+            final int month = Calendar.getInstance().get(Calendar.MONTH);
+            final int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
             // Instantiate a DatePickerDialog and how it to the user
             // The dialog's date will be set to the current date.
-            mSimpleDateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
             DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(),
                     (viewObject, year1, month1, dayOfMonth) ->
-                            mParkingBookingViewModel.getmPickedDate().setValue(mSimpleDateFormat.format(Utility.getDateOf(year1, month1, dayOfMonth))),
+                            mParkingBookingViewModel.getPickedDate().setValue(new SimpleDateFormat("dd-MM-yyyy",
+                                    Locale.getDefault())
+                                    .format(Utility.getDateOf(year1, month1, dayOfMonth))),
                     year, month, day);
             datePickerDialog.show();
         });
@@ -181,9 +178,9 @@ public class ParkingBookingFragment extends Fragment {
      */
     public void bookParking() throws ParseException {
         // Access parking operator's details via the Intent object
-        String pickedDate = mParkingBookingViewModel.getmPickedDate().getValue();
-        String pickedStartingTime = mParkingBookingViewModel.getmPickedStartingTime().getValue();
-        String pickedEndingTime = mParkingBookingViewModel.getmPickedEndingTime().getValue();
+        String pickedDate = mParkingBookingViewModel.getPickedDate().getValue();
+        String pickedStartingTime = mParkingBookingViewModel.getPickedStartingTime().getValue();
+        String pickedEndingTime = mParkingBookingViewModel.getPickedEndingTime().getValue();
 
         // Check that pickedStartingTime < pickedEndingTime && validate Date as well!
         int startingHours = Integer.parseInt(Objects.requireNonNull(pickedStartingTime).substring(0, 2)); // Access first two digits
@@ -227,7 +224,7 @@ public class ParkingBookingFragment extends Fragment {
             docRef.addOnCompleteListener(task -> {
                 // Inform the user booking was successful and offer a temporary UNDO option
                 if (task.isSuccessful())
-                    Snackbar.make(mView, "Parking has been booked successfully!", Snackbar.LENGTH_LONG)
+                    Snackbar.make(requireView(), "Parking has been booked successfully!", Snackbar.LENGTH_LONG)
                             .setAction("UNDO", v -> ParkingRepository.cancelParking(privateParkingBooking.generateUniqueId())).show();
 
                 // TODO: Generate QR Code
@@ -238,16 +235,15 @@ public class ParkingBookingFragment extends Fragment {
     }
 
     /**
-     * Attaches an OnClickListener to the given button.
+     * Creates an OnClickListener to the given button.
      * OnClick: Creates a TimePickerDialog with its own OnTimeSetListener.
      * OnTimeSetListener-onClick: Updates the value of the specified LiveData Object.
      *
-     * @param timePickerButton      reference to a button in the layout
      * @param stringMutableLiveData LiveData which handles persistence of a String
+     * @return An View.OnClickListener
      */
-    private void attachListenerToTimePicker(@NotNull Button timePickerButton,
-                                            @NotNull MutableLiveData<String> stringMutableLiveData) {
-        timePickerButton.setOnClickListener(v -> {
+    private View.OnClickListener getListenerForTimePicker(@NotNull MutableLiveData<String> stringMutableLiveData) {
+        return v -> {
             TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
                     AlertDialog.THEME_HOLO_DARK, // TODO: useful for night mode THEME_HOLO_LIGHT
                     // Triggers TextView's Update
@@ -256,6 +252,6 @@ public class ParkingBookingFragment extends Fragment {
                     Calendar.getInstance().get(Calendar.MINUTE),
                     true);
             timePickerDialog.show();
-        });
+        };
     }
 }

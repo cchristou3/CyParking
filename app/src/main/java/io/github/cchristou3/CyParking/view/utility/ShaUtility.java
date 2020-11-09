@@ -29,9 +29,7 @@ public class ShaUtility {
     public static String digest(String input) {
         try {
             byte[] bytesOfInput = input.getBytes(UTF_8);
-            MessageDigest md;
-            md = MessageDigest.getInstance(SHA256);
-            byte[] result = md.digest(bytesOfInput);
+            byte[] result = MessageDigest.getInstance(SHA256).digest(bytesOfInput);
             return bytesToHex(result);
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             return input;

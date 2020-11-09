@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -51,20 +50,7 @@ public class ViewBookingsFragment extends Fragment {
 
     // Fragment variables
     private ArrayList<PrivateParkingBooking> privateParkingBookingArrayList;
-    private final View.OnClickListener mOnItemClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            new AlertDialog.Builder(getContext()).setTitle(android.R.string.dialog_alert_title)
-                    .setPositiveButton(android.R.string.yes, (dialog, which) -> {
-                        RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
-                        int position = viewHolder.getAdapterPosition();
-                        final String bookingToBeCancelledId = privateParkingBookingArrayList.get(position).generateUniqueId();
-                        ParkingRepository.cancelParking(bookingToBeCancelledId);
-                    })
-                    .setNegativeButton(android.R.string.cancel, (dialog, which) -> { /* Do nothing */ })
-                    .setMessage("Are you sure you would like to cancel the booking?").show();
-        }
-    };
+
     private int databaseDataState;
     private BookingAdapter bookingAdapter;
     private ShimmerFrameLayout mShimmerViewContainer;
@@ -94,10 +80,9 @@ public class ViewBookingsFragment extends Fragment {
         // Get a reference of the placeholder container from the layout
         mShimmerViewContainer = view.findViewById(R.id.fragment_view_bookings_sfl_shimmer_view_container);
 
-        // Initialize the fragment's ViewModel
-        ViewBookingsViewModel viewBookingsViewModel = new ViewModelProvider(requireActivity()).get(ViewBookingsViewModel.class);
+        // Initialize the fragment's ViewModel / LiveData
         bookingListMutableLiveData =
-                viewBookingsViewModel.getBookingListMutableLiveData();
+                new ViewModelProvider(requireActivity()).get(ViewBookingsViewModel.class).getBookingListMutableLiveData();
 
         pendingButton = view.findViewById(R.id.fragment_view_bookings_btn_pending);
         completedButton = view.findViewById(R.id.fragment_view_bookings_btn_completed);
@@ -196,12 +181,25 @@ public class ViewBookingsFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.fragment_view_bookings_rv_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setHasFixedSize(true);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        //recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         // Create new adapter and pass the fetched data.
         bookingAdapter = new BookingAdapter(privateParkingBookingArrayList);
         // Pass an onItemClickListener to the adapter
-        bookingAdapter.setOnItemClickListener(mOnItemClickListener);
+        bookingAdapter.setOnItemClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(getContext()).setTitle(android.R.string.dialog_alert_title)
+                        .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                            RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
+                            int position = viewHolder.getAdapterPosition();
+                            final String bookingToBeCancelledId = privateParkingBookingArrayList.get(position).generateUniqueId();
+                            ParkingRepository.cancelParking(bookingToBeCancelledId);
+                        })
+                        .setNegativeButton(android.R.string.cancel, (dialog, which) -> { /* Do nothing */ })
+                        .setMessage("Are you sure you would like to cancel the booking?").show();
+            }
+        });
         bookingAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {

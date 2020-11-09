@@ -30,15 +30,15 @@ public class ParkingBookingViewModel extends ViewModel {
     MutableLiveData<String> mPickedStartingTime = new MutableLiveData<>(getInitialValue(CREATING_STARTING_TIME_DATA));
     MutableLiveData<String> mPickedEndingTime = new MutableLiveData<>(getInitialValue(CREATING_ENDING_TIME_DATA));
 
-    public MutableLiveData<String> getmPickedDate() {
+    public MutableLiveData<String> getPickedDate() {
         return mPickedDate;
     }
 
-    public MutableLiveData<String> getmPickedStartingTime() {
+    public MutableLiveData<String> getPickedStartingTime() {
         return mPickedStartingTime;
     }
 
-    public MutableLiveData<String> getmPickedEndingTime() {
+    public MutableLiveData<String> getPickedEndingTime() {
         return mPickedEndingTime;
     }
 
@@ -51,9 +51,8 @@ public class ParkingBookingViewModel extends ViewModel {
      */
     public String initializeToCurrentTime(int forwardHours) {
         // Access the current time of the day
-        Calendar mcurrentTime = Calendar.getInstance();
-        int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-        int minute = mcurrentTime.get(Calendar.MINUTE);
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        int minute = Calendar.getInstance().get(Calendar.MINUTE);
         return (Utility.getTimeOf((hour + forwardHours), minute));
     }
 

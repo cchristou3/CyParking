@@ -86,28 +86,4 @@ public class MainHostActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
-
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        Log.i(ParkingMapFragment.TAG, "MainHostActivity: onStart");
-//    }
-//
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        Log.i(ParkingMapFragment.TAG, "MainHostActivity: onResume");
-//    }
-//
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        Log.i(ParkingMapFragment.TAG, "MainHostActivity: onStop");
-//    }
-//
-//    @Override
-//    public void onDestroy() {
-//        super.onDestroy();
-//        Log.i(ParkingMapFragment.TAG, "MainHostActivity: onDestroy");
-//    }
 }

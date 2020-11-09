@@ -3,9 +3,7 @@ package io.github.cchristou3.CyParking.view.ui;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -44,6 +42,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -68,7 +67,7 @@ import io.github.cchristou3.CyParking.view.utility.Utility;
  */
 
 // TODO: Save state of info layout and clicked marker when orientation is changed
-public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClickListener,
+public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener, GoogleMap.OnMapLoadedCallback {
 
     // Constant variables
@@ -82,34 +81,11 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
     // Location related variables
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationCallback mLocationCallback;
-    private LocationRequest mLocationRequest;
     private boolean triggeredFirstDatabaseUpdate;
     private GoogleMap mGoogleMap;
     private LatLng mCurrentLatLngOfUser;
     private boolean mRegistered;
-    private final OnMapReadyCallback callback = new OnMapReadyCallback() {
-
-        /**
-         * Manipulates the map once available.
-         * This callback is triggered when the map is ready to be used.
-         * This is where we can add markers or lines, add listeners or move the camera.
-         * If Google Play services is not installed on the device, the user will be prompted to
-         * install it inside the SupportMapFragment. This method will only be triggered once the
-         * user has installed Google Play services and returned to the app.
-         */
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            mGoogleMap = googleMap;
-            registerCurrentLocationUpdates();
-
-            // Add listeners to the markers + map
-            mGoogleMap.setOnMarkerClickListener(ParkingMapFragment.this);
-            mGoogleMap.setOnMapClickListener(ParkingMapFragment.this);
-            mGoogleMap.setOnMapLoadedCallback(ParkingMapFragment.this);
-
-            mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
-        }
-    };
+    private ListenerRegistration mListenerRegistration;
     private PrivateParkingResultSet mSelectedPrivateParking;
     private ContentLoadingProgressBar mContentLoadingProgressBar;
     private Marker mUserMarker;
@@ -151,8 +127,6 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
         mLocationCallback = getLocationCallback();
 
         // Initialize location based variables
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(INTERVAL_TIME);
         mRegistered = false;
         triggeredFirstDatabaseUpdate = false;
 
@@ -160,17 +134,16 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
             if (mSelectedPrivateParking == null) return;
             try {
                 // Access the coordinates of the selected marker
-                final HashMap<String, Double> coordinatesOfSelectedParking = mSelectedPrivateParking.getParking().getCoordinates();
-                double selectedParkingLatitude = Objects.requireNonNull(coordinatesOfSelectedParking.get(ParkingRepository.LATITUDE_KEY));
-                double selectedParkingLongitude = Objects.requireNonNull(coordinatesOfSelectedParking.get(ParkingRepository.LONGITUDE_KEY));
+                double selectedParkingLatitude = Objects.requireNonNull(mSelectedPrivateParking.getParking().getCoordinates()
+                        .get(ParkingRepository.LATITUDE_KEY));
+                double selectedParkingLongitude = Objects.requireNonNull(mSelectedPrivateParking.getParking().getCoordinates()
+                        .get(ParkingRepository.LONGITUDE_KEY));
                 // Create Uri (query string) for a Google Maps Intent
                 // :q= indicates that we request for directions
-                Uri gmmIntentUri = Uri.parse("google.navigation:q=" + selectedParkingLatitude
-                        + "," + selectedParkingLongitude);
-                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                mapIntent.setPackage("com.google.android.apps.maps");
                 // Launch Google Maps activity
-                startActivity(mapIntent);
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("google.navigation:q=" + selectedParkingLatitude
+                                + "," + selectedParkingLongitude)).setPackage("com.google.android.apps.maps"));
             } catch (NullPointerException e) {
                 // TODO: Inform user
             }
@@ -208,7 +181,7 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.fragment_parking_map_fcv_map);
         if (mapFragment != null) {
-            mapFragment.getMapAsync(callback);
+            mapFragment.getMapAsync(this);
         }
     }
 
@@ -221,10 +194,12 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
     public void onStart() {
         super.onStart();
         // Initialize a firebase firestore observer to inform us about changes in the DB
-        // By passing the activity (this), the listener will get removed automatically when the
-        // activity calls onStop()
-        // The callback of the SnapshotListener gets triggered straight away when we add it
-        FirebaseFirestore.getInstance().collection("private_parking").addSnapshotListener(requireActivity(), (value, error) -> {
+        // The callback of the SnapshotListener gets triggered straight away when we attach it
+        mListenerRegistration = retrieveDataAndListenForChanges();
+    }
+
+    private ListenerRegistration retrieveDataAndListenForChanges() {
+        return FirebaseFirestore.getInstance().collection("private_parking").addSnapshotListener((value, error) -> {
             // ref: https://firebase.google.com/docs/firestore/query-data/listen#view_changes_between_snapshots
             if (!triggeredFirstDatabaseUpdate) { // To ensure that when we add the listener, the block of code will not get executed
                 // Fetch initial data via HTTPs request, the filtering will be done by a cloud function
@@ -250,9 +225,7 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
                     // If not, then move on to the next document which got changed
                     if (!Utility.isNearbyUser(mCurrentLatLngOfUser, parkingLatitude, parkingLongitude))
                         continue;
-                    // If yes, then access the document which was changed and
-                    // convert it to a PrivateParking object
-                    final PrivateParking newParking = dc.getDocument().toObject(PrivateParking.class);
+
                     switch (dc.getType()) {
                         case ADDED: // If the document was newly added
                             LatLng parkingLatLng = new LatLng(parkingLatitude, parkingLongitude);
@@ -261,15 +234,16 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
                                     .position(parkingLatLng)
                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                             // Add to hashmap to keep track of each marker's corresponding PrivateParking object
-                            mHashMapToValuesOfMarkersInScene.put(marker, new PrivateParkingResultSet(dc.getDocument().getId(), newParking));
+                            mHashMapToValuesOfMarkersInScene.put(marker, new PrivateParkingResultSet(dc.getDocument().getId(),
+                                    dc.getDocument().toObject(PrivateParking.class)));
                             break;
                         default:
                             // Either modified or removed
                             // Traverse the markers
                             for (Marker markerOfParking : mHashMapToValuesOfMarkersInScene.keySet()) { // the key is of type Marker
                                 // Access the marker's corresponding PrivateParking
-                                final PrivateParkingResultSet oldParkingResultSet = mHashMapToValuesOfMarkersInScene.get(markerOfParking);
-                                final PrivateParking oldParkingObject = Objects.requireNonNull(oldParkingResultSet).getParking();
+                                final PrivateParking oldParkingObject = Objects.requireNonNull(mHashMapToValuesOfMarkersInScene.
+                                        get(markerOfParking)).getParking();
                                 // Check whether it's null
                                 if (oldParkingObject != null) {
                                     // Access the marker's latitude and longitude
@@ -282,8 +256,11 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
                                     if (markerLat == parkingLatitude && markerLng == parkingLongitude) {
                                         // then update the private parking's content
                                         if (dc.getType() == DocumentChange.Type.MODIFIED) {
-                                            mHashMapToValuesOfMarkersInScene.put(markerOfParking, new PrivateParkingResultSet(dc.getDocument().getId(), newParking));
-                                            if (getView().findViewById(R.id.fragment_parking_map_li_infoLayout).getVisibility() == View.VISIBLE) {
+                                            mHashMapToValuesOfMarkersInScene.put(markerOfParking,
+                                                    new PrivateParkingResultSet(dc.getDocument().getId(),
+                                                            dc.getDocument().toObject(PrivateParking.class)));
+                                            if (requireView().findViewById(R.id.fragment_parking_map_li_infoLayout)
+                                                    .getVisibility() == View.VISIBLE) {
                                                 showDetails(markerOfParking);
                                             }
                                         } else { // REMOVED
@@ -308,12 +285,25 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
     }
 
     /**
+     * Called when the fragment is visible to the user and actively running.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mListenerRegistration == null) {
+            mListenerRegistration = retrieveDataAndListenForChanges();
+        }
+    }
+
+    /**
      * Unregisters location updates.
      */
     @Override
     public void onPause() {
         super.onPause();
         unRegisterCurrentLocationUpdates();
+        mListenerRegistration.remove();
+        mListenerRegistration = null;
     }
 
     /**
@@ -354,7 +344,7 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
                     ActivityCompat.requestPermissions(requireActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
             } else { // no need to ask for permission
                 // start to find location...
-                mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, requireActivity().getMainLooper());
+                mFusedLocationProviderClient.requestLocationUpdates(new LocationRequest().setInterval(INTERVAL_TIME), mLocationCallback, requireActivity().getMainLooper());
                 mRegistered = true;
             }
         }
@@ -391,16 +381,15 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
         final Request<String> requestForPrivateParking = new StringRequest(Request.Method.GET,
                 getResources().getString(R.string.firestore_api_url) + "?latitude=" + userLatitude + "&longitude=" + userLongitude,
                 response -> {
-                    // Convert json object into an array of objects
-                    final PrivateParkingResultSet[] privateParking = new Gson().fromJson(response, PrivateParkingResultSet[].class);
 
                     // clear all the current markers from the map except fromt the user's one.
                     for (Marker marker : mHashMapToValuesOfMarkersInScene.keySet()) { // the key is of type Marker
                         marker.remove();
                     }
 
+                    // Convert json object into an array of objects
                     // Traverse through the fetched objects and add them to the map.
-                    for (PrivateParkingResultSet parking : privateParking) {
+                    for (PrivateParkingResultSet parking : new Gson().fromJson(response, PrivateParkingResultSet[].class)) {
                         // Get the coordinates of the parking
                         try {
                             double parkingLatitude = parking.getParking().getCoordinates().get(ParkingRepository.LATITUDE_KEY);
@@ -436,15 +425,14 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
      * @param latLng The coordinates of an object/event on the map.
      * @return True, if we have any marker which has the same coordinates. Otherwise, false.
      */
-    public boolean mapContainsTheseCoordinates(LatLng latLng) {
+    public boolean mapContainsTheseCoordinates(@NotNull LatLng latLng) {
         // Create a hash map based on clicked location
-        final HashMap<String, Double> mapOfClickedLocation = new HashMap<String, Double>() {
+        return mHashMapToValuesOfMarkersInScene.containsValue(new HashMap<String, Double>() {
             {
                 put(ParkingRepository.LATITUDE_KEY, latLng.latitude);
                 put(ParkingRepository.LONGITUDE_KEY, latLng.longitude);
             }
-        };
-        return mHashMapToValuesOfMarkersInScene.containsValue(mapOfClickedLocation);
+        });
     }
 
     /**
@@ -500,15 +488,14 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
                 super.onLocationResult(locationResult);
                 if (locationResult == null) return;
 
-                // Update the user's location
-                Location receivedLocation = locationResult.getLastLocation();
-                mCurrentLatLngOfUser = new LatLng(receivedLocation.getLatitude(), receivedLocation.getLongitude());
+                // Update the user's location with the received location
+                mCurrentLatLngOfUser = new LatLng(locationResult.getLastLocation().getLatitude(),
+                        locationResult.getLastLocation().getLongitude());
 
                 // TODO: replace drawable of my location
                 Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_user_location, null);
                 if (drawable != null) {
                     drawable.setAlpha(95); // = Opacity
-                    Bitmap bitmapForMarker = Utility.drawableToBitmap(drawable);
 
                     // Keep track of the user's marker. When their location changes, remove current one
                     // and add a new one.
@@ -517,7 +504,7 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
                     mUserMarker = mGoogleMap.addMarker(new MarkerOptions()
                             .title("Title")
                             .position(mCurrentLatLngOfUser)
-                            .icon(BitmapDescriptorFactory.fromBitmap(bitmapForMarker)) // TODO: Replace with an actual icon
+                            .icon(BitmapDescriptorFactory.fromBitmap(Utility.drawableToBitmap(drawable))) // TODO: Replace with an actual icon
                             .snippet("Current Location!")
                             .title("Me"));
                     // Add a tag to it, to differentiate it from the other markers on the map
@@ -542,7 +529,7 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
         Toast.makeText(requireContext(), "Marker has been clicked!", Toast.LENGTH_SHORT).show();
         changeInfoLayoutVisibilityTo(View.VISIBLE);
         // Get references to the view elements
-        final View view = getView();
+        final View view = requireView();
         TextView nameTextView = view.findViewById(R.id.fragment_parking_map_txt_name);
         TextView priceTextView = view.findViewById(R.id.fragment_parking_map_txt_price);
         TextView capacityTextView = view.findViewById(R.id.fragment_parking_map_txt_capacity);
@@ -566,7 +553,7 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
      */
     private void changeInfoLayoutVisibilityTo(final int visibility) {
         // Get a reference to the hidden info layout
-        LinearLayout infoLayout = getView().findViewById(R.id.fragment_parking_map_li_infoLayout);
+        LinearLayout infoLayout = requireView().findViewById(R.id.fragment_parking_map_li_infoLayout);
         // Check if the current visibility is already set with the given one (to avoid unnecessary actions)
         if (infoLayout.getVisibility() != visibility) infoLayout.setVisibility(visibility);
     }
@@ -578,5 +565,28 @@ public class ParkingMapFragment extends Fragment implements GoogleMap.OnMapClick
     public void onMapLoaded() {
         Log.d(TAG, "onMapLoaded: Zooming...");
         mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
+    }
+
+
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera.
+     * If Google Play services is not installed on the device, the user will be prompted to
+     * install it inside the SupportMapFragment. This method will only be triggered once the
+     * user has installed Google Play services and returned to the app.
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mGoogleMap = googleMap;
+        registerCurrentLocationUpdates();
+
+        // Add listeners to the markers + map
+        mGoogleMap.setOnMarkerClickListener(ParkingMapFragment.this);
+        mGoogleMap.setOnMapClickListener(ParkingMapFragment.this);
+        mGoogleMap.setOnMapLoadedCallback(ParkingMapFragment.this);
+
+        mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
+
     }
 }

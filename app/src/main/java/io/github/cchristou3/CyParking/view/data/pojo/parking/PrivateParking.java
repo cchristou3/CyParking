@@ -54,7 +54,8 @@ public class PrivateParking extends Parking {
     }  //  no-argument constructor to be used by GSON
 
     public PrivateParking(HashMap<String, Double> coordinates, int parkingID, int capacity, int availableSpaces, int capacityForDisabled, int availableSpacesForDisabled, String openingHours, ArrayList<Integer> pricingList) {
-        super(coordinates, parkingID);
+        this.coordinates = coordinates;
+        this.parkingID = parkingID;
         this.capacity = capacity;
         this.availableSpaces = availableSpaces;
         this.capacityForDisabled = capacityForDisabled;

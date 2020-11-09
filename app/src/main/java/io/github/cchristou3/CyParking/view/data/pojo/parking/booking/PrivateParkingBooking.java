@@ -52,7 +52,8 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
 
 
     public PrivateParkingBooking(HashMap<String, Double> coordinates, int parkingID, String parkingOperatorID, String parkingName, String userID, String username, Date dateOfBooking, String startingTime, String endingTime, double price, boolean completed) {
-        super(coordinates, parkingID);
+        this.coordinates = coordinates;
+        this.parkingID = parkingID;
         this.parkingOperatorID = parkingOperatorID;
         this.parkingName = parkingName;
         this.userID = userID;
@@ -65,7 +66,8 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
     }
 
     public PrivateParkingBooking(HashMap<String, Double> coordinates, int parkingID, String parkingOperatorID, String parkingName, String userID, String username, Date dateOfBooking, String startingTime, String endingTime, double price) {
-        super(coordinates, parkingID);
+        this.coordinates = coordinates;
+        this.parkingID = parkingID;
         this.parkingOperatorID = parkingOperatorID;
         this.parkingName = parkingName;
         this.userID = userID;
@@ -93,13 +95,12 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
     @Override
     public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof PrivateParkingBooking)) return false;
-        PrivateParkingBooking booking = (PrivateParkingBooking) obj;
-        return this.generateUniqueId().equals(booking.generateUniqueId());
+        return this.generateUniqueId().equals(((PrivateParkingBooking) obj).generateUniqueId());
     }
 
     public void updateContents(PrivateParkingBooking privateParkingBooking) {
-        setCoordinates(privateParkingBooking.getCoordinates());
-        setParkingID(privateParkingBooking.getParkingID());
+        this.coordinates = privateParkingBooking.coordinates;
+        this.parkingID = privateParkingBooking.parkingID;
         this.parkingOperatorID = privateParkingBooking.parkingOperatorID;
         this.parkingName = privateParkingBooking.parkingName;
         this.userID = privateParkingBooking.userID;

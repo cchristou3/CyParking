@@ -30,7 +30,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
 
     private static final long DURATION = 500;
     private static View.OnClickListener mOnItemClickListener;
-    private List<PrivateParkingBooking> mDataset;
+    private final List<PrivateParkingBooking> mDataset;
     private boolean onAttach = true;
 
     public BookingAdapter(List<PrivateParkingBooking> mDataset) {
@@ -46,11 +46,9 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
     @Override
     public BookingAdapter.MyViewHolder onCreateViewHolder(@NotNull ViewGroup parent,
                                                           int viewType) {
-        // create a new view
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.booking_item, parent, false);
-
-        return new MyViewHolder(v);
+        // create and return a new view
+        return new MyViewHolder(LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.booking_item, parent, false));
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -60,15 +58,14 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
         // - replace the contents of the view with that element
         setAnimation(holder.itemView, position);
 
-        final PrivateParkingBooking privateParkingBooking = mDataset.get(position);
-        final String price = Double.toString(privateParkingBooking.getPrice());
+        final String price = Double.toString(mDataset.get(position).getPrice());
         final CharSequence date = "Date: " + DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
-                .format(privateParkingBooking.getDateOfBooking());
+                .format(mDataset.get(position).getDateOfBooking());
+        final String time = "Time: " + mDataset.get(position).getStartingTime()
+                .concat(" - ").concat(mDataset.get(position).getEndingTime());
+        final String status = "Status: " + (mDataset.get(position).isCompleted() ? "Completed" : "Pending");
+        final String parkingName = "Parking: " + mDataset.get(position).getParkingName();
 
-        final String time = "Time: " + privateParkingBooking.getStartingTime()
-                .concat(" - ").concat(privateParkingBooking.getEndingTime());
-        final String status = "Status: " + (privateParkingBooking.isCompleted() ? "Completed" : "Pending");
-        final String parkingName = "Parking: " + privateParkingBooking.getParkingName();
         holder.status.setText(status);
         holder.price.setText(price);
         holder.parking_name.setText(parkingName);

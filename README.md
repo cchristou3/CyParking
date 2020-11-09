@@ -35,6 +35,7 @@
 ## Table of Contents
 
 * [About the Project](#about-the-project)
+  * [Features](#features)
   * [Built With](#built-with)
 * [Getting Started](#getting-started)
   * [Prerequisites](#prerequisites)
@@ -64,6 +65,14 @@ Here's why:
 * You should element DRY principles to the rest of your life :smile:
 
 Of course, the application cannot be deployed yet. So I'll be adding more features in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue.
+
+### Features
+The application has the following features so far:
+* Book a parking slot for a specific period [User]
+* Cancel a booking [User]
+* View all available private parking locations within a range [User]
+* View for each locations its available parking spaces [User]
+* Sign in/up [Everyone]
 
 A list of commonly used resources that I find helpful are listed in the acknowledgements.
 

@@ -16,7 +16,7 @@ exports.filterLocations = functions.https.onRequest(async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     if (req.method === 'GET') {
         if (!req.query.latitude || !req.query.longitude) { // if at least of of the parameters is empty
-            return res.status(404).send('Not Found!');
+            return res.status(422).send('Missing one or both parameters: latitude, longitude');
         }
         const userLatitude = req.query.latitude;
         const userLongitude = req.query.longitude;

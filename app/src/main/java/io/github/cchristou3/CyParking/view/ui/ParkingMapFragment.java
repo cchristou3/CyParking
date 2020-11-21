@@ -55,7 +55,7 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParking;
 import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParkingResultSet;
 import io.github.cchristou3.CyParking.view.data.repository.ParkingRepository;
-import io.github.cchristou3.CyParking.view.utility.Utility;
+import io.github.cchristou3.CyParking.view.utilities.Utility;
 
 /**
  * Purpose: <p>View all nearby parking.

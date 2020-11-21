@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 import io.github.cchristou3.CyParking.view.data.pojo.parking.Parking;
-import io.github.cchristou3.CyParking.view.utility.ShaUtility;
+import io.github.cchristou3.CyParking.view.utilities.ShaUtility;
 
 /**
  * Purpose: <p>POJO to be used to transfer and receive data

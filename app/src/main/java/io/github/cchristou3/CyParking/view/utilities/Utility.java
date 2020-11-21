@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.view.utility;
+package io.github.cchristou3.CyParking.view.utilities;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

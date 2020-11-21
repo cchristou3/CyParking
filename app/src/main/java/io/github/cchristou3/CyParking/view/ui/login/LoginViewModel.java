@@ -25,7 +25,8 @@ public class LoginViewModel extends ViewModel {
     private final MutableLiveData<String> emailState = new MutableLiveData<>();
     private final MutableLiveData<String> passwordState = new MutableLiveData<>();
     private final LoginRepository loginRepository;
-    private boolean isUserSigningIn = true; // First fragment which appears to the user is the "sign in" tab
+    // First fragment which appears to the user is the "sign in" tab
+    private final MutableLiveData<Boolean> isUserInSigningInTab = new MutableLiveData<>(true);
 
     LoginViewModel(LoginRepository loginRepository) {
         this.loginRepository = loginRepository;
@@ -75,7 +76,7 @@ public class LoginViewModel extends ViewModel {
             loginFormState.setValue(new LoginFormState(R.string.invalid_username, null, null));
         } else if (!isPasswordValid(password)) {
             loginFormState.setValue(new LoginFormState(null, R.string.invalid_password, null));
-        } else if (!AreAnyRolesSelected(isUser, isOperator) && !isUserSigningIn) { // Checks only if the user is registering
+        } else if (!AreAnyRolesSelected(isUser, isOperator) && !isUserInSigningInTab.getValue()) { // Checks only if the user is registering
             loginFormState.setValue(new LoginFormState(null, null, R.string.invalid_role_choice));
         } else {
             loginFormState.setValue(new LoginFormState(true));
@@ -106,7 +107,7 @@ public class LoginViewModel extends ViewModel {
     }
 
     /**
-     * A placeholder password validation check
+     * A password validation check
      *
      * @param password The password of the user.
      * @return true if it passes the criteria.
@@ -119,12 +120,16 @@ public class LoginViewModel extends ViewModel {
      * Getters & Setters
      */
 
+    public MutableLiveData<Boolean> getTabState() {
+        return isUserInSigningInTab;
+    }
+
     public boolean isUserSigningIn() {
-        return isUserSigningIn;
+        return isUserInSigningInTab.getValue();
     }
 
     public void setUserSigningIn(boolean userSigningIn) {
-        isUserSigningIn = userSigningIn;
+        isUserInSigningInTab.setValue(userSigningIn);
     }
 
     public MutableLiveData<String> getEmailState() {
@@ -135,7 +140,7 @@ public class LoginViewModel extends ViewModel {
         return passwordState;
     }
 
-    LiveData<LoginFormState> getLoginFormState() {
+    MutableLiveData<LoginFormState> getLoginFormState() {
         return loginFormState;
     }
 

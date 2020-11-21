@@ -38,7 +38,7 @@ import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParking;
 import io.github.cchristou3.CyParking.view.data.pojo.parking.PrivateParkingResultSet;
 import io.github.cchristou3.CyParking.view.data.pojo.parking.booking.PrivateParkingBooking;
 import io.github.cchristou3.CyParking.view.data.repository.ParkingRepository;
-import io.github.cchristou3.CyParking.view.utility.Utility;
+import io.github.cchristou3.CyParking.view.utilities.Utility;
 
 import static io.github.cchristou3.CyParking.view.ui.ParkingMapFragment.TAG;
 
@@ -116,7 +116,6 @@ public class ParkingBookingFragment extends Fragment {
         // Instantiate a view model object for the activity
         mParkingBookingViewModel =
                 new ViewModelProvider(this).get(ParkingBookingViewModel.class);
-
 
         Button startingTimePickerButton = view.findViewById(R.id.fragment_parking_booking_btn_starting_time_button);
         TextView endingTimeTextView = view.findViewById(R.id.fragment_parking_booking_txt_ending_time);

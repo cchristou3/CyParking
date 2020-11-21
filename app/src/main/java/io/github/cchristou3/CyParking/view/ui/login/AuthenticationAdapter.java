@@ -16,8 +16,8 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 public class AuthenticationAdapter extends FragmentStateAdapter {
 
     // Adapter's constants
-    public static final short LOGIN_PAGE = 0;
-    public static final short REGISTRATION_PAGE = 1;
+    public static final short LOGIN_TAB = 0;
+    public static final short REGISTRATION_TAB = 1;
 
     /**
      * AuthenticationAdapter's public Constructor
@@ -37,8 +37,8 @@ public class AuthenticationAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         return (position == 0) ?
-                LoginFragment.newInstance(LOGIN_PAGE) :
-                LoginFragment.newInstance(REGISTRATION_PAGE);
+                LoginFragment.newInstance(LOGIN_TAB) :
+                LoginFragment.newInstance(REGISTRATION_TAB);
     }
 
     /**

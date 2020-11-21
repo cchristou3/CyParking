@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import io.github.cchristou3.CyParking.view.utility.ShaUtility;
+import io.github.cchristou3.CyParking.view.utilities.ShaUtility;
 
 /**
  * Purpose: <p>POJO to be used to transfer and receive data

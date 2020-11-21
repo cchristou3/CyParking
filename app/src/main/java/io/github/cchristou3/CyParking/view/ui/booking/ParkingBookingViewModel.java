@@ -8,7 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import io.github.cchristou3.CyParking.view.utility.Utility;
+import io.github.cchristou3.CyParking.view.utilities.Utility;
 
 /**
  * <p>A ViewModel implementation, adopted to the ParkingBookingFragment fragment.

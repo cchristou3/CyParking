@@ -1,8 +1,6 @@
 package io.github.cchristou3.CyParking.view.ui.login;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -35,7 +33,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.view.MainHostActivity;
 import io.github.cchristou3.CyParking.view.ui.support.DescriptionDialog;
 
 /**
@@ -55,8 +52,8 @@ public class LoginFragment extends Fragment {
     // Fragment variables
     private LoginViewModel loginViewModel;
     private short pageType;
-    private EditText usernameEditText;
-    private EditText passwordEditText;
+    private CheckBox userCheckbox;
+    private CheckBox operatorCheckbox;
 
     public LoginFragment() { /* Required empty public constructor */ }
 
@@ -149,12 +146,11 @@ public class LoginFragment extends Fragment {
      */
     private void initFragment(@NotNull View view) {
         // Get references to the UI elements
-        usernameEditText = view.findViewById(R.id.fragment_login_et_email);
-        passwordEditText = view.findViewById(R.id.fragment_login_et_password);
+        final EditText emailEditText = view.findViewById(R.id.fragment_login_et_email);
+        final EditText passwordEditText = view.findViewById(R.id.fragment_login_et_password);
+
         final Button loginButton = view.findViewById(R.id.fragment_login_btn_auth_button);
         final ProgressBar loadingProgressBar = view.findViewById(R.id.fragment_login_pb_loading);
-        final CheckBox userCheckbox = view.findViewById(R.id.fragment_login_cb_role_one_checkbox);
-        final CheckBox operatorCheckbox = view.findViewById(R.id.fragment_login_cb_role_two_checkbox);
 
         if (loginViewModel != null) {
             // Add an observer to the login form state
@@ -162,18 +158,33 @@ public class LoginFragment extends Fragment {
                 if (loginFormState == null) return;
                 loginButton.setEnabled(loginFormState.isDataValid());
 
+                // If there is an error, show it for the specific UI field.
+                // If there was an error before, and it got resolved then hide the error.
                 if (loginFormState.getUsernameError() != null) {
-                    usernameEditText.setError(getString(loginFormState.getUsernameError()));
+                    emailEditText.setError(getString(loginFormState.getUsernameError()));
+                } else {
+                    if (emailEditText.getError() != null)
+                        emailEditText.setError(null, null);
                 }
                 if (loginFormState.getPasswordError() != null) {
                     passwordEditText.setError(getString(loginFormState.getPasswordError()));
-                }
-                if (loginFormState.getRoleError() != null) {
-                    userCheckbox.setError(getString(loginFormState.getRoleError()));
-                    operatorCheckbox.setError(getString(loginFormState.getRoleError()));
                 } else {
-                    userCheckbox.setError(null, null);
-                    operatorCheckbox.setError(null, null);
+                    if (passwordEditText.getError() != null)
+                        passwordEditText.setError(null, null);
+                }
+                if (!loginViewModel.isUserSigningIn()) {// User signs up
+                    // Get references to the UI checkboxes if they have not been accessed previously
+                    if (userCheckbox == null || operatorCheckbox == null) {
+                        userCheckbox = view.findViewById(R.id.fragment_login_cb_role_one_checkbox);
+                        operatorCheckbox = view.findViewById(R.id.fragment_login_cb_role_two_checkbox);
+                    }
+                    if (loginFormState.getRoleError() != null) {
+                        userCheckbox.setError(getString(loginFormState.getRoleError()));
+                        operatorCheckbox.setError(getString(loginFormState.getRoleError()));
+                    } else {
+                        userCheckbox.setError(null, null);
+                        operatorCheckbox.setError(null, null);
+                    }
                 }
             });
 
@@ -194,20 +205,22 @@ public class LoginFragment extends Fragment {
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString(), userCheckbox.isChecked(), operatorCheckbox.isChecked());
-
+                    loginViewModel.loginDataChanged(emailEditText.getText().toString(),
+                            passwordEditText.getText().toString(),
+                            (userCheckbox != null && userCheckbox.isChecked()),
+                            (operatorCheckbox != null && operatorCheckbox.isChecked()));
                 }
             };
+
             // Add text listeners to both the user name and the password fields.
-            usernameEditText.addTextChangedListener(afterTextChangedListener);
+            emailEditText.addTextChangedListener(afterTextChangedListener);
             passwordEditText.addTextChangedListener(afterTextChangedListener);
 
-            View.OnClickListener onClickListener = null;
-            int buttonTextResId = 0;
+            View.OnClickListener onClickListener;
+            int buttonTextResId;
 
             switch (pageType) {
-                case AuthenticationAdapter.LOGIN_PAGE:
+                case AuthenticationAdapter.LOGIN_TAB:
                     // Set up the UI and listeners for logging in
                     // Hide unnecessary UI elements
                     hideRoleArea(view);
@@ -215,31 +228,38 @@ public class LoginFragment extends Fragment {
                     // Pressing the "enter" on the keyboard will automatically trigger the login method
                     passwordEditText.setOnEditorActionListener((v, actionId, event) -> {
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            loginViewModel.login(usernameEditText.getText().toString(),
-                                    passwordEditText.getText().toString());
+                            if (loginViewModel.getLoginFormState().getValue().isDataValid())
+                                loginViewModel.login(emailEditText.getText().toString(),
+                                        passwordEditText.getText().toString());
                         }
                         return false;
                     });
                     onClickListener = v -> { // Set corresponding listener for the login button
                         loadingProgressBar.setVisibility(View.VISIBLE);
-                        loginViewModel.login(usernameEditText.getText().toString(),
+                        loginViewModel.login(emailEditText.getText().toString(),
                                 passwordEditText.getText().toString());
                     };
                     break;
-                case AuthenticationAdapter.REGISTRATION_PAGE:
+                case AuthenticationAdapter.REGISTRATION_TAB:
                     // User is registering
                     // Set up the UI and listeners for registration
                     buttonTextResId = R.string.sign_up; // Set corresponding id string
+                    // Get references of the checkboxes from the layout
+                    if (userCheckbox == null || operatorCheckbox == null) {
+                        userCheckbox = view.findViewById(R.id.fragment_login_cb_role_one_checkbox);
+                        operatorCheckbox = view.findViewById(R.id.fragment_login_cb_role_two_checkbox);
+                    }
                     // Add listeners to the checkboxes
                     CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (buttonView, isChecked) ->
-                            loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
+                            loginViewModel.loginDataChanged(emailEditText.getText().toString(),
                                     passwordEditText.getText().toString(), userCheckbox.isChecked(), operatorCheckbox.isChecked());
                     userCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
                     operatorCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
                     onClickListener = v -> {  // Set corresponding listener for the sign up button
                         loadingProgressBar.setVisibility(View.VISIBLE);
-                        loginViewModel.register(usernameEditText.getText().toString(),
-                                passwordEditText.getText().toString(), userCheckbox.isChecked(), operatorCheckbox.isChecked(), requireContext());
+                        loginViewModel.register(emailEditText.getText().toString(),
+                                passwordEditText.getText().toString(),
+                                userCheckbox.isChecked(), operatorCheckbox.isChecked(), requireContext());
                     };
                     final Button roleOneDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_one_button);
                     final Button roleTwoDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_two_button);
@@ -257,6 +277,18 @@ public class LoginFragment extends Fragment {
             // Set the button's onClick listener
             loginButton.setOnClickListener(onClickListener);
         }
+
+        loginViewModel.getTabState().observe(getViewLifecycleOwner(), state -> {
+            final String emailText = loginViewModel.getEmailState().getValue();
+            final String passwordText = loginViewModel.getPasswordState().getValue();
+            emailEditText.setText(emailText);
+            passwordEditText.setText(passwordText);
+            // Call loginDataChanged to refresh the form's error messages of the next tab
+            loginViewModel.loginDataChanged(loginViewModel.getEmailState().getValue(),
+                    loginViewModel.getPasswordState().getValue(),
+                    (userCheckbox != null && userCheckbox.isChecked()),
+                    (operatorCheckbox != null && operatorCheckbox.isChecked()));
+        });
     }
 
     /**
@@ -291,33 +323,9 @@ public class LoginFragment extends Fragment {
         }
     }
 
-    /**
-     * Callback invoked after onStart has returned.
-     * Sets the EditTexts' of this tab with the previous tab's username and password values if there are any.
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (loginViewModel == null && !isDetached()) {
-            new AlertDialog.Builder(getContext()) // create an alert dialog builder
-                    .setTitle("Oops!")
-                    .setMessage("Something went wrong with the application. Would you like to restart it?")
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setPositiveButton(android.R.string.yes, (dialog, which) -> {
-                        /* Restart the applicatiion */
-                        requireActivity().finish();
-                        startActivity(new Intent(getActivity(), MainHostActivity.class));
-                    }).setNegativeButton(android.R.string.no, (dialog, which) -> requireActivity().finish()
-            ).show();
-
-        } else {
-            usernameEditText.setText(loginViewModel.getEmailState().getValue());
-            passwordEditText.setText(loginViewModel.getPasswordState().getValue());
-        }
-    }
 
     /**
-     * Callback invoked when we swap tabs.
+     * Callback invoked of the current fragment when we swap tabs.
      * The LiveData objects of the email and password get updated with the current value
      * of their corresponding EditTexts.
      * Further, the user signing in state gets reversed. (From true to false and vice versa)
@@ -325,8 +333,6 @@ public class LoginFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        loginViewModel.getEmailState().setValue(usernameEditText.getText().toString());
-        loginViewModel.getPasswordState().setValue(passwordEditText.getText().toString());
         // Reverse the ViewModel's isUserSigningIn attribute as we move to the other tab
         loginViewModel.setUserSigningIn(!loginViewModel.isUserSigningIn());
     }

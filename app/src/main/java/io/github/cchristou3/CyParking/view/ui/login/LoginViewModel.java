@@ -8,6 +8,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.view.data.pojo.login.LoginFormState;
+import io.github.cchristou3.CyParking.view.data.pojo.login.LoginResult;
 import io.github.cchristou3.CyParking.view.data.repository.LoginRepository;
 
 /**
@@ -62,25 +64,15 @@ public class LoginViewModel extends ViewModel {
     }
 
     /**
-     * Validates all elements our our login / registration form.
+     * A placeholder username validation check.
      *
-     * @param username   The user name of the user.
-     * @param password   The password of the user.
-     * @param isUser     true if the user selected the checkbox which corresponds to the user. Otherwise, false.
-     * @param isOperator true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
+     * @param username The username of the user.
+     * @return true if it passes the criteria.
      */
-    public void loginDataChanged(String username, String password, boolean isUser, boolean isOperator) {
-        passwordState.setValue(password);
-        emailState.setValue(username);
-        if (!isUserNameValid(username)) {
-            loginFormState.setValue(new LoginFormState(R.string.invalid_username, null, null));
-        } else if (!isPasswordValid(password)) {
-            loginFormState.setValue(new LoginFormState(null, R.string.invalid_password, null));
-        } else if (!AreAnyRolesSelected(isUser, isOperator) && !isUserInSigningInTab.getValue()) { // Checks only if the user is registering
-            loginFormState.setValue(new LoginFormState(null, null, R.string.invalid_role_choice));
-        } else {
-            loginFormState.setValue(new LoginFormState(true));
-        }
+    public static boolean isEmailValid(String username) {
+        if (username == null || username.trim().isEmpty()) return false;
+
+        return Patterns.EMAIL_ADDRESS.matcher(username).matches();
     }
 
     /**
@@ -95,25 +87,35 @@ public class LoginViewModel extends ViewModel {
     }
 
     /**
-     * A placeholder username validation check.
-     *
-     * @param username The username of the user.
-     * @return true if it passes the criteria.
-     */
-    private boolean isUserNameValid(String username) {
-        if (username == null || username.trim().isEmpty()) return false;
-
-        return Patterns.EMAIL_ADDRESS.matcher(username).matches();
-    }
-
-    /**
      * A password validation check
      *
      * @param password The password of the user.
      * @return true if it passes the criteria.
      */
-    private boolean isPasswordValid(String password) {
+    public static boolean isPasswordValid(String password) {
         return password != null && password.trim().length() > 5;
+    }
+
+    /**
+     * Validates all elements our our login / registration form.
+     *
+     * @param username   The user name of the user.
+     * @param password   The password of the user.
+     * @param isUser     true if the user selected the checkbox which corresponds to the user. Otherwise, false.
+     * @param isOperator true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
+     */
+    public void loginDataChanged(String username, String password, boolean isUser, boolean isOperator) {
+        passwordState.setValue(password);
+        emailState.setValue(username);
+        if (!isEmailValid(username)) {
+            loginFormState.setValue(new LoginFormState(R.string.invalid_username, null, null));
+        } else if (!isPasswordValid(password)) {
+            loginFormState.setValue(new LoginFormState(null, R.string.invalid_password, null));
+        } else if (!AreAnyRolesSelected(isUser, isOperator) && !isUserInSigningInTab.getValue()) { // Checks only if the user is registering
+            loginFormState.setValue(new LoginFormState(null, null, R.string.invalid_role_choice));
+        } else {
+            loginFormState.setValue(new LoginFormState(true));
+        }
     }
 
     /**

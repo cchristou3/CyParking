@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.view.ui.login;
+package io.github.cchristou3.CyParking.view.data.pojo.login;
 
 import androidx.annotation.Nullable;
 
@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
  * @author Charalambos Christou
  * @version 1.0 1/11/20
  */
-class LoginFormState {
+public class LoginFormState {
     @Nullable
     private final Integer usernameError;
     @Nullable
@@ -25,7 +25,7 @@ class LoginFormState {
      * @param passwordError The id of the error related to the password.
      * @param roleError     The id of the error related to the role.
      */
-    LoginFormState(@Nullable Integer usernameError, @Nullable Integer passwordError, @Nullable Integer roleError) {
+    public LoginFormState(@Nullable Integer usernameError, @Nullable Integer passwordError, @Nullable Integer roleError) {
         this.usernameError = usernameError;
         this.passwordError = passwordError;
         this.roleError = roleError;
@@ -37,7 +37,7 @@ class LoginFormState {
      *
      * @param isDataValid true of the data in the form is valid
      */
-    LoginFormState(boolean isDataValid) {
+    public LoginFormState(boolean isDataValid) {
         this.usernameError = null;
         this.passwordError = null;
         this.roleError = null;
@@ -48,16 +48,16 @@ class LoginFormState {
      * Getters & Setters
      */
     @Nullable
-    Integer getUsernameError() {
+    public Integer getUsernameError() {
         return usernameError;
     }
 
     @Nullable
-    Integer getPasswordError() {
+    public Integer getPasswordError() {
         return passwordError;
     }
 
-    boolean isDataValid() {
+    public boolean isDataValid() {
         return isDataValid;
     }
 

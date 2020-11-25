@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.view.ui.login;
+package io.github.cchristou3.CyParking.view.data.pojo.login;
 
 import androidx.annotation.Nullable;
 
@@ -23,12 +23,12 @@ public class LoginResult {
     }
 
     @Nullable
-    LoggedInUserView getSuccess() {
+    public LoggedInUserView getSuccess() {
         return success;
     }
 
     @Nullable
-    String getError() {
+    public String getError() {
         return error;
     }
 }

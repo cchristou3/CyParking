@@ -198,6 +198,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
         mListenerRegistration = retrieveDataAndListenForChanges();
     }
 
+    @NotNull
     private ListenerRegistration retrieveDataAndListenForChanges() {
         return FirebaseFirestore.getInstance().collection("private_parking").addSnapshotListener((value, error) -> {
             // ref: https://firebase.google.com/docs/firestore/query-data/listen#view_changes_between_snapshots

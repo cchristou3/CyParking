@@ -60,18 +60,23 @@ public class DescriptionDialog extends DialogFragment {
      */
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        final View root = inflater.inflate(R.layout.dialog_role_description, container, false);
-        getDialog().setTitle(mTitle);
-        ((TextView) root.findViewById(R.id.dialog_role_description_txt_description)).setText(mDescription);
-        ((Button) root.findViewById(R.id.dialog_role_description_btn_dismiss)).setOnClickListener((View.OnClickListener) v -> dismiss());
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.dialog_role_description, container, false);
+    }
+
+    /**
+     * @param view               The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     */
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        requireDialog().setTitle(mTitle);
+        ((TextView) view.findViewById(R.id.dialog_role_description_txt_description)).setText(mDescription);
+        view.findViewById(R.id.dialog_role_description_btn_dismiss).setOnClickListener(v -> dismiss());
 
         if (mNightModeFlags != Configuration.UI_MODE_NIGHT_YES)
-            ((Button) root.findViewById(R.id.dialog_role_description_btn_dismiss)).setTextColor(getResources().getColor(R.color.black));
-
-        return root;
+            ((Button) view.findViewById(R.id.dialog_role_description_btn_dismiss)).setTextColor(getResources().getColor(R.color.black));
     }
 
     /**

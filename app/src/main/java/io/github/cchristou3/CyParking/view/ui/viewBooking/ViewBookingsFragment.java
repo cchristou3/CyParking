@@ -94,6 +94,7 @@ public class ViewBookingsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         // Check whether the user is logged in
+        // TODO: If not show appropriate feedback
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             // Show placeholder layout and hide the filter buttons
             mShimmerViewContainer.startShimmerAnimation();

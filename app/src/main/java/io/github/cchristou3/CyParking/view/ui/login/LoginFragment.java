@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +34,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.view.data.pojo.login.LoggedInUserView;
 import io.github.cchristou3.CyParking.view.ui.support.DescriptionDialog;
 
 /**
@@ -96,23 +98,7 @@ public class LoginFragment extends Fragment {
      */
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        // If there is an event send of type LoginViewModel
-        // then retrieve it and initialize this fragment's ViewModel
-        try {
-            loginViewModel = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(LoginViewModel.class));
-        } catch (ClassCastException | NullPointerException e) {
-            //Log.e(TAG, "onCreateView: ", e);
-            // Otherwise, initialize this fragment's ViewModel
-            // and send it to the sticky event bucket.
-            initializeAndPostViewModel();
-        }
-        // Result: all fragments which retrieve events of type LoginViewModel
-        // share the same LoginViewModel instance.
-        // In this case, both Login and Register fragments share the same instance of LoginViewModel.
-
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_login, container, false);
     }
 
@@ -136,6 +122,22 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        // If there is an event send of type LoginViewModel
+        // then retrieve it and initialize this fragment's ViewModel
+        try {
+            loginViewModel = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(LoginViewModel.class));
+        } catch (ClassCastException | NullPointerException e) {
+            //Log.e(TAG, "onCreateView: ", e);
+            // Otherwise, initialize this fragment's ViewModel
+            // and send it to the sticky event bucket.
+            // TODO:  https://developer.android.com/guide/fragments/communicate#fragments see caution text
+            //  Potential refactor
+            initializeAndPostViewModel();
+        }
+        // Result: all fragments which retrieve events of type LoginViewModel
+        // share the same LoginViewModel instance.
+        // In this case, both Login and Register fragments share the same instance of LoginViewModel.
+
         initFragment(view);
     }
 
@@ -323,7 +325,6 @@ public class LoginFragment extends Fragment {
         }
     }
 
-
     /**
      * Callback invoked of the current fragment when we swap tabs.
      * The LiveData objects of the email and password get updated with the current value
@@ -361,6 +362,8 @@ public class LoginFragment extends Fragment {
         // TODO : initiate successful logged in experience
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
+            // Go to previous screen
+            Navigation.findNavController(requireParentFragment().requireView()).popBackStack();
         }
     }
 

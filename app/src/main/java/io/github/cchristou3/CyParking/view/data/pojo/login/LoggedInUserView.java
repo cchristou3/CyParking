@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.view.ui.login;
+package io.github.cchristou3.CyParking.view.data.pojo.login;
 
 /**
  * Purpose:<p> Class exposing authenticated user details to the UI.</p>

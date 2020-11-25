@@ -16,9 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.github.cchristou3.CyParking.view.data.pojo.login.LoggedInUserView;
+import io.github.cchristou3.CyParking.view.data.pojo.login.LoginResult;
 import io.github.cchristou3.CyParking.view.data.pojo.user.LoggedInUser;
-import io.github.cchristou3.CyParking.view.ui.login.LoggedInUserView;
-import io.github.cchristou3.CyParking.view.ui.login.LoginResult;
 
 /**
  * Purpose: <p>Class that handles authentication w/ login credentials and retrieves user information.
@@ -83,7 +83,7 @@ public class LoginRepository {
                 setLoggedInUser(loggedInUser);
 
                 // Save the user's roles locally using SharedPreferences
-                // TODO: also add them to the database
+                // TODO: also add them to the database / Preferences
                 // If user did not pick any of the roles and he passed the data validation
                 // it means that he must be logging in. Otherwise, he must be registering.
                 if (isUser || isOperator) { // User is registering

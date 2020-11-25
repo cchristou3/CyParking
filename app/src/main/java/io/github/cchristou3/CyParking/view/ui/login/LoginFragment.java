@@ -26,11 +26,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import io.github.cchristou3.CyParking.R;
@@ -103,16 +101,6 @@ public class LoginFragment extends Fragment {
     }
 
     /**
-     * Initialize the fragment's LoginViewModel and Post it as an event for future fragments
-     * to obtain it.
-     */
-    public void initializeAndPostViewModel() {
-        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
-                .get(LoginViewModel.class);
-        EventBus.getDefault().postSticky(loginViewModel);
-    }
-
-    /**
      * Invoked at the completion of onCreateView. Initializes fragment's ViewModel.
      * Lastly, it attaches a listener to our UI button
      *
@@ -122,22 +110,14 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // If there is an event send of type LoginViewModel
-        // then retrieve it and initialize this fragment's ViewModel
         try {
-            loginViewModel = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(LoginViewModel.class));
-        } catch (ClassCastException | NullPointerException e) {
-            //Log.e(TAG, "onCreateView: ", e);
-            // Otherwise, initialize this fragment's ViewModel
-            // and send it to the sticky event bucket.
-            // TODO:  https://developer.android.com/guide/fragments/communicate#fragments see caution text
-            //  Potential refactor
-            initializeAndPostViewModel();
+            // By passing the parent (AuthenticationFragment)'s ViewModelStoreOwner
+            // Both tabs share the same LoginViewModel instance
+            loginViewModel = new ViewModelProvider(requireParentFragment(), new LoginViewModelFactory())
+                    .get(LoginViewModel.class);
+        } catch (IllegalStateException e) {
+            Toast.makeText(getContext(), "Failed to instantiate the fragment's LoginViewModel object", Toast.LENGTH_SHORT).show();
         }
-        // Result: all fragments which retrieve events of type LoginViewModel
-        // share the same LoginViewModel instance.
-        // In this case, both Login and Register fragments share the same instance of LoginViewModel.
-
         initFragment(view);
     }
 

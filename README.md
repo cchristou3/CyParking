@@ -178,7 +178,7 @@ Project Link: [https://github.com/cchristou3/CyParking](https://github.com/cchri
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/forks/cchristou3/CyParking
+[contributors-shield]: https://img.shields.io/badge/contributors-2-blue
 [contributors-url]: https://github.com/cchristou3/CyParking/graphs/contributors
 
 [forks-shield]: https://img.shields.io/github/forks/cchristou3/CyParking

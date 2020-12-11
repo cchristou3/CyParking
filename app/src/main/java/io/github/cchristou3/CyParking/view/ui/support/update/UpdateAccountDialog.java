@@ -1,9 +1,10 @@
 package io.github.cchristou3.CyParking.view.ui.support.update;
 
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,18 +19,19 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textview.MaterialTextView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 
-import static io.github.cchristou3.CyParking.view.ui.ParkingMapFragment.TAG;
 import static io.github.cchristou3.CyParking.view.ui.support.DescriptionDialog.getStyleConfiguration;
 
 // TODO: Add log out button. Test update password functionality
+
 /**
- * Purpose: TODO: Add further comments
+ * Purpose: Allows the users to update one of their attributes.
  *
  * @author Charalambos Christou
  * @version 2.0 11/12/20
@@ -66,6 +68,11 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         return dialog;
     }
 
+    /**
+     * Initializes the fragment with the specified arguments.
+     *
+     * @param savedInstanceState A bundle which contains info about previously stored data
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +81,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
             mUpdateViewModel = new ViewModelProvider(this, new UpdateViewModelFactory()).get(UpdateViewModel.class);
             mUpdateViewModel.getTitle().setValue(getArguments().getString(TITLE_KEY));
             mUpdateViewModel.getFieldText().setValue(getArguments().getString(FIELD_TO_BE_UPDATED_KEY));
-            mUpdateViewModel.getDialogState().setValue(getArguments().getShort(DIALOG_TYPE_KEY));
+            mUpdateViewModel.setDialogType(getArguments().getShort(DIALOG_TYPE_KEY));
             mUpdateViewModel.getUpdatedFieldText().setValue("");
         }
     }
@@ -105,18 +112,29 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         ((MaterialTextView) view
                 .findViewById(R.id.dialog_account_update_mtv_field)).setText(mUpdateViewModel.getFieldText().getValue());
 
-        // Initialize the UI's content
-        final TextInputEditText textInputEditText = view.findViewById(R.id.dialog_account_update_met_input);
-        setInputTypeTo(mUpdateViewModel.getDialogState().getValue(), textInputEditText);
-        final short mUpdateState = mUpdateViewModel.getDialogState().getValue();
-        textInputEditText.setHint("Enter new " +
-                ((mUpdateState == UPDATE_DISPLAY_NAME) ? "name" : (mUpdateState == UPDATE_EMAIL) ? "email" : "password") + "...");
-
         // Attach listeners to both buttons
         view.findViewById(R.id.dialog_account_update_mbtn_dismiss).setOnClickListener(v -> dismiss());
         final Button updateButton = view.findViewById(R.id.dialog_account_update_mbtn_update);
         updateButton.setOnClickListener(this);
 
+        // Initialize the UI's content
+        final TextInputEditText textInputEditText = view.findViewById(R.id.dialog_account_update_met_input);
+        setInputTypeTo(mUpdateViewModel.getDialogType(), textInputEditText);
+        final short mUpdateState = mUpdateViewModel.getDialogType();
+        textInputEditText.setHint("Enter new " +
+                ((mUpdateState == UPDATE_DISPLAY_NAME) ? "name" : (mUpdateState == UPDATE_EMAIL) ? "email" : "password") + "...");
+        textInputEditText.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* ignore */ }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) { /* ignore */ }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mUpdateViewModel.updateDataChanged(s.toString());
+            }
+        });
+
+        // Add observer to out form
         mUpdateViewModel.getUpdateFormState().observe(this, updateFormState -> {
             updateButton.setEnabled(updateFormState.isDataValid());
             if (updateFormState.getError() != null) {
@@ -131,6 +149,13 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         });
     }
 
+    /**
+     * Sets the input type of the specified TextInputEditText
+     * based on the specified numeric value (dialog type).
+     *
+     * @param dialogType        The type of the dialog
+     * @param textInputEditText A UI element of type TextInputEditText
+     */
     private void setInputTypeTo(@NotNull Short dialogType, TextInputEditText textInputEditText) {
         switch (dialogType) {
             case UpdateAccountDialog.UPDATE_PASSWORD:
@@ -152,36 +177,35 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      */
     @Override
     public void onClick(View v) {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+
+        // Access the field's info
         final String updatedField = ((TextInputEditText) requireView().findViewById(R.id.dialog_account_update_met_input))
                 .getText().toString();
+        // Update it and save a reference to its returning Task object
         Task<Void> updateTask = mUpdateViewModel.updateField(updatedField);
 
         if (updateTask != null) {
             updateTask.addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    short updateState = mUpdateViewModel.getDialogState().getValue();
-                    String actionItem = (updateState == UPDATE_DISPLAY_NAME) ? "name" : (updateState == UPDATE_EMAIL) ? "email" : "password";
+                if (task.isSuccessful()) { // if successful
+                    // Compose a message
+                    short updateState = mUpdateViewModel.getDialogType();
+                    final String actionItem =
+                            (updateState == UPDATE_DISPLAY_NAME) ? "name" : (updateState == UPDATE_EMAIL) ? "email" : "password";
                     final String toastMsg = "User " + actionItem + (task.isSuccessful() ? " updated." : "failed to update.");
+                    // And display it to the user
                     Toast.makeText(requireContext(), toastMsg, Toast.LENGTH_SHORT).show();
+                    // Hide the dialog
                     dismiss();
                 } else {
                     // https://firebase.google.com/docs/auth/android/manage-users#re-authenticate_a_user
                     // Re-authenticate the user automatically
                     if (task.getException() instanceof FirebaseAuthRecentLoginRequiredException) {
+                        // TODO: Test
                         mUpdateViewModel.reauthenticateUser(updatedField);
                     }
                 }
             });
         }
-    }
-
-    /**
-     * Called when the fragment is no longer in use.  This is called
-     * after {@link #onStop()} and before {@link #onDetach()}.
-     */
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy: Dialog destroyed!");
     }
 }

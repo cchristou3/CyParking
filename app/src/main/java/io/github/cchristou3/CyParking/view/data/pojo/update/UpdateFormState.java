@@ -2,6 +2,12 @@ package io.github.cchristou3.CyParking.view.data.pojo.update;
 
 import androidx.annotation.Nullable;
 
+/**
+ * Purpose: <p>Data validation state of the update credentials form.</p>
+ *
+ * @author Charalambos Christou
+ * @version 2.0 11/12/20
+ */
 public class UpdateFormState {
 
     @Nullable
@@ -29,6 +35,9 @@ public class UpdateFormState {
         this.isDataValid = isDataValid;
     }
 
+    /**
+     * Getters
+     */
     @Nullable
     public Integer getError() {
         return error;

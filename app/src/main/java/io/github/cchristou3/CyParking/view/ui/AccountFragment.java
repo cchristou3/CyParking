@@ -29,8 +29,9 @@ import io.github.cchristou3.CyParking.view.ui.support.update.UpdateAccountDialog
  */
 public class AccountFragment extends Fragment {
 
+    // Fragment's data members
+    private final String TAG = AccountFragment.this.getClass().getName();
     private UpdateAccountDialog mUpdateAccountDialog;
-
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -74,38 +75,40 @@ public class AccountFragment extends Fragment {
      * with an on click listener that instantiates a
      * dialog.
      *
-     * @param view       The user interface view
-     * @param buttonId   The id of the button
-     * @param field      The field that the user prompt to update
-     * @param title      The title of the dialog
-     * @param dialogType The type of the dialog
+     * @param view             The user interface view
+     * @param buttonId         The id of the button
+     * @param fieldToBeUpdated The field that the user prompt to update
+     * @param title            The title of the dialog
+     * @param dialogType       The type of the dialog
      */
-    private void setUpButtonListenerOf(@NotNull View view, @IdRes int buttonId, @StringRes int field, String title, short dialogType) {
+    private void setUpButtonListenerOf(
+            @NotNull View view, @IdRes int buttonId, @StringRes int fieldToBeUpdated, String title, short dialogType
+    ) {
         view.findViewById(buttonId)
                 .setOnClickListener(
-                        getButtonListener(field, title, dialogType));
+                        getButtonListener(fieldToBeUpdated, title, dialogType));
     }
 
     /**
      * Creates a new instance of View.OnClickListener. When triggered,
      * creates a dialog that displays info about the specified parameters.
      *
-     * @param field       A String Resource Id
-     * @param dialogTitle The title of the dialog
-     * @param updateState The kind of dialog
+     * @param fieldToBeUpdated A String Resource Id
+     * @param dialogTitle      The title of the dialog
+     * @param updateState      The kind of dialog
      * @return A View.OnClickListener instance
      */
-    public View.OnClickListener getButtonListener(@StringRes int field, String dialogTitle, short updateState) {
+    public View.OnClickListener getButtonListener(@StringRes int fieldToBeUpdated, String dialogTitle, short updateState) {
         return v -> {
             FragmentManager fm = isAdded() ? getParentFragmentManager() : null;
             if (fm != null) {
                 // Access the device's night mode configurations
                 int nightModeFlags = this.requireContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
                 mUpdateAccountDialog = UpdateAccountDialog.newInstance(dialogTitle,
-                        getResources().getString(field),
+                        getResources().getString(fieldToBeUpdated),
                         nightModeFlags,
                         updateState);
-                mUpdateAccountDialog.show(fm, "updateDialog");
+                mUpdateAccountDialog.show(fm, TAG);
             }
         };
     }

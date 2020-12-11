@@ -21,11 +21,13 @@ import android.widget.Toast;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -42,13 +44,13 @@ import io.github.cchristou3.CyParking.view.ui.support.DescriptionDialog;
  * Can be used for both logging in and signing up.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 07/11/20
+ * @version 2.0 11/12/20
  */
 public class LoginFragment extends Fragment {
 
     // Constant variables
     public static final String PAGE_TYPE_KEY = "PAGE_TYPE_KEY";
-    private final int[] resIdsForRoleArea = new int[]{R.id.fragment_login_txt_roles_header, R.id.fragment_login_txt_role_one_title, R.id.fragment_login_cb_role_one_checkbox, R.id.fragment_login_btn_dialog_one_button, R.id.fragment_login_txt_role_two_title, R.id.fragment_login_cb_role_two_checkbox, R.id.fragment_login_btn_dialog_two_button};
+    private final int[] resIdsForRoleArea = new int[]{R.id.fragment_login_txt_roles_header, R.id.fragment_login_txt_role_user_title, R.id.fragment_login_cb_role_user_checkbox, R.id.fragment_login_btn_dialog_user_button, R.id.fragment_login_txt_role_operator_title, R.id.fragment_login_cb_role_operator_checkbox, R.id.fragment_login_btn_dialog_operator_button};
     // Fragment variables
     private LoginViewModel loginViewModel;
     private short pageType;
@@ -121,6 +123,20 @@ public class LoginFragment extends Fragment {
         initFragment(view);
     }
 
+
+    /**
+     * Callback invoked of the current fragment when we swap tabs.
+     * The LiveData objects of the email and password get updated with the current value
+     * of their corresponding EditTexts.
+     * Further, the user signing in state gets reversed. (From true to false and vice versa)
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Reverse the ViewModel's isUserSigningIn attribute as we move to the other tab
+        loginViewModel.setUserSigningIn(!loginViewModel.isUserSigningIn());
+    }
+
     /**
      * Sets up the logic of the fragment
      *
@@ -157,8 +173,8 @@ public class LoginFragment extends Fragment {
                 if (!loginViewModel.isUserSigningIn()) {// User signs up
                     // Get references to the UI checkboxes if they have not been accessed previously
                     if (userCheckbox == null || operatorCheckbox == null) {
-                        userCheckbox = view.findViewById(R.id.fragment_login_cb_role_one_checkbox);
-                        operatorCheckbox = view.findViewById(R.id.fragment_login_cb_role_two_checkbox);
+                        userCheckbox = view.findViewById(R.id.fragment_login_cb_role_user_checkbox);
+                        operatorCheckbox = view.findViewById(R.id.fragment_login_cb_role_operator_checkbox);
                     }
                     if (loginFormState.getRoleError() != null) {
                         userCheckbox.setError(getString(loginFormState.getRoleError()));
@@ -228,8 +244,8 @@ public class LoginFragment extends Fragment {
                     buttonTextResId = R.string.sign_up; // Set corresponding id string
                     // Get references of the checkboxes from the layout
                     if (userCheckbox == null || operatorCheckbox == null) {
-                        userCheckbox = view.findViewById(R.id.fragment_login_cb_role_one_checkbox);
-                        operatorCheckbox = view.findViewById(R.id.fragment_login_cb_role_two_checkbox);
+                        userCheckbox = view.findViewById(R.id.fragment_login_cb_role_user_checkbox);
+                        operatorCheckbox = view.findViewById(R.id.fragment_login_cb_role_operator_checkbox);
                     }
                     // Add listeners to the checkboxes
                     CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (buttonView, isChecked) ->
@@ -243,16 +259,22 @@ public class LoginFragment extends Fragment {
                                 passwordEditText.getText().toString(),
                                 userCheckbox.isChecked(), operatorCheckbox.isChecked(), requireContext());
                     };
-                    final Button roleOneDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_one_button);
-                    final Button roleTwoDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_two_button);
+                    final Button roleUserDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_user_button);
+                    final Button roleOperatorDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_operator_button);
                     // Add listeners to the "description" buttons
-                    roleOneDescriptionButton.setOnClickListener(getRoleDescriptionOnClickListener(R.id.fragment_login_txt_role_one_title));
-                    roleTwoDescriptionButton.setOnClickListener(getRoleDescriptionOnClickListener(R.id.fragment_login_txt_role_two_title));
+                    roleUserDescriptionButton
+                            .setOnClickListener(
+                                    getRoleDescriptionOnClickListener(
+                                            R.id.fragment_login_txt_role_user_title, R.string.user_desc));
+                    roleOperatorDescriptionButton
+                            .setOnClickListener(
+                                    getRoleDescriptionOnClickListener(
+                                            R.id.fragment_login_txt_role_operator_title, R.string.op_desc));
                     break;
                 default:
-                    throw new IllegalStateException("The page type must be one of those:\n" +
-                            "LOGIN_PAGE\n" +
-                            "REGISTRATION_PAGE");
+                    throw new IllegalStateException("The page type must be one of those:\n"
+                            + "LOGIN_PAGE\n"
+                            + "REGISTRATION_PAGE");
             }
             // Set the button's text
             loginButton.setText(buttonTextResId);
@@ -276,10 +298,13 @@ public class LoginFragment extends Fragment {
     /**
      * Creates an instance of View.OnClickListener which creates a DialogFragment once triggered.
      *
-     * @param roleResId The id of a EditText element
+     * @param roleResId   The id of a EditText element
+     * @param description The resource id of a string
      * @return A View.OnClickListener instance
      */
-    private View.OnClickListener getRoleDescriptionOnClickListener(@IdRes Integer roleResId) {
+    @NotNull
+    @Contract(pure = true)
+    private View.OnClickListener getRoleDescriptionOnClickListener(@IdRes Integer roleResId, @StringRes final Integer description) {
         return v -> {
             FragmentManager fm = isAdded() ? getParentFragmentManager() : null;
             if (fm != null) {
@@ -287,7 +312,9 @@ public class LoginFragment extends Fragment {
                 CharSequence roleTitle = ((TextView) v.getRootView().findViewById(roleResId)).getText();
                 // Access the device's night mode configurations
                 int nightModeFlags = this.getContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-                DescriptionDialog dialogFragment = DescriptionDialog.newInstance(roleTitle, roleTitle + "....\n.....\n.....", nightModeFlags);
+                // Instantiate the dialog fragment and show it
+                DescriptionDialog dialogFragment = DescriptionDialog.newInstance(roleTitle,
+                        getResources().getString(description), nightModeFlags);
                 dialogFragment.show(fm, roleTitle + " dialog");
             }
         };
@@ -299,24 +326,12 @@ public class LoginFragment extends Fragment {
      * @param view The view of the fragment.
      */
     private void hideRoleArea(View view) {
-        // Traversing all elements of the ui which are associated to the roles and hide each of one of them
+        // Traversing all elements of the ui that are associated to the roles and hide each of one of them
         for (int resId : resIdsForRoleArea) {
             view.findViewById(resId).setVisibility(View.GONE);
         }
     }
 
-    /**
-     * Callback invoked of the current fragment when we swap tabs.
-     * The LiveData objects of the email and password get updated with the current value
-     * of their corresponding EditTexts.
-     * Further, the user signing in state gets reversed. (From true to false and vice versa)
-     */
-    @Override
-    public void onPause() {
-        super.onPause();
-        // Reverse the ViewModel's isUserSigningIn attribute as we move to the other tab
-        loginViewModel.setUserSigningIn(!loginViewModel.isUserSigningIn());
-    }
 
     /**
      * Accesses the local details of the user and updates the UI accordingly.
@@ -336,7 +351,7 @@ public class LoginFragment extends Fragment {
         editor.putStringSet("roles", setOfRoles);
         editor.apply();
 
-        // TODO: When creating the UI in other fragments, check if the roles are stores locally, if not access them via the Database
+        // TODO: When creating the UI in other fragments, check if the roles are stores locally, if not access them via the cloud Database
 
         String welcome = getString(R.string.welcome) + model.getDisplayName();
         // TODO : initiate successful logged in experience

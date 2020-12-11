@@ -71,8 +71,11 @@ public class DescriptionDialog extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        // Set the dialog's title
         requireDialog().setTitle(mTitle);
+        // Set the dialog's description
         ((TextView) view.findViewById(R.id.dialog_role_description_txt_description)).setText(mDescription);
+        // Hook up the listener to the dismiss button
         view.findViewById(R.id.dialog_role_description_btn_dismiss).setOnClickListener(v -> dismiss());
 
         if (mNightModeFlags != Configuration.UI_MODE_NIGHT_YES)

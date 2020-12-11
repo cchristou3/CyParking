@@ -73,11 +73,11 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_login_btn_dialog_two_button"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_login_btn_dialog_operator_button"
                 app:layout_constraintVertical_bias="0.2" />
 
             <TextView
-                android:id="@+id/fragment_login_txt_role_one_title"
+                android:id="@+id/fragment_login_txt_role_user_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
@@ -87,56 +87,56 @@
                 app:layout_constraintTop_toBottomOf="@+id/fragment_login_txt_roles_header" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/fragment_login_cb_role_one_checkbox"
+                android:id="@+id/fragment_login_cb_role_user_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="100dp"
                 android:layout_marginLeft="100dp"
                 android:button="@drawable/checkbox"
-                app:layout_constraintBottom_toBottomOf="@+id/fragment_login_txt_role_one_title"
+                app:layout_constraintBottom_toBottomOf="@+id/fragment_login_txt_role_user_title"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/fragment_login_txt_role_one_title"
-                app:layout_constraintTop_toTopOf="@+id/fragment_login_txt_role_one_title" />
+                app:layout_constraintStart_toEndOf="@+id/fragment_login_txt_role_user_title"
+                app:layout_constraintTop_toTopOf="@+id/fragment_login_txt_role_user_title" />
 
             <Button
-                android:id="@+id/fragment_login_btn_dialog_one_button"
+                android:id="@+id/fragment_login_btn_dialog_user_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="View Description"
-                app:layout_constraintStart_toStartOf="@+id/fragment_login_txt_role_one_title"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_login_txt_role_one_title" />
+                app:layout_constraintStart_toStartOf="@+id/fragment_login_txt_role_user_title"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_login_txt_role_user_title" />
 
             <TextView
-                android:id="@+id/fragment_login_txt_role_two_title"
+                android:id="@+id/fragment_login_txt_role_operator_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
                 android:text="Operator"
                 android:textSize="23sp"
-                app:layout_constraintStart_toStartOf="@+id/fragment_login_txt_role_one_title"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_login_btn_dialog_one_button" />
+                app:layout_constraintStart_toStartOf="@+id/fragment_login_txt_role_user_title"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_login_btn_dialog_user_button" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/fragment_login_cb_role_two_checkbox"
+                android:id="@+id/fragment_login_cb_role_operator_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="100dp"
                 android:layout_marginLeft="100dp"
                 android:button="@drawable/checkbox"
-                app:layout_constraintBottom_toBottomOf="@+id/fragment_login_txt_role_two_title"
+                app:layout_constraintBottom_toBottomOf="@+id/fragment_login_txt_role_operator_title"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/fragment_login_txt_role_one_title"
-                app:layout_constraintTop_toTopOf="@+id/fragment_login_txt_role_two_title" />
+                app:layout_constraintStart_toEndOf="@+id/fragment_login_txt_role_user_title"
+                app:layout_constraintTop_toTopOf="@+id/fragment_login_txt_role_operator_title" />
 
             <Button
-                android:id="@+id/fragment_login_btn_dialog_two_button"
+                android:id="@+id/fragment_login_btn_dialog_operator_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="View Description"
-                app:layout_constraintStart_toStartOf="@+id/fragment_login_txt_role_one_title"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_login_txt_role_two_title" />
+                app:layout_constraintStart_toStartOf="@+id/fragment_login_txt_role_user_title"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_login_txt_role_operator_title" />
 
             <ProgressBar
                 android:id="@+id/fragment_login_pb_loading"
@@ -153,6 +153,7 @@
                 app:layout_constraintStart_toStartOf="@+id/fragment_login_et_password"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.3" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 

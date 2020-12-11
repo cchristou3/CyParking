@@ -1,19 +1,22 @@
 <resources>
+    <!-- Strings related to the application itself -->
     <string name="app_name">CyParking</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
+
+    <!-- Strings related to the action bar -->
     <string name="action_settings">Settings</string>
     <string name="action_sign_out">Sign Out</string>
 
+    <!-- Strings related to drawer -->
     <string name="menu_home">Home</string>
     <string name="menu_bookings">Bookings</string>
     <string name="menu_account">My Account</string>
     <string name="title_activity_parking_map">Map</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <!-- Strings related to login -->
     <string name="prompt_name">Display Name</string>
     <string name="prompt_email">Email</string>
@@ -32,4 +35,11 @@
     <string name="sign_in">Sign in</string>
     <string name="sign_up">Sign up</string>
     <string name="cancel">Cancel</string>
+    <string name="user_desc">- Book a parking \n- Pay via card</string>
+    <string name="op_desc">- Register their parking area \n- Offer parking slots via the app</string>
+
+    <!-- Strings related to the description dialog -->
+    <string name="dial_intro">Privileges</string>
+    <string name="dismiss">Dismiss</string>
+
 </resources>

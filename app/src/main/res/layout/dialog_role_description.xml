@@ -2,29 +2,43 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:gravity="center"
     android:orientation="vertical"
     android:padding="10dp">
 
     <TextView
-        android:id="@+id/dialog_role_description_txt_description"
+        android:id="@+id/dialog_role_description_txt_intro"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="200dp"
-        android:maxLines="5"
-        android:text="Lorem ipsum dolor sit amet..."
-        android:textSize="20dp"
+        android:layout_marginTop="20dp"
+        android:gravity="left"
+        android:text="@string/dial_intro"
+        android:textSize="25dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/dialog_role_description_txt_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="5"
+        android:layout_marginTop="20dp"
+        android:textSize="25dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dialog_role_description_txt_intro" />
 
     <Button
         android:id="@+id/dialog_role_description_btn_dismiss"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Dismiss"
+        android:layout_marginTop="20dp"
+        android:text="@string/dismiss"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/dialog_role_description_txt_description" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -28,7 +28,12 @@ import static io.github.cchristou3.CyParking.view.ui.ParkingMapFragment.TAG;
 import static io.github.cchristou3.CyParking.view.ui.support.DescriptionDialog.getStyleConfiguration;
 
 // TODO: Add log out button. Test update password functionality
-
+/**
+ * Purpose: TODO: Add further comments
+ *
+ * @author Charalambos Christou
+ * @version 2.0 11/12/20
+ */
 public class UpdateAccountDialog extends DialogFragment implements View.OnClickListener {
 
     // Fragment's constants
@@ -97,7 +102,8 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         super.onViewCreated(view, savedInstanceState);
         // Initialize the dialog's title and body
         requireDialog().setTitle(mUpdateViewModel.getTitle().getValue());
-        ((MaterialTextView) view.findViewById(R.id.dialog_account_update_mtv_field)).setText(mUpdateViewModel.getFieldText().getValue());
+        ((MaterialTextView) view
+                .findViewById(R.id.dialog_account_update_mtv_field)).setText(mUpdateViewModel.getFieldText().getValue());
 
         // Initialize the UI's content
         final TextInputEditText textInputEditText = view.findViewById(R.id.dialog_account_update_met_input);
@@ -136,10 +142,6 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
             case UPDATE_DISPLAY_NAME: // nothing
                 break;
         }
-    }
-
-    public void setUpdateDialogViewModel(UpdateViewModel mUpdateViewModel) {
-        this.mUpdateViewModel = mUpdateViewModel;
     }
 
 

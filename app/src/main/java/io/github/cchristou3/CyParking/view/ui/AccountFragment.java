@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -14,6 +15,8 @@ import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
+
+import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.view.ui.support.update.UpdateAccountDialog;
@@ -28,6 +31,12 @@ public class AccountFragment extends Fragment {
 
     private UpdateAccountDialog mUpdateAccountDialog;
 
+
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     */
+    @Nullable
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_account, container, false);
@@ -40,36 +49,76 @@ public class AccountFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.findViewById(R.id.fragment_account_mbtn_update_name)
-                .setOnClickListener(getButtonListener(R.string.prompt_name, "Updating name", UpdateAccountDialog.UPDATE_DISPLAY_NAME));
-        view.findViewById(R.id.fragment_account_mbtn_update_email)
-                .setOnClickListener(getButtonListener(R.string.prompt_email, "Updating email", UpdateAccountDialog.UPDATE_EMAIL));
-        view.findViewById(R.id.fragment_account_mbtn_update_password)
-                .setOnClickListener(getButtonListener(R.string.prompt_password, "Updating password", UpdateAccountDialog.UPDATE_PASSWORD));
-        if (FirebaseAuth.getInstance()
-                .getCurrentUser() != null) { // If user is logged in
-            ((MaterialTextView) view.findViewById(R.id.fragment_account_mtv_display_name)).setText(FirebaseAuth.getInstance()
-                    .getCurrentUser()
-                    .getDisplayName());
-            ((MaterialTextView) view.findViewById(R.id.fragment_account_mtv_email)).setText(FirebaseAuth.getInstance()
-                    .getCurrentUser()
-                    .getEmail());
-        }
+        // Hook up listeners to the UI buttons
+        setUpButtonListenerOf(view, R.id.fragment_account_mbtn_update_name,
+                R.string.prompt_name, "Updating name", UpdateAccountDialog.UPDATE_DISPLAY_NAME);
 
+        setUpButtonListenerOf(view, R.id.fragment_account_mbtn_update_email,
+                R.string.prompt_email, "Updating email", UpdateAccountDialog.UPDATE_EMAIL);
+
+        setUpButtonListenerOf(view, R.id.fragment_account_mbtn_update_password,
+                R.string.prompt_password, "Updating password", UpdateAccountDialog.UPDATE_PASSWORD);
+
+
+        // If users are logged in, show their name and email
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) { // If user is logged in
+            updateButtonTextTo(view, R.id.fragment_account_mtv_display_name,
+                    FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+            updateButtonTextTo(view, R.id.fragment_account_mtv_email,
+                    FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        }
     }
 
-    public View.OnClickListener getButtonListener(@StringRes int field, String filedTitle, short updateState) {
+    /**
+     * Hook up the button given the specified button id,
+     * with an on click listener that instantiates a
+     * dialog.
+     *
+     * @param view       The user interface view
+     * @param buttonId   The id of the button
+     * @param field      The field that the user prompt to update
+     * @param title      The title of the dialog
+     * @param dialogType The type of the dialog
+     */
+    private void setUpButtonListenerOf(@NotNull View view, @IdRes int buttonId, @StringRes int field, String title, short dialogType) {
+        view.findViewById(buttonId)
+                .setOnClickListener(
+                        getButtonListener(field, title, dialogType));
+    }
+
+    /**
+     * Creates a new instance of View.OnClickListener. When triggered,
+     * creates a dialog that displays info about the specified parameters.
+     *
+     * @param field       A String Resource Id
+     * @param dialogTitle The title of the dialog
+     * @param updateState The kind of dialog
+     * @return A View.OnClickListener instance
+     */
+    public View.OnClickListener getButtonListener(@StringRes int field, String dialogTitle, short updateState) {
         return v -> {
             FragmentManager fm = isAdded() ? getParentFragmentManager() : null;
             if (fm != null) {
                 // Access the device's night mode configurations
                 int nightModeFlags = this.requireContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-                mUpdateAccountDialog = UpdateAccountDialog.newInstance(filedTitle,
+                mUpdateAccountDialog = UpdateAccountDialog.newInstance(dialogTitle,
                         getResources().getString(field),
                         nightModeFlags,
                         updateState);
                 mUpdateAccountDialog.show(fm, "updateDialog");
             }
         };
+    }
+
+    /**
+     * Finds the view given the specified view id
+     * and sets its text value to the specified string.
+     *
+     * @param view   The user interface view
+     * @param viewID The id of a UI element
+     * @param text   The text to be assigned to the UI element
+     */
+    private void updateButtonTextTo(@NotNull View view, @IdRes Integer viewID, final String text) {
+        ((MaterialTextView) view.findViewById(viewID)).setText(text);
     }
 }

@@ -11,6 +11,13 @@ import io.github.cchristou3.CyParking.view.data.pojo.update.UpdateFormState;
 import io.github.cchristou3.CyParking.view.data.repository.AccountRepository;
 import io.github.cchristou3.CyParking.view.ui.login.LoginViewModel;
 
+/**
+ * Purpose: <p>Data persistence when orientation changes.
+ * Used when the users try to update their information.</p>
+ *
+ * @author Charalambos Christou
+ * @version 1.0 05/11/20
+ */
 public class UpdateViewModel extends ViewModel {
 
     final private MutableLiveData<String> title = new MutableLiveData<>();

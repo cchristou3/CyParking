@@ -19,7 +19,6 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -60,31 +59,17 @@ public class MainHostActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_view_bookings, R.id.nav_account)
+                R.id.nav_home, R.id.nav_view_bookings, R.id.nav_account, R.id.nav_feedback)
                 .setOpenableLayout(drawer)
                 .build();
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_main_host_fcv_nav_host_fragment);
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_main_host_fcv_nav_host_fragment);
         NavController navController = navHostFragment.getNavController();
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
-//                updatedMenu(firebaseAuth.getCurrentUser());
-//                this.onPrepareOptionsMenu(mMenu);
-//                this.invalidateOptionsMenu();
+            // TODO: UI related changes
         });
-    }
-
-    private void updatedMenu(FirebaseUser user) {
-        if (mMenu == null) return;
-        if (user != null) { // User is logged in!
-            mMenu.removeItem(R.id.action_sign_in);
-            mMenu.add(1, R.id.action_sign_out, 1, "Sign out!");
-        } else {
-            mMenu.add(1, R.id.action_sign_in, 1, "Sign in!");
-            mMenu.removeItem(R.id.action_sign_out);
-//            mMenu.setGroupEnabled(R.id.action_sign_in, true);
-//            mMenu.setGroupEnabled(R.id.action_sign_out, false);
-        }
     }
 
     /**
@@ -174,6 +159,4 @@ public class MainHostActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
-
-
 }

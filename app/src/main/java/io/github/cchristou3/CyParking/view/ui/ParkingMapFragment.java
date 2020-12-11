@@ -106,7 +106,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
     }
 
     /**
-     * Initialises the activity.
+     * Initialises the fragment.
      * Requests a Support Fragment to place the Google Map.
      * Retrieves the location of the user from previous activity and sends a HTTPS request
      * to the backend to retrieve all nearby parking. While retrieving the data, a loading progress

@@ -8,8 +8,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.view.data.pojo.login.LoginFormState;
-import io.github.cchristou3.CyParking.view.data.pojo.login.LoginResult;
+import io.github.cchristou3.CyParking.view.data.pojo.user.login.LoginFormState;
+import io.github.cchristou3.CyParking.view.data.pojo.user.login.LoginResult;
 import io.github.cchristou3.CyParking.view.data.repository.LoginRepository;
 
 /**
@@ -108,7 +108,7 @@ public class LoginViewModel extends ViewModel {
         passwordState.setValue(password);
         emailState.setValue(username);
         if (!isEmailValid(username)) {
-            loginFormState.setValue(new LoginFormState(R.string.invalid_username, null, null));
+            loginFormState.setValue(new LoginFormState(R.string.invalid_email, null, null));
         } else if (!isPasswordValid(password)) {
             loginFormState.setValue(new LoginFormState(null, R.string.invalid_password, null));
         } else if (!AreAnyRolesSelected(isUser, isOperator) && !isUserInSigningInTab.getValue()) { // Checks only if the user is registering

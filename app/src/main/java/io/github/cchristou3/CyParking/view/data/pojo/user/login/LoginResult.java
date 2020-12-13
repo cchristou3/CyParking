@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.view.data.pojo.login;
+package io.github.cchristou3.CyParking.view.data.pojo.user.login;
 
 import androidx.annotation.Nullable;
 

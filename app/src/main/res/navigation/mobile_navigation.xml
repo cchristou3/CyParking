@@ -54,7 +54,7 @@
     <fragment
         android:id="@+id/nav_authentication_fragment"
         android:name="io.github.cchristou3.CyParking.view.ui.login.AuthenticationFragment"
-        android:label="fragment_authentication"
+        android:label="Sign in / Sign up"
         tools:layout="@layout/fragment_authentication" />
 
     <fragment
@@ -71,7 +71,7 @@
     <fragment
         android:id="@+id/nav_feedback"
         android:name="io.github.cchristou3.CyParking.view.ui.feedback.FeedbackFragment"
-        android:label="feedback_fragment"
+        android:label="Feedback"
         tools:layout="@layout/feedback_fragment" />
 
 

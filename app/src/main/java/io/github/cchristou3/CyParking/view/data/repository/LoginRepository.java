@@ -16,9 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.github.cchristou3.CyParking.view.data.pojo.login.LoggedInUserView;
-import io.github.cchristou3.CyParking.view.data.pojo.login.LoginResult;
 import io.github.cchristou3.CyParking.view.data.pojo.user.LoggedInUser;
+import io.github.cchristou3.CyParking.view.data.pojo.user.login.LoggedInUserView;
+import io.github.cchristou3.CyParking.view.data.pojo.user.login.LoginResult;
 
 /**
  * Purpose: <p>Class that handles authentication w/ login credentials and retrieves user information.

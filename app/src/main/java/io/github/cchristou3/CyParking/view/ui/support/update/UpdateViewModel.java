@@ -7,7 +7,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.EmailAuthProvider;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.view.data.pojo.update.UpdateFormState;
+import io.github.cchristou3.CyParking.view.data.pojo.user.update.UpdateFormState;
 import io.github.cchristou3.CyParking.view.data.repository.AccountRepository;
 import io.github.cchristou3.CyParking.view.ui.login.LoginViewModel;
 
@@ -22,7 +22,7 @@ public class UpdateViewModel extends ViewModel {
 
     final private MutableLiveData<String> title = new MutableLiveData<>();
     final private MutableLiveData<String> fieldText = new MutableLiveData<>();
-    final private MutableLiveData<String> updatedFieldText = new MutableLiveData<>();
+    final private MutableLiveData<String> updatedFieldText = new MutableLiveData<>("");
     final private MutableLiveData<UpdateFormState> updateFormState = new MutableLiveData<>();
 
     final private AccountRepository accountRepository;
@@ -44,10 +44,11 @@ public class UpdateViewModel extends ViewModel {
      *
      * @param updatedField The text value of the UI element
      */
-    public void updateDataChanged(String updatedField) {
+    public void formDataChanged(String updatedField) {
+        updatedFieldText.setValue(updatedField);
         switch (mDialogType) {
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
-                if (updatedField != null && !updatedField.trim().isEmpty()) {
+                if (!updatedField.equals(null) && !updatedField.trim().isEmpty()) {
                     updateFormState.setValue(new UpdateFormState(true));
                 } else {
                     updateFormState.setValue(new UpdateFormState(R.string.invalid_username));

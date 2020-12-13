@@ -34,7 +34,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.view.data.pojo.login.LoggedInUserView;
+import io.github.cchristou3.CyParking.view.data.pojo.user.login.LoggedInUserView;
 import io.github.cchristou3.CyParking.view.ui.support.DescriptionDialog;
 
 /**
@@ -158,8 +158,8 @@ public class LoginFragment extends Fragment {
 
                 // If there is an error, show it for the specific UI field.
                 // If there was an error before, and it got resolved then hide the error.
-                if (loginFormState.getUsernameError() != null) {
-                    emailEditText.setError(getString(loginFormState.getUsernameError()));
+                if (loginFormState.getEmailError() != null) {
+                    emailEditText.setError(getString(loginFormState.getEmailError()));
                 } else {
                     if (emailEditText.getError() != null)
                         emailEditText.setError(null, null);

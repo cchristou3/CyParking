@@ -45,11 +45,14 @@
     <string name="feedback_disclaimer">Your feedback is important and helps improve our products. While we cannot reply to all feedback, all comments are taken into consideration.</string>
     <string name="name">Name</string>
     <string name="email">Email</string>
-    <string name="email_hint">Enter email here...</string>
+    <string name="email_hint">Enter email here…</string>
     <string name="give_feedback">Give Feedback</string>
     <string name="required">Required</string>
     <string name="send_feedback">Send feedback</string>
     <string name="diagnostic_info_disclaimer">In order to understand your feedback, we may receive diagnostic information from your device. While we cannot reply to feedback, all comments are taken into consideration.</string>
     <string name="name_not_found">Unavailable</string>
+
+    <!-- Strings related to the feedback -->
+    <string name="invalid_feedback">Cannot be empty</string>
 
 </resources>

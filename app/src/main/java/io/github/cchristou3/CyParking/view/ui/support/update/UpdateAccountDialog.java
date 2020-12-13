@@ -82,7 +82,6 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
             mUpdateViewModel.getTitle().setValue(getArguments().getString(TITLE_KEY));
             mUpdateViewModel.getFieldText().setValue(getArguments().getString(FIELD_TO_BE_UPDATED_KEY));
             mUpdateViewModel.setDialogType(getArguments().getShort(DIALOG_TYPE_KEY));
-            mUpdateViewModel.getUpdatedFieldText().setValue("");
         }
     }
 
@@ -116,11 +115,14 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         view.findViewById(R.id.dialog_account_update_mbtn_dismiss).setOnClickListener(v -> dismiss());
         final Button updateButton = view.findViewById(R.id.dialog_account_update_mbtn_update);
         updateButton.setOnClickListener(this);
+        updateButton.setEnabled(false); // disable it
 
         // Initialize the UI's content
         final TextInputEditText textInputEditText = view.findViewById(R.id.dialog_account_update_met_input);
-        setInputTypeTo(mUpdateViewModel.getDialogType(), textInputEditText);
         final short mUpdateState = mUpdateViewModel.getDialogType();
+        setInputTypeTo(mUpdateState, textInputEditText);
+        // Display the saved value
+        textInputEditText.setText(mUpdateViewModel.getUpdatedFieldText().getValue());
         textInputEditText.setHint("Enter new " +
                 ((mUpdateState == UPDATE_DISPLAY_NAME) ? "name" : (mUpdateState == UPDATE_EMAIL) ? "email" : "password") + "...");
         textInputEditText.addTextChangedListener(new TextWatcher() {
@@ -130,7 +132,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
 
             @Override
             public void afterTextChanged(Editable s) {
-                mUpdateViewModel.updateDataChanged(s.toString());
+                mUpdateViewModel.formDataChanged(s.toString());
             }
         });
 

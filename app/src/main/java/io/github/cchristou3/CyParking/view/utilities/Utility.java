@@ -1,26 +1,50 @@
 package io.github.cchristou3.CyParking.view.utilities;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.view.MotionEvent;
+import android.view.View;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Calendar;
 import java.util.Date;
 
-import io.github.cchristou3.CyParking.view.ui.ParkingMapFragment;
+import io.github.cchristou3.CyParking.view.ui.parking.slots.ParkingMapFragment;
 
 /**
  * Purpose: <p>Contain all helper / utility methods which the application needs.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 29/10/20
+ * @version 2.0 14/12/20
  */
 public class Utility {
+
+    /**
+     * The parent view no longer receives touch events from the specified
+     * child view. If a scrollable area (e.g. ListView) is inside a
+     * ScrollView then there is an issue while scrolling
+     * the scrollable area's inner contents.
+     * So, when touching the scrollable area, any touch events are blocked from its parent view.
+     *
+     * @param view The view that should scroll smoothly without interference.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    public static void disableParentScrollingInterferenceOf(@NotNull View view) {
+        view.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
+                v.getParent().requestDisallowInterceptTouchEvent(false);
+            }
+            return false;
+        });
+    }
 
     /**
      * Checks whether the specified lat and lng are inside the user's range
@@ -84,6 +108,8 @@ public class Utility {
      * @param minute     the minute(s) of the hour
      * @return A string of the format "__ : __" where _ is a digit.
      */
+    @NotNull
+    @Contract(pure = true)
     public static String getTimeOf(int finalHours, int minute) {
         return "" + finalHours + " : " + ((minute < 10) ? "0" : "") + minute;
     }
@@ -97,6 +123,7 @@ public class Utility {
      * @param day   the day of the month
      * @return A Date object based on specified year, month and day
      */
+    @NotNull
     public static Date getDateOf(int year, int month, int day) {
         final Calendar innerCalendar = Calendar.getInstance();
         innerCalendar.set(Calendar.YEAR, year);

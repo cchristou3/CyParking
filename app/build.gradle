@@ -35,9 +35,9 @@ dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
-    implementation 'androidx.navigation:navigation-fragment:2.3.1'
-    implementation 'androidx.navigation:navigation-ui:2.3.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.navigation:navigation-fragment:2.3.2'
+    implementation 'androidx.navigation:navigation-ui:2.3.2'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
@@ -52,6 +52,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'org.greenrobot:eventbus:3.1.1'
 
+    // Shared Preference dependency
     implementation 'androidx.preference:preference:1.1.1'
 
     // Google Maps dependency
@@ -69,12 +70,15 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     // Tapped fragments
-    implementation "androidx.viewpager2:viewpager2:1.0.0"
+    implementation 'androidx.viewpager2:viewpager2:1.0.0'
 
     // CardView
-    implementation "androidx.cardview:cardview:1.0.0"
+    implementation 'androidx.cardview:cardview:1.0.0'
 
     // Shimmer
     implementation 'com.facebook.shimmer:shimmer:0.1.0@aar'
+
+    // Java 8 DefaultLifecycleObserver  dependency
+    implementation 'android.arch.lifecycle:common-java8:1.1.1'
 
 }

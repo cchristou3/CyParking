@@ -75,7 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/ic_cancel_booking"
-            android:contentDescription="Cancel"
+            android:contentDescription="@string/cancel"
             app:layout_constraintEnd_toEndOf="parent"
             android:padding="35dp"
             app:layout_constraintTop_toTopOf="parent" />

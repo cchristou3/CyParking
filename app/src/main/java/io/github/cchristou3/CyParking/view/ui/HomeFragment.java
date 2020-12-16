@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
@@ -26,16 +27,18 @@ import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.view.data.interfaces.Navigate;
+import io.github.cchristou3.CyParking.view.data.manager.AuthObserver;
 
-import static io.github.cchristou3.CyParking.view.ui.ParkingMapFragment.LOCATION_PERMISSION_REQUEST_CODE;
+import static io.github.cchristou3.CyParking.view.ui.parking.slots.ParkingMapFragment.LOCATION_PERMISSION_REQUEST_CODE;
 
 /**
  * Purpose: <p>Show to the user all available options</p>
  *
  * @author Charalambos Christou
- * @version 1.0 29/10/20
+ * @version 2.0 15/12/20
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements Navigate {
 
     // Fragment variables
     private com.google.android.gms.location.FusedLocationProviderClient mFusedLocationProviderClient;
@@ -53,9 +56,16 @@ public class HomeFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
+    @NonNull
+    @Override
+    public String toString() {
+        return "Yep, this is the home fragment!";
+
+    }
+
     /**
      * Invoked at the completion of onCreateView. Initializes fragment's ViewModel.
-     * Lastly, it attaches a listener to our UI button
+     * Lastly, listeners are attached to all buttons.
      *
      * @param view               The view of the fragment
      * @param savedInstanceState A bundle which contains info about previously stored data
@@ -63,10 +73,42 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.findViewById(R.id.fragment_home_nav_button).setOnClickListener(v -> {
+        // Attach listener to "Parking Map" button
+        view.findViewById(R.id.fragment_home_btn_nav_to_map).setOnClickListener(v -> {
+            // Initialize the FusedLocationProviderClient instance
             mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
+            // Request for the user's latest known location
             getLastKnownLocationOfUser(v);
         });
+        // Attach listener to "Register Parking lot" button
+        view.findViewById(R.id.fragment_home_mbtn_register_parking_lot).setOnClickListener(v -> {
+            // Navigate to the parking lot registration form
+
+            Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+                    .navigate(R.id.action_nav_home_to_nav_register_lot_fragment);
+
+        });
+
+        // Get a reference to the UI's CardView
+        final CardView lotRegistrationCardView = view.findViewById(R.id.fragment_home_cv_lot_info);
+        // Set up an Auth state observer
+        AuthObserver.newInstance(currentUser -> {
+            if (currentUser != null) { // Check whether logged in.
+                // TODO: Access roles (locally / cloud database)
+                // if Operator
+                if (true /* isOperator == true ? */) {
+                    // Make it visible to the user if it's hidden
+                    if (lotRegistrationCardView.getVisibility() == View.GONE) {
+                        lotRegistrationCardView.setVisibility(View.VISIBLE);
+                    }
+                    return;
+                }
+            }
+            // Hide it from the user if it's visible
+            if (lotRegistrationCardView.getVisibility() == View.VISIBLE) {
+                lotRegistrationCardView.setVisibility(View.GONE);
+            }
+        }).registerObserver(getLifecycle());
     }
 
     /**
@@ -95,13 +137,13 @@ public class HomeFragment extends Fragment {
                                     // Pass it to the ParkingMapFragment
                                     EventBus.getDefault().postSticky(new LatLng(userLatestLocation.getLatitude(), userLatestLocation.getLongitude()));
                                     // Navigate to the ParkingMapFragment
-                                    Navigation.findNavController(view).navigate(R.id.action_home_to_parking_map);
+                                    Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view)).navigate(R.id.action_home_to_parking_map);
                                 } else {
-                            // Inform the user something wrong happened
-                            Toast.makeText(getActivity(), "Your location could not be processed! Check your GPS settings!", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }, requireActivity().getMainLooper());
+                                    // Inform the user something wrong happened
+                                    Toast.makeText(getActivity(), "Your location could not be processed! Check your GPS settings!", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }, requireActivity().getMainLooper());
             }
 
         }
@@ -131,5 +173,53 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(getContext(), "Permission is not granted!", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link io.github.cchristou3.CyParking.view.ui.user.login.AuthenticatorFragment}.
+     */
+    @Override
+    public void toAuthenticator() {
+        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view)).navigate(R.id.action_nav_home_to_nav_authenticator_fragment);
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link io.github.cchristou3.CyParking.view.ui.parking.slots.viewBooking.ViewBookingsFragment}.
+     */
+    @Override
+    public void toBookings() {
+        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+                .navigate(R.id.action_nav_home_to_nav_view_bookings);
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link io.github.cchristou3.CyParking.view.ui.user.AccountFragment}.
+     */
+    @Override
+    public void toAccount() {
+        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+                .navigate(R.id.action_nav_home_to_nav_account);
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link io.github.cchristou3.CyParking.view.ui.user.feedback.FeedbackFragment}.
+     */
+    @Override
+    public void toFeedback() {
+        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+                .navigate(R.id.action_nav_home_to_nav_feedback);
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link io.github.cchristou3.CyParking.view.ui.HomeFragment}.
+     */
+    @Override
+    public void toHome() {
+        // Already in this screen. Thus, no need to implement this method.
     }
 }

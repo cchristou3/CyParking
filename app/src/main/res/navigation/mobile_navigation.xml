@@ -16,23 +16,121 @@
             app:enterAnim="@anim/nav_default_enter_anim"
             app:popExitAnim="@animator/nav_default_exit_anim"
             app:popUpTo="@id/nav_home" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_register_lot_fragment"
+            app:destination="@id/nav_register_lot_fragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_home" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_authenticator_fragment"
+            app:destination="@id/nav_authenticator_fragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_home" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_view_bookings"
+            app:destination="@id/nav_view_bookings"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_home" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_account"
+            app:destination="@id/nav_account"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_home" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_feedback"
+            app:destination="@id/nav_feedback"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_home" />
     </fragment>
 
     <fragment
         android:id="@+id/nav_view_bookings"
-        android:name="io.github.cchristou3.CyParking.view.ui.viewBooking.ViewBookingsFragment"
+        android:name="io.github.cchristou3.CyParking.view.ui.parking.slots.viewBooking.ViewBookingsFragment"
         android:label="@string/menu_bookings"
-        tools:layout="@layout/fragment_view_bookings" />
+        tools:layout="@layout/fragment_view_bookings">
+        <action
+            android:id="@+id/action_nav_view_bookings_to_nav_account"
+            app:destination="@id/nav_account"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_view_bookings" />
+        <action
+            android:id="@+id/action_nav_view_bookings_to_nav_feedback"
+            app:destination="@id/nav_feedback"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_view_bookings" />
+        <action
+            android:id="@+id/action_nav_view_bookings_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_view_bookings" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_account"
-        android:name="io.github.cchristou3.CyParking.view.ui.AccountFragment"
+        android:name="io.github.cchristou3.CyParking.view.ui.user.AccountFragment"
         android:label="@string/menu_account"
-        tools:layout="@layout/fragment_account" />
+        tools:layout="@layout/fragment_account">
+        <action
+            android:id="@+id/action_nav_account_to_nav_authenticator_fragment"
+            app:destination="@id/nav_authenticator_fragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_account" />
+        <action
+            android:id="@+id/action_nav_account_to_nav_view_bookings"
+            app:destination="@id/nav_view_bookings"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_account" />
+        <action
+            android:id="@+id/action_nav_account_to_nav_feedback"
+            app:destination="@id/nav_feedback"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_account" />
+        <action
+            android:id="@+id/action_nav_account_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_account" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_parking_map_fragment"
-        android:name="io.github.cchristou3.CyParking.view.ui.ParkingMapFragment"
+        android:name="io.github.cchristou3.CyParking.view.ui.parking.slots.ParkingMapFragment"
         android:label="Nearby Parking"
         tools:layout="@layout/fragment_parking_map">
         <action
@@ -43,36 +141,229 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim"
             app:popUpTo="@id/nav_parking_map_fragment" />
+        <action
+            android:id="@+id/action_nav_parking_map_fragment_to_nav_authenticator_fragment"
+            app:destination="@id/nav_authenticator_fragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_parking_map_fragment" />
+        <action
+            android:id="@+id/action_nav_parking_map_fragment_to_nav_view_bookings"
+            app:destination="@id/nav_view_bookings"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_parking_map_fragment" />
+        <action
+            android:id="@+id/action_nav_parking_map_fragment_to_nav_account"
+            app:destination="@id/nav_account"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_parking_map_fragment" />
+        <action
+            android:id="@+id/action_nav_parking_map_fragment_to_nav_feedback"
+            app:destination="@id/nav_feedback"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_parking_map_fragment" />
+        <action
+            android:id="@+id/action_nav_parking_map_fragment_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_parking_map_fragment" />
     </fragment>
 
     <fragment
         android:id="@+id/nav_parking_booking_fragment"
-        android:name="io.github.cchristou3.CyParking.view.ui.booking.ParkingBookingFragment"
+        android:name="io.github.cchristou3.CyParking.view.ui.parking.slots.booking.ParkingBookingFragment"
         android:label="Booking Parking"
-        tools:layout="@layout/fragment_parking_booking" />
+        tools:layout="@layout/fragment_parking_booking">
+        <action
+            android:id="@+id/action_nav_parking_booking_fragment_pop"
+            app:popUpTo="@id/nav_parking_booking_fragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_nav_parking_booking_fragment_to_nav_account"
+            app:destination="@id/nav_account"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_parking_booking_fragment" />
+        <action
+            android:id="@+id/action_nav_parking_booking_fragment_to_nav_feedback"
+            app:destination="@id/nav_feedback"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_parking_booking_fragment" />
+        <action
+            android:id="@+id/action_nav_parking_booking_fragment_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_parking_booking_fragment" />
+        <action
+            android:id="@+id/action_nav_parking_booking_fragment_to_nav_view_bookings"
+            app:destination="@id/nav_view_bookings"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_parking_booking_fragment" />
+    </fragment>
 
     <fragment
-        android:id="@+id/nav_authentication_fragment"
-        android:name="io.github.cchristou3.CyParking.view.ui.login.AuthenticationFragment"
+        android:id="@+id/nav_authenticator_fragment"
+        android:name="io.github.cchristou3.CyParking.view.ui.user.login.AuthenticatorFragment"
         android:label="Sign in / Sign up"
-        tools:layout="@layout/fragment_authentication" />
+        tools:layout="@layout/fragment_authentication">
+        <action
+            android:id="@+id/action_nav_authenticator_fragment_to_nav_view_bookings"
+            app:destination="@id/nav_view_bookings"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_authenticator_fragment" />
+        <action
+            android:id="@+id/action_nav_authenticator_fragment_to_nav_account"
+            app:destination="@id/nav_account"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_authenticator_fragment" />
+        <action
+            android:id="@+id/action_nav_authenticator_fragment_to_nav_feedback"
+            app:destination="@id/nav_feedback"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_authenticator_fragment" />
+        <action
+            android:id="@+id/action_nav_authenticator_fragment_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_authenticator_fragment" />
+        <!--        <action-->
+        <!--            android:id="@+id/action_nav_authenticator_fragment_pop"-->
+        <!--            app:popUpTo="@id/nav_authenticator_fragment"-->
+        <!--            app:popUpToInclusive="true" />-->
+    </fragment>
 
     <fragment
-        android:id="@+id/loginFragment"
-        android:name="io.github.cchristou3.CyParking.view.ui.login.LoginFragment"
+        android:id="@+id/authenticatorHosteeFragment"
+        android:name="io.github.cchristou3.CyParking.view.ui.user.login.AuthenticatorHosteeFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" />
 
-    <action
-        android:id="@+id/to_authentication_fragment"
-        app:destination="@id/nav_authentication_fragment"
-        app:popUpToInclusive="false" />
-
     <fragment
         android:id="@+id/nav_feedback"
-        android:name="io.github.cchristou3.CyParking.view.ui.feedback.FeedbackFragment"
+        android:name="io.github.cchristou3.CyParking.view.ui.user.feedback.FeedbackFragment"
         android:label="Feedback"
-        tools:layout="@layout/feedback_fragment" />
+        tools:layout="@layout/feedback_fragment">
+        <action
+            android:id="@+id/action_nav_feedback_to_nav_authenticator_fragment"
+            app:destination="@id/nav_authenticator_fragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_feedback" />
+        <action
+            android:id="@+id/action_nav_feedback_to_nav_view_bookings"
+            app:destination="@id/nav_view_bookings"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_feedback" />
+        <action
+            android:id="@+id/action_nav_feedback_to_nav_account"
+            app:destination="@id/nav_account"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_feedback" />
+        <action
+            android:id="@+id/action_nav_feedback_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_feedback" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_register_lot_fragment"
+        android:name="io.github.cchristou3.CyParking.view.ui.parking.lots.RegisterLotFragment"
+        android:label="Parking Lot Registration"
+        tools:layout="@layout/register_lot_fragment">
+        <action
+            android:id="@+id/action_nav_register_lot_fragment_to_nav_authenticator_fragment"
+            app:destination="@id/nav_authenticator_fragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_register_lot_fragment" />
+        <action
+            android:id="@+id/action_nav_register_lot_fragment_to_nav_view_bookings"
+            app:destination="@id/nav_view_bookings"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_register_lot_fragment" />
+        <action
+            android:id="@+id/action_nav_register_lot_fragment_to_nav_account"
+            app:destination="@id/nav_account"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_register_lot_fragment" />
+        <action
+            android:id="@+id/action_nav_register_lot_fragment_to_nav_feedback"
+            app:destination="@id/nav_feedback"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_register_lot_fragment" />
+        <action
+            android:id="@+id/action_nav_register_lot_fragment_to_nav_home"
+            app:destination="@id/nav_home"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_register_lot_fragment" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_nav_authenticator_fragment"
+        app:destination="@id/nav_authenticator_fragment"
+        app:popUpTo="@id/mobile_navigation" />
 
 
 </navigation>

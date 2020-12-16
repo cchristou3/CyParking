@@ -5,7 +5,7 @@
     xmlns:shimmer="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.ui.viewBooking.ViewBookingsFragment">
+    tools:context=".view.ui.parking.slots.viewBooking.ViewBookingsFragment">
 
 
     <com.facebook.shimmer.ShimmerFrameLayout

@@ -9,7 +9,7 @@ import com.google.firebase.auth.EmailAuthProvider;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.view.data.pojo.user.update.UpdateFormState;
 import io.github.cchristou3.CyParking.view.data.repository.AccountRepository;
-import io.github.cchristou3.CyParking.view.ui.login.LoginViewModel;
+import io.github.cchristou3.CyParking.view.ui.user.login.AuthenticatorViewModel;
 
 /**
  * Purpose: <p>Data persistence when orientation changes.
@@ -48,21 +48,21 @@ public class UpdateViewModel extends ViewModel {
         updatedFieldText.setValue(updatedField);
         switch (mDialogType) {
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
-                if (!updatedField.equals(null) && !updatedField.trim().isEmpty()) {
+                if (updatedField != null && !updatedField.trim().isEmpty()) {
                     updateFormState.setValue(new UpdateFormState(true));
                 } else {
                     updateFormState.setValue(new UpdateFormState(R.string.invalid_username));
                 }
                 break;
             case UpdateAccountDialog.UPDATE_EMAIL:
-                if (LoginViewModel.isEmailValid(updatedField)) {
+                if (AuthenticatorViewModel.isEmailValid(updatedField)) {
                     updateFormState.setValue(new UpdateFormState(true));
                 } else {
                     updateFormState.setValue(new UpdateFormState(R.string.invalid_email));
                 }
                 break;
             case UpdateAccountDialog.UPDATE_PASSWORD:
-                if (LoginViewModel.isPasswordValid(updatedField)) {
+                if (AuthenticatorViewModel.isPasswordValid(updatedField)) {
                     updateFormState.setValue(new UpdateFormState(true));
                 } else {
                     updateFormState.setValue(new UpdateFormState(R.string.invalid_password));

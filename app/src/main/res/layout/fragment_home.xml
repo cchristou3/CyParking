@@ -9,13 +9,60 @@
 
 
     <Button
-        android:id="@+id/fragment_home_nav_button"
+        android:id="@+id/fragment_home_btn_nav_to_map"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Navigate to Parking Map!"
+        android:text="@string/parking_map"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- CardView  To include all relevant info about the operator's lot.
+        Manipulate it accordingly. No lot? Register one -> Form...
+        Already registered? View/Update its info
+    -->
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/fragment_home_cv_lot_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_home_btn_nav_to_map">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/fragment_home_txt_lot_maessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_parking_lots_text"
+                android:textColor="@color/red"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/fragment_home_mbtn_register_parking_lot"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fragment_home_mbtn_register_parking_lot"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/register_parking_lot"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

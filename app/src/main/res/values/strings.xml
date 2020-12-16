@@ -54,5 +54,37 @@
 
     <!-- Strings related to the feedback -->
     <string name="invalid_feedback">Cannot be empty</string>
+    <string name="parking_map">Parking Map</string>
+    <string name="no_parking_lots_text">No parking lots registered yet</string>
+
+    <!-- Strings related to the registering a parking lot -->
+    <string name="enter_mobile_number">Enter mobile number…</string>
+    <string name="enter_capacity">Enter capacity…</string>
+    <string name="enter_parking_lot_name">Enter parking lot name…</string>
+    <string name="lot_name">Lot Name: </string>
+    <string name="parking_lot_info">Parking Lot Info</string>
+    <string name="mobile_phone">Mobile phone: </string>
+    <string name="basic_info">Basic Info</string>
+    <string name="capacity">Capacity: </string>
+    <string name="get_location_text">Or get location via GPS</string>
+    <string name="get_location">Get location</string>
+    <string name="enter_longitude">Enter longitude…</string>
+    <string name="longitude">Longitude:</string>
+    <string name="enter_latitude">Enter latitude…</string>
+    <string name="latitude">Latitude:</string>
+    <string name="location">Location:</string>
+    <string name="duration">Duration</string>
+    <string name="price">Price</string>
+    <string name="add">Add</string>
+    <string name="pricing">Pricing</string>
+    <string name="price_eur">Price(eur)</string>
+    <string name="duration_hours">Duration(hours)</string>
+    <string name="remove">Remove</string>
+    <string name="register">Register</string>
+    <string name="done">Done</string>
+    <string name="disclaimer">Disclaimer:</string>
+    <string name="charges_disclaimer">Around 1.5% of all the transaction fees via bookings will be contributed towards the CyParking Application.</string>
+    <string name="register_parking_lot">Register Parking Lot</string>
+    <string name="unexpected_error_info">An unexpected error occurred! Diagnostic information from your device was sent to the development team to be processed to avoid future failures.</string>
 
 </resources>

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.ui.AccountFragment">
+    tools:context=".view.ui.user.AccountFragment">
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/fragment_account_mtv_display_name"

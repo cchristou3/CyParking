@@ -73,6 +73,8 @@ The application has the following features so far:
 * View all available private parking locations within a range [User]
 * View for each locations its available parking spaces [User]
 * Sign in/up [Everyone]
+* Update name/email/password [Everyone]
+* Send Feedback [Everyone]
 
 A list of commonly used resources that I find helpful are listed in the acknowledgements.
 

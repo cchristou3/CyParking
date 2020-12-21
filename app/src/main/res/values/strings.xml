@@ -83,8 +83,22 @@
     <string name="register">Register</string>
     <string name="done">Done</string>
     <string name="disclaimer">Disclaimer:</string>
-    <string name="charges_disclaimer">Around 1.5% of all the transaction fees via bookings will be contributed towards the CyParking Application.</string>
+    <string name="charges_disclaimer">Around 1.5% of all the credit card transaction fees will be contributed towards the CyParking Application.</string>
     <string name="register_parking_lot">Register Parking Lot</string>
     <string name="unexpected_error_info">An unexpected error occurred! Diagnostic information from your device was sent to the development team to be processed to avoid future failures.</string>
+
+    <!-- Strings related to the registering a parking lot errors -->
+    <string name="mobile_phone_error">Not a valid phone number!</string>
+    <string name="lot_capacity_error">The capacity must not be empty!</string>
+    <string name="lot_name_error">Not a valid name!</string>
+    <string name="lot_lat_lng_error">Invalid coordinates!</string>
+    <string name="lot_slot_offer_error">There must be at least 1 Slot Offer!</string>
+    <string name="add_at_least_one_slot_offer">Add at least one Slot Offer</string>
+    <string name="error_retrieving_location">Your location could not be processed! Check your GPS settings!</string>
+    <string name="error_lot_registration">Oops! Something went wrong! Please check your details and try again.</string>
+    <string name="error_lot_already_exists">The Parking Lot already exists!</string>
+    <string name="success_lot_registration">Lot registered successfully!</string>
+    <string name="increment_by_one">Increment by one</string>
+    <string name="decrement_by_one">Decrement by one</string>
 
 </resources>

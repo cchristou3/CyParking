@@ -5,7 +5,7 @@
     android:id="@+id/id_fragment_parking_map"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.ui.parking.slots.ParkingMapFragment">
+    tools:context=".ui.parking.lots.ParkingMapFragment">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_parking_map_fcv_map"
@@ -16,7 +16,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:context=".view.ui.parking.slots.ParkingMapFragment" />
+        tools:context=".ui.parking.lots.ParkingMapFragment" />
 
     <androidx.core.widget.ContentLoadingProgressBar
         android:visibility="visible"

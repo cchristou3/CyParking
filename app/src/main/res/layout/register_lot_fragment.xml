@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.ui.parking.lots.RegisterLotFragment">
+    tools:context=".ui.parking.lots.RegisterLotFragment">
 
     <ScrollView
         android:id="@+id/register_lot_fragment_sv_scroll_view"
@@ -46,7 +46,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="15dp"
-                        android:text="Email: casdasdsa@gmail.com"
                         android:textSize="20sp"
                         app:layout_constraintEnd_toEndOf="@+id/register_lot_fragment_txt_basic_title"
                         app:layout_constraintStart_toStartOf="@+id/register_lot_fragment_txt_basic_title"
@@ -62,8 +61,8 @@
                         app:layout_constraintStart_toStartOf="@+id/register_lot_fragment_txt_basic_title"
                         app:layout_constraintTop_toBottomOf="@+id/register_lot_fragment_txt_email" />
 
-                    <EditText
-                        android:id="@+id/register_lot_fragment_txt_phone_body"
+                    <io.github.cchristou3.CyParking.ui.widgets.PhoneEditText
+                        android:id="@+id/register_lot_fragment_et_phone_body"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:hint="@string/enter_mobile_number"
@@ -310,11 +309,26 @@
                             android:layout_height="wrap_content"
                             android:text="@string/add"
                             android:textSize="20sp"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintBottom_toBottomOf="@+id/register_lot_fragment_s_price"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toTopOf="@+id/register_lot_fragment_s_price" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <TextView
+                        android:id="@+id/register_lot_fragment_txt_slot_offer_warning"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="@string/add_at_least_one_slot_offer"
+                        android:textColor="@color/red"
+                        android:textSize="20sp"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toTopOf="@+id/textView3"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/register_lot_fragment_rv_price_list"

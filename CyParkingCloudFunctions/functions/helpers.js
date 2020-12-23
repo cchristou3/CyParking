@@ -2,44 +2,16 @@ const constants = require('./constants')
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 // Helper Functions
-// Firestore data converter
-module.exports.privateParkingConverter = {
-    toFirestore: function (privateParking) {
-        return {
-            id: privateParking.id,
-            parking: {
-                coordinates: {
-                    latitude: privateParking.coordinates.latitude,
-                    longitude: privateParking.coordinates.longitude,
-                },
-                parkingID: privateParking.parkingID,
-                pricingList: privateParking.pricingList,
-                capacity: privateParking.capacity,
-                availableSpaces: privateParking.availableSpaces,
-                capacityForDisabled: privateParking.capacityForDisabled,
-                availableSpacesForDisabled: privateParking.availableSpacesForDisabled,
-                openingHours: privateParking.openingHours
-            }
-        };
-    },
-    fromFirestore: function (snapshot, options) {
-        const data = snapshot.data(options);
-        return {
-            id: snapshot.id,
-            parking: snapshot.data()
-        };
-    }
-}
 
 // Determines whether the given location is inside the range
-const nearbyUser = function (parkingObject, userLatitude, userLongitude) {
+const nearbyUser = function (parking, userLatitude, userLongitude) {
     // User's lat lng
     var lat1 = userLatitude
     var lon1 = userLongitude;
 
     // Parking's lat lng
-    var lat2 = parkingObject.parking.coordinates.latitude;
-    var lon2 = parkingObject.parking.coordinates.longitude;
+    var lat2 = parking.coordinates.latitude;
+    var lon2 = parking.coordinates.longitude;
     
     // Calculate the distance between the two points (User and current parking)
     // Reference: http://www.movable-type.co.uk/scripts/latlong.html

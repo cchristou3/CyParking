@@ -23,18 +23,18 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AuthObserver;
-import io.github.cchristou3.CyParking.data.manager.SingleLocationManager;
+import io.github.cchristou3.CyParking.data.manager.LocationManager;
 
 /**
  * Purpose: <p>Show to the user all available options</p>
  *
  * @author Charalambos Christou
- * @version 3.0 21/12/20
+ * @version 4.0 23/12/20
  */
 public class HomeFragment extends Fragment implements Navigable, LocationHandler {
 
     // Fragment variables
-    private SingleLocationManager mSingleLocationManager;
+    private LocationManager mLocationManager;
 
     /**
      * Inflates our fragment's view.
@@ -62,10 +62,10 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
         // Attach listener to "Parking Map" button
         view.findViewById(R.id.fragment_home_btn_nav_to_map).setOnClickListener(v -> {
             // Initialize the SingleLocationManager object
-            if (mSingleLocationManager == null)
-                mSingleLocationManager = new SingleLocationManager(requireContext(), this);
+            if (mLocationManager == null)
+                mLocationManager = new LocationManager(requireContext(), this, true);
             // Request for the user's latest known location
-            mSingleLocationManager.getLastKnownLocationOfUser(this);
+            mLocationManager.requestUserLocationUpdates(this);
         });
         // Attach listener to "Register Parking lot" button
         view.findViewById(R.id.fragment_home_mbtn_register_parking_lot).setOnClickListener(v ->
@@ -110,7 +110,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
-        mSingleLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
+        mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
     }
 
     /**
@@ -163,7 +163,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      * Callback invoked when the user's location is received.
      *
      * @param locationResult The result of the user's requested location.
-     * @see SingleLocationManager#getLastKnownLocationOfUser(Fragment)
+     * @see LocationManager#requestUserLocationUpdates(Fragment)
      */
     @Override
     public void onLocationResult(LocationResult locationResult) {

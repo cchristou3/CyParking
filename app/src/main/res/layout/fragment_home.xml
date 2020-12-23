@@ -18,11 +18,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- CardView  To include all relevant info about the operator's lot.
-        Manipulate it accordingly. No lot? Register one -> Form...
-        Already registered? View/Update its info
-    -->
-
     <androidx.cardview.widget.CardView
         android:id="@+id/fragment_home_cv_lot_info"
         android:layout_width="match_parent"
@@ -34,6 +29,7 @@
         app:layout_constraintTop_toBottomOf="@+id/fragment_home_btn_nav_to_map">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="10dp">
@@ -75,8 +71,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="10dp"
-            android:visibility="gone">
+            android:padding="10dp">
 
             <TextView
                 android:id="@+id/fragment_home_txt_lot_message"

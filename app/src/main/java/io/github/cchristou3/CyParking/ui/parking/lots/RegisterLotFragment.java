@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +37,7 @@ import java.util.List;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.SingleLocationManager;
+import io.github.cchristou3.CyParking.data.manager.LocationManager;
 import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.pojo.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
@@ -61,7 +62,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     private float mSelectedDuration;
     private float mSelectedPrice;
     private RegisterLotFragmentBinding mRegisterLotFragmentBinding;
-    private SingleLocationManager mSingleLocationManager;
+    private LocationManager mLocationManager;
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -97,7 +98,6 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
         // Initialize the slot offer container
         mSlotOfferList = new ArrayList<>();
 
-        // Do UI related stuff here...
         InitializeUi();
 
         // Add an observer to the ViewModel's RegisterLotFormState
@@ -145,12 +145,10 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
 
         // Hook up a listener to the "get location" button
         getBinding().registerLotFragmentMbtnGetLocation.setOnClickListener(v -> {
-            // TODO: Get user's latest known location. After, extract the lat and lng attributes from it.
-            //  and finally update the EditTexts' text.
             Toast.makeText(requireContext(), "Location retrieved!", Toast.LENGTH_SHORT).show();
-            if (mSingleLocationManager == null)
-                mSingleLocationManager = new SingleLocationManager(requireContext(), this);
-            mSingleLocationManager.getLastKnownLocationOfUser(this);
+            if (mLocationManager == null)
+                mLocationManager = new LocationManager(requireContext(), this, true);
+            mLocationManager.requestUserLocationUpdates(this);
         });
 
         // Set up the recycler view
@@ -180,20 +178,21 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
         // Hook up a listener to the "Register" button
         final Button registerButton = getBinding().registerLotFragmentBtnRegisterLot;
         registerButton.setOnClickListener(v -> {
-            ParkingRepository.addDummyParkingData();
 
             // Create a ParkingLot object to hold all necessary info.
             mViewModel.registerParkingLot(buildParkingLotObject())
-                    .addOnCompleteListener(task -> {
-                        if (task != null && task.isSuccessful()) {
+                    .addOnCompleteListener((Task<Void> task) -> {
+
+                        if (task.getException() == null) {
                             // Display message to user.
-                            Toast.makeText(requireContext(), getString(R.string.success_lot_registration), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterLotFragment.this.requireContext(), RegisterLotFragment.this.getString(R.string.success_lot_registration), Toast.LENGTH_SHORT).show();
                             // Navigate back to home screen
-                            Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+                            Navigation.findNavController(RegisterLotFragment.this.getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
                                     .popBackStack();
-                        } else {
+                        } else if (task.getException() instanceof NullPointerException
+                                && task.getException().getMessage().equals("Continuation returned null")) {
                             // Display error message to user that the parking lot already exists
-                            Toast.makeText(requireContext(), getString(R.string.error_lot_already_exists), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterLotFragment.this.requireContext(), RegisterLotFragment.this.getString(R.string.error_lot_already_exists), Toast.LENGTH_SHORT).show();
                         }
                     });
         });
@@ -221,7 +220,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
             }
         };
 
-        // Attach listeners to the UI's EditTexts
+        // Attach textWatchers to the UI's EditTexts
         getBinding().registerLotFragmentEtPhoneBody.addTextChangedListener(textWatcher);
         getBinding().registerLotFragmentEtLotName.addTextChangedListener(textWatcher);
         getBinding().registerLotFragmentEtCapacity.addTextChangedListener(textWatcher);
@@ -239,7 +238,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
-        mSingleLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
+        mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
     }
 
     /**
@@ -253,7 +252,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     }
 
     /**
-     * Gathers all inputted information into a single ParkingLot object
+     * Gather all inputted information into a single ParkingLot object
      * and return it.
      *
      * @return A ParkingLot object containing all necessary info of an operator's
@@ -268,22 +267,20 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
         coordinates.put(ParkingRepository.LONGITUDE_KEY,
                 Double.parseDouble(getBinding().registerLotFragmentEtLocationLng.getText().toString()));
 
-        // Secondly, store the user's mobile number input into a local variable
-        final String pNumber = getBinding().registerLotFragmentEtPhoneBody.getText().toString();
-
         // Instantiate the ParkingLot object
-        final ParkingLot lotToBeRegistered = new ParkingLot(coordinates, pNumber,
-                FirebaseAuth.getInstance().getCurrentUser().getEmail());
-
-        // Set its remaining attributes via its setters
-        lotToBeRegistered.setLotName(getBinding().registerLotFragmentEtLotName.getText().toString());
-        lotToBeRegistered.setCapacity(Integer.parseInt(getBinding().registerLotFragmentEtCapacity.getText().toString()));
-        lotToBeRegistered.setCapacityForDisabled(0);
-        lotToBeRegistered.setOpeningHours(null);
-        lotToBeRegistered.setSlotOfferList(this.mSlotOfferList);
-
-        // return the ParkingLot object
-        return lotToBeRegistered;
+        // and return it
+        return new ParkingLot(
+                coordinates,  // coordinates
+                getBinding().registerLotFragmentEtLotName.getText().toString(), // lotName
+                FirebaseAuth.getInstance().getCurrentUser().getEmail(), // operatorEmail
+                getBinding().registerLotFragmentEtPhoneBody.getNonSpacedText(), // operatorMobileNumber
+                Integer.parseInt(getBinding().registerLotFragmentEtCapacity.getText().toString()), // capacity
+                0, // availableSpaces
+                0, // capacityForDisabled
+                0, // availableSpacesForDisabled
+                null, // openingHours
+                mSlotOfferList // slotOfferList
+        );
     }
 
     /**
@@ -308,29 +305,30 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
         final String phoneNumber = getBinding().registerLotFragmentEtPhoneBody.getText() != null ?
                 getBinding().registerLotFragmentEtPhoneBody.getText().toString().replace(" ", "") : "";
 
-        int a = RegisterLotFragment.this.mSlotOfferList.size();
+        int a = mSlotOfferList.size();
         mViewModel.lotRegistrationDataChanged(
                 phoneNumber,
                 lotCapacity,
                 getBinding().registerLotFragmentEtLotName.getText().toString(),
                 lotLatLng,
-                RegisterLotFragment.this.mSlotOfferList
+                mSlotOfferList
         );
     }
 
     /**
-     * Updates the specified TextView's error status with the given error
+     * Updates the specified TextView's error status with the given error.
+     * The method is used for Buttons and EditTexts (Derived classes of TextView).
      *
-     * @param derivedTextViewObject A Button or EditText instance.
-     * @param error                 The id of the error associated with the specified View object.
+     * @param viewToBeUpdated A Button or EditText instance.
+     * @param error           The id of the error associated with the specified View object.
      */
-    private boolean updateErrorOf(TextView derivedTextViewObject, @Nullable Integer error) {
+    private boolean updateErrorOf(TextView viewToBeUpdated, @Nullable Integer error) {
         if (error != null) {
-            derivedTextViewObject.setError(getString(error));
+            viewToBeUpdated.setError(getString(error));
             return true;
         } else {
-            if (derivedTextViewObject.getError() != null) {
-                derivedTextViewObject.setError(null, null);
+            if (viewToBeUpdated.getError() != null) {
+                viewToBeUpdated.setError(null, null);
             }
             return false;
         }
@@ -410,6 +408,35 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     }
 
     /**
+     * Getter for {@link #mRegisterLotFragmentBinding}
+     *
+     * @return A reference to the fragment's binding instance.
+     */
+    public RegisterLotFragmentBinding getBinding() {
+        return mRegisterLotFragmentBinding;
+    }
+
+    /**
+     * Callback invoked when the user's location is received.
+     *
+     * @param locationResult The result of the user's requested location.
+     * @see LocationManager#requestUserLocationUpdates(Fragment)
+     */
+    @Override
+    public void onLocationResult(LocationResult locationResult) {
+        if (locationResult != null) {
+            // Access the latest location
+            Location currentLocation = locationResult.getLastLocation();
+            // Set the Lat and Lng editTexts' text with the retrieved location's values.
+            getBinding().registerLotFragmentEtLocationLat.setText(String.valueOf(currentLocation.getLatitude()));
+            getBinding().registerLotFragmentEtLocationLng.setText(String.valueOf(currentLocation.getLongitude()));
+        } else {
+            // Inform the user something wrong happened
+            Toast.makeText(requireContext(), getString(R.string.error_retrieving_location), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
      * Navigates from the current Fragment subclass to the
      * {@link io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment}.
      */
@@ -457,35 +484,6 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     public void toHome() {
         Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
                 .navigate(R.id.action_nav_register_lot_fragment_to_nav_home);
-    }
-
-    /**
-     * Getter for {@link #mRegisterLotFragmentBinding}
-     *
-     * @return A reference to the fragment's binding instance.
-     */
-    public RegisterLotFragmentBinding getBinding() {
-        return mRegisterLotFragmentBinding;
-    }
-
-    /**
-     * Callback invoked when the user's location is received.
-     *
-     * @param locationResult The result of the user's requested location.
-     * @see SingleLocationManager#getLastKnownLocationOfUser(Fragment)
-     */
-    @Override
-    public void onLocationResult(LocationResult locationResult) {
-        if (locationResult != null) {
-            // Access the latest location
-            Location currentLocation = locationResult.getLastLocation();
-            // Set the Lat and Lng editTexts' text with the retrieved location's values.
-            getBinding().registerLotFragmentEtLocationLat.setText(String.valueOf(currentLocation.getLatitude()));
-            getBinding().registerLotFragmentEtLocationLng.setText(String.valueOf(currentLocation.getLongitude()));
-        } else {
-            // Inform the user something wrong happened
-            Toast.makeText(requireContext(), getString(R.string.error_retrieving_location), Toast.LENGTH_SHORT).show();
-        }
     }
 
     /**

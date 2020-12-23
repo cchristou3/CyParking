@@ -3,6 +3,8 @@ package io.github.cchristou3.CyParking.data.pojo.parking.lot;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -12,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
  * parking lot.
  *
  * @author Charalambos Christou
- * @version 1.0 14/12/2020
+ * @version 2.0 22/12/2020
  */
 public class SlotOffer implements Parcelable {
 
@@ -32,6 +34,11 @@ public class SlotOffer implements Parcelable {
     private float durationInHours;
     private float price;
 
+    /**
+     * A no-argument constructor to be used by Firebase.
+     */
+    public SlotOffer() {
+    }
 
     /**
      * Initialize the object's duration and
@@ -116,5 +123,16 @@ public class SlotOffer implements Parcelable {
      */
     public void setPrice(float price) {
         this.price = price;
+    }
+
+    /**
+     * Returns a string representation of the object.
+     *
+     * @return a string representation of the object.
+     */
+    @NonNull
+    @Override
+    public String toString() {
+        return "€" + this.price + " for " + this.durationInHours + " hours";
     }
 }

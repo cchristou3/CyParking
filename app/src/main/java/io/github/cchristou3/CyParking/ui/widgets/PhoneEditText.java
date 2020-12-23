@@ -4,16 +4,21 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.cchristou3.CyParking.MainHostActivity.TAG;
-
-public class PhoneEditText extends androidx.appcompat.widget.AppCompatEditText implements TextWatcher {
+/**
+ * Purpose: provide a more clean way of inputting a mobile number.
+ * It automatically adds spacing to make the mobile number appear
+ * as such as 99 99 99 99.
+ *
+ * @author Charalambos Christou
+ * @version 1.0 22/12/20
+ */
+public final class PhoneEditText extends androidx.appcompat.widget.AppCompatEditText implements TextWatcher {
 
     private int latestEditableLength = 0;
 
@@ -39,18 +44,6 @@ public class PhoneEditText extends androidx.appcompat.widget.AppCompatEditText i
         this.addTextChangedListener(this);
     }
 
-//    /**
-//     * Return the text that the view is displaying. If an editable text has not been set yet, this
-//     * will return null. Any spaces are omitted.
-//     */
-//    @Nullable
-//    @Override
-//    public Editable getText() {
-//        if (super.getText() == null || super.getText().length() == 0) return super.getText();
-//        final String currentText = super.getText().toString();
-//        return new SpannableStringBuilder(currentText.replace(" ", ""));
-//    }
-
     /**
      * Called by the garbage collector on an object when garbage collection
      * determines that there are no more references to the object.
@@ -67,41 +60,49 @@ public class PhoneEditText extends androidx.appcompat.widget.AppCompatEditText i
      * This method is called to notify you that, somewhere within
      * <code>s</code>, the text has been changed.
      *
-     * @param s The EditText's editable object.
+     * @param updatedEditable The EditText's editable object.
      */
     @Override
-    public void afterTextChanged(@NotNull Editable s) {
-        Log.d(TAG, "PhoneEditText afterTextChanged");
-        if (s.length() < latestEditableLength) {
-            latestEditableLength = s.length();
+    public void afterTextChanged(@NotNull Editable updatedEditable) {
+        // If the received Editable has shorter length than the previously stored one
+        // then the user is using backspace to remove characters.
+        if (updatedEditable.length() < latestEditableLength) {
+            latestEditableLength = updatedEditable.length();
+            // If the cursor is pointing in positions where there space is, then
+            // remove the space at that position.
             if (latestEditableLength == 2 || latestEditableLength == 5 || latestEditableLength == 8) {
-                s.replace(latestEditableLength - 1, latestEditableLength, "");
+                updatedEditable.replace(latestEditableLength - 1, latestEditableLength, "");
             }
+            // and terminate the method.
             return;
         }
-        int a = s.length();
-        int b = latestEditableLength;
 
-        String number = s.toString();
-        int length = number.length();
+        // Evey two digits at a white space.
+        int length = updatedEditable.toString().length();
         if (length == 2 || length == 5 || length == 8) {
-            s.insert(length, " ");//append(" ");
+            updatedEditable.insert(length, " ");
         }
-        latestEditableLength = s.length();
-    }
-
-
-    /**
-     * Ignored
-     */
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        // Keep track of the editable's length
+        latestEditableLength = updatedEditable.length();
     }
 
     /**
-     * Ignored
+     * Access the current text and remove any white spaces,
+     * then return it.
+     *
+     * @return The editText's text represented as a string without any white spaces.
+     */
+    @NotNull
+    public String getNonSpacedText() {
+        return super.getText().toString().replace(" ", "");
+    }
+
+    /**
+     * Unused {@link TextWatcher} methods
      */
     @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-    }
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* Ignore */ }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) { /* Ignore */ }
 }

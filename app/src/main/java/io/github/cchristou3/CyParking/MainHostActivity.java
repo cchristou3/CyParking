@@ -12,8 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
@@ -37,11 +35,6 @@ import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
  *
  * @author Charalambos Christou
  * @version 3.0 15/12/20
- * <p>
- * TODO: Solve race condition issue between
- * the {@link io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel#login && #register} methods
- * and
- * the {@link MainHostActivity} -> Auth listener
  */
 public class MainHostActivity extends AppCompatActivity {
 
@@ -88,17 +81,14 @@ public class MainHostActivity extends AppCompatActivity {
             mDrawerMenu.getItem(i).setOnMenuItemClickListener(this::onMenuItemClick);
         }
 
-        Navigation.setViewNavController(findViewById(R.id.fragment_main_host_nv_nav_view),
-                NavHostFragment.findNavController(getSupportFragmentManager().getFragments().get(0) // Access the NavHostFragment
-                        .getChildFragmentManager().getFragments().get(0)));
-
         // TODO: Solution to the Auth Race condition
         //  ViewModel for Main -> LiveData for a User object (User/ FirebaseUser)
         //  Initialize it with FireAuth.getInstance().getCurrentUser
         //  Fragments can access it and when Auth changes, they update it.
         //  (Add more details and design concerning the UI updates (Drawer/ActionBar and
         //  fragment related UI updates))
-
+        //  On Auth State changed -> invoked activeFragment
+        //  (which implements UiUpdatable)'s updateUi method.
 
         AuthObserver.newInstance(currentFirebaseUser -> {
             Log.d(TAG, "onCreate AuthObserver: invoked!");
@@ -153,6 +143,12 @@ public class MainHostActivity extends AppCompatActivity {
 
     /**
      * This hook is called whenever an item in your options menu is selected.
+     * <p>
+     * In the case of {@link #SIGN_IN}:
+     * <p>
+     * All fragments except ParkingBookingFragment, ViewBookingsFragment, AuthenticatorHosteeFragment, AuthenticatorFragment
+     * implement the Navigate interface and provide code to its functions.
+     * Thus, via polymorphism, the appropriate {@link Navigable#toAuthenticator()} gets invoked.
      *
      * @param item The menu item that was selected.
      * @return boolean Return false to allow normal menu processing to
@@ -172,13 +168,7 @@ public class MainHostActivity extends AppCompatActivity {
                 break;
             case SIGN_IN:
                 try {
-                    /*
-                     * All fragments but ParkingBookingFragment, ViewBookingsFragment, AuthenticatorHosteeFragment, AuthenticatorFragment
-                     * implement the Navigate interface and provide code to its functions.
-                     * Thus, via polymorphism, the appropriate {@link Navigate#toAuthenticator()} gets invoked.
-                     */
-                    getActiveFragment()
-                            .toAuthenticator();
+                    getActiveFragment().toAuthenticator();
 
                 } catch (IllegalStateException e) {
                     Toast.makeText(this, "Failed to navigate to login screen!", Toast.LENGTH_SHORT).show();

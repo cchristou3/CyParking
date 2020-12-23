@@ -38,26 +38,36 @@ import java.util.Objects;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.pojo.parking.slot.PrivateParkingResultSet;
 import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivateParkingBooking;
 import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
+import io.github.cchristou3.CyParking.ui.HomeFragment;
+import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsFragment;
+import io.github.cchristou3.CyParking.ui.user.AccountFragment;
+import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
+import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;
 
 import static io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment.TAG;
 
 /**
- * Purpose: <p>View parking details, (TODO:) choose a payment method
+ * Purpose: <p>View parking details,
  * and book the specific parking for a specific date and time.</p>
+ * <p>
+ * TODO: - choose a payment method
+ * - generate QR code
+ * - Change "end date" to duration. -> Simpler validation
+ * -> Update {@link PrivateParkingBooking}
  *
  * @author Charalambos Christou
- * @version 3.0 07/11/20
+ * @version 4.0 23/12/20
  */
 public class ParkingBookingFragment extends Fragment implements Navigable {
 
     // Fragment variables
     private ParkingBookingViewModel mParkingBookingViewModel;
-    private PrivateParkingResultSet mSelectedParking;
+    private ParkingLot mSelectedParking;
     private TextView parkingAvailability;
+    private TextView parkingCapacity;
 
     /**
      * Initialises the fragment. Uses the EventBus, to get access to data send by the previous fragment.
@@ -68,7 +78,7 @@ public class ParkingBookingFragment extends Fragment implements Navigable {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
-            mSelectedParking = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(PrivateParkingResultSet.class));
+            mSelectedParking = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(ParkingLot.class));
         } catch (ClassCastException | NullPointerException e) {
             Log.e(TAG, "onCreateView: ", e); // TODO: Plan B
         }
@@ -102,16 +112,16 @@ public class ParkingBookingFragment extends Fragment implements Navigable {
 
         // Get references to the UI elements
         final TextView parkingName = view.findViewById(R.id.fragment_parking_booking_txt_parking_name);
-        final TextView parkingCapacity = view.findViewById(R.id.fragment_parking_booking_txt_parking_capacity);
+        parkingCapacity = view.findViewById(R.id.fragment_parking_booking_txt_parking_capacity);
         parkingAvailability = view.findViewById(R.id.fragment_parking_booking_txt_parking_availability);
         final TextView datePickerTextView = view.findViewById(R.id.fragment_parking_booking_txt_date);
         final Button datePickerButton = view.findViewById(R.id.fragment_parking_booking_btn_date_button);
         final TextView startingTimeTextView = view.findViewById(R.id.fragment_parking_booking_txt_starting_time);
 
         // Set their text to their corresponding value
-        final String parkingID = "ParkingID: " + mSelectedParking.getParking().getParkingID();
-        final String capacity = "Capacity: " + mSelectedParking.getParking().getCapacity();
-        final String availableSpaces = "AvailableSpaces: " + mSelectedParking.getParking().getAvailableSpaces();
+        final String parkingID = "ParkingID: " + mSelectedParking.getParkingID();
+        final String capacity = "Capacity: " + mSelectedParking.getCapacity();
+        final String availableSpaces = "AvailableSpaces: " + mSelectedParking.getAvailableSpaces();
         parkingName.setText(parkingID);
         parkingCapacity.setText(capacity);
         parkingAvailability.setText(availableSpaces);
@@ -133,8 +143,8 @@ public class ParkingBookingFragment extends Fragment implements Navigable {
         endingTimeTextView.setText(mParkingBookingViewModel.getPickedEndingTime().getValue());
 
         // Set up time pickers' listeners
-        startingTimePickerButton.setOnClickListener(getListenerForTimePicker(mParkingBookingViewModel.getPickedStartingTime()));
-        endingTimePickerButton.setOnClickListener(getListenerForTimePicker(mParkingBookingViewModel.getPickedEndingTime()));
+        startingTimePickerButton.setOnClickListener(buildListenerForTimePicker(mParkingBookingViewModel.getPickedStartingTime()));
+        endingTimePickerButton.setOnClickListener(buildListenerForTimePicker(mParkingBookingViewModel.getPickedEndingTime()));
 
         // Set up date picker listener
         datePickerButton.setOnClickListener(v -> {
@@ -173,11 +183,15 @@ public class ParkingBookingFragment extends Fragment implements Navigable {
         super.onStart();
         ParkingRepository.observeSelectedParking(mSelectedParking)
                 .addSnapshotListener(requireActivity(), (value, error) -> {
-                    if (error != null) return;
-                    final String updatedParkingSlots = "AvailableSpaces: " + Objects.requireNonNull(Objects.requireNonNull(value)
-                            .toObject(ParkingLot.class)).getAvailableSpaces();
+                    if (error != null || (value == null || value.toObject(ParkingLot.class) == null))
+                        return;
+                    final String updatedAvailability = "AvailableSpaces: " +
+                            value.toObject(ParkingLot.class).getAvailableSpaces();
+                    final String updatedCapacity = "AvailableSpaces: " +
+                            value.toObject(ParkingLot.class).getCapacity();
 
-                    parkingAvailability.setText(updatedParkingSlots);
+                    parkingAvailability.setText(updatedAvailability);
+                    parkingCapacity.setText(updatedAvailability);
                 });
     }
 
@@ -224,11 +238,9 @@ public class ParkingBookingFragment extends Fragment implements Navigable {
             String username = (firebaseUser != null) ? firebaseUser.getDisplayName() : "Anonymous";
             String userID = (firebaseUser != null) ? firebaseUser.getUid() : "OneRandomUserID";
 
-            ParkingLot parking = mSelectedParking.getParking();
-
-            PrivateParkingBooking privateParkingBooking = new PrivateParkingBooking(
-                    parking.getCoordinates(), parking.getParkingID(), Integer.toString(parking.getParkingID()),
-                    Integer.toString(parking.getParkingID()), userID, username,
+            final PrivateParkingBooking privateParkingBooking = new PrivateParkingBooking(
+                    mSelectedParking.getCoordinates(), mSelectedParking.getParkingID(), Integer.toString(mSelectedParking.getParkingID()),
+                    Integer.toString(mSelectedParking.getParkingID()), userID, username,
                     pickedDateObject, pickedStartingTime, pickedEndingTime, 2.0);
 
             // Store to the database
@@ -258,7 +270,7 @@ public class ParkingBookingFragment extends Fragment implements Navigable {
      */
     @NotNull
     @Contract(pure = true)
-    private View.OnClickListener getListenerForTimePicker(@NotNull MutableLiveData<String> stringMutableLiveData) {
+    private View.OnClickListener buildListenerForTimePicker(@NotNull MutableLiveData<String> stringMutableLiveData) {
         return v -> {
             TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
                     AlertDialog.THEME_HOLO_DARK, // TODO: useful for night mode THEME_HOLO_LIGHT
@@ -271,32 +283,54 @@ public class ParkingBookingFragment extends Fragment implements Navigable {
         };
     }
 
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link AuthenticatorFragment}.
+     */
     @Override
     public void toAuthenticator() {
         // The user must be logged in to be in this fragment (Booking screen). Thus, no need to implement this method.
     }
 
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link ViewBookingsFragment}.
+     */
     @Override
     public void toBookings() {
         Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
                 .navigate(R.id.action_nav_parking_booking_fragment_to_nav_view_bookings);
     }
 
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link AccountFragment}.
+     */
     @Override
     public void toAccount() {
         Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
                 .navigate(R.id.action_nav_parking_booking_fragment_to_nav_account);
     }
 
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link FeedbackFragment}.
+     */
     @Override
     public void toFeedback() {
         Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
                 .navigate(R.id.action_nav_parking_booking_fragment_to_nav_feedback);
     }
 
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link HomeFragment}.
+     */
     @Override
     public void toHome() {
         Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
                 .navigate(R.id.action_nav_parking_booking_fragment_to_nav_home);
     }
+
 }

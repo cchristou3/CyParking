@@ -1,6 +1,7 @@
 package io.github.cchristou3.CyParking.data.repository;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -13,14 +14,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.pojo.parking.slot.PrivateParkingResultSet;
 import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivateParkingBooking;
 
 /**
  * Purpose: <p>contain all methods to access the (cloud / local) database's parking nodes.</p>
  *
  * @author Charalambos Christou
- * @version 3.0 21/12/20
+ * @version 4.0 23/12/20
  */
 public class ParkingRepository {
 
@@ -49,6 +49,18 @@ public class ParkingRepository {
     }
 
     /**
+     * An observer is attached to the current collection, to listen for changes
+     * concerning the parking lots (available spaces, prices).
+     * Removal of observer is self-managed by the hosting activity.
+     *
+     * @return The {@link CollectionReference} reference to be observed.
+     */
+    @NotNull
+    public static CollectionReference observerParkingLots() {
+        return FirebaseFirestore.getInstance().collection(PRIVATE_PARKING);
+    }
+
+    /**
      * Stores to the database's PRIVATE_PARKING node the specified object.
      * The document id used corresponds to the merge of the ParkingLot object's
      * coordinates and the given operator mobile number.
@@ -68,7 +80,9 @@ public class ParkingRepository {
                     // within the database.
                     if (task.isSuccessful() && task.getResult().getData() != null) {
                         return null; // Do not do any more tasks
-
+                        // Returning null will result into a NullPointerException("Continuation returned null")
+                        // As the continueWithTask method cannot return null.
+                        // Thus, in fragment check for this kind of exception and handle it appropriately
                         // TODO: what if the task failed?
                     } else {
                         // Add it to the database
@@ -84,7 +98,7 @@ public class ParkingRepository {
      * Stores the specified object to the database's PRIVATE_PARKING_BOOKING node.
      *
      * @param privateParkingBookingToBeStored Holds all necessary info about a booking of a private parking
-     * @return A Task<DocumentReference> object which listeners can be attached to
+     * @return A Task<Void> object to be handled in the calling fragment.
      */
     @NotNull
     public static Task<Void> bookParking(@NotNull PrivateParkingBooking privateParkingBookingToBeStored) {
@@ -115,9 +129,9 @@ public class ParkingRepository {
      * @return The {@link DocumentReference} reference to be observed.
      */
     @NotNull
-    public static DocumentReference observeSelectedParking(@NotNull PrivateParkingResultSet selectedParking) {
+    public static DocumentReference observeSelectedParking(@NotNull ParkingLot selectedParking) {
         return FirebaseFirestore.getInstance().collection(PRIVATE_PARKING)
-                .document(selectedParking.getDocumentID());
+                .document(selectedParking.generateUniqueId());
     }
 
     /**

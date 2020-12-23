@@ -16,8 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Calendar;
 import java.util.Date;
 
-import io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment;
-
 /**
  * Purpose: <p>Contain all helper / utility methods which the application needs.</p>
  *
@@ -25,6 +23,9 @@ import io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment;
  * @version 2.0 14/12/20
  */
 public class Utility {
+
+    // Static Constants
+    private static final double MAXIMUM_METERS_FROM_USER = 1000.0D;
 
     /**
      * The parent view no longer receives touch events from the specified
@@ -70,7 +71,7 @@ public class Utility {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double d = R * c; // d is the total distance in metres
 
-        return (d <= ParkingMapFragment.MAXIMUM_METERS_FROM_USER);
+        return (d <= MAXIMUM_METERS_FROM_USER);
     }
 
     /**

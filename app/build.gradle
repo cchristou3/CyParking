@@ -83,5 +83,4 @@ dependencies {
 
     // Java 8 DefaultLifecycleObserver  dependency
     implementation 'android.arch.lifecycle:common-java8:1.1.1'
-
 }

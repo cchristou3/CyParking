@@ -19,12 +19,12 @@
         tools:context=".ui.parking.lots.ParkingMapFragment" />
 
     <androidx.core.widget.ContentLoadingProgressBar
-        android:visibility="visible"
         android:id="@+id/fragment_parking_map_pb_loadingMarkers"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@+id/fragment_parking_map_fcv_map"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -55,31 +55,31 @@
             android:orientation="vertical">
 
             <TextView
-                android:maxLength="17"
-                android:text="122212121212121121212123123123"
                 android:id="@+id/fragment_parking_map_txt_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:maxLength="17"
+                android:text="122212121212121121212123123123"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="@+id/activity_parking_map_fg_google_map" />
 
             <TextView
-                android:maxLength="17"
-                android:text="122212121212121121212123123123"
                 android:id="@+id/fragment_parking_map_txt_capacity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:maxLength="17"
+                android:text="122212121212121121212123123123"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="@+id/activity_parking_map_fg_google_map" />
 
             <TextView
-                android:maxLength="17"
-                android:text="122212121212121121212123123123"
                 android:id="@+id/fragment_parking_map_txt_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:maxLength="17"
+                android:text="122212121212121121212123123123"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="@+id/activity_parking_map_fg_google_map" />

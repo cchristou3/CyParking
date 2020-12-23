@@ -33,7 +33,7 @@ import io.github.cchristou3.CyParking.utilities.ShaUtility;
  * {@link #coordinates}, its {@link #parkingID} and its {@link #lotName}.
  *
  * @author Charalambos Christou
- * @version 4.0 20/12/20
+ * @version 5.0 23/12/20
  */
 public class ParkingLot extends Parking {
 
@@ -66,7 +66,7 @@ public class ParkingLot extends Parking {
     @Nullable
     @SerializedName("openingHours")
     private String openingHours;
-    @SerializedName("slotOffers")
+    @SerializedName("slotOfferList")
     private List<SlotOffer> slotOfferList;
 
     public ParkingLot() {
@@ -83,6 +83,22 @@ public class ParkingLot extends Parking {
         this.capacityForDisabled = 0;
         this.openingHours = null;
         this.slotOfferList = null;
+    }
+
+    public ParkingLot(HashMap<String, Double> coordinates, String lotName, String operatorEmail, String operatorMobileNumber,
+                      int capacity, int availableSpaces, int capacityForDisabled, int availableSpacesForDisabled,
+                      @Nullable String openingHours, List<SlotOffer> slotOfferList) {
+        super(coordinates, 0);
+        this.setParkingID(generateParkingId(coordinates.values().toArray(), operatorMobileNumber));
+        this.lotName = lotName;
+        this.operatorEmail = operatorEmail;
+        this.operatorMobileNumber = operatorMobileNumber;
+        this.capacity = capacity;
+        this.availableSpaces = availableSpaces;
+        this.capacityForDisabled = capacityForDisabled;
+        this.availableSpacesForDisabled = availableSpacesForDisabled;
+        this.openingHours = openingHours;
+        this.slotOfferList = slotOfferList;
     }
 
     protected ParkingLot(Parcel in) {
@@ -131,14 +147,70 @@ public class ParkingLot extends Parking {
     @Override
     public String toString() {
         return
-                "Coordinates: " + getCoordinates() +
-                        ", ParkingID: " + getParkingID() +
-                        ", PricingList: " + getSlotOfferList() +
-                        ", Capacity: " + getCapacity() +
-                        ", AvailableSpaces: " + getAvailableSpaces() +
-                        ", CapacityForDisabled: " + getCapacityForDisabled() +
-                        ", AvailableSpacesForDisabled: " + getAvailableSpacesForDisabled() +
-                        ", OpeningHours: " + getOpeningHours();
+                "LotName: " + lotName + ", "
+                        + "OperatorEmail: " + operatorEmail + ", "
+                        + "OperatorMobileNumber: " + operatorMobileNumber + ", "
+                        + "Capacity: " + capacity + ", "
+                        + "AvailableSpaces: " + availableSpaces + ", "
+                        + "CapacityForDisabled: " + capacityForDisabled + ", "
+                        + "AvailableSpacesForDisabled: " + availableSpacesForDisabled + ", "
+                        + "OpeningHours: " + openingHours + ", "
+                        + "SlotOfferList: " + slotOfferList;
+
+    }
+
+    /**
+     * Access the the parking lot's coordinates
+     * based on a key.
+     * The key indicates whether to access its
+     *
+     * @param key The key used for look up.
+     * @return The Latitude or its Longitude of the lot, depending of the given key.
+     */
+    public double getParkingLotAttribute(String key) {
+        if (getCoordinates().get(key) != null)
+            return getCoordinates().get(key);
+        else
+            return 0.00000D;
+    }
+
+    /**
+     * Create a new string which consists of the following attributes:
+     * {@link #coordinates}, {@link #parkingID} and {@link #lotName}
+     * Then, hash the generated string and return it.
+     * Used as the DocumentID for the Firestore database's PRIVATE_PARKING node.
+     *
+     * @return A digest unique to each object
+     * @see io.github.cchristou3.CyParking.data.repository.ParkingRepository
+     * @see PrivateParkingBooking#generateUniqueId()
+     */
+    @Override
+    public String generateUniqueId() {
+        // Create a long and unique id
+        String id = getCoordinates().values().toString() + parkingID + lotName;
+        // Hash (SHA256) it to has a fixed length of 32 characters and return its value
+        return ShaUtility.digest(id);
+    }
+
+    /**
+     * Generate a unique identifier based on the lot's
+     * coordinates and the operator's mobile phone number.
+     *
+     * @param lotCoordinates The lot's coordinates.
+     * @param mobileNumber   The operator's mobile number.
+     * @return
+     */
+    private int generateParkingId(@NotNull final Object[] lotCoordinates, @NotNull String mobileNumber) {
+        try {
+            int lat = (int) ((double) lotCoordinates[0] * 1000000); // Get rid most of the decimal part
+            int lng = (int) ((double) lotCoordinates[1] * 1000000); // and cast it to an integer
+            // 33.62356 -> (int)336235.6 -> 336235
+
+            return Integer.parseInt(mobileNumber) + lat + lng;
+        } catch (ClassCastException | NumberFormatException e) {
+            byte[] bytesOfObject = (mobileNumber + lotCoordinates[0] + lotCoordinates[1] + capacity).getBytes();
+            return UUID.nameUUIDFromBytes(bytesOfObject).hashCode();
+        }
     }
 
     // Getters & Setters
@@ -206,44 +278,12 @@ public class ParkingLot extends Parking {
         this.availableSpacesForDisabled = availableSpacesForDisabled;
     }
 
-    @org.jetbrains.annotations.Nullable
+    @Nullable
     public String getOpeningHours() {
         return openingHours;
     }
 
     public void setOpeningHours(@Nullable String openingHours) {
         this.openingHours = openingHours;
-    }
-
-    /**
-     * Create a new string which consists of the following attributes:
-     * {@link #coordinates}, {@link #parkingID} and {@link #lotName}
-     * Then, hash the generated string and return it.
-     * Used as the DocumentID for the Firestore database's PRIVATE_PARKING node.
-     *
-     * @return A digest unique to each object
-     * @see io.github.cchristou3.CyParking.data.repository.ParkingRepository
-     * @see PrivateParkingBooking#generateUniqueId()
-     */
-    @Override
-    public String generateUniqueId() {
-        // Create a long and unique id
-        String id = getCoordinates().values().toString() + parkingID + lotName;
-        // Hash (SHA256) it to has a fixed length of 32 characters and return its value
-        String digest = ShaUtility.digest(id);
-        return digest;
-    }
-
-    private int generateParkingId(@NotNull final Object[] lotCoordinates, @NotNull String mobileNumber) {
-        try {
-            String number = mobileNumber.replace(" ", "");
-            int lat = (int) ((double) lotCoordinates[0] * 1000000); // Get rid most of the decimal part
-            int lng = (int) ((double) lotCoordinates[1] * 1000000); // and cast it to an integer
-
-            return Integer.parseInt(number) + lat + lng;
-        } catch (ClassCastException | NumberFormatException e) {
-            byte[] bytesOfObject = (mobileNumber + lotCoordinates[0] + lotCoordinates[1] + capacity).getBytes();
-            return UUID.nameUUIDFromBytes(bytesOfObject).hashCode();
-        }
     }
 }

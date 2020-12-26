@@ -75,6 +75,7 @@ The application has the following features so far:
 * Sign in/up [Everyone]
 * Update name/email/password [Everyone]
 * Send Feedback [Everyone]
+* Register Parking Lot [Operator]
 
 A list of commonly used resources that I find helpful are listed in the acknowledgements.
 

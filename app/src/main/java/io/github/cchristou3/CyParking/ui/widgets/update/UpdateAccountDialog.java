@@ -28,10 +28,9 @@ import io.github.cchristou3.CyParking.R;
 
 import static io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog.getStyleConfiguration;
 
-// TODO: Add log out button. Test update password functionality
-
 /**
  * Purpose: Allows the users to update one of their attributes.
+ * TODO: Update user data on the database node as well if updating email/display name
  *
  * @author Charalambos Christou
  * @version 2.0 11/12/20

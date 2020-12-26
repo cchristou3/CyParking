@@ -50,24 +50,23 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         super();
     }
 
-
-    public PrivateParkingBooking(HashMap<String, Double> coordinates, int parkingID, String parkingOperatorID, String parkingName, String userID, String username, Date dateOfBooking, String startingTime, String endingTime, double price, boolean completed) {
-        this.coordinates = coordinates;
-        this.parkingID = parkingID;
-        this.parkingOperatorID = parkingOperatorID;
-        this.parkingName = parkingName;
-        this.userID = userID;
-        this.username = username;
-        this.dateOfBooking = dateOfBooking;
-        this.startingTime = startingTime;
-        this.endingTime = endingTime;
-        this.price = price;
-        this.completed = completed;
-    }
-
+    /**
+     * Public Constructor.
+     * Initialize all the attributes of the class with the given arguments.
+     *
+     * @param coordinates       The lot's to be booked coordinates
+     * @param parkingID         The lot's id.
+     * @param parkingOperatorID The lot's operator.
+     * @param parkingName       The lot's name.
+     * @param userID            The lot's operator's id.
+     * @param username          The username of the user that booked a space in the lot.
+     * @param dateOfBooking     The date of the booking.
+     * @param startingTime      The starting time of the booking.
+     * @param endingTime        The ending time of the booking.
+     * @param price             The fee of the parking.
+     */
     public PrivateParkingBooking(HashMap<String, Double> coordinates, int parkingID, String parkingOperatorID, String parkingName, String userID, String username, Date dateOfBooking, String startingTime, String endingTime, double price) {
-        this.coordinates = coordinates;
-        this.parkingID = parkingID;
+        super(coordinates, parkingID);
         this.parkingOperatorID = parkingOperatorID;
         this.parkingName = parkingName;
         this.userID = userID;
@@ -79,6 +78,13 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         this.completed = getInitialBookingStatus();
     }
 
+    /**
+     * Constructor to be used by the Parcelable interface
+     * to initialize the PrivateParkingBooking instance with the specified
+     * {@link Parcel}.
+     *
+     * @param in Contains the contents of the PrivateParkingBooking instance.
+     */
     protected PrivateParkingBooking(Parcel in) {
         super(in);
         dateOfBooking = new Date(in.readLong());
@@ -92,35 +98,44 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         completed = (in.readInt() == 1);
     }
 
+    /**
+     * Compares the given object with the current object.
+     * The {@link #generateUniqueId()} method is used
+     * to produce the id of each object.
+     *
+     * @param obj The object to be compared with.
+     * @return True, if both objects generate the same id. Otherwise, false.
+     */
     @Override
     public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof PrivateParkingBooking)) return false;
         return this.generateUniqueId().equals(((PrivateParkingBooking) obj).generateUniqueId());
     }
 
-    public void updateContents(PrivateParkingBooking privateParkingBooking) {
-        this.coordinates = privateParkingBooking.coordinates;
-        this.parkingID = privateParkingBooking.parkingID;
-        this.parkingOperatorID = privateParkingBooking.parkingOperatorID;
-        this.parkingName = privateParkingBooking.parkingName;
-        this.userID = privateParkingBooking.userID;
-        this.username = privateParkingBooking.username;
-        this.dateOfBooking = privateParkingBooking.dateOfBooking;
-        this.startingTime = privateParkingBooking.startingTime;
-        this.endingTime = privateParkingBooking.endingTime;
-        this.price = privateParkingBooking.price;
-        this.completed = privateParkingBooking.completed;
-    }
-
+    /**
+     * Get the initial status of each booking.
+     *
+     * @return False, as to booking not completed yet.
+     */
     public boolean getInitialBookingStatus() {
         return false;
     }
 
+    /**
+     * Non-implemented Parcelable method.
+     */
     @Override
     public int describeContents() {
         return 0;
     }
 
+    /**
+     * Flatten this object in to a Parcel.
+     *
+     * @param dest  The Parcel in which the object should be written.
+     * @param flags Additional flags about how the object should be written.
+     *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
+     */
     @Override
     public void writeToParcel(@NotNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
@@ -135,6 +150,9 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         dest.writeInt(completed ? 1 : 0);
     }
 
+    /**
+     * Getters and Setters
+     */
     public String getParkingOperatorID() {
         return parkingOperatorID;
     }

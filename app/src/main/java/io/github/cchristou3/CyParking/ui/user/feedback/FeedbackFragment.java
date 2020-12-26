@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
+import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;
 
 /**
@@ -220,7 +221,7 @@ public class FeedbackFragment extends Fragment implements Navigable {
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.HomeFragment}.
+     * {@link HomeFragment}.
      */
     @Override
     public void toHome() {

@@ -14,6 +14,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
+import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 
 /**
  * Purpose: <p>To host the two tabs (Sign in, Sign up) and provide to both the same instance of</p>
@@ -87,7 +88,7 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.HomeFragment}.
+     * {@link HomeFragment}.
      */
     @Override
     public void toHome() {

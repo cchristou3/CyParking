@@ -47,7 +47,7 @@ import io.github.cchristou3.CyParking.data.manager.LocationManager;
 import io.github.cchristou3.CyParking.data.manager.MarkerManager;
 import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
-import io.github.cchristou3.CyParking.ui.HomeFragment;
+import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsFragment;
 import io.github.cchristou3.CyParking.ui.user.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
@@ -151,17 +151,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
 
         // Hook up the "directions" button with an on click listener
         view.findViewById(R.id.fragment_parking_map_imgbtn_directions).setOnClickListener(v -> {
-            if (mMarkerManager.getSelectedParkingLot() == null) return;
-            // Access the coordinates of the selected marker
-            double selectedParkingLatitude = mMarkerManager.getSelectedLocationAttribute(ParkingRepository.LATITUDE_KEY);
-            double selectedParkingLongitude = mMarkerManager.getSelectedLocationAttribute(ParkingRepository.LONGITUDE_KEY);
-            // Create Uri (query string) for a Google Maps Intent
-            // :q= indicates that we request for directions
-            // Launch Google Maps activity
-            startActivity(new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("google.navigation:q=" + selectedParkingLatitude
-                            + "," + selectedParkingLongitude)).setPackage("com.google.android.apps.maps"));
-
+            getDirections();
         });
 
         // Hook up the "book" button with an onClick listener
@@ -184,6 +174,24 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
         // Show a progress bar to inform the user that the data is loading
         mContentLoadingProgressBar = view.findViewById(R.id.fragment_parking_map_pb_loadingMarkers);
         mContentLoadingProgressBar.getIndeterminateDrawable().setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
+    }
+
+    /**
+     * Creates and launches a GoogleMaps intent.
+     * The user will be navigated to his GoogleMaps app
+     * and directions will be set for the given position.
+     */
+    private void getDirections() {
+        if (mMarkerManager.getSelectedParkingLot() == null) return;
+        // Access the coordinates of the selected marker
+        double selectedParkingLatitude = mMarkerManager.getSelectedLocationAttribute(ParkingRepository.LATITUDE_KEY);
+        double selectedParkingLongitude = mMarkerManager.getSelectedLocationAttribute(ParkingRepository.LONGITUDE_KEY);
+        // Create Uri (query string) for a Google Maps Intent
+        // :q= indicates that we request for directions
+        // Launch Google Maps activity
+        startActivity(new Intent(Intent.ACTION_VIEW,
+                Uri.parse("google.navigation:q=" + selectedParkingLatitude
+                        + "," + selectedParkingLongitude)).setPackage("com.google.android.apps.maps"));
     }
 
     /**
@@ -237,7 +245,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
 
     @NotNull
     public ListenerRegistration retrieveDataAndListenForChanges() throws NullPointerException {
-        return ParkingRepository.observerParkingLots().addSnapshotListener((value, error) -> {
+        return ParkingRepository.observeAllParkingLots().addSnapshotListener((value, error) -> {
             // ref: https://firebase.google.com/docs/firestore/query-data/listen#view_changes_between_snapshots
             if (!triggeredFirstDatabaseUpdate) { // To ensure that when we add the listener, the block of code will not get executed
                 // Fetch initial data via HTTPs request, the filtering will be done by a cloud function
@@ -399,7 +407,8 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
             // Get the corresponding hash map object
             ParkingLot dataOfSelectedMarker = mMarkerManager.getParkingLotOf(marker);
             nameTextViewString = dataOfSelectedMarker.getOpeningHours();
-            capacityTextViewString = dataOfSelectedMarker.getAvailableSpaces() + " / " + dataOfSelectedMarker.getCapacity();
+            capacityTextViewString = (dataOfSelectedMarker.getCapacity() - dataOfSelectedMarker.getAvailableSpaces())
+                    + " / " + dataOfSelectedMarker.getCapacity();
             try {
                 slotOfferTextViewString = dataOfSelectedMarker.getSlotOfferList().get(0).toString();
             } catch (NullPointerException ignored) {

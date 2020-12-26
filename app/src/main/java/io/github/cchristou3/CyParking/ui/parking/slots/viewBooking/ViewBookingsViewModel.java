@@ -8,7 +8,7 @@ import java.util.List;
 import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivateParkingBooking;
 
 /**
- * Purpose: <p>Data persistence when orientation changes. Shared amongst all tab fragments.
+ * Purpose: <p>Data persistence when orientation changes.
  * Used when the users try to view their bookings.</p>
  *
  * @author Charalambos Christou
@@ -16,10 +16,16 @@ import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivatePark
  */
 public class ViewBookingsViewModel extends ViewModel {
 
-    final private MutableLiveData<List<PrivateParkingBooking>> bookingListMutableLiveData =
+    // Data member
+    final private MutableLiveData<List<PrivateParkingBooking>> bookingList =
             new MutableLiveData<>();
 
-    public MutableLiveData<List<PrivateParkingBooking>> getBookingListMutableLiveData() {
-        return bookingListMutableLiveData;
+    /**
+     * Access the booking list's state
+     *
+     * @return The state of the booking list.
+     */
+    public MutableLiveData<List<PrivateParkingBooking>> getBookingList() {
+        return bookingList;
     }
 }

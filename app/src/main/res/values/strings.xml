@@ -100,5 +100,6 @@
     <string name="success_lot_registration">Lot registered successfully!</string>
     <string name="increment_by_one">Increment by one</string>
     <string name="decrement_by_one">Decrement by one</string>
+    <string name="availability">Availability: </string>
 
 </resources>

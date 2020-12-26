@@ -84,7 +84,7 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
 
         // Initialize the fragment's ViewModel / LiveData
         bookingListMutableLiveData =
-                new ViewModelProvider(requireActivity()).get(ViewBookingsViewModel.class).getBookingListMutableLiveData();
+                new ViewModelProvider(requireActivity()).get(ViewBookingsViewModel.class).getBookingList();
 
         pendingButton = view.findViewById(R.id.fragment_view_bookings_btn_pending);
         completedButton = view.findViewById(R.id.fragment_view_bookings_btn_completed);

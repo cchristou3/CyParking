@@ -69,9 +69,18 @@ public class ParkingLot extends Parking {
     @SerializedName("slotOfferList")
     private List<SlotOffer> slotOfferList;
 
-    public ParkingLot() {
-    }  //  no-argument constructor to be used by GSON
+    public ParkingLot() { /*  no-argument constructor to be used by GSON */ }
 
+    /**
+     * Public Constructor.
+     * Initializes {@link #coordinates}, {@link #operatorMobileNumber},
+     * and {@link #operatorMobileNumber} with the specified arguments.
+     * The remaining fields are set to their default values.
+     *
+     * @param coordinates          The position of the lot.
+     * @param operatorMobileNumber The lot's operator's phone number.
+     * @param email                The lot's operator's email address.
+     */
     public ParkingLot(HashMap<String, Double> coordinates, String operatorMobileNumber, String email) {
         super(coordinates, 0);
         this.setParkingID(generateParkingId(coordinates.values().toArray(), operatorMobileNumber));
@@ -85,8 +94,23 @@ public class ParkingLot extends Parking {
         this.slotOfferList = null;
     }
 
+    /**
+     * Public Constructor.
+     * Initialize all the attributes of the class with the given arguments.
+     * Besides, the {@link #parkingID} is generated and set.
+     *
+     * @param coordinates                The position of the lot.
+     * @param lotName                    The lot's name.
+     * @param operatorEmail              The lot's operator's email address.
+     * @param operatorMobileNumber       The lot's operator's phone number.
+     * @param capacity                   The lot's capacity.
+     * @param capacityForDisabled        The lot's capacity for disabled people.
+     * @param availableSpacesForDisabled The lot's available spaces for disabled people.
+     * @param openingHours               The lot's opening hours.
+     * @param slotOfferList              The lot's offers.
+     */
     public ParkingLot(HashMap<String, Double> coordinates, String lotName, String operatorEmail, String operatorMobileNumber,
-                      int capacity, int availableSpaces, int capacityForDisabled, int availableSpacesForDisabled,
+                      int capacity, int capacityForDisabled, int availableSpacesForDisabled,
                       @Nullable String openingHours, List<SlotOffer> slotOfferList) {
         super(coordinates, 0);
         this.setParkingID(generateParkingId(coordinates.values().toArray(), operatorMobileNumber));
@@ -94,13 +118,20 @@ public class ParkingLot extends Parking {
         this.operatorEmail = operatorEmail;
         this.operatorMobileNumber = operatorMobileNumber;
         this.capacity = capacity;
-        this.availableSpaces = availableSpaces;
+        this.availableSpaces = capacity;
         this.capacityForDisabled = capacityForDisabled;
         this.availableSpacesForDisabled = availableSpacesForDisabled;
         this.openingHours = openingHours;
         this.slotOfferList = slotOfferList;
     }
 
+    /**
+     * Constructor to be used by the Parcelable interface
+     * to initialize the ParkingLot instance with the specified
+     * {@link Parcel}.
+     *
+     * @param in Contains the contents of the ParkingLot instance.
+     */
     protected ParkingLot(Parcel in) {
         super(in);
         lotName = in.readString();
@@ -119,6 +150,13 @@ public class ParkingLot extends Parking {
         }
     }
 
+    /**
+     * Flatten this object in to a Parcel.
+     *
+     * @param dest  The Parcel in which the object should be written.
+     * @param flags Additional flags about how the object should be written.
+     *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
+     */
     @Override
     public void writeToParcel(@NotNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
@@ -134,15 +172,23 @@ public class ParkingLot extends Parking {
         int size = slotOfferList.size();
         dest.writeInt(size);
         for (int i = 0; i < size; i++) {
-            dest.writeParcelable(slotOfferList.get(i), 0);
+            dest.writeParcelable(slotOfferList.get(i), flags);
         }
     }
 
+    /**
+     * Non-implemented Parcelable method.
+     */
     @Override
     public int describeContents() {
         return 0;
     }
 
+    /**
+     * Returns a string representation of the object.
+     *
+     * @return a string representation of the object.
+     */
     @NonNull
     @Override
     public String toString() {
@@ -168,10 +214,10 @@ public class ParkingLot extends Parking {
      * @return The Latitude or its Longitude of the lot, depending of the given key.
      */
     public double getParkingLotAttribute(String key) {
-        if (getCoordinates().get(key) != null)
-            return getCoordinates().get(key);
-        else
+        if (getCoordinates() == null || getCoordinates().get(key) == null)
             return 0.00000D;
+        else
+            return getCoordinates().get(key);
     }
 
     /**
@@ -198,7 +244,7 @@ public class ParkingLot extends Parking {
      *
      * @param lotCoordinates The lot's coordinates.
      * @param mobileNumber   The operator's mobile number.
-     * @return
+     * @return The id of the parking lot.
      */
     private int generateParkingId(@NotNull final Object[] lotCoordinates, @NotNull String mobileNumber) {
         try {
@@ -213,7 +259,9 @@ public class ParkingLot extends Parking {
         }
     }
 
-    // Getters & Setters
+    /**
+     * Getters & Setters
+     */
     public String getOperatorEmail() {
         return operatorEmail;
     }

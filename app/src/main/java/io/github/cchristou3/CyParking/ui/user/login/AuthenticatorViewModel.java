@@ -30,8 +30,36 @@ public class AuthenticatorViewModel extends ViewModel {
     // First fragment which appears to the user is the "sign in" tab
     private final MutableLiveData<Boolean> isUserInSigningInTab = new MutableLiveData<>(true);
 
+    /**
+     * Initialize the ViewModel's AuthenticatorRepository instance with the given
+     * argument.
+     *
+     * @param authenticatorRepository An AuthenticatorRepository instance.
+     */
     AuthenticatorViewModel(AuthenticatorRepository authenticatorRepository) {
         this.authenticatorRepository = authenticatorRepository;
+    }
+
+    /**
+     * A placeholder username validation check.
+     *
+     * @param username The username of the user.
+     * @return true if it passes the criteria.
+     */
+    public static boolean isEmailValid(String username) {
+        if (username == null || username.trim().isEmpty()) return false;
+
+        return Patterns.EMAIL_ADDRESS.matcher(username).matches();
+    }
+
+    /**
+     * A password validation check
+     *
+     * @param password The password of the user.
+     * @return true if it passes the criteria.
+     */
+    public static boolean isPasswordValid(String password) {
+        return password != null && password.trim().length() > 5;
     }
 
     /**
@@ -40,9 +68,9 @@ public class AuthenticatorViewModel extends ViewModel {
      * @param username The user name of the user.
      * @param password The password of the user.
      */
-    public void login(String username, String password) {
+    public void login(Context context, String username, String password) {
         // can be launched in a separate asynchronous job
-        authenticatorRepository.login(username, password, loginResult);
+        authenticatorRepository.login(context, username, password, loginResult);
     }
 
     /**
@@ -64,18 +92,6 @@ public class AuthenticatorViewModel extends ViewModel {
     }
 
     /**
-     * A placeholder username validation check.
-     *
-     * @param username The username of the user.
-     * @return true if it passes the criteria.
-     */
-    public static boolean isEmailValid(String username) {
-        if (username == null || username.trim().isEmpty()) return false;
-
-        return Patterns.EMAIL_ADDRESS.matcher(username).matches();
-    }
-
-    /**
      * Validates whether the user picked any of the roles.
      *
      * @param isUser     true if the user selected the checkbox which corresponds to the user. Otherwise, false.
@@ -84,16 +100,6 @@ public class AuthenticatorViewModel extends ViewModel {
      */
     private boolean AreAnyRolesSelected(boolean isUser, boolean isOperator) {
         return isUser || isOperator;
-    }
-
-    /**
-     * A password validation check
-     *
-     * @param password The password of the user.
-     * @return true if it passes the criteria.
-     */
-    public static boolean isPasswordValid(String password) {
-        return password != null && password.trim().length() > 5;
     }
 
     /**
@@ -111,7 +117,7 @@ public class AuthenticatorViewModel extends ViewModel {
             loginFormState.setValue(new LoginFormState(R.string.invalid_email, null, null));
         } else if (!isPasswordValid(password)) {
             loginFormState.setValue(new LoginFormState(null, R.string.invalid_password, null));
-        } else if (!AreAnyRolesSelected(isUser, isOperator) && !isUserInSigningInTab.getValue()) { // Checks only if the user is registering
+        } else if (!AreAnyRolesSelected(isUser, isOperator) && !isUserSigningIn()) { // Checks only if the user is registering
             loginFormState.setValue(new LoginFormState(null, null, R.string.invalid_role_choice));
         } else {
             loginFormState.setValue(new LoginFormState(true));
@@ -127,13 +133,19 @@ public class AuthenticatorViewModel extends ViewModel {
     }
 
     public boolean isUserSigningIn() {
-        return isUserInSigningInTab.getValue();
+        if (isUserInSigningInTab.getValue() != null)
+            return isUserInSigningInTab.getValue();
+        else
+            return false; // By default
     }
 
     public void setUserSigningIn(boolean userSigningIn) {
         isUserInSigningInTab.setValue(userSigningIn);
     }
 
+    /**
+     * Getters
+     */
     public MutableLiveData<String> getEmailState() {
         return emailState;
     }

@@ -42,6 +42,7 @@ import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.pojo.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 import io.github.cchristou3.CyParking.databinding.RegisterLotFragmentBinding;
+import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;
 
 /**
@@ -51,7 +52,7 @@ import io.github.cchristou3.CyParking.utilities.Utility;
  * @author Charalambos Christou
  * @version 1.0 14/12/20
  */
-public class RegisterLotFragment extends Fragment implements Navigable, LocationHandler {
+public class RegisterLotFragment extends Fragment implements Navigable, LocationHandler, TextWatcher {
 
     // Fragment's constants
     public static final String TAG = RegisterLotFragment.class.getName() + "UniqueTag";
@@ -178,11 +179,9 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
         // Hook up a listener to the "Register" button
         final Button registerButton = getBinding().registerLotFragmentBtnRegisterLot;
         registerButton.setOnClickListener(v -> {
-
             // Create a ParkingLot object to hold all necessary info.
             mViewModel.registerParkingLot(buildParkingLotObject())
                     .addOnCompleteListener((Task<Void> task) -> {
-
                         if (task.getException() == null) {
                             // Display message to user.
                             Toast.makeText(RegisterLotFragment.this.requireContext(), RegisterLotFragment.this.getString(R.string.success_lot_registration), Toast.LENGTH_SHORT).show();
@@ -208,24 +207,12 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
             triggerViewModelUpdate();
         });
 
-        // Initialize a TextWatcher to be used by all EditTexts
-        final TextWatcher textWatcher = new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* ignore */ }
-
-            public void onTextChanged(CharSequence s, int start, int before, int count) { /* ignore */ }
-
-            @Override
-            public void afterTextChanged(@NotNull Editable s) {
-                triggerViewModelUpdate();
-            }
-        };
-
-        // Attach textWatchers to the UI's EditTexts
-        getBinding().registerLotFragmentEtPhoneBody.addTextChangedListener(textWatcher);
-        getBinding().registerLotFragmentEtLotName.addTextChangedListener(textWatcher);
-        getBinding().registerLotFragmentEtCapacity.addTextChangedListener(textWatcher);
-        getBinding().registerLotFragmentEtLocationLat.addTextChangedListener(textWatcher);
-        getBinding().registerLotFragmentEtLocationLng.addTextChangedListener(textWatcher);
+        // Attach a textWatcher to the UI's EditTexts
+        getBinding().registerLotFragmentEtPhoneBody.addTextChangedListener(this);
+        getBinding().registerLotFragmentEtLotName.addTextChangedListener(this);
+        getBinding().registerLotFragmentEtCapacity.addTextChangedListener(this);
+        getBinding().registerLotFragmentEtLocationLat.addTextChangedListener(this);
+        getBinding().registerLotFragmentEtLocationLng.addTextChangedListener(this);
     }
 
     /**
@@ -248,6 +235,11 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        getBinding().registerLotFragmentEtPhoneBody.removeTextChangedListener(this);
+        getBinding().registerLotFragmentEtLotName.removeTextChangedListener(this);
+        getBinding().registerLotFragmentEtCapacity.removeTextChangedListener(this);
+        getBinding().registerLotFragmentEtLocationLat.removeTextChangedListener(this);
+        getBinding().registerLotFragmentEtLocationLng.removeTextChangedListener(this);
         mRegisterLotFragmentBinding = null; // Ready to get garbage collected
     }
 
@@ -275,7 +267,6 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
                 FirebaseAuth.getInstance().getCurrentUser().getEmail(), // operatorEmail
                 getBinding().registerLotFragmentEtPhoneBody.getNonSpacedText(), // operatorMobileNumber
                 Integer.parseInt(getBinding().registerLotFragmentEtCapacity.getText().toString()), // capacity
-                0, // availableSpaces
                 0, // capacityForDisabled
                 0, // availableSpacesForDisabled
                 null, // openingHours
@@ -417,6 +408,21 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     }
 
     /**
+     * Unused TextWatcher methods.
+     */
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* ignore */ }
+
+    public void onTextChanged(CharSequence s, int start, int before, int count) { /* ignore */ }
+
+    /**
+     * Triggers an update of the fragment's ViewModel instance.
+     */
+    @Override
+    public void afterTextChanged(@NotNull Editable s) {
+        triggerViewModelUpdate();
+    }
+
+    /**
      * Callback invoked when the user's location is received.
      *
      * @param locationResult The result of the user's requested location.
@@ -478,7 +484,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.HomeFragment}.
+     * {@link HomeFragment}.
      */
     @Override
     public void toHome() {

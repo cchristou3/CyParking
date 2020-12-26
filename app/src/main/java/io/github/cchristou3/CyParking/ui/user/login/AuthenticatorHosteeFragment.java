@@ -28,8 +28,10 @@ import androidx.navigation.Navigation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import io.github.cchristou3.CyParking.AuthStateViewModel;
+import io.github.cchristou3.CyParking.AuthStateViewModelFactory;
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.pojo.user.login.LoggedInUserView;
+import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
 import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
 
 /**
@@ -45,12 +47,15 @@ public class AuthenticatorHosteeFragment extends Fragment {
 
     // Constant variables
     public static final String PAGE_TYPE_KEY = "PAGE_TYPE_KEY";
-    private final int[] resIdsForRoleArea = new int[]{R.id.fragment_login_txt_roles_header, R.id.fragment_login_txt_role_user_title, R.id.fragment_login_cb_role_user_checkbox, R.id.fragment_login_btn_dialog_user_button, R.id.fragment_login_txt_role_operator_title, R.id.fragment_login_cb_role_operator_checkbox, R.id.fragment_login_btn_dialog_operator_button};
+    private final int[] viewIdsForRoleArea = new int[]{R.id.fragment_login_txt_roles_header, R.id.fragment_login_txt_role_user_title, R.id.fragment_login_cb_role_user_checkbox, R.id.fragment_login_btn_dialog_user_button, R.id.fragment_login_txt_role_operator_title, R.id.fragment_login_cb_role_operator_checkbox, R.id.fragment_login_btn_dialog_operator_button};
     // Fragment variables
     private AuthenticatorViewModel authenticatorViewModel;
+    private AuthStateViewModel mAuthStateViewModel;
+
     private short pageType;
     private CheckBox userCheckbox;
     private CheckBox operatorCheckbox;
+
 
     public AuthenticatorHosteeFragment() { /* Required empty public constructor */ }
 
@@ -59,7 +64,7 @@ public class AuthenticatorHosteeFragment extends Fragment {
      * this fragment using the provided parameters.
      *
      * @param pageType The type of the page (LOGIN_PAGE, REGISTRATION_PAGE)
-     * @return A new instance of fragment AuthenticationFragment.
+     * @return A new instance of fragment AuthenticatorHosteeFragment.
      */
     @NotNull
     public static AuthenticatorHosteeFragment newInstance(short pageType) {
@@ -69,6 +74,7 @@ public class AuthenticatorHosteeFragment extends Fragment {
         authenticatorHosteeFragment.setArguments(args);
         return authenticatorHosteeFragment;
     }
+
 
     /**
      * Initialises the fragment.
@@ -98,7 +104,7 @@ public class AuthenticatorHosteeFragment extends Fragment {
     }
 
     /**
-     * Invoked at the completion of onCreateView. Initializes fragment's ViewModel.
+     * Invoked at the completion of onCreateView. Initializes fragment's ViewModels.
      * Lastly, it attaches a listener to our UI button
      *
      * @param view               The view of the fragment
@@ -107,6 +113,9 @@ public class AuthenticatorHosteeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        // Initialize the AuthStateViewModel instance (key for communicating with MainHostActivity)
+        mAuthStateViewModel = new ViewModelProvider(requireActivity(), new AuthStateViewModelFactory())
+                .get(AuthStateViewModel.class);
         try {
             // By passing the parent (AuthenticationFragment)'s ViewModelStoreOwner
             // Both tabs share the same LoginViewModel instance
@@ -182,7 +191,13 @@ public class AuthenticatorHosteeFragment extends Fragment {
 
             // Add an observer to the login result state
             authenticatorViewModel.getLoginResult().observe(getViewLifecycleOwner(), loginResult -> {
-                if (loginResult == null) return;
+                // Also check if the fragment is on its onResume state.
+                // In case the user enters his credentials (Both email and password) on the login page
+                // and decides to switch the to registration tab (assuming it is the first time the user
+                // pressed this tab). Then the registration tab will get initialized that time (it will start from
+                // onCreateView till onResume). Thus, as the observer is set on the onViewCreated callback it
+                // will trigger immediately with the user's data
+                if (loginResult == null || !this.isResumed()) return;
                 loadingProgressBar.setVisibility(View.GONE);
                 if (loginResult.getError() != null) showLoginFailed(loginResult.getError());
                 if (loginResult.getSuccess() != null) updateUiWithUser(loginResult.getSuccess());
@@ -190,10 +205,8 @@ public class AuthenticatorHosteeFragment extends Fragment {
 
             // Build a TextWatcher for our two EditTexts (email, password)
             TextWatcher afterTextChangedListener = new TextWatcher() {
-                @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {/* ignore */ }
 
-                @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {/* ignore */}
 
                 @Override
@@ -222,14 +235,14 @@ public class AuthenticatorHosteeFragment extends Fragment {
                     passwordEditText.setOnEditorActionListener((v, actionId, event) -> {
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
                             if (authenticatorViewModel.getLoginFormState().getValue().isDataValid())
-                                authenticatorViewModel.login(emailEditText.getText().toString(),
+                                authenticatorViewModel.login(requireContext(), emailEditText.getText().toString(),
                                         passwordEditText.getText().toString());
                         }
                         return false;
                     });
                     onClickListener = v -> { // Set corresponding listener for the login button
                         loadingProgressBar.setVisibility(View.VISIBLE);
-                        authenticatorViewModel.login(emailEditText.getText().toString(),
+                        authenticatorViewModel.login(requireContext(), emailEditText.getText().toString(),
                                 passwordEditText.getText().toString());
                     };
                     break;
@@ -325,7 +338,7 @@ public class AuthenticatorHosteeFragment extends Fragment {
      */
     private void hideRoleArea(View view) {
         // Traversing all elements of the ui that are associated to the roles and hide each of one of them
-        for (int resId : resIdsForRoleArea) {
+        for (int resId : viewIdsForRoleArea) {
             view.findViewById(resId).setVisibility(View.GONE);
         }
     }
@@ -335,17 +348,22 @@ public class AuthenticatorHosteeFragment extends Fragment {
      *
      * @param model An instance of LoggedInUserView.
      */
-    private synchronized void updateUiWithUser(@NotNull LoggedInUserView model) {
+    private synchronized void updateUiWithUser(@NotNull LoggedInUser model) {
         // Check if the current fragment is onResume state
         // Without this check, this method would get triggered twice, (by each tab) causing unexpected navigation behaviour.
         if (this.isResumed()) {
-            // TODO: When creating the UI in other fragments, check if the roles are stored locally, if not access them via the cloud Database
-            // TODO: initiate successful logged in experience
+
+            // Update the UserState - trigger observer update in MainHostActivity to update the drawer
+            mAuthStateViewModel.updateAuthState(model);
+
             // Display a message to the user
             String welcome = getString(R.string.welcome) + model.getDisplayName();
+            if (model.getDisplayName() == null || model.getDisplayName().isEmpty()) {
+                welcome = getString(R.string.welcome) + model.getEmail();
+            }
             Toast.makeText(requireContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
             // Go to previous screen
-            Navigation.findNavController(getParentFragment().getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+            Navigation.findNavController(getParentFragment().requireActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
                     .popBackStack();
         }
     }

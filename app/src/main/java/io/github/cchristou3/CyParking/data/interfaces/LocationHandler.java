@@ -3,13 +3,14 @@ package io.github.cchristou3.CyParking.data.interfaces;
 import androidx.fragment.app.Fragment;
 
 import io.github.cchristou3.CyParking.data.manager.LocationManager;
+import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 
 /**
  * Purpose:
  * Provide the {@link LocationManager} class the
  * appropriate callback method to handle
  * incoming LocationResult objects.
- * Used by {@link io.github.cchristou3.CyParking.ui.HomeFragment}
+ * Used by {@link HomeFragment}
  * and {@link io.github.cchristou3.CyParking.ui.parking.lots.RegisterLotFragment}.
  *
  * @author Charalambos Christou

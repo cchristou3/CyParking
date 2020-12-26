@@ -40,7 +40,7 @@ import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivateParkingBooking;
 import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
-import io.github.cchristou3.CyParking.ui.HomeFragment;
+import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsFragment;
 import io.github.cchristou3.CyParking.ui.user.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
@@ -202,6 +202,7 @@ public class ParkingBookingFragment extends Fragment implements Navigable {
     public void bookParking() throws ParseException {
         // TODO: Migrate boiler-plate code into a Date Validation Class
         //  and simply call its methods.
+
         // Access parking operator's details via the Intent object
         final String pickedDate = mParkingBookingViewModel.getPickedDate().getValue();
         final String pickedStartingTime = mParkingBookingViewModel.getPickedStartingTime().getValue();

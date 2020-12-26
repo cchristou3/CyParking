@@ -73,7 +73,7 @@ public class SharedPreferencesManager {
      * @return The Set object that is associated with the given key, if there is one,
      * converted into an ArrayList. Otherwise, return null.
      */
-    public ArrayList<String> getKey(String key) {
+    public ArrayList<String> getValue(String key) {
         if (mSharedPrefs.getStringSet(key, null) != null) {
             return new ArrayList<>(mSharedPrefs.getStringSet(key, null));
         }

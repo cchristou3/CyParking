@@ -3,6 +3,7 @@ package io.github.cchristou3.CyParking.data.repository;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
@@ -20,15 +21,20 @@ import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivatePark
  * Purpose: <p>contain all methods to access the (cloud / local) database's parking nodes.</p>
  *
  * @author Charalambos Christou
- * @version 4.0 23/12/20
+ * @version 5.0 25/12/20
  */
 public class ParkingRepository {
 
-    // Keys related to the parking
+    // Keys related to the ParkingLot objects
     public static final String LATITUDE_KEY = "latitude";
     public static final String LONGITUDE_KEY = "longitude";
+
+    // Keys related to the database fields
     private static final String USER_ID = "userID";
     private static final String COMPLETED = "completed";
+    private static final String OPERATOR_EMAIL = "operatorEmail";
+    private static final String AVAILABLE_SPACES = "availableSpaces";
+
     // Firebase Firestore paths (nodes)
     private static final String PRIVATE_PARKING = "private_parking";
     private static final String PRIVATE_PARKING_BOOKING = "private_parking_bookings";
@@ -56,7 +62,7 @@ public class ParkingRepository {
      * @return The {@link CollectionReference} reference to be observed.
      */
     @NotNull
-    public static CollectionReference observerParkingLots() {
+    public static CollectionReference observeAllParkingLots() {
         return FirebaseFirestore.getInstance().collection(PRIVATE_PARKING);
     }
 
@@ -132,6 +138,36 @@ public class ParkingRepository {
     public static DocumentReference observeSelectedParking(@NotNull ParkingLot selectedParking) {
         return FirebaseFirestore.getInstance().collection(PRIVATE_PARKING)
                 .document(selectedParking.generateUniqueId());
+    }
+
+    /**
+     * Returns the operator's parking lot based on his/hers email address.
+     *
+     * @param email The email address of the operator.
+     * @return A query that returns the parking lot of the operator with the specified email.
+     */
+    @NotNull
+    public static Query observeParkingLot(String email) {
+        return observeAllParkingLots()
+                .whereEqualTo(OPERATOR_EMAIL, email).limit(1L);
+    }
+
+    /**
+     * Increases the the number of available spaces of the current lot reference.
+     *
+     * @param lotReference A DocumentReference of the lot
+     */
+    public static void incrementAvailableSpacesOf(@NotNull final DocumentReference lotReference) {
+        lotReference.update(AVAILABLE_SPACES, FieldValue.increment(1));
+    }
+
+    /**
+     * Decreases the the number of available spaces of the current lot reference.
+     *
+     * @param lotReference A DocumentReference of the lot
+     */
+    public static void decrementAvailableSpacesOf(@NotNull final DocumentReference lotReference) {
+        lotReference.update(AVAILABLE_SPACES, FieldValue.increment(-1));
     }
 
     /**

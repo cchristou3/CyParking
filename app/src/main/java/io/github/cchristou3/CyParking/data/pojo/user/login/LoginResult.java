@@ -2,15 +2,17 @@ package io.github.cchristou3.CyParking.data.pojo.user.login;
 
 import androidx.annotation.Nullable;
 
+import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
+
 /**
  * Purpose: <p>Authentication result : success (user details) or error message.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 1/11/20
+ * @version 2.0 23/12/20
  */
 public class LoginResult {
     @Nullable
-    private LoggedInUserView success;
+    private LoggedInUser success;
     @Nullable
     private String error;
 
@@ -18,12 +20,12 @@ public class LoginResult {
         this.error = error;
     }
 
-    public LoginResult(@Nullable LoggedInUserView success) {
+    public LoginResult(@Nullable LoggedInUser success) {
         this.success = success;
     }
 
     @Nullable
-    public LoggedInUserView getSuccess() {
+    public LoggedInUser getSuccess() {
         return success;
     }
 

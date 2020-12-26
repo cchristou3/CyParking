@@ -12,20 +12,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.AuthObserver;
-import io.github.cchristou3.CyParking.data.manager.SharedPreferencesManager;
-import io.github.cchristou3.CyParking.data.pojo.user.User;
+import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 
 /**
@@ -34,14 +32,14 @@ import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
  * of all fragments which it is the host of.</p>
  *
  * @author Charalambos Christou
- * @version 3.0 15/12/20
+ * @version 5.0 25/12/20
  */
 public class MainHostActivity extends AppCompatActivity {
 
     // Activity constants
     public static final String USER = "User";
     public static final String OPERATOR = "Operator";
-    public static final String TAG = MainHostActivity.class.getName() + "Unique_Tag";
+    public static final String TAG = MainHostActivity.class.getName() + "UniqueTag";
     private static final int HOME = R.id.nav_home;
     private static final int VIEW_BOOKINGS = R.id.nav_view_bookings;
     private static final int MY_ACCOUNT = R.id.nav_account;
@@ -54,6 +52,7 @@ public class MainHostActivity extends AppCompatActivity {
     private Menu mActionBarMenu;
     private Menu mDrawerMenu;
     private DrawerLayout mDrawerLayout;
+    private AuthStateViewModel mAuthStateViewModel;
 
     /**
      * Initialises the activity.
@@ -65,50 +64,37 @@ public class MainHostActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate: Invoked!");
         FirebaseApp.initializeApp(this);
         setContentView(R.layout.fragment_main_host);
 
+        // Set up ActionBar
         Toolbar toolbar = findViewById(R.id.fragment_main_host_tb_toolbar);
         setSupportActionBar(toolbar);
 
+        // Set up drawer
         mDrawerLayout = findViewById(R.id.fragment_main_host_dl_drawer_layout);
         NavigationView navigationView = findViewById(R.id.fragment_main_host_nv_nav_view);
 
         mDrawerMenu = navigationView.getMenu();
+        // Attach listeners to the drawer's items
         final int numOfDrawerItems = mDrawerMenu.size();
         for (int i = 0; i < numOfDrawerItems; i++) {
             mDrawerMenu.getItem(i).setOnMenuItemClickListener(this::onMenuItemClick);
         }
 
-        // TODO: Solution to the Auth Race condition
-        //  ViewModel for Main -> LiveData for a User object (User/ FirebaseUser)
-        //  Initialize it with FireAuth.getInstance().getCurrentUser
-        //  Fragments can access it and when Auth changes, they update it.
-        //  (Add more details and design concerning the UI updates (Drawer/ActionBar and
-        //  fragment related UI updates))
-        //  On Auth State changed -> invoked activeFragment
-        //  (which implements UiUpdatable)'s updateUi method.
+        // Set up the NavController, bind it with the specified view (fragment_main_host_nv_nav_view)
+        // The fragments can access the same controller by passing in the same view (fragment_main_host_nv_nav_view)
+        Navigation.setViewNavController(findViewById(R.id.fragment_main_host_nv_nav_view),
+                NavHostFragment.findNavController(getSupportFragmentManager().getFragments().get(0) // Access the NavHostFragment
+                        .getChildFragmentManager().getFragments().get(0)));
 
-        AuthObserver.newInstance(currentFirebaseUser -> {
-            Log.d(TAG, "onCreate AuthObserver: invoked!");
-            // UpdateDrawer
-            updateDrawer(currentFirebaseUser);
+        // Initialize the activity's ViewModel instance
+        mAuthStateViewModel = new ViewModelProvider(this, new AuthStateViewModelFactory())
+                .get(AuthStateViewModel.class);
 
-            // TODO: Do UI related changes here
-        }).registerObserver(getLifecycle());
-    }
+        mAuthStateViewModel.getUserState().observe(this, MainHostActivity.this::updateDrawer);
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d(TAG, "onStart: Invoked");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume: Invoked");
+        mAuthStateViewModel.getUserInfo(this);
     }
 
     /**
@@ -137,7 +123,7 @@ public class MainHostActivity extends AppCompatActivity {
      */
     @Override
     public boolean onPrepareOptionsMenu(@NotNull Menu menu) {
-        updateActionBar(FirebaseAuth.getInstance().getCurrentUser());
+        updateActionBar(mAuthStateViewModel.getUserState().getValue());
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -162,15 +148,18 @@ public class MainHostActivity extends AppCompatActivity {
                 Toast.makeText(this, "Settings!", Toast.LENGTH_SHORT).show();
                 break;
             case SIGN_OUT:
-                FirebaseAuth.getInstance().getCurrentUser().delete();
-                FirebaseAuth.getInstance().signOut();
+                // Sign the user out
+                AuthenticatorRepository.getInstance(FirebaseAuth.getInstance()).signOut();
+                // Update the UserState to null
+                mAuthStateViewModel.getUserState().setValue(null);
+                // Display a message to the user
                 Toast.makeText(this, "You have been logged out!", Toast.LENGTH_SHORT).show();
                 break;
             case SIGN_IN:
                 try {
                     getActiveFragment().toAuthenticator();
-
                 } catch (IllegalStateException e) {
+                    Log.d(TAG, "onOptionsItemSelected: error: " + e.getMessage());
                     Toast.makeText(this, "Failed to navigate to login screen!", Toast.LENGTH_SHORT).show();
                 }
                 break;
@@ -180,54 +169,46 @@ public class MainHostActivity extends AppCompatActivity {
         return true;
     }
 
-    private void updateDrawer(FirebaseUser currentUser) {
+    /**
+     * Updates the drawer's items based on the given LoggedInUser object.
+     *
+     * @param currentUser The latest {@link LoggedInUser} object.
+     */
+    private void updateDrawer(LoggedInUser currentUser) {
         // TODO: If a user signs out while being in a fragment that requires authentication
         //  then show message to user (alert) and navigate him back to home fragment (+ pop back stack)
-        Log.d(TAG, "updateDrawer: User is " + currentUser);
-        if (currentUser != null) {
-            // Access the user's roles via the Preference manager
-            // Get a reference to the application's SharedPreferences instance
-            SharedPreferencesManager preferencesManager = new SharedPreferencesManager(this);
-
-            List<String> setOfRoles = preferencesManager.getKey(currentUser.getUid());
-
-            // Logged in user can
-            // see/perform bookings
-            // TODO: continue with the use cases
-
-            if (setOfRoles == null || setOfRoles.isEmpty()) {
-                // Query the roles via the cloud database
-                AuthenticatorRepository.getInstance(FirebaseAuth.getInstance()).getUser(currentUser)
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                final User user = task.getResult().toObject(User.class);
-                                if (user == null) return;
-                                boolean isUser = user.getRoles().contains(USER);
-                                boolean isOperator = user.getRoles().contains(OPERATOR);
-                                Log.d(TAG, "updateDrawer: Fetched from database: User: " + isUser + ", Operator: " + isOperator);
-                                // TODO: Do underlying Drawer update
-                                if (isUser)
-                                    mDrawerMenu.findItem(R.id.nav_view_bookings).setVisible(true);
-                            } else {
-                                Log.d(TAG, "updateDrawer: Fetched from database failed!");
-                            }
-                        });
-            } else {
-                boolean isUser = setOfRoles.contains(USER);
-                boolean isOperator = setOfRoles.contains(OPERATOR);
-                // TODO: Do underlying Drawer update
-                Log.d(TAG, "updateDrawer: Fetched locally: User: " + isUser + ", Operator: " + isOperator);
-                if (isUser) mDrawerMenu.findItem(R.id.nav_view_bookings).setVisible(true);
+        // Logged in user can
+        // see/perform bookings
+        if (currentUser != null && !(currentUser.getRoles() == null || currentUser.getRoles().isEmpty())) {
+            boolean isUser = currentUser.getRoles().contains(USER);
+            boolean isOperator = currentUser.getRoles().contains(OPERATOR);
+            // TODO: Do underlying Drawer update
+            if (!isOperator && !isUser) return;// If neither stop here.
+            if (isOperator && !isUser) { // Is an operator but not a user
+            } else if (isUser && !isOperator) { // Is a user but not an operator
+                // Show bookings in drawer
+                mDrawerMenu.findItem(R.id.nav_view_bookings).setVisible(true);
+            } else { // Is both
+                // Show bookings in drawer
+                mDrawerMenu.findItem(R.id.nav_view_bookings).setVisible(true);
             }
+
+
         } else {
-            // TODO: Update drawer to only show user-specific actions
+            // TODO: Update drawer to only show non-loggedIn-specific actions
+            // View Map
             // User cannot book -> thus cannot see their bookings
             // Remove Bookings from drawer
             mDrawerMenu.findItem(R.id.nav_view_bookings).setVisible(false);
         }
     }
 
-    private void updateActionBar(FirebaseUser currentUser) {
+    /**
+     * Updates the action bar's items based on the given LoggedInUser object.
+     *
+     * @param currentUser The latest {@link LoggedInUser} object.
+     */
+    private void updateActionBar(LoggedInUser currentUser) {
         if (currentUser != null) {
             // User is logged in!
             // Hide sign in option
@@ -243,6 +224,14 @@ public class MainHostActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * On click listener for all menu items.
+     * Based on the item's id perform its corresponding
+     * navigation action and close the drawer.
+     *
+     * @param item The drawer item that got clicked.
+     * @return By default false.
+     */
     private boolean onMenuItemClick(@NotNull MenuItem item) {
         // Access the visible view
         final int menuItemId = item.getItemId();
@@ -264,6 +253,11 @@ public class MainHostActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Access the current active fragment.
+     *
+     * @return A reference to the current active fragment.
+     */
     private Navigable getActiveFragment() {
         try {
             Fragment activeFragment = getSupportFragmentManager().getFragments().get(0) // Access the NavHostFragment

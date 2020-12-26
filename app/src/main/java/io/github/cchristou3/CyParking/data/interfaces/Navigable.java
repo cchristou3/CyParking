@@ -3,6 +3,8 @@ package io.github.cchristou3.CyParking.data.interfaces;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import io.github.cchristou3.CyParking.ui.home.HomeFragment;
+
 /**
  * Purpose: Provide a Navigation API to be implemented by all the
  * Fragments (subclasses) of the application.
@@ -25,20 +27,15 @@ public interface Navigable {
     @Contract(value = " -> new", pure = true)
     static Navigable empty() {
         return new Navigable() {
-            public void toAuthenticator() {
-            }
+            public void toAuthenticator() { /* ignore - empty */ }
 
-            public void toBookings() {
-            }
+            public void toBookings() { /* ignore - empty */ }
 
-            public void toAccount() {
-            }
+            public void toAccount() { /* ignore - empty */ }
 
-            public void toFeedback() {
-            }
+            public void toFeedback() { /* ignore - empty */ }
 
-            public void toHome() {
-            }
+            public void toHome() { /* ignore - empty */ }
         };
     }
 
@@ -68,7 +65,7 @@ public interface Navigable {
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.HomeFragment}.
+     * {@link HomeFragment}.
      */
     void toHome();
 }

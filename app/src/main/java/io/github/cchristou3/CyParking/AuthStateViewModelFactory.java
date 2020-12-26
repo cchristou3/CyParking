@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.ui.user.login;
+package io.github.cchristou3.CyParking;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
@@ -9,13 +9,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 
 /**
- * Purpose: <p>ViewModel provider factory to instantiate AuthenticatorViewModel.
- * Required given AuthenticatorViewModel has a non-empty constructor</p>
+ * Purpose: <p>ViewModel provider factory to instantiate AuthStateViewModel.
+ * Required given AuthStateViewModel has a non-empty constructor</p>
  *
  * @author Charalambos Christou
- * @version 1.0 1/11/20
+ * @version 1.0 24/12/20
  */
-public class AuthenticatorViewModelFactory implements ViewModelProvider.Factory {
+public class AuthStateViewModelFactory implements ViewModelProvider.Factory {
 
     /**
      * Creates a new instance of the given {@code Class}.
@@ -28,8 +28,8 @@ public class AuthenticatorViewModelFactory implements ViewModelProvider.Factory 
     @Override
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        if (modelClass.isAssignableFrom(AuthenticatorViewModel.class)) {
-            return (T) new AuthenticatorViewModel(AuthenticatorRepository.getInstance(FirebaseAuth.getInstance()));
+        if (modelClass.isAssignableFrom(AuthStateViewModel.class)) {
+            return (T) new AuthStateViewModel(AuthenticatorRepository.getInstance(FirebaseAuth.getInstance()));
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

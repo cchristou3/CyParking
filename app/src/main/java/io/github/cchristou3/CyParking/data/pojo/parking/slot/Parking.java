@@ -34,16 +34,29 @@ public class Parking implements Parcelable {
     @SerializedName("coordinates")
     protected HashMap<String, Double> coordinates;
     @SerializedName("parkingID")
-    protected int parkingID;
+    protected int parkingID; // TODO: Migrate to String data type
 
-    public Parking() {
-    }  //  no-argument constructor to be used by GSON
+    public Parking() { /* no-argument constructor to be used by GSON */ }
 
+    /**
+     * Public Constructor.
+     * Initialize all the attributes of the class with the given arguments.
+     *
+     * @param coordinates The lot's to be booked coordinates
+     * @param parkingID   The lot's id.
+     */
     public Parking(HashMap<String, Double> coordinates, int parkingID) {
         this.coordinates = coordinates;
         this.parkingID = parkingID;
     }
 
+    /**
+     * Constructor to be used by the Parcelable interface
+     * to initialize the Parking instance with the specified
+     * {@link Parcel}.
+     *
+     * @param in Contains the contents of the Parking instance.
+     */
     protected Parking(Parcel in) {
         // Read the size of the passed hash map
         final int sizeOfMap = in.readInt();
@@ -64,6 +77,13 @@ public class Parking implements Parcelable {
         parkingID = in.readInt();
     }
 
+    /**
+     * Flatten this object in to a Parcel.
+     *
+     * @param dest  The Parcel in which the object should be written.
+     * @param flags Additional flags about how the object should be written.
+     *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
+     */
     @Override
     public void writeToParcel(@NotNull Parcel dest, int flags) {
         // set up coordinates hash map as well
@@ -76,13 +96,17 @@ public class Parking implements Parcelable {
         dest.writeInt(parkingID);
     }
 
-
+    /**
+     * Non-implemented Parcelable method.
+     */
     @Override
     public int describeContents() {
         return 0;
     }
 
-    // Getters & Setters
+    /**
+     * Getters & Setters
+     */
     public HashMap<String, Double> getCoordinates() {
         return coordinates;
     }

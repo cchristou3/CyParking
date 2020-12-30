@@ -33,7 +33,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MainHostActivity"
+            android:name=".ui.host.MainHostActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.CyParking.NoActionBar">
             <intent-filter>

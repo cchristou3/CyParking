@@ -6,12 +6,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -19,13 +17,12 @@ import androidx.navigation.Navigation;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
-import io.github.cchristou3.CyParking.AuthStateViewModel;
-import io.github.cchristou3.CyParking.AuthStateViewModelFactory;
-import io.github.cchristou3.CyParking.MainHostActivity;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
@@ -33,8 +30,12 @@ import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
 import io.github.cchristou3.CyParking.data.manager.LocationManager;
 import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
+import io.github.cchristou3.CyParking.databinding.FragmentHomeBinding;
+import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.AuthStateViewModelFactory;
+import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 
-import static io.github.cchristou3.CyParking.MainHostActivity.TAG;
+import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 
 /**
  * Purpose: <p>Show to the user all available action options</p>
@@ -48,16 +49,17 @@ import static io.github.cchristou3.CyParking.MainHostActivity.TAG;
  * </p>
  *
  * @author Charalambos Christou
- * @version 5.0 25/12/20
+ * @version 6.0 28/12/20
  */
 public class HomeFragment extends Fragment implements Navigable, LocationHandler {
 
     // Fragment variables
     private LocationManager mLocationManager;
     private AuthStateViewModel mAuthStateViewModel;
+    private FragmentHomeBinding mFragmentHomeBinding;
     // Members related to the Operator
     private OperatorViewModel mOperatorViewModel;
-    private DatabaseObserver mDatabaseObserver;
+    private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
 
     /**
      * Inflates our fragment's view.
@@ -69,7 +71,8 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        mFragmentHomeBinding = FragmentHomeBinding.inflate(inflater);
+        return mFragmentHomeBinding.getRoot();
     }
 
     /**
@@ -82,10 +85,10 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initializeAuthStateViewModel(view);
+        initializeAuthStateViewModelWithObserver();
 
         // Attach listener to "Parking Map" button
-        view.findViewById(R.id.fragment_home_btn_nav_to_map).setOnClickListener(v -> {
+        getBinding().fragmentHomeBtnNavToMap.setOnClickListener(v -> {
             // Initialize the SingleLocationManager object
             if (mLocationManager == null)
                 mLocationManager = new LocationManager(requireContext(), this, true);
@@ -126,21 +129,32 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
     }
 
     /**
+     * Called when the view previously created by {@link #onCreateView} has
+     * been detached from the fragment.  The next time the fragment needs
+     * to be displayed, a new view will be created.  This is called
+     * after {@link #onStop()} and before {@link #onDestroy()}.  It is called
+     * <em>regardless</em> of whether {@link #onCreateView} returned a
+     * non-null view.  Internally it is called after the view's state has
+     * been saved but before it has been removed from its parent.
+     */
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mFragmentHomeBinding = null;
+    }
+
+    /**
      * Initialize the AuthStateViewModel with ViewModelStoreOwner
      * the hosting activity {@link MainHostActivity} and
      * adds an observer to the user's auth state.
-     *
-     * @param view The user interface of the fragment.
      */
-    private void initializeAuthStateViewModel(View view) {
+    private void initializeAuthStateViewModelWithObserver() {
         // Initialize the its AuthStateViewModel
         mAuthStateViewModel = new ViewModelProvider(requireActivity(), new AuthStateViewModelFactory())
                 .get(AuthStateViewModel.class);
 
         // NOTE: Observer gets invoked once the state changes or when it has been initialized
-        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
-            updateUi(loggedInUser, view);
-        });
+        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), this::updateUi);
     }
 
     /**
@@ -149,15 +163,13 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      * everything related to the operator is hidden.
      *
      * @param loggedInUser The current {@link LoggedInUser} instance.
-     * @param view         The user interface of the fragment.
      */
-    private void updateUi(LoggedInUser loggedInUser, @NotNull View view) {
-        final CardView lotCardView = view.findViewById(R.id.fragment_home_cv_lot_info);
+    private void updateUi(LoggedInUser loggedInUser) {
         if (loggedInUser == null) {
             // If operator logged out, remove observer to its parking lot
             if (mDatabaseObserver != null) mDatabaseObserver.unregisterLifecycleObserver();
             // Hide anything related to parking lot from the user
-            lotCardView.setVisibility(View.GONE);
+            getBinding().fragmentHomeCvLotInfo.setVisibility(View.GONE);
             return;
         }
 
@@ -172,29 +184,24 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
         // in this fragment the "User" role has not extra actions
         if (isOperator) {
             // Is an operator but not a user
-            initializeOperator(view, lotCardView);
+            initializeOperator();
         } else { // Is a user but not an operator
             // Hide anything related to parking lot from the user
-            lotCardView.setVisibility(View.GONE);
+            getBinding().fragmentHomeCvLotInfo.setVisibility(View.GONE);
         }
     }
 
     /**
      * Initializes both the Ui and the database logic related to the operator.
-     *
-     * @param view     The user interface of the fragment.
-     * @param cardView The view related to the operator.
      */
-    private void initializeOperator(@NotNull View view, @NotNull View cardView) {
+    private void initializeOperator() {
         // Set up the Ui for the operator
-        cardView.setVisibility(View.VISIBLE);
+        getBinding().fragmentHomeCvLotInfo.setVisibility(View.VISIBLE);
         // Initialize the OperatorViewModel
         mOperatorViewModel = new ViewModelProvider(this).get(OperatorViewModel.class);
         // Attach observer to update the view's parking lot info whenever it changes
-        mOperatorViewModel.getParkingLotState().observe(getViewLifecycleOwner(), parkingLot -> {
-            // Display the parking lot's contents
-            updateLotContents(view, parkingLot);
-        });
+        mOperatorViewModel.getParkingLotState().observe(getViewLifecycleOwner(),
+                this::updateLotContents); // Display the parking lot's contents
 
         // Attach listener to "increment", "decrement" buttons
         if (mAuthStateViewModel.getUserState().getValue() == null) {
@@ -202,33 +209,33 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
         }
         String email = mAuthStateViewModel.getUserState().getValue().getEmail();
         // Get the operator's lot info from the database.
-        getParkingLotInfo(view, email);
+        getParkingLotInfo(email);
     }
 
     /**
-     * Initialize a self-management database observer.
+     * Initialize a self-management query observer.
      * The observer, handles retrieving the operators lot
      * and any of its changes.
      * On initial and consecutive data loads the Ui related to the
      * operator's lot is updated accordingly.
      *
-     * @param view  The user interface of the fragment.
      * @param email The email of the operator.
      */
-    private void getParkingLotInfo(View view, String email) {
-        // Initialize the fragment's DatabaseObserver
-        mDatabaseObserver = new DatabaseObserver(mOperatorViewModel.observeParkingLot(email),
-                (value, error) -> {
+    private void getParkingLotInfo(String email) {
+        // Initialize the fragment's QueryObserver
+        mDatabaseObserver = DatabaseObserver.createQueryObserver(
+                mOperatorViewModel.observeParkingLot(email), // The Query
+                (value, error) -> { // The Event listener
                     Log.d(TAG, "getParkingLotInfo: ");
-                    if (error != null || value == null) return;
+                    if (error != null || value == null) return; // TODO: Handle error
 
                     if (value.getDocuments().size() == 0) { // The operator did not register lot yet
-                        displayLotRegistrationLayout(view);
+                        displayLotRegistrationLayout();
                         return;
                     }
 
                     // Remove listeners to the register lot button button TODO: Check
-                    view.findViewById(R.id.fragment_home_mbtn_register_parking_lot).setOnClickListener(null);
+                    getBinding().fragmentHomeMbtnRegisterParkingLot.setOnClickListener(null);
 
                     // If the operator has registered a lot already, display its info
                     final ParkingLot userParkingLot = value.getDocuments().get(0).toObject(ParkingLot.class);
@@ -237,7 +244,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
                     final DocumentReference ref = value.getDocuments().get(0).getReference();
 
                     // Hook up buttons with listeners
-                    HomeFragment.this.setUpOperatorButtons(view, ref, userParkingLot);
+                    HomeFragment.this.setUpOperatorButtons(ref, userParkingLot);
 
                     // Trigger parking lot update.
                     if (userParkingLot != null) {
@@ -246,63 +253,56 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
                 });
         // Register it for lifecycle observation
         mDatabaseObserver.registerLifecycleObserver(getLifecycle());
-        // TODO: addSnapshotListener remove activity and handle manually with mListenerRegistration
     }
 
     /**
      * Updates the views related to the lot with the specified {@link ParkingLot}
      * instance.
      *
-     * @param view           The user interface of the fragment.
      * @param userParkingLot The updated version of the parking lot.
      */
-    private void updateLotContents(@NotNull View view, @NotNull ParkingLot userParkingLot) {
-        // Get references to the Ui
-        final TextView lotCapacity = view.findViewById(R.id.fragment_home_txt_lot_capacity);
-        final TextView lotName = view.findViewById(R.id.fragment_home_txt_lot_name);
-        // Compose their texts
+    private void updateLotContents(@NotNull ParkingLot userParkingLot) {
+        // Compose the TextViews' text that display the lot's name and capacity.
         final String availability = HomeFragment.this.getString(R.string.availability) + " "
                 + (userParkingLot.getCapacity() - userParkingLot.getAvailableSpaces())
                 + "/" + userParkingLot.getCapacity();
         final String name = HomeFragment.this.getString(R.string.lot_name) + " " + userParkingLot.getLotName();
         // Update their texts with the above ones
-        lotCapacity.setText(availability);
-        lotName.setText(name);
+        getBinding().fragmentHomeTxtLotCapacity.setText(availability);
+        getBinding().fragmentHomeTxtLotName.setText(name);
     }
 
     /**
      * Displays a view giving the operator the option
      * to register a parking lot.
-     *
-     * @param view The user interface of the fragment.
      */
-    private void displayLotRegistrationLayout(@NotNull View view) {
-        view.findViewById(R.id.fragment_home_cl_show_lot_info).setVisibility(View.GONE); // showLotInfo
-        view.findViewById(R.id.fragment_home_cl_register_lot_info).setVisibility(View.VISIBLE); // registerLotInfo
+    private void displayLotRegistrationLayout() {
+        getBinding().fragmentHomeClShowLotInfo.setVisibility(View.GONE); // showLotInfo
+        getBinding().fragmentHomeClRegisterLotInfo.setVisibility(View.VISIBLE); // registerLotInfo
         // Attach listener to "Register Parking lot" button
-        view.findViewById(R.id.fragment_home_mbtn_register_parking_lot).setOnClickListener(v ->
-                // Navigate to the parking lot registration form
-                Navigation.findNavController(HomeFragment.this.requireActivity()
-                        .findViewById(R.id.fragment_main_host_nv_nav_view))
-                        .navigate(R.id.action_nav_home_to_nav_register_lot_fragment));
+        getBinding().fragmentHomeMbtnRegisterParkingLot
+                .setOnClickListener(v ->
+                        // Navigate to the parking lot registration form
+                        Navigation.findNavController(HomeFragment.this.requireActivity()
+                                .findViewById(R.id.fragment_main_host_nv_nav_view))
+                                .navigate(R.id.action_nav_home_to_nav_register_lot_fragment));
     }
 
     /**
      * Hooks up both "increment" and "decrement" buttons with on click listeners.
      *
-     * @param view           The user interface of the fragment.
      * @param ref            A DocumentReference of the parking lot in the database.
      * @param userParkingLot The latest retrieved parking lot of the database.
      */
-    private void setUpOperatorButtons(@NotNull View view, DocumentReference ref, ParkingLot userParkingLot) {
-        view.findViewById(R.id.fragment_home_btn_increment).setOnClickListener(v -> {
+    private void setUpOperatorButtons(DocumentReference ref, ParkingLot userParkingLot) {
+        getBinding().fragmentHomeBtnIncrement.setOnClickListener(v -> {
             // If the lot has available spaces decrease its value by one
             // E.g. 40/40 -> do nothing
             if (userParkingLot.getAvailableSpaces() > 0) {
                 mOperatorViewModel.incrementPersonCount(ref);
             }
         });
-        view.findViewById(R.id.fragment_home_btn_decrement).setOnClickListener(v -> {
+        getBinding().fragmentHomeBtnDecrement.setOnClickListener(v -> {
             // If the lot has the same number of available spaces as its capacity do nothing.
             // E.g. 0/40 -> do nothing
             if (userParkingLot.getAvailableSpaces() < userParkingLot.getCapacity()) {
@@ -310,6 +310,15 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
                 mOperatorViewModel.decrementPersonCount(ref);
             }
         });
+    }
+
+    /**
+     * Access the {@link #mFragmentHomeBinding}.
+     *
+     * @return A reference to {@link #mFragmentHomeBinding}.
+     */
+    private FragmentHomeBinding getBinding() {
+        return mFragmentHomeBinding;
     }
 
     /**

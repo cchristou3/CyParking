@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.ui.user.login;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.Editable;
@@ -8,11 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,10 +27,11 @@ import androidx.navigation.Navigation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import io.github.cchristou3.CyParking.AuthStateViewModel;
-import io.github.cchristou3.CyParking.AuthStateViewModelFactory;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
+import io.github.cchristou3.CyParking.databinding.FragmentAuthenticatorHosteeBinding;
+import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.AuthStateViewModelFactory;
 import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
 
 /**
@@ -41,21 +41,19 @@ import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
  * Can be used for both logging in and signing up.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 11/12/20
+ * @version 3.0 30/12/20
  */
-public class AuthenticatorHosteeFragment extends Fragment {
+public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher {
 
     // Constant variables
     public static final String PAGE_TYPE_KEY = "PAGE_TYPE_KEY";
     private final int[] viewIdsForRoleArea = new int[]{R.id.fragment_login_txt_roles_header, R.id.fragment_login_txt_role_user_title, R.id.fragment_login_cb_role_user_checkbox, R.id.fragment_login_btn_dialog_user_button, R.id.fragment_login_txt_role_operator_title, R.id.fragment_login_cb_role_operator_checkbox, R.id.fragment_login_btn_dialog_operator_button};
     // Fragment variables
-    private AuthenticatorViewModel authenticatorViewModel;
+    private AuthenticatorViewModel mAuthenticatorViewModel;
     private AuthStateViewModel mAuthStateViewModel;
+    private FragmentAuthenticatorHosteeBinding mFragmentAuthenticatorHosteeBinding;
 
     private short pageType;
-    private CheckBox userCheckbox;
-    private CheckBox operatorCheckbox;
-
 
     public AuthenticatorHosteeFragment() { /* Required empty public constructor */ }
 
@@ -74,7 +72,6 @@ public class AuthenticatorHosteeFragment extends Fragment {
         authenticatorHosteeFragment.setArguments(args);
         return authenticatorHosteeFragment;
     }
-
 
     /**
      * Initialises the fragment.
@@ -100,7 +97,9 @@ public class AuthenticatorHosteeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_login, container, false);
+        mFragmentAuthenticatorHosteeBinding =
+                FragmentAuthenticatorHosteeBinding.inflate(inflater);
+        return mFragmentAuthenticatorHosteeBinding.getRoot();
     }
 
     /**
@@ -116,15 +115,13 @@ public class AuthenticatorHosteeFragment extends Fragment {
         // Initialize the AuthStateViewModel instance (key for communicating with MainHostActivity)
         mAuthStateViewModel = new ViewModelProvider(requireActivity(), new AuthStateViewModelFactory())
                 .get(AuthStateViewModel.class);
-        try {
-            // By passing the parent (AuthenticationFragment)'s ViewModelStoreOwner
-            // Both tabs share the same LoginViewModel instance
-            authenticatorViewModel = new ViewModelProvider(requireParentFragment(), new AuthenticatorViewModelFactory())
-                    .get(AuthenticatorViewModel.class);
-        } catch (IllegalStateException e) {
-            Toast.makeText(getContext(), "Failed to instantiate the fragment's LoginViewModel object", Toast.LENGTH_SHORT).show();
-        }
-        initFragment(view);
+
+        // By passing the parent (AuthenticationFragment)'s ViewModelStoreOwner
+        // Both tabs share the same LoginViewModel instance
+        mAuthenticatorViewModel = new ViewModelProvider(requireParentFragment(), new AuthenticatorViewModelFactory())
+                .get(AuthenticatorViewModel.class);
+
+        initializeFragment(view);
     }
 
 
@@ -138,7 +135,25 @@ public class AuthenticatorHosteeFragment extends Fragment {
     public void onPause() {
         super.onPause();
         // Reverse the ViewModel's isUserSigningIn attribute as we move to the other tab
-        authenticatorViewModel.setUserSigningIn(!authenticatorViewModel.isUserSigningIn());
+        mAuthenticatorViewModel.setUserSigningIn(!mAuthenticatorViewModel.isUserSigningIn());
+    }
+
+    /**
+     * Called when the view previously created by {@link #onCreateView} has
+     * been detached from the fragment.
+     */
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (!mAuthenticatorViewModel.isUserSigningIn()) {
+            getBinding().fragmentLoginBtnDialogUserButton.setOnClickListener(null);
+            getBinding().fragmentLoginBtnDialogOperatorButton.setOnClickListener(null);
+            getBinding().fragmentLoginCbRoleUserCheckbox.setOnCheckedChangeListener(null);
+            getBinding().fragmentLoginCbRoleOperatorCheckbox.setOnCheckedChangeListener(null);
+        }
+        getBinding().fragmentLoginEtEmail.removeTextChangedListener(this);
+        getBinding().fragmentLoginEtPassword.removeTextChangedListener(this);
+        mFragmentAuthenticatorHosteeBinding = null;
     }
 
     /**
@@ -146,163 +161,221 @@ public class AuthenticatorHosteeFragment extends Fragment {
      *
      * @param view The view of the fragment
      */
-    private void initFragment(@NotNull View view) {
+    private void initializeFragment(@NotNull View view) {
         // Get references to the UI elements
-        final EditText emailEditText = view.findViewById(R.id.fragment_login_et_email);
-        final EditText passwordEditText = view.findViewById(R.id.fragment_login_et_password);
-        final Button loginButton = view.findViewById(R.id.fragment_login_btn_auth_button);
-        final ProgressBar loadingProgressBar = view.findViewById(R.id.fragment_login_pb_loading);
+        final EditText emailEditText = getBinding().fragmentLoginEtEmail;
+        final EditText passwordEditText = getBinding().fragmentLoginEtPassword;
 
-        if (authenticatorViewModel != null) {
-            // Add an observer to the login form state
-            authenticatorViewModel.getLoginFormState().observe(getViewLifecycleOwner(), loginFormState -> {
-                if (loginFormState == null) return;
-                loginButton.setEnabled(loginFormState.isDataValid());
-
-                // If there is an error, show it for the specific UI field.
-                // If there was an error before, and it got resolved then hide the error.
-                if (loginFormState.getEmailError() != null) {
-                    emailEditText.setError(getString(loginFormState.getEmailError()));
-                } else {
-                    if (emailEditText.getError() != null)
-                        emailEditText.setError(null, null);
-                }
-                if (loginFormState.getPasswordError() != null) {
-                    passwordEditText.setError(getString(loginFormState.getPasswordError()));
-                } else {
-                    if (passwordEditText.getError() != null)
-                        passwordEditText.setError(null, null);
-                }
-                if (!authenticatorViewModel.isUserSigningIn()) {// User signs up
-                    // Get references to the UI checkboxes if they have not been accessed previously
-                    if (userCheckbox == null || operatorCheckbox == null) {
-                        userCheckbox = view.findViewById(R.id.fragment_login_cb_role_user_checkbox);
-                        operatorCheckbox = view.findViewById(R.id.fragment_login_cb_role_operator_checkbox);
-                    }
-                    if (loginFormState.getRoleError() != null) {
-                        userCheckbox.setError(getString(loginFormState.getRoleError()));
-                        operatorCheckbox.setError(getString(loginFormState.getRoleError()));
-                    } else {
-                        userCheckbox.setError(null, null);
-                        operatorCheckbox.setError(null, null);
-                    }
-                }
-            });
-
-            // Add an observer to the login result state
-            authenticatorViewModel.getLoginResult().observe(getViewLifecycleOwner(), loginResult -> {
-                // Also check if the fragment is on its onResume state.
-                // In case the user enters his credentials (Both email and password) on the login page
-                // and decides to switch the to registration tab (assuming it is the first time the user
-                // pressed this tab). Then the registration tab will get initialized that time (it will start from
-                // onCreateView till onResume). Thus, as the observer is set on the onViewCreated callback it
-                // will trigger immediately with the user's data
-                if (loginResult == null || !this.isResumed()) return;
-                loadingProgressBar.setVisibility(View.GONE);
-                if (loginResult.getError() != null) showLoginFailed(loginResult.getError());
-                if (loginResult.getSuccess() != null) updateUiWithUser(loginResult.getSuccess());
-            });
-
-            // Build a TextWatcher for our two EditTexts (email, password)
-            TextWatcher afterTextChangedListener = new TextWatcher() {
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {/* ignore */ }
-
-                public void onTextChanged(CharSequence s, int start, int before, int count) {/* ignore */}
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    authenticatorViewModel.loginDataChanged(emailEditText.getText().toString(),
-                            passwordEditText.getText().toString(),
-                            (userCheckbox != null && userCheckbox.isChecked()),
-                            (operatorCheckbox != null && operatorCheckbox.isChecked()));
-                }
-            };
+        if (mAuthenticatorViewModel != null) {
+            attachObserverToForm();
+            attachObserverToResult();
 
             // Add text listeners to both the user name and the password fields.
-            emailEditText.addTextChangedListener(afterTextChangedListener);
-            passwordEditText.addTextChangedListener(afterTextChangedListener);
-
-            View.OnClickListener onClickListener;
-            int buttonTextResId;
+            emailEditText.addTextChangedListener(this);
+            passwordEditText.addTextChangedListener(this);
 
             switch (pageType) {
                 case AuthenticatorAdapter.LOGIN_TAB:
-                    // Set up the UI and listeners for logging in
-                    // Hide unnecessary UI elements
-                    hideRoleArea(view);
-                    buttonTextResId = R.string.sign_in; // Set corresponding id string
-                    // Pressing the "enter" on the keyboard will automatically trigger the login method
-                    passwordEditText.setOnEditorActionListener((v, actionId, event) -> {
-                        if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            if (authenticatorViewModel.getLoginFormState().getValue().isDataValid())
-                                authenticatorViewModel.login(requireContext(), emailEditText.getText().toString(),
-                                        passwordEditText.getText().toString());
-                        }
-                        return false;
-                    });
-                    onClickListener = v -> { // Set corresponding listener for the login button
-                        loadingProgressBar.setVisibility(View.VISIBLE);
-                        authenticatorViewModel.login(requireContext(), emailEditText.getText().toString(),
-                                passwordEditText.getText().toString());
-                    };
+                    updateUiForLoggingIn(view);
                     break;
                 case AuthenticatorAdapter.REGISTRATION_TAB:
-                    // User is registering
-                    // Set up the UI and listeners for registration
-                    buttonTextResId = R.string.sign_up; // Set corresponding id string
-                    // Get references of the checkboxes from the layout
-                    if (userCheckbox == null || operatorCheckbox == null) {
-                        userCheckbox = view.findViewById(R.id.fragment_login_cb_role_user_checkbox);
-                        operatorCheckbox = view.findViewById(R.id.fragment_login_cb_role_operator_checkbox);
-                    }
-                    // Add listeners to the checkboxes
-                    CompoundButton.OnCheckedChangeListener onCheckedChangeListener = (buttonView, isChecked) ->
-                            authenticatorViewModel.loginDataChanged(emailEditText.getText().toString(),
-                                    passwordEditText.getText().toString(), userCheckbox.isChecked(), operatorCheckbox.isChecked());
-                    userCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
-                    operatorCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
-                    onClickListener = v -> {  // Set corresponding listener for the sign up button
-                        loadingProgressBar.setVisibility(View.VISIBLE);
-                        authenticatorViewModel.register(emailEditText.getText().toString(),
-                                passwordEditText.getText().toString(),
-                                userCheckbox.isChecked(), operatorCheckbox.isChecked(), requireContext());
-                    };
-                    final Button roleUserDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_user_button);
-                    final Button roleOperatorDescriptionButton = view.findViewById(R.id.fragment_login_btn_dialog_operator_button);
-                    // Add listeners to the "description" buttons
-                    roleUserDescriptionButton
-                            .setOnClickListener(
-                                    getRoleDescriptionOnClickListener(
-                                            R.id.fragment_login_txt_role_user_title, R.string.user_desc));
-                    roleOperatorDescriptionButton
-                            .setOnClickListener(
-                                    getRoleDescriptionOnClickListener(
-                                            R.id.fragment_login_txt_role_operator_title, R.string.op_desc));
+                    updateUiForRegistration();
                     break;
                 default:
                     throw new IllegalStateException("The page type must be one of those:\n"
                             + "LOGIN_PAGE\n"
                             + "REGISTRATION_PAGE");
             }
-            // Set the button's text
-            loginButton.setText(buttonTextResId);
-            // Set the button's onClick listener
-            loginButton.setOnClickListener(onClickListener);
         }
 
         // Observe any tab changes
-        authenticatorViewModel.getTabState().observe(getViewLifecycleOwner(), state -> {
+        mAuthenticatorViewModel.getTabState().observe(getViewLifecycleOwner(), state -> {
             // Set the current tab's EditTexts' values with the values of the previous tab
-            final String emailText = authenticatorViewModel.getEmailState().getValue();
-            final String passwordText = authenticatorViewModel.getPasswordState().getValue();
+            final String emailText = mAuthenticatorViewModel.getEmailState().getValue();
+            final String passwordText = mAuthenticatorViewModel.getPasswordState().getValue();
             emailEditText.setText(emailText);
             passwordEditText.setText(passwordText);
             // Call loginDataChanged to refresh the form's error messages of the current tab,
             // after receiving the inputs from the previous tab.
-            authenticatorViewModel.loginDataChanged(authenticatorViewModel.getEmailState().getValue(),
-                    authenticatorViewModel.getPasswordState().getValue(),
-                    (userCheckbox != null && userCheckbox.isChecked()),
-                    (operatorCheckbox != null && operatorCheckbox.isChecked()));
+            notifyDataChanged();
+
+        });
+    }
+
+    /**
+     * Updates the data of the ViewModel.
+     */
+    private void notifyDataChanged() {
+        mAuthenticatorViewModel.dataChanged(mAuthenticatorViewModel.getEmailState().getValue(),
+                mAuthenticatorViewModel.getPasswordState().getValue(),
+                (!mAuthenticatorViewModel.isUserSigningIn() &&
+                        getBinding().fragmentLoginCbRoleUserCheckbox.isChecked()),
+                (!mAuthenticatorViewModel.isUserSigningIn() &&
+                        getBinding().fragmentLoginCbRoleOperatorCheckbox.isChecked()));
+    }
+
+    /**
+     * Prepares the Ui for a user registration attempt.
+     */
+    private void updateUiForRegistration() {
+        // User is registering
+        // Set up the UI and listeners for registration
+        final CheckBox userCheckbox = getBinding().fragmentLoginCbRoleUserCheckbox;
+        final CheckBox operatorCheckbox = getBinding().fragmentLoginCbRoleOperatorCheckbox;
+
+        // create an on checked listener for the checkboxes
+        final CompoundButton.OnCheckedChangeListener onCheckedChangeListener =
+                (buttonView, isChecked) -> notifyDataChanged();
+        // Hook up listeners to both checkboxes
+        userCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
+        operatorCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
+        // Set up authButton
+        setUpAuthButton(R.string.sign_up, v -> {
+            register();
+        });
+
+        // Add listeners to both "description" buttons
+        getBinding().fragmentLoginBtnDialogUserButton.setOnClickListener(
+                getRoleDescriptionOnClickListener(
+                        R.id.fragment_login_txt_role_user_title, R.string.user_desc));
+        getBinding().fragmentLoginBtnDialogOperatorButton.setOnClickListener(
+                getRoleDescriptionOnClickListener(
+                        R.id.fragment_login_txt_role_operator_title, R.string.op_desc));
+    }
+
+    /**
+     * Sets the text of the button with the specified one
+     * and its on click listener with the given one.
+     *
+     * @param textId          The text of the authButton.
+     * @param onClickListener The OnClickListener of authButton.
+     */
+    private void setUpAuthButton(@StringRes int textId, View.OnClickListener onClickListener) {
+        // Set its text to
+        setAuthButtonText(textId);
+        // Set its listener to the specified one
+        getBinding().fragmentLoginBtnAuthButton.setOnClickListener(onClickListener);
+    }
+
+    /**
+     * Registers the user.
+     */
+    private void register() {
+        changeVisibilityOfLoadingBarTo(View.VISIBLE);
+        mAuthenticatorViewModel.register(
+                getBinding().fragmentLoginEtEmail.getText().toString(),
+                getBinding().fragmentLoginEtPassword.getText().toString(),
+                getBinding().fragmentLoginCbRoleUserCheckbox.isChecked(),
+                getBinding().fragmentLoginCbRoleOperatorCheckbox.isChecked(),
+                requireContext());
+    }
+
+    /**
+     * Show or hide the loading bar based on the specified visibility.
+     */
+    private void changeVisibilityOfLoadingBarTo(int visibility) {
+        if (getBinding().fragmentLoginPbLoading.getVisibility() != visibility)
+            getBinding().fragmentLoginPbLoading.setVisibility(visibility);
+    }
+
+    /**
+     * Prepares the Ui for a user log in attempt.
+     * Hides the role area and attaches appropriate listeners.
+     *
+     * @param view The Ui of the fragment.
+     */
+    private void updateUiForLoggingIn(View view) {
+        // Set up the UI and listeners for logging in
+        // Hide unnecessary UI elements
+        hideRoleArea(view);
+        // Pressing the "enter" on the keyboard will automatically trigger the login method
+        getBinding().fragmentLoginEtPassword.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                if (mAuthenticatorViewModel.getLoginFormState().getValue().isDataValid())
+                    login(requireContext());
+            }
+            return false;
+        });
+        setUpAuthButton(R.string.sign_in, v -> {
+            login(requireContext());
+        });
+    }
+
+    /**
+     * Sets the authButton's text to the given one.
+     *
+     * @param textId The new text of the authButton
+     */
+    private void setAuthButtonText(int textId) {
+        getBinding().fragmentLoginBtnAuthButton.setText(textId);// Set corresponding id string
+    }
+
+    /**
+     * Logs in the user.
+     *
+     * @param requiredContext The context of the fragment.
+     */
+    private void login(Context requiredContext) {
+        changeVisibilityOfLoadingBarTo(View.VISIBLE);
+        mAuthenticatorViewModel.login(requiredContext,
+                getBinding().fragmentLoginEtEmail.getText().toString(),
+                getBinding().fragmentLoginEtPassword.getText().toString());
+    }
+
+    /**
+     * Looks for changes in the authenticatorResult.
+     * Its callback is invoked, whenever the user clicks the authButton (to log in or register).
+     */
+    private void attachObserverToResult() {
+        // Add an observer to the login result state
+        mAuthenticatorViewModel.getAuthenticatorResult().observe(getViewLifecycleOwner(), loginResult -> {
+            // Also check if the fragment is on its onResume state.
+            // In case the user enters his credentials (Both email and password) on the login page
+            // and decides to switch the to registration tab (assuming it is the first time the user
+            // pressed this tab). Then the registration tab will get initialized that time (it will start from
+            // onCreateView till onResume). Thus, as the observer is set on the onViewCreated callback it
+            // will trigger immediately with the user's data.
+            if (loginResult == null || !this.isResumed()) return;
+            changeVisibilityOfLoadingBarTo(View.GONE); // hide the loading bar
+            if (loginResult.getError() != null) showLoginFailed(loginResult.getError());
+            if (loginResult.getSuccess() != null) updateUiWithUser(loginResult.getSuccess());
+        });
+    }
+
+    /**
+     * Looks for changes in the form.
+     * Its callback is invoked, whenever any of its fields get changed.
+     */
+    private void attachObserverToForm() {
+        // Add an observer to the login form state
+        mAuthenticatorViewModel.getLoginFormState().observe(getViewLifecycleOwner(), loginFormState -> {
+            if (loginFormState == null) return;
+            getBinding().fragmentLoginBtnAuthButton
+                    .setEnabled(loginFormState.isDataValid());
+
+            // If there is an error, show it for the specific UI field.
+            // If there was an error before, and it got resolved then hide the error.
+            if (loginFormState.getEmailError() != null) {
+                getBinding().fragmentLoginEtEmail.setError(getString(loginFormState.getEmailError()));
+            } else {
+                if (getBinding().fragmentLoginEtEmail.getError() != null)
+                    getBinding().fragmentLoginEtEmail.setError(null, null);
+            }
+            if (loginFormState.getPasswordError() != null) {
+                getBinding().fragmentLoginEtPassword.setError(getString(loginFormState.getPasswordError()));
+            } else {
+                if (getBinding().fragmentLoginEtPassword.getError() != null)
+                    getBinding().fragmentLoginEtPassword.setError(null, null);
+            }
+            if (!mAuthenticatorViewModel.isUserSigningIn()) {// User signs up
+                if (loginFormState.getRoleError() != null) {
+                    getBinding().fragmentLoginCbRoleUserCheckbox.setError(getString(loginFormState.getRoleError()));
+                    getBinding().fragmentLoginCbRoleOperatorCheckbox.setError(getString(loginFormState.getRoleError()));
+                } else {
+                    getBinding().fragmentLoginCbRoleUserCheckbox.setError(null, null);
+                    getBinding().fragmentLoginCbRoleOperatorCheckbox.setError(null, null);
+                }
+            }
         });
     }
 
@@ -381,4 +454,37 @@ public class AuthenticatorHosteeFragment extends Fragment {
                     Toast.LENGTH_LONG).show();
         }
     }
+
+    /**
+     * Access the {@link #mFragmentAuthenticatorHosteeBinding}.
+     *
+     * @return A reference to {@link #mFragmentAuthenticatorHosteeBinding}.
+     */
+    private FragmentAuthenticatorHosteeBinding getBinding() {
+        return mFragmentAuthenticatorHosteeBinding;
+    }
+
+    /**
+     * This method is called whenever the editText
+     * that it is attached to, has its text changed.
+     *
+     * @param s The updated text.
+     */
+    @Override
+    public void afterTextChanged(Editable s) {
+        mAuthenticatorViewModel.dataChanged(
+                getBinding().fragmentLoginEtEmail.getText().toString(), // Inputted email
+                getBinding().fragmentLoginEtPassword.getText().toString(), // Inputted password
+                (!mAuthenticatorViewModel.isUserSigningIn() // If logging in
+                        && getBinding().fragmentLoginCbRoleUserCheckbox.isChecked()), // user got checked
+                (!mAuthenticatorViewModel.isUserSigningIn() // If logging in
+                        && getBinding().fragmentLoginCbRoleOperatorCheckbox.isChecked())); // operator got checked
+    }
+
+    /**
+     * Unused TextWatcher methods.
+     */
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* ignore */ }
+
+    public void onTextChanged(CharSequence s, int start, int before, int count) { /* ignore */ }
 }

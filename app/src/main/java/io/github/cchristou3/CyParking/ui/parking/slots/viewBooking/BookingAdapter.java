@@ -31,11 +31,11 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
 
     private static final long DURATION = 500;
     private static View.OnClickListener mOnItemClickListener;
-    private final List<PrivateParkingBooking> mDataset;
+    private final List<PrivateParkingBooking> bookings;
     private boolean mOnAttach = true;
 
-    public BookingAdapter(List<PrivateParkingBooking> mDataset) {
-        this.mDataset = mDataset;
+    public BookingAdapter(List<PrivateParkingBooking> bookings) {
+        this.bookings = bookings;
     }
 
     /**
@@ -80,17 +80,16 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
 
         setAnimation(holder.itemView, position);
 
-        final String price = Double.toString(mDataset.get(position).getPrice());
+        final String offer = "Slot offer: " + bookings.get(position).getSlotOffer().toString();
         final CharSequence date = "Date: " + DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
-                .format(mDataset.get(position).getDateOfBooking());
-        final String time = "Time: " + mDataset.get(position).getStartingTime()
-                .concat(" - ").concat(mDataset.get(position).getEndingTime());
-        final String status = "Status: " + (mDataset.get(position).isCompleted() ? "Completed" : "Pending");
-        final String parkingName = "Parking: " + mDataset.get(position).getParkingName();
+                .format(bookings.get(position).getDateOfBooking());
+        final String time = "Start time: " + bookings.get(position).getStartingTime();
+        final String status = "Status: " + (bookings.get(position).isCompleted() ? "Completed" : "Pending");
+        final String parkingName = "Parking: " + bookings.get(position).getParkingName();
 
         holder.status.setText(status);
-        holder.price.setText(price);
-        holder.parking_name.setText(parkingName);
+        holder.offer.setText(offer);
+        holder.lotName.setText(parkingName);
         holder.date.setText(date);
         holder.time.setText(time);
     }
@@ -102,7 +101,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
      */
     @Override
     public int getItemCount() {
-        return mDataset.size();
+        return bookings.size();
     }
 
     /**
@@ -154,8 +153,8 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView status;
-        public TextView price;
-        public TextView parking_name;
+        public TextView offer;
+        public TextView lotName;
         public TextView date;
         public TextView time;
         public ImageButton cancelButton;
@@ -163,8 +162,8 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
         public MyViewHolder(View view) {
             super(view);
             status = view.findViewById(R.id.booking_placeholder_item_txt_status);
-            price = view.findViewById(R.id.booking_placeholder_item_txt_price);
-            parking_name = view.findViewById(R.id.booking_placeholder_item_txt_parking_name);
+            offer = view.findViewById(R.id.booking_placeholder_item_txt_offer);
+            lotName = view.findViewById(R.id.booking_placeholder_item_txt_parking_name);
             date = view.findViewById(R.id.booking_placeholder_item_txt_date);
             time = view.findViewById(R.id.booking_placeholder_item_txt_time);
             cancelButton = view.findViewById(R.id.booking_placeholder_item_btn_cancel);

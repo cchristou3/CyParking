@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.data.pojo.parking.lot;
 
+import android.content.Context;
 import android.os.Parcel;
 
 import androidx.annotation.NonNull;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.pojo.parking.slot.Parking;
 import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivateParkingBooking;
 import io.github.cchristou3.CyParking.utilities.ShaUtility;
@@ -33,7 +35,7 @@ import io.github.cchristou3.CyParking.utilities.ShaUtility;
  * {@link #coordinates}, its {@link #parkingID} and its {@link #lotName}.
  *
  * @author Charalambos Christou
- * @version 5.0 23/12/20
+ * @version 6.0 29/12/20
  */
 public class ParkingLot extends Parking {
 
@@ -333,5 +335,21 @@ public class ParkingLot extends Parking {
 
     public void setOpeningHours(@Nullable String openingHours) {
         this.openingHours = openingHours;
+    }
+
+    /**
+     * Calculates the current availability (the amount of slots are currently taken)
+     * of the parking lot.
+     * E.g. availableSpaces = 20, capacity = 30
+     * It will generate the string "Availability: 10/30".
+     *
+     * @param context The context to use.  Usually your {@link android.app.Application}
+     *                or {@link android.app.Activity} object.
+     * @return A string representation of the lot's availability status.
+     */
+    public String getAvailability(@NotNull Context context) {
+        return context.getString(R.string.availability) + " "
+                + (capacity - availableSpaces)
+                + "/" + capacity;
     }
 }

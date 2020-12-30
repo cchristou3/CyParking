@@ -28,7 +28,7 @@
 
 
         <View
-            android:id="@+id/booking_placeholder_item_txt_price"
+            android:id="@+id/booking_placeholder_item_txt_offer"
             android:layout_width="70dp"
             android:layout_height="@dimen/placeholder_text_height"
             android:background="@color/placeholder_bg"

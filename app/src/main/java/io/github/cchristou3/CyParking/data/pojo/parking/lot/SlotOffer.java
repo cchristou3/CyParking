@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -31,6 +33,7 @@ public class SlotOffer implements Parcelable {
     };
 
     // Data members
+    @SerializedName("duration")
     private float durationInHours;
     private float price;
 

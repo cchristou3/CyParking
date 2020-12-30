@@ -32,7 +32,7 @@ public class Parking implements Parcelable {
         }
     };
     @SerializedName("coordinates")
-    protected HashMap<String, Double> coordinates;
+    protected HashMap<String, Double> coordinates; // TODO: Replace with inner class Coordinates
     @SerializedName("parkingID")
     protected int parkingID; // TODO: Migrate to String data type
 

@@ -4,10 +4,9 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.firebase.auth.FirebaseAuth;
-
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.pojo.user.FeedbackFormState;
+import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel;
 
 
@@ -24,9 +23,16 @@ public class FeedbackViewModel extends ViewModel {
     final private MutableLiveData<String> feedback = new MutableLiveData<>();
     final private MutableLiveData<FeedbackFormState> formState = new MutableLiveData<>();
 
-    public void formDataChanged(String feedbackMessage, @Nullable String recipientEmail) {
+    /**
+     * Updates the {@link #formState}'s value based on the given arguments.
+     *
+     * @param user            The current LoggedInUser instance if there is one
+     * @param feedbackMessage The user's current feedback message.
+     * @param recipientEmail  The user's email.
+     */
+    public void formDataChanged(LoggedInUser user, String feedbackMessage, @Nullable String recipientEmail) {
         feedback.setValue(feedbackMessage);
-        if (!isLoggedIn()) {
+        if (user == null) {
             email.setValue(recipientEmail); // Persist the email string
 
             // If not logged in, validate the given email
@@ -44,12 +50,8 @@ public class FeedbackViewModel extends ViewModel {
     }
 
     /**
-     * Getters for all {@link FeedbackViewModel} data members
+     * Getter to its data members
      */
-    public boolean isLoggedIn() {
-        return FirebaseAuth.getInstance().getCurrentUser() != null;
-    }
-
     public MutableLiveData<String> getEmail() {
         return email;
     }

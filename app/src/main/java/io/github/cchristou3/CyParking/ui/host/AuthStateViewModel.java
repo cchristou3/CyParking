@@ -1,8 +1,9 @@
-package io.github.cchristou3.CyParking;
+package io.github.cchristou3.CyParking.ui.host;
 
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -14,13 +15,23 @@ import java.util.List;
 import io.github.cchristou3.CyParking.data.manager.SharedPreferencesManager;
 import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
+import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 
-import static io.github.cchristou3.CyParking.MainHostActivity.TAG;
+import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 
 /**
  * Purpose: <p>Data persistence when orientation changes.
  * The primary mean of communicating between the fragments
  * and their hosting activity in terms of the Auth State data.
+ * <p>
+ * <strong>Note:</strong>
+ * <p>
+ * The {@link #userState} is initially set to null.
+ * Its value is initially updated inside {@link MainHostActivity}'s onCreate method
+ * via the invocation of {@link #getUserInfo(Context)}.
+ * The state also changes when the user is logging in or registering in {@link AuthenticatorFragment}
+ * and when signing out by clicking the action bar's "sign out" option.
+ * </p>
  *
  * @author Charalambos Christou
  * @version 1.0 25/12/20
@@ -42,12 +53,23 @@ public class AuthStateViewModel extends ViewModel {
     }
 
     /**
-     * Acccess the user's state.
+     * Access the user's state.
      *
      * @return A reference to the user's state.
      */
     public MutableLiveData<LoggedInUser> getUserState() {
         return userState;
+    }
+
+    /**
+     * Access the current set {@link LoggedInUser} instance.
+     *
+     * @return A reference to current {@link LoggedInUser} instance
+     * if there is one.
+     */
+    @Nullable
+    public LoggedInUser getUser() {
+        return userState.getValue();
     }
 
     /**
@@ -100,13 +122,13 @@ public class AuthStateViewModel extends ViewModel {
                         }
                     });
         }
-
     }
 
     /**
-     * @return true if the userState is set (logged in). Otherwise, false.
+     * Signs the user out.
      */
-    public boolean isLoggedIn() {
-        return FirebaseAuth.getInstance().getCurrentUser() != null;
+    public void signOut() {
+        mAuthenticatorRepository.signOut();
+        updateAuthState(null); // Update the userState to null
     }
 }

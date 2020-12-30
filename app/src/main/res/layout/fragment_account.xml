@@ -6,54 +6,111 @@
     android:layout_height="match_parent"
     tools:context=".ui.user.AccountFragment">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/fragment_account_mtv_display_name"
+    <com.google.android.material.circularreveal.cardview.CircularRevealCardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Name"
-        android:textSize="25sp"
-        app:layout_constraintBottom_toTopOf="@+id/fragment_account_mbtn_update_name"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/fragment_account_mtv_email"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Email"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_account_mtv_display_name" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/fragment_account_mbtn_update_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Update Name"
-        app:layout_constraintBottom_toTopOf="@+id/fragment_account_mbtn_update_email"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_account_mbtn_update_password"
-        app:layout_constraintStart_toStartOf="@+id/fragment_account_mbtn_update_password" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/fragment_account_mbtn_update_email"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Update Email"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_account_mbtn_update_password"
-        app:layout_constraintStart_toStartOf="@+id/fragment_account_mbtn_update_password"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/fragment_account_mbtn_update_password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Update Password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_account_mbtn_update_email" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/fragment_account_cl_not_logged_in"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/fragment_account_txt_not_logged_in"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingStart="30dp"
+                android:paddingLeft="30dp"
+                android:paddingTop="30dp"
+                android:paddingEnd="30dp"
+                android:paddingRight="30dp"
+                android:paddingBottom="15dp"
+                android:text="@string/not_logged_in_account_1"
+                android:textSize="25sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/fragment_account_btn_to_auth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="20dp"
+                android:text="@string/click_here"
+                android:textSize="22sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_account_txt_not_logged_in" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/fragment_account_cl_logged_in"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:visibility="gone">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/fragment_account_mtv_display_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="25sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/fragment_account_mtv_email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textSize="25sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_account_mtv_display_name" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fragment_account_mbtn_update_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/update_name"
+                app:layout_constraintEnd_toEndOf="@+id/fragment_account_mbtn_update_password"
+                app:layout_constraintStart_toStartOf="@+id/fragment_account_mbtn_update_password"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_account_mtv_email" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fragment_account_mbtn_update_email"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/update_email"
+                app:layout_constraintEnd_toEndOf="@+id/fragment_account_mbtn_update_password"
+                app:layout_constraintStart_toStartOf="@+id/fragment_account_mbtn_update_password"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_account_mbtn_update_name" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fragment_account_mbtn_update_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/update_password"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_account_mbtn_update_email" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.circularreveal.cardview.CircularRevealCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,11 +5,14 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.HashMap;
 
+import io.github.cchristou3.CyParking.data.pojo.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.pojo.parking.slot.Parking;
 import io.github.cchristou3.CyParking.utilities.ShaUtility;
 
@@ -36,14 +39,21 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         }
     };
 
+    @SerializedName("parkingOperatorID")
     private String parkingOperatorID;
+    @SerializedName("parkingName")
     private String parkingName;
+    @SerializedName("userID")
     private String userID;
+    @SerializedName("username")
     private String username;
+    @SerializedName("dateOfBooking")
     private Date dateOfBooking;
+    @SerializedName("startingTime")
     private String startingTime;
-    private String endingTime;
-    private double price;
+    @SerializedName("slotOffer")
+    private SlotOffer slotOffer;
+    @SerializedName("completed")
     private boolean completed;
 
     public PrivateParkingBooking() {
@@ -62,10 +72,9 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
      * @param username          The username of the user that booked a space in the lot.
      * @param dateOfBooking     The date of the booking.
      * @param startingTime      The starting time of the booking.
-     * @param endingTime        The ending time of the booking.
-     * @param price             The fee of the parking.
+     * @param slotOffer         The slot offer of the booking.
      */
-    public PrivateParkingBooking(HashMap<String, Double> coordinates, int parkingID, String parkingOperatorID, String parkingName, String userID, String username, Date dateOfBooking, String startingTime, String endingTime, double price) {
+    public PrivateParkingBooking(HashMap<String, Double> coordinates, int parkingID, String parkingOperatorID, String parkingName, String userID, String username, Date dateOfBooking, String startingTime, SlotOffer slotOffer) {
         super(coordinates, parkingID);
         this.parkingOperatorID = parkingOperatorID;
         this.parkingName = parkingName;
@@ -73,8 +82,7 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         this.username = username;
         this.dateOfBooking = dateOfBooking;
         this.startingTime = startingTime;
-        this.endingTime = endingTime;
-        this.price = price;
+        this.slotOffer = slotOffer;
         this.completed = getInitialBookingStatus();
     }
 
@@ -92,9 +100,8 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         parkingName = in.readString();
         userID = in.readString();
         username = in.readString();
-        endingTime = in.readString();
+        slotOffer = in.readParcelable(SlotOffer.class.getClassLoader());
         startingTime = in.readString();
-        price = in.readDouble();
         completed = (in.readInt() == 1);
     }
 
@@ -144,9 +151,8 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         dest.writeString(parkingName);
         dest.writeString(userID);
         dest.writeString(username);
-        dest.writeString(endingTime);
+        dest.writeParcelable(slotOffer, flags);
         dest.writeString(startingTime);
-        dest.writeDouble(price);
         dest.writeInt(completed ? 1 : 0);
     }
 
@@ -177,12 +183,8 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
         return startingTime;
     }
 
-    public String getEndingTime() {
-        return endingTime;
-    }
-
-    public double getPrice() {
-        return price;
+    public SlotOffer getSlotOffer() {
+        return slotOffer;
     }
 
     public boolean isCompleted() {
@@ -192,7 +194,7 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
     /**
      * Create a new string which consists of the following attributes:
      * {@link #parkingID}, {@link #parkingOperatorID}, {@link #parkingName}, {@link #userID}, {@link #username},
-     * {@link #dateOfBooking}, {@link #startingTime}, {@link #endingTime}, {@link #price}, {@link #coordinates}.
+     * {@link #dateOfBooking}, {@link #startingTime}, {@link #slotOffer}, {@link #coordinates}.
      * <p>
      * Not Included: {@link #completed}
      * <p>
@@ -210,8 +212,8 @@ public class PrivateParkingBooking extends Parking implements Parcelable {
     @Override
     public String generateUniqueId() {
         // Create a long and unique id
-        String id = getParkingID() + parkingOperatorID + parkingName + userID + username + dateOfBooking + startingTime + endingTime +
-                price + getCoordinates().values().toString();
+        String id = getParkingID() + parkingOperatorID + parkingName + userID + username + dateOfBooking + startingTime + slotOffer
+                + getCoordinates().values().toString();
         // Hash (SHA256) it to has a fixed length of 32 characters
         return ShaUtility.digest(id);
     }

@@ -19,7 +19,7 @@
         tools:context=".ui.parking.lots.ParkingMapFragment" />
 
     <androidx.core.widget.ContentLoadingProgressBar
-        android:id="@+id/fragment_parking_map_pb_loadingMarkers"
+        android:id="@+id/fragment_parking_map_clp_loadingMarkers"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

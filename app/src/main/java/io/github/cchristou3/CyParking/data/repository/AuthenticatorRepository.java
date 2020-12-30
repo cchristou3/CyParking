@@ -15,10 +15,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.github.cchristou3.CyParking.MainHostActivity;
 import io.github.cchristou3.CyParking.data.manager.SharedPreferencesManager;
 import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.pojo.user.login.LoginResult;
+import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 
 /**
  * Purpose: <p>Class that handles authentication w/ login credentials and retrieves user information.

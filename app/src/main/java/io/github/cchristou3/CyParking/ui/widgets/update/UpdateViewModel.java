@@ -3,8 +3,12 @@ package io.github.cchristou3.CyParking.ui.widgets.update;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.EmailAuthProvider;
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
+
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.pojo.user.update.UpdateFormState;
@@ -16,13 +20,13 @@ import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel;
  * Used when the users try to update their information.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 05/11/20
+ * @version 2.0 29/12/20
  */
 public class UpdateViewModel extends ViewModel {
 
-    final private MutableLiveData<String> title = new MutableLiveData<>();
-    final private MutableLiveData<String> fieldText = new MutableLiveData<>();
-    final private MutableLiveData<String> updatedFieldText = new MutableLiveData<>("");
+    final private MutableLiveData<String> dialogTitle = new MutableLiveData<>();
+    final private MutableLiveData<String> actionFieldTitle = new MutableLiveData<>();
+    final private MutableLiveData<String> actionFieldInput = new MutableLiveData<>("");
     final private MutableLiveData<UpdateFormState> updateFormState = new MutableLiveData<>();
 
     final private AccountRepository accountRepository;
@@ -45,7 +49,7 @@ public class UpdateViewModel extends ViewModel {
      * @param updatedField The text value of the UI element
      */
     public void formDataChanged(String updatedField) {
-        updatedFieldText.setValue(updatedField);
+        actionFieldInput.setValue(updatedField);
         switch (mDialogType) {
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
                 if (updatedField != null && !updatedField.trim().isEmpty()) {
@@ -80,15 +84,39 @@ public class UpdateViewModel extends ViewModel {
      */
     public Task<Void> updateField(String updatedField) {
         switch (mDialogType) {
+            // TODO: For email and display name,
+            //  use another continueWithTask to
+            //  update their fields in the Firestore database as well.
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
                 return accountRepository.updateDisplayName(updatedField);
             case UpdateAccountDialog.UPDATE_EMAIL:
-                return accountRepository.updateEmail(updatedField);
+                return accountRepository.updateEmail(updatedField)
+                        .continueWithTask(getContinuation(updatedField));
             case UpdateAccountDialog.UPDATE_PASSWORD:
-                return accountRepository.updatePassword(updatedField);
+                return accountRepository.updatePassword(updatedField)
+                        .continueWithTask(getContinuation(updatedField));
             default:
                 return null;
         }
+    }
+
+    /**
+     * src: https://firebase.google.com/docs/auth/android/manage-users#re-authenticate_a_user
+     * Re-authenticate the user automatically
+     *
+     * @param updatedField The user's field that got updated
+     * @return A Continuation instance.
+     */
+    @NotNull
+    @Contract(pure = true)
+    private Continuation<Void, Task<Void>> getContinuation(String updatedField) {
+        return task -> {
+            if (task.getException() instanceof FirebaseAuthRecentLoginRequiredException) {
+                // TODO: Test
+                return reauthenticateUser(updatedField);
+            }
+            return task;
+        };
     }
 
     /**
@@ -99,25 +127,24 @@ public class UpdateViewModel extends ViewModel {
      *
      * @param credentials The user's credentials
      */
-    public void reauthenticateUser(String credentials) {
-        accountRepository.getFirebaseUser()
-                .reauthenticate(EmailAuthProvider
-                        .getCredential(accountRepository.getFirebaseUser().getEmail(), credentials));
+    public Task<Void> reauthenticateUser(String credentials) throws IllegalStateException {
+        // TODO: Prompt user to re-enter details (e.g. in another dialog)
+        return accountRepository.reauthenticateUser(credentials);
     }
 
     /**
      * Getters for all data members
      */
-    public MutableLiveData<String> getTitle() {
-        return title;
+    public MutableLiveData<String> getDialogTitle() {
+        return dialogTitle;
     }
 
-    public MutableLiveData<String> getFieldText() {
-        return fieldText;
+    public MutableLiveData<String> getActionFieldTitle() {
+        return actionFieldTitle;
     }
 
-    public MutableLiveData<String> getUpdatedFieldText() {
-        return updatedFieldText;
+    public MutableLiveData<String> getActionFieldInput() {
+        return actionFieldInput;
     }
 
     public short getDialogType() {

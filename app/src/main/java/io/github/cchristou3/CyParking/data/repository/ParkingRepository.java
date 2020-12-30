@@ -21,7 +21,7 @@ import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivatePark
  * Purpose: <p>contain all methods to access the (cloud / local) database's parking nodes.</p>
  *
  * @author Charalambos Christou
- * @version 5.0 25/12/20
+ * @version 6.0 28/12/20
  */
 public class ParkingRepository {
 
@@ -52,6 +52,7 @@ public class ParkingRepository {
                 .collection(PRIVATE_PARKING_BOOKING)
                 .whereEqualTo(USER_ID, userId)
                 .orderBy(COMPLETED, Query.Direction.ASCENDING); // Show pending bookings first
+        // TODO: Make a HTTP request - filter data (get only pending bookings) on the server and send to the client
     }
 
     /**
@@ -73,7 +74,9 @@ public class ParkingRepository {
      *
      * @param parkingLotToBeStored Stores all necessary info about the private parking
      * @return The task to be handled in the active fragment
+     * @throws NullPointerException in case the continuation returns null
      * @see ParkingLot#generateUniqueId()
+     * @see Task#getException()
      */
     @NotNull
     public static Task<Void> registerParkingLot(@NotNull ParkingLot parkingLotToBeStored) {
@@ -107,7 +110,7 @@ public class ParkingRepository {
      * @return A Task<Void> object to be handled in the calling fragment.
      */
     @NotNull
-    public static Task<Void> bookParking(@NotNull PrivateParkingBooking privateParkingBookingToBeStored) {
+    private static Task<Void> bookParkingSlot(@NotNull PrivateParkingBooking privateParkingBookingToBeStored) {
         // Add the booking info to the database
         return FirebaseFirestore.getInstance()
                 .collection(PRIVATE_PARKING_BOOKING)
@@ -116,11 +119,44 @@ public class ParkingRepository {
     }
 
     /**
+     * Stores the specified object to the database's PRIVATE_PARKING_BOOKING node.
+     * The user has the option to check whether or not to check of this booking has already been made.
+     * If specified, the booking document is queried from the database based on the booking's id.
+     * If a document is returned, then it already exists. Otherwise, if null was returned, it indicates
+     * that the booking does not exist in the database.
+     * For the latter, the booking gets then stored to the database.
+     *
+     * @param booking              Holds all necessary info about a booking of a private parking
+     * @param checkIfAlreadyExists Indicates whether or not to check of this booking already exists in the database.
+     * @return A Task<Void> object to be handled in the calling fragment.
+     * @throws NullPointerException in case the continuation returns null
+     * @see Task#getException()
+     */
+    public static Task<Void> bookParkingSlot(@NotNull PrivateParkingBooking booking, boolean checkIfAlreadyExists) {
+        if (checkIfAlreadyExists) {
+            return FirebaseFirestore.getInstance().collection(PRIVATE_PARKING_BOOKING)
+                    .document(booking.generateUniqueId()).get()
+                    .continueWithTask(task -> {
+                        if (task.isSuccessful()) {
+                            if (task.getResult().getData() == null) { // If it does not already exist
+                                // Store to the database
+                                return bookParkingSlot(booking);
+                            }
+                        }
+                        return null; // This should throw a NullPointerException (to be handled by the View).
+                    });
+        } else {
+            // Store to the database immediately
+            return bookParkingSlot(booking);
+        }
+    }
+
+    /**
      * Deletes the specified document using the document ID
      *
      * @param idOfBookingToBeCancelled The id of the document which we want to delete
      */
-    public static void cancelParking(@NotNull String idOfBookingToBeCancelled) {
+    public static void cancelParkingBooking(@NotNull String idOfBookingToBeCancelled) {
         // Delete the booking info to the database
         FirebaseFirestore.getInstance()
                 .collection(PRIVATE_PARKING_BOOKING)
@@ -135,7 +171,7 @@ public class ParkingRepository {
      * @return The {@link DocumentReference} reference to be observed.
      */
     @NotNull
-    public static DocumentReference observeSelectedParking(@NotNull ParkingLot selectedParking) {
+    public static DocumentReference observeParkingLot(@NotNull ParkingLot selectedParking) {
         return FirebaseFirestore.getInstance().collection(PRIVATE_PARKING)
                 .document(selectedParking.generateUniqueId());
     }

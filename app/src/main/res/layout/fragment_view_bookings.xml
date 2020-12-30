@@ -1,64 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:shimmer="http://schemas.android.com/tools"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.parking.slots.viewBooking.ViewBookingsFragment">
 
-
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/fragment_view_bookings_sfl_shimmer_view_container"
+    <ScrollView
+        android:id="@+id/fragment_view_bookings_sv_scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        shimmer:duration="800">
+        android:layout_height="match_parent">
 
-        <!-- Adding 3 rows of placeholders -->
-        <LinearLayout
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/fragment_view_bookings_sfl_shimmer_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            shimmer:duration="800">
 
-            <include layout="@layout/booking_placeholder_item" />
+            <!-- Adding 3 rows of placeholders -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-            <include layout="@layout/booking_placeholder_item" />
+                <include layout="@layout/booking_placeholder_item" />
 
-            <include layout="@layout/booking_placeholder_item" />
+                <include layout="@layout/booking_placeholder_item" />
 
-            <include layout="@layout/booking_placeholder_item" />
+                <include layout="@layout/booking_placeholder_item" />
 
-        </LinearLayout>
+                <include layout="@layout/booking_placeholder_item" />
 
-    </com.facebook.shimmer.ShimmerFrameLayout>
+            </LinearLayout>
 
-    <Button
-        android:id="@+id/fragment_view_bookings_btn_pending"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Pending"
-        android:textSize="21sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/fragment_view_bookings_s_space"
-        app:layout_constraintTop_toTopOf="@+id/fragment_view_bookings_btn_completed" />
+        </com.facebook.shimmer.ShimmerFrameLayout>
 
-    <Button
-        android:id="@+id/fragment_view_bookings_btn_completed"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Completed"
-        android:textSize="21sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/fragment_view_bookings_s_space"
-        app:layout_constraintStart_toStartOf="parent" />
+    </ScrollView>
 
     <Space
         android:id="@+id/fragment_view_bookings_s_space"
@@ -74,7 +57,21 @@
         android:id="@+id/fragment_view_bookings_rv_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/fragment_view_bookings_btn_completed"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/fragment_view_bookings_txt_no_bookings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="@string/no_pending_bookings"
+        android:textSize="25sp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

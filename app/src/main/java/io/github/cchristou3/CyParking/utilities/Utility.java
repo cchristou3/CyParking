@@ -1,50 +1,82 @@
 package io.github.cchristou3.CyParking.utilities;
 
-import android.annotation.SuppressLint;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.view.MotionEvent;
-import android.view.View;
-
 import com.google.android.gms.maps.model.LatLng;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Purpose: <p>Contain all helper / utility methods which the application needs.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 14/12/20
+ * @version 5.0 30/12/20
  */
 public class Utility {
 
     // Static Constants
     private static final double MAXIMUM_METERS_FROM_USER = 1000.0D;
+    private static final String DATE_PATTERN = "dd-MM-yyyy";
 
     /**
-     * The parent view no longer receives touch events from the specified
-     * child view. If a scrollable area (e.g. ListView) is inside a
-     * ScrollView then there is an issue while scrolling
-     * the scrollable area's inner contents.
-     * So, when touching the scrollable area, any touch events are blocked from its parent view.
+     * Creates a string representation of the date accumulated by the specified
+     * year, month and day.
      *
-     * @param view The view that should scroll smoothly without interference.
+     * @param year  The year of the date.
+     * @param month The month of the date.
+     * @param day   The day of the date.
+     * @return The string version of the date in the dd-MM-yyyy format.
      */
-    @SuppressLint("ClickableViewAccessibility")
-    public static void disableParentScrollingInterferenceOf(@NotNull View view) {
-        view.setOnTouchListener((v, event) -> {
-            v.getParent().requestDisallowInterceptTouchEvent(true);
-            if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
-                v.getParent().requestDisallowInterceptTouchEvent(false);
-            }
-            return false;
-        });
+    @NotNull
+    public static String dateToString(int year, int month, int day) {
+        return dateToString(Utility.getDateOf(year, month, day));
+    }
+
+    /**
+     * Creates a string representation of the specified date object.
+     *
+     * @param date The date to represent in a string.
+     * @return The string version of the date in the dd-MM-yyyy format.
+     */
+    @NotNull
+    public static String dateToString(@NotNull Date date) {
+        return new SimpleDateFormat(DATE_PATTERN,
+                Locale.getDefault())
+                .format(date);
+    }
+
+    /**
+     * Creates a new instance of Date that corresponds
+     * to the current date.
+     *
+     * @return The current date.
+     */
+    @NotNull
+    public static Date getCurrentDate() {
+        final Calendar currentDate = Calendar.getInstance();
+        currentDate.setTime(Calendar.getInstance().getTime());
+        currentDate.set(Calendar.HOUR_OF_DAY, 0);
+        currentDate.set(Calendar.MINUTE, 0);
+        currentDate.set(Calendar.SECOND, 0);
+        currentDate.set(Calendar.MILLISECOND, 0);
+        return currentDate.getTime();
+    }
+
+    /**
+     * Converts the given string into a date object.
+     *
+     * @param date The string to be converted to a Date object.
+     * @return The representation of the string's date value into a Date object.
+     * @throws ParseException When the given string cannot be parsed into a Date object.
+     */
+    public static Date fromStringToDate(String date) throws ParseException {
+        return new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                .parse(date);
     }
 
     /**
@@ -72,34 +104,6 @@ public class Utility {
         double d = R * c; // d is the total distance in metres
 
         return (d <= MAXIMUM_METERS_FROM_USER);
-    }
-
-    /**
-     * Creates a Bitmap object based on a specified drawable
-     *
-     * @param drawable the drawable to be placed on a bitmap
-     * @return A bitmap used to indicate the user's location
-     */
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        Bitmap bitmap;
-
-        if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if (bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
-            }
-        }
-
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
-
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
     }
 
     /**
@@ -135,5 +139,36 @@ public class Utility {
         innerCalendar.set(Calendar.SECOND, 0);
         innerCalendar.set(Calendar.MILLISECOND, 0);
         return innerCalendar.getTime();
+    }
+
+    /**
+     * Generates a sequence of numbers and stores them in an Array.
+     * The number are in range of startFrom - endTo.
+     *
+     * @param multiplicand The number to multiply with every index (multiplier) of the array.
+     * @return An array of string that holds numeric values.
+     */
+    @NotNull
+    public static String[] getVolume(float multiplicand, int startFrom, int endTo /* non-inclusive */) {
+        final String[] volumes = new String[10];
+        int multiplier = startFrom;
+        for (int i = 0; i < endTo; i++) {
+            volumes[i] = String.valueOf((multiplier * multiplicand));
+            multiplier++;
+        }
+        return volumes;
+    }
+
+    /**
+     * Computes the time of the day.
+     *
+     * @return A String which corresponds to the time (E.g. "12 : 30").
+     */
+    @NotNull
+    public static String getCurrentTime() {
+        // Access the current time of the day
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        int minute = Calendar.getInstance().get(Calendar.MINUTE);
+        return (Utility.getTimeOf((hour), minute));
     }
 }

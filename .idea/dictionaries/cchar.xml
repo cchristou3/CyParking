@@ -5,6 +5,7 @@
       <w>gson</w>
       <w>livedata</w>
       <w>pojo</w>
+      <w>reauthenticate</w>
     </words>
   </dictionary>
 </component>

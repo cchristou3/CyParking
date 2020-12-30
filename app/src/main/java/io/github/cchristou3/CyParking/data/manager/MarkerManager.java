@@ -17,7 +17,8 @@ import java.util.Set;
 
 import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
-import io.github.cchristou3.CyParking.utilities.Utility;
+import io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment;
+import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
 /**
  * Purpose: manage {@link Marker} objects of {@link io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment}.
@@ -72,7 +73,7 @@ public class MarkerManager {
         mUserMarker = mGoogleMap.addMarker(new MarkerOptions()
                 .title("Title")
                 .position(mCurrentLatLngOfUser)
-                .icon(BitmapDescriptorFactory.fromBitmap(Utility.drawableToBitmap(mUserMapIcon))) // TODO: Replace with an actual icon
+                .icon(BitmapDescriptorFactory.fromBitmap(ViewUtility.drawableToBitmap(mUserMapIcon))) // TODO: Replace with an actual icon
                 .snippet("Current Location!")
                 .title("Me"));
         // Add a tag to it, to differentiate it from the other markers on the map
@@ -129,7 +130,7 @@ public class MarkerManager {
      * based on a key.
      * Could be either the Latitude or the Longitude.
      *
-     * @param marker
+     * @param marker The lot's associated marker object.
      * @param key    The key used for look up.
      * @return The value corresponding to the key.
      */
@@ -181,7 +182,7 @@ public class MarkerManager {
      * Called whenever a ParkingLot is REMOVED from the database.
      *
      * @param marker The marker to be erased.
-     * @see io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment#retrieveDataAndListenForChanges
+     * @see ParkingMapFragment#onStart()
      */
     public void removeMarker(Marker marker) {
         // Remove it from the HashMap
@@ -215,7 +216,7 @@ public class MarkerManager {
      * @param lot             The lot to be attached to the created marker.
      * @param markerLatitude  The latitude of the marker.
      * @param markerLongitude The longitude of the marker.
-     * @see io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment#retrieveDataAndListenForChanges
+     * @see ParkingMapFragment#onStart()
      */
     public void addMarker(@NotNull GoogleMap mGoogleMap, @NotNull ParkingLot lot, double markerLatitude, double markerLongitude) {
         add(
@@ -233,7 +234,7 @@ public class MarkerManager {
      *
      * @param lot    The lot to be attached to the given marker.
      * @param marker The marker to be associated with the given ParkingLot object.
-     * @see io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment#retrieveDataAndListenForChanges
+     * @see ParkingMapFragment#onStart()
      */
     public void addMarker(@NotNull ParkingLot lot, @NonNull Marker marker) {
         add(marker, lot);

@@ -1,10 +1,14 @@
 package io.github.cchristou3.CyParking.data.repository;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.EmailAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
 import org.jetbrains.annotations.Nullable;
+
+import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
 
 /**
  * Purpose: <p>Class that offers to the user's the following services:
@@ -13,21 +17,22 @@ import org.jetbrains.annotations.Nullable;
  * <p>- Update their password
  *
  * @author Charalambos Christou
- * @version 2.0 11/12/20
+ * @version 3.0 28/12/20
  */
 public class AccountRepository {
 
     @Nullable
-    final private FirebaseUser mFirebaseUser;
+    private FirebaseUser mFirebaseUser = null;
 
     /**
      * Initializes the AccountRepository's firebase user
-     * with the specified argument.
+     * based on the specified argument.
      *
-     * @param firebaseUser The current instance of FirebaseUser
+     * @param loggedInUser The current instance of LoggedInUser
      */
-    public AccountRepository(@Nullable FirebaseUser firebaseUser) {
-        this.mFirebaseUser = firebaseUser;
+    public AccountRepository(@Nullable LoggedInUser loggedInUser) {
+        if (loggedInUser != null)
+            this.mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     }
 
     /**
@@ -71,5 +76,10 @@ public class AccountRepository {
     @Nullable
     public Task<Void> updatePassword(String newPassword) {
         return mFirebaseUser.updatePassword(newPassword);
+    }
+
+    public Task<Void> reauthenticateUser(String credentials) {
+        return mFirebaseUser.reauthenticate(EmailAuthProvider
+                .getCredential(mFirebaseUser.getEmail(), credentials));
     }
 }

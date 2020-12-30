@@ -12,13 +12,17 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import org.jetbrains.annotations.NotNull;
+
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
+import io.github.cchristou3.CyParking.databinding.FragmentAuthenticationBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 
 /**
- * Purpose: <p>To host the two tabs (Sign in, Sign up) and provide to both the same instance of</p>
- * LoginViewModel.
+ * Purpose: <p>To host the two tabs (Sign in, Sign up) </p>
+ * Both tabs, use this fragment as their ViewModelStoreOwner to both
+ * acquire the same instance of {@link AuthenticatorViewModel}.
  *
  * @author Charalambos Christou
  * @version 3.0 15/12/20
@@ -28,23 +32,22 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
     public AuthenticatorFragment() {/* Required empty public constructor */}
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_authentication, container, false);
-
         // Inflate the layout for this fragment
+        FragmentAuthenticationBinding binding = FragmentAuthenticationBinding.inflate(inflater);
         AuthenticatorAdapter sectionsPagerAdapter = new AuthenticatorAdapter(getChildFragmentManager(),
                 getLifecycle());
-        ViewPager2 viewPager = view.findViewById(R.id.fragment_authentication_vp2_view_pager_2);
+        final ViewPager2 viewPager = binding.fragmentAuthenticationVp2ViewPager2;
         viewPager.setAdapter(sectionsPagerAdapter);
-        TabLayout tabLayout = view.findViewById(R.id.fragment_authentication_tl_tabs);
+        final TabLayout tabLayout = binding.fragmentAuthenticationTlTabs;
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) -> {
-                    tab.setText((position == 0) ? "Sign in" : "Sign up");
+                    tab.setText((position == 0) ? getString(R.string.sign_in) : getString(R.string.sign_up));
                     tab.setTabLabelVisibility(TabLayout.TAB_LABEL_VISIBILITY_LABELED);
                 }
         ).attach();
-        return view;
+        return binding.getRoot();
     }
 
     /**

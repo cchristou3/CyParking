@@ -44,15 +44,17 @@ import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 import io.github.cchristou3.CyParking.databinding.RegisterLotFragmentBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;
+import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
 /**
  * Purpose: Allow the operator-typed user to register
  * their Parking Lot to the application's system.
  *
  * @author Charalambos Christou
- * @version 1.0 14/12/20
+ * @version 2.0 28/12/20
  */
-public class RegisterLotFragment extends Fragment implements Navigable, LocationHandler, TextWatcher {
+public class RegisterLotFragment extends Fragment implements Navigable, LocationHandler,
+        TextWatcher, View.OnClickListener {
 
     // Fragment's constants
     public static final String TAG = RegisterLotFragment.class.getName() + "UniqueTag";
@@ -64,6 +66,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     private float mSelectedPrice;
     private RegisterLotFragmentBinding mRegisterLotFragmentBinding;
     private LocationManager mLocationManager;
+    private SlotOfferAdapter mSlotOfferAdapter;
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -99,8 +102,52 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
         // Initialize the slot offer container
         mSlotOfferList = new ArrayList<>();
 
-        InitializeUi();
+        initializeUi();
+        addObserverToForm();
+    }
 
+    /**
+     * Gets invoked after the user has been asked for a permission for a given package.
+     * If permission was granted, request for the user's latest known location.
+     *
+     * @param requestCode  The code of the user's request.
+     * @param permissions  The permission that were asked.
+     * @param grantResults The results of the user's response.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
+        mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
+    }
+
+    /**
+     * Called when the view previously created by {@link #onCreateView} has
+     * been detached from the fragment.
+     */
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Remove OnClickListeners
+        getBinding().registerLotFragmentBtnRegisterLot.setOnClickListener(null);
+        getBinding().registerLotFragmentBtnAdd.setOnClickListener(null);
+        getBinding().registerLotFragmentMbtnGetLocation.setOnClickListener(null);
+        SlotOfferAdapter.setOnItemClickListener(null);
+        // Remove TextWatchers
+        getBinding().registerLotFragmentEtPhoneBody.removeTextChangedListener(this);
+        getBinding().registerLotFragmentEtLotName.removeTextChangedListener(this);
+        getBinding().registerLotFragmentEtCapacity.removeTextChangedListener(this);
+        getBinding().registerLotFragmentEtLocationLat.removeTextChangedListener(this);
+        getBinding().registerLotFragmentEtLocationLng.removeTextChangedListener(this);
+
+        mRegisterLotFragmentBinding = null; // Ready to get garbage collected
+    }
+
+
+    /**
+     * Attaches an observer to the form's state.
+     * Whenever, the state of the form changes, the
+     * Ui gets updated accordingly.
+     */
+    private void addObserverToForm() {
         // Add an observer to the ViewModel's RegisterLotFormState
         mViewModel.getRegisterLotFormState().observe(getViewLifecycleOwner(), registerLotFormState -> {
             if (registerLotFormState == null) return;
@@ -133,7 +180,10 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
         });
     }
 
-    private void InitializeUi() {
+    /**
+     * Initializes the fragment's Ui contents and listeners.
+     */
+    private void initializeUi() {
         // Initially the button is disabled
         getBinding().registerLotFragmentBtnRegisterLot.setEnabled(false);
 
@@ -152,57 +202,19 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
             mLocationManager.requestUserLocationUpdates(this);
         });
 
-        // Set up the recycler view
-        final RecyclerView recyclerView = getBinding().registerLotFragmentRvPriceList;
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        // Set up the RecyclerView's adapter
-        final SlotOfferAdapter slotOfferAdapter = new SlotOfferAdapter(mSlotOfferList);
-        SlotOfferAdapter.setOnItemClickListener(v -> {
-            // Access the item's position
-            RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
-            int position = viewHolder.getAdapterPosition();
-            // Remove it from the list and notify the adapter
-            if (position >= 0) {
-                slotOfferAdapter.remove(position);
-            }
-            triggerViewModelUpdate();
-        });
-        // Bind recyclerView with its adapter
-        recyclerView.setAdapter(slotOfferAdapter);
-
-        // If recyclerView is inside a ScrollView then there is an issue while scrolling recyclerView’s inner contents.
-        // So, when touching the recyclerView forbid the ScrollView from intercepting touch events.
-        Utility.disableParentScrollingInterferenceOf(recyclerView);
+        setUpRecyclerViewWithAdapter();
 
         // Hook up a listener to the "Register" button
         final Button registerButton = getBinding().registerLotFragmentBtnRegisterLot;
-        registerButton.setOnClickListener(v -> {
-            // Create a ParkingLot object to hold all necessary info.
-            mViewModel.registerParkingLot(buildParkingLotObject())
-                    .addOnCompleteListener((Task<Void> task) -> {
-                        if (task.getException() == null) {
-                            // Display message to user.
-                            Toast.makeText(RegisterLotFragment.this.requireContext(), RegisterLotFragment.this.getString(R.string.success_lot_registration), Toast.LENGTH_SHORT).show();
-                            // Navigate back to home screen
-                            Navigation.findNavController(RegisterLotFragment.this.getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
-                                    .popBackStack();
-                        } else if (task.getException() instanceof NullPointerException
-                                && task.getException().getMessage().equals("Continuation returned null")) {
-                            // Display error message to user that the parking lot already exists
-                            Toast.makeText(RegisterLotFragment.this.requireContext(), RegisterLotFragment.this.getString(R.string.error_lot_already_exists), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        });
+        registerButton.setOnClickListener(this);
 
         // Hook up a listener to the "add" button
         getBinding().registerLotFragmentBtnAdd.setOnClickListener(v -> {
             // Add to the adapter's list
-            slotOfferAdapter.insert(new SlotOffer(mSelectedDuration, mSelectedPrice));
+            mSlotOfferAdapter.insert(new SlotOffer(mSelectedDuration, mSelectedPrice));
             Toast.makeText(requireContext(), "Item added!", Toast.LENGTH_SHORT).show();
-            // Scrolls down towards the "register" button
-            registerButton.getParent().requestChildFocus(registerButton, registerButton);
+            // Scrolls down-wards to the "register" button
+            ViewUtility.scrollTo(registerButton);
             // Update the ViewModel's state
             triggerViewModelUpdate();
         });
@@ -216,31 +228,33 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     }
 
     /**
-     * Gets invoked after the user has been asked for a permission for a given package.
-     * If permission was granted, request for the user's latest known location.
-     *
-     * @param requestCode  The code of the user's request.
-     * @param permissions  The permission that were asked.
-     * @param grantResults The results of the user's response.
+     * Initializes the fragment's RecyclerView and
+     * {@link SlotOfferAdapter} instance.
      */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
-        mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
-    }
+    private void setUpRecyclerViewWithAdapter() {
+        // Set up the recycler view
+        final RecyclerView recyclerView = getBinding().registerLotFragmentRvPriceList;
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-    /**
-     * Called when the view previously created by {@link #onCreateView} has
-     * been detached from the fragment.
-     */
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        getBinding().registerLotFragmentEtPhoneBody.removeTextChangedListener(this);
-        getBinding().registerLotFragmentEtLotName.removeTextChangedListener(this);
-        getBinding().registerLotFragmentEtCapacity.removeTextChangedListener(this);
-        getBinding().registerLotFragmentEtLocationLat.removeTextChangedListener(this);
-        getBinding().registerLotFragmentEtLocationLng.removeTextChangedListener(this);
-        mRegisterLotFragmentBinding = null; // Ready to get garbage collected
+        // Set up the RecyclerView's adapter
+        mSlotOfferAdapter = new SlotOfferAdapter(mSlotOfferList);
+        SlotOfferAdapter.setOnItemClickListener(v -> {
+            // Access the item's position
+            RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
+            int position = viewHolder.getAdapterPosition();
+            // Remove it from the list and notify the adapter
+            if (position >= 0) {
+                mSlotOfferAdapter.remove(position);
+            }
+            triggerViewModelUpdate();
+        });
+        // Bind recyclerView with its adapter
+        recyclerView.setAdapter(mSlotOfferAdapter);
+
+        // If recyclerView is inside a ScrollView then there is an issue while scrolling recyclerView’s inner contents.
+        // So, when touching the recyclerView forbid the ScrollView from intercepting touch events.
+        ViewUtility.disableParentScrollingInterferenceOf(recyclerView);
     }
 
     /**
@@ -352,28 +366,13 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
         });
 
         // Create an array that will hold all the values of the spinner, based on a multiplicand
-        final String[] volume = getVolume(volumeMultiplicand);
+        final String[] volume = Utility.getVolume(volumeMultiplicand, 1, 10);
         // Initialize an ArrayAdapter
         final ArrayAdapter<String> volumeAdapter = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_dropdown_item,
                 volume);
         // Bind the spinner with its adapter
         targetSpinner.setAdapter(volumeAdapter);
-    }
-
-    /**
-     * Generates a sequence of numbers and stores them in an Array.
-     *
-     * @param multiplicand The number to multiply with every index (multiplier) of the array.
-     * @return An array of string that holds numeric values.
-     */
-    @NotNull
-    private String[] getVolume(float multiplicand) {
-        final String[] volumes = new String[10];
-        for (int multiplier = 0; multiplier < 10; multiplier++) {
-            volumes[multiplier] = String.valueOf((multiplier * multiplicand));
-        }
-        return volumes;
     }
 
     /**
@@ -405,6 +404,30 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
      */
     public RegisterLotFragmentBinding getBinding() {
         return mRegisterLotFragmentBinding;
+    }
+
+    /**
+     * Called when the "register" button has been clicked.
+     *
+     * @param v The view that was clicked.
+     */
+    @Override
+    public void onClick(View v) {
+        // Create a ParkingLot object to hold all necessary info.
+        mViewModel.registerParkingLot(buildParkingLotObject())
+                .addOnCompleteListener((Task<Void> task) -> {
+                    if (task.getException() == null) {
+                        // Display message to user.
+                        Toast.makeText(RegisterLotFragment.this.requireContext(), RegisterLotFragment.this.getString(R.string.success_lot_registration), Toast.LENGTH_SHORT).show();
+                        // Navigate back to home screen
+                        Navigation.findNavController(RegisterLotFragment.this.getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+                                .popBackStack();
+                    } else if (task.getException() instanceof NullPointerException
+                            && task.getException().getMessage().equals("Continuation returned null")) {
+                        // Display error message to user that the parking lot already exists
+                        Toast.makeText(RegisterLotFragment.this.requireContext(), RegisterLotFragment.this.getString(R.string.error_lot_already_exists), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     /**

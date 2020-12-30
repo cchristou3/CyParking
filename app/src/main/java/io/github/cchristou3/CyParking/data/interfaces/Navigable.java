@@ -1,5 +1,9 @@
 package io.github.cchristou3.CyParking.data.interfaces;
 
+import android.view.View;
+
+import androidx.navigation.Navigation;
+
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +18,7 @@ import io.github.cchristou3.CyParking.ui.home.HomeFragment;
  * to up to 5 different global (Drawer/ActionBar) destinations (not top level).
  *
  * @author Charalambos Christou
- * @version 2.0 21/12/20
+ * @version 3.0 27/12/20
  */
 public interface Navigable {
     /**
@@ -68,4 +72,14 @@ public interface Navigable {
      * {@link HomeFragment}.
      */
     void toHome();
+
+    /**
+     * Navigates to the latest destination of the BackStack.
+     *
+     * @param navHostView The {@link androidx.navigation.fragment.NavHostFragment} of the
+     *                    caller.
+     */
+    default void goBack(View navHostView) {
+        Navigation.findNavController(navHostView).popBackStack();
+    }
 }

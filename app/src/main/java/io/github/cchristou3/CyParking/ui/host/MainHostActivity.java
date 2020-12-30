@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking;
+package io.github.cchristou3.CyParking.ui.host;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -7,7 +7,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -18,13 +17,13 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
 
+import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
+import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
-import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 
 /**
  * <p>Main host activity of the Application.
@@ -144,14 +143,11 @@ public class MainHostActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case TO_SETTINGS:
-                // TODO: Show navigate to settings
+                // TODO: Navigate to settings (implement settings)
                 Toast.makeText(this, "Settings!", Toast.LENGTH_SHORT).show();
                 break;
             case SIGN_OUT:
-                // Sign the user out
-                AuthenticatorRepository.getInstance(FirebaseAuth.getInstance()).signOut();
-                // Update the UserState to null
-                mAuthStateViewModel.getUserState().setValue(null);
+                mAuthStateViewModel.signOut();
                 // Display a message to the user
                 Toast.makeText(this, "You have been logged out!", Toast.LENGTH_SHORT).show();
                 break;
@@ -264,11 +260,12 @@ public class MainHostActivity extends AppCompatActivity {
                     .getChildFragmentManager().getFragments().get(0); // Get a reference to the visible fragment
             return (Navigable) activeFragment;
         } catch (NullPointerException | ClassCastException e) {
-            new AlertDialog.Builder(this)
-                    .setMessage(R.string.unexpected_error_info)
-                    .setNeutralButton(android.R.string.ok, (dialog, which) -> {
-                        // TODO: Find counter-measure for this test case
-                    }).create().show();
+            AlertBuilder.showAlert(this,
+                    R.string.app_name,
+                    R.string.unexpected_error_title,
+                    android.R.string.ok,
+                    null // TODO: Find counter-measure for this test case
+            );
             return Navigable.empty();
         }
     }

@@ -7,9 +7,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,27 +16,33 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
+import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
+import io.github.cchristou3.CyParking.databinding.FeedbackFragmentBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
-import io.github.cchristou3.CyParking.utilities.Utility;
+import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
+import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
 /**
  * Purpose: <p>Allow the user to send feedback to the development team. </p>
+ * <p>
+ * In terms of Authentication, this is achieved by communicating with the hosting
+ * activity {@link MainHostActivity} via the {@link AuthStateViewModel}.
+ * </p>
  *
  * @author Charalambos Christou
- * @version 1.0 12/12/20
+ * @version 2.0 28/12/20
  */
-public class FeedbackFragment extends Fragment implements Navigable {
+public class FeedbackFragment extends Fragment implements Navigable, TextWatcher {
 
-    private FeedbackViewModel mViewModel;
-    private EditText mEmailEditText;
+    // Fragment data members
+    private FeedbackViewModel mFeedbackViewModel;
+    private AuthStateViewModel mAuthStateViewModel;
+    private FeedbackFragmentBinding mFeedbackFragmentBinding;
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -46,7 +50,8 @@ public class FeedbackFragment extends Fragment implements Navigable {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.feedback_fragment, container, false);
+        mFeedbackFragmentBinding = FeedbackFragmentBinding.inflate(inflater);
+        return mFeedbackFragmentBinding.getRoot();
     }
 
     /**
@@ -60,34 +65,33 @@ public class FeedbackFragment extends Fragment implements Navigable {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(FeedbackViewModel.class);
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null)
-            mEmailEditText = view.findViewById(R.id.feedback_fragment_et_email_body);
+        // Initialize mFeedbackViewModel and mAuthStateViewModel
+        mFeedbackViewModel = new ViewModelProvider(this).get(FeedbackViewModel.class);
+        mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
 
         // Update the UI based on the user's logged in status
-        updateUI(view, FirebaseAuth.getInstance().getCurrentUser());
+        updateUI(mAuthStateViewModel.getUser());
 
         // Hook up the send feedback button with an onClickListener and disable it initially
-        Button sendFeedbackButton = view.findViewById(R.id.feedback_fragment_mbtn_send_feedback);
-        sendFeedbackButton.setEnabled(false);
-        sendFeedbackButton.setOnClickListener(v -> {
-            // TODO: Store message to Firestore & send notification to administrator
+        getBinding().feedbackFragmentMbtnSendFeedback.setEnabled(false);
+        getBinding().feedbackFragmentMbtnSendFeedback.setOnClickListener(v -> {
+            // TODO: Store message to Firestore & send notification to administrator via cloud function
             Toast.makeText(requireContext(), "Not implemented yet!", Toast.LENGTH_SHORT).show();
         });
 
         // Get a reference to the feedback TextView of the UI
-        EditText feedbackTextArea = view.findViewById(R.id.feedback_fragment_et_feedback_body);
+        final EditText feedbackTextArea = getBinding().feedbackFragmentEtFeedbackBody;
 
         // If feedbackTextArea is inside a ScrollView then there is an issue while scrolling TextArea’s inner contents.
         // So, when touching the feedbackTextArea forbid the ScrollView from intercepting touch events.
-        Utility.disableParentScrollingInterferenceOf(feedbackTextArea);
+        ViewUtility.disableParentScrollingInterferenceOf(feedbackTextArea);
 
-        feedbackTextArea.addTextChangedListener(getTextChangedListener());
+        feedbackTextArea.addTextChangedListener(this);
 
         // Add an observer to the form to wait for changes
-        mViewModel.getFormState().observe(getViewLifecycleOwner(), feedbackFormState -> {
-            sendFeedbackButton.setEnabled(feedbackFormState.isDataValid());
+        mFeedbackViewModel.getFormState().observe(getViewLifecycleOwner(), feedbackFormState -> {
+            getBinding().feedbackFragmentMbtnSendFeedback
+                    .setEnabled(feedbackFormState.isDataValid());
             // Show validity status for the feedback message
             if (feedbackFormState.getFeedbackMessageError() != null) {
                 feedbackTextArea.setError(getString(feedbackFormState.getFeedbackMessageError()));
@@ -97,14 +101,15 @@ public class FeedbackFragment extends Fragment implements Navigable {
                     feedbackTextArea.setError(null, null);
                 }
             }
-            if (!mViewModel.isLoggedIn()) {
+            if (mAuthStateViewModel.getUser() == null) {
                 // Update Email error
                 if (feedbackFormState.getEmailError() != null) {
-                    mEmailEditText.setError(getString(feedbackFormState.getEmailError()));
+                    getBinding().feedbackFragmentEtEmailBody
+                            .setError(getString(feedbackFormState.getEmailError()));
                 } else {
                     // Hide error if it shows
-                    if (mEmailEditText.getError() != null) {
-                        mEmailEditText.setError(null, null);
+                    if (getBinding().feedbackFragmentEtEmailBody.getError() != null) {
+                        getBinding().feedbackFragmentEtEmailBody.setError(null, null);
                     }
                 }
             }
@@ -112,72 +117,102 @@ public class FeedbackFragment extends Fragment implements Navigable {
     }
 
     /**
+     * Called when the view previously created by {@link #onCreateView} has
+     * been detached from the fragment.
+     */
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        getBinding().feedbackFragmentMbtnSendFeedback.setOnClickListener(null);
+        getBinding().feedbackFragmentEtFeedbackBody.removeTextChangedListener(this);
+        getBinding().feedbackFragmentEtEmailBody.removeTextChangedListener(this);
+        mFeedbackFragmentBinding = null;
+    }
+
+    /**
+     * Access the {@link #mFeedbackFragmentBinding}.
+     *
+     * @return A reference to {@link #mFeedbackFragmentBinding}.
+     */
+    private FeedbackFragmentBinding getBinding() {
+        return mFeedbackFragmentBinding;
+    }
+
+    /**
      * Updates the UI based on the specified FirebaseUser argument.
      *
-     * @param view The user interface view
-     * @param user The current FirebaseUser instance if there is one
+     * @param user The current LoggedInUser instance if there is one
      */
-    public void updateUI(@NonNull View view, @Nullable FirebaseUser user) {
+    public void updateUI(@Nullable LoggedInUser user) {
         if (user != null) { // User is logged in
-            // Show the name section
-            view.findViewById(R.id.feedback_fragment_txt_name_title).setVisibility(View.VISIBLE);
-            TextView nameTextView = view.findViewById(R.id.feedback_fragment_txt_name_body);
-            nameTextView.setVisibility(View.VISIBLE);
-
-            // Show the email section
-            view.findViewById(R.id.feedback_fragment_txt_name_body).setVisibility(View.VISIBLE);
-            TextView emailTextView = view.findViewById(R.id.feedback_fragment_txt_email_body);
-            emailTextView.setVisibility(View.VISIBLE);
-
-            // Hide the edit text related to the email
-            view.findViewById(R.id.feedback_fragment_et_email_body).setVisibility(View.GONE);
-
-            // Display user info
-            String userDisplayName = user.getDisplayName();
-            if (userDisplayName.equals("")) {
-                userDisplayName = getString(R.string.name_not_found);
-            }
-            nameTextView.setText(userDisplayName);
-            emailTextView.setText(user.getEmail());
-
+            updateUIWithUser(user);
         } else {// User is NOT logged in
-            // Hide the name details
-            view.findViewById(R.id.feedback_fragment_txt_name_title).setVisibility(View.GONE);
-            view.findViewById(R.id.feedback_fragment_txt_name_body).setVisibility(View.GONE);
-
-            // Hide the TextView related to the email
-            view.findViewById(R.id.feedback_fragment_txt_email_body).setVisibility(View.GONE);
-
-            // Show the edit text related to the email and add a listener
-            mEmailEditText.setVisibility(View.VISIBLE);
-            mEmailEditText.addTextChangedListener(getTextChangedListener());
+            updateUIWithoutUser();
         }
     }
 
     /**
-     * Creates a new instance of TextWatcher.
-     * Its {@link TextWatcher#afterTextChanged} method triggers
-     * an update to the Fragment's FeedbackViewModel instance.
-     *
-     * @return An instance of TextWatcher
+     * Updates the Ui appropriate for a non-logged in user.
      */
-    @NotNull
-    @Contract(value = " -> new", pure = true)
-    private TextWatcher getTextChangedListener() {
-        return new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* ignore */ }
+    private void updateUIWithoutUser() {
+        // Hide the name details
+        getBinding().feedbackFragmentTxtNameTitle.setVisibility(View.GONE);
+        getBinding().feedbackFragmentTxtNameBody.setVisibility(View.GONE);
 
-            public void onTextChanged(CharSequence s, int start, int before, int count) { /* ignore */ }
+        // Hide the TextView related to the email
+        getBinding().feedbackFragmentTxtEmailBody.setVisibility(View.GONE);
 
-            @Override
-            public void afterTextChanged(Editable textFromFeedbackArea) {
-                // Access the user's email if logged in. Otherwise, use the email
-                // that the user entered.
-                final String email = mViewModel.isLoggedIn()
-                        ? FirebaseAuth.getInstance().getCurrentUser().getEmail() : mEmailEditText.getText().toString();
-                mViewModel.formDataChanged(textFromFeedbackArea.toString(), email);
-            }
-        };
+        // Show the edit text related to the email and add a listener
+        getBinding().feedbackFragmentEtEmailBody.setVisibility(View.VISIBLE);
+        getBinding().feedbackFragmentEtEmailBody.addTextChangedListener(this);
+    }
+
+    /**
+     * Updates the Ui appropriate for a logged in user.
+     *
+     * @param user The current LoggedInUser instance.
+     */
+    private void updateUIWithUser(@NotNull LoggedInUser user) {
+        // Show the name section
+        getBinding().feedbackFragmentTxtNameTitle.setVisibility(View.VISIBLE);
+        getBinding().feedbackFragmentTxtNameBody.setVisibility(View.VISIBLE);
+
+        // Show the email section
+        getBinding().feedbackFragmentTxtEmailBody.setVisibility(View.VISIBLE);
+
+        // Hide the edit text related to the email
+        getBinding().feedbackFragmentEtEmailBody.setVisibility(View.GONE);
+
+        // Display user info
+        String userDisplayName = user.getDisplayName();
+        if (userDisplayName == null || userDisplayName.isEmpty()) {
+            userDisplayName = user.getEmail();
+        }
+        getBinding().feedbackFragmentTxtNameBody.setText(userDisplayName);
+        getBinding().feedbackFragmentTxtEmailBody.setText(user.getEmail());
+    }
+
+    /**
+     * Unused TextWatcher methods.
+     */
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* ignore */ }
+
+    public void onTextChanged(CharSequence s, int start, int before, int count) { /* ignore */ }
+
+    /**
+     * Gets triggered whenever, a text of an EditText changes.
+     *
+     * @param textFromFeedbackArea The new instance of editable of the editText.
+     */
+    @Override
+    public void afterTextChanged(@NotNull Editable textFromFeedbackArea) {
+        // Access the user's email if logged in. Otherwise, use the email
+        // that the user entered.
+        final LoggedInUser user = mAuthStateViewModel.getUser();
+        final String email = (user != null)
+                ? mAuthStateViewModel.getUser().getEmail()
+                : getBinding().feedbackFragmentEtEmailBody.getText().toString();
+        mFeedbackViewModel.formDataChanged(user, textFromFeedbackArea.toString(), email);
     }
 
     /**

@@ -3,11 +3,15 @@ package io.github.cchristou3.CyParking.ui.parking.slots.booking;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 
+import org.jetbrains.annotations.NotNull;
+
+import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.data.pojo.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivateParkingBooking;
+import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 import io.github.cchristou3.CyParking.utilities.Utility;
 
 /**
@@ -15,20 +19,54 @@ import io.github.cchristou3.CyParking.utilities.Utility;
  * Purpose: Data persistence during orientation changes.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 29/10/20
+ * @version 2.0 30/10/20
  */
 public class ParkingBookingViewModel extends ViewModel {
 
-    // ViewModel constants
-    private static final int CREATING_DATE_DATA = 0;
-    private static final int CREATING_STARTING_TIME_DATA = 1;
-    private static final int CREATING_ENDING_TIME_DATA = 2;
-    private final static int STARTING_TIME_FORWARD_HOURS = 0;
-    private final static int ENDING_TIME_FORWARD_HOURS = 2;
+    // Data members
+    private final MutableLiveData<String> mPickedDate =
+            new MutableLiveData<>(Utility.dateToString(Utility.getCurrentDate()));
+    private final MutableLiveData<String> mPickedStartingTime =
+            new MutableLiveData<>(Utility.getCurrentTime());
+    private final MutableLiveData<SlotOffer> mPickedSlotOffer =
+            new MutableLiveData<>();
 
-    MutableLiveData<String> mPickedDate = new MutableLiveData<>(getInitialValue(CREATING_DATE_DATA));
-    MutableLiveData<String> mPickedStartingTime = new MutableLiveData<>(getInitialValue(CREATING_STARTING_TIME_DATA));
-    MutableLiveData<String> mPickedEndingTime = new MutableLiveData<>(getInitialValue(CREATING_ENDING_TIME_DATA));
+    /**
+     * Updates the value of {@link #mPickedSlotOffer} with the
+     * specified one.
+     *
+     * @param newSlotOffer The latest selected slot offer.
+     */
+    public void updateSlotOffer(SlotOffer newSlotOffer) {
+        mPickedSlotOffer.setValue(newSlotOffer);
+    }
+
+    /**
+     * Updates the value of {@link #mPickedDate} with the
+     * date formed by the specified arguments.
+     *
+     * @param selectedYear  The selected Year.
+     * @param selectedMonth The selected Month.
+     * @param selectedDay   The selected Day.
+     */
+    public void updatePickedDate(int selectedYear, int selectedMonth, int selectedDay) {
+        mPickedDate.setValue(Utility.dateToString(selectedYear, selectedMonth, selectedDay));
+    }
+
+    /**
+     * Getters for all its data members
+     */
+    public String getPickedDateValue() {
+        return mPickedDate.getValue();
+    }
+
+    public String getPickedStartingTimeValue() {
+        return mPickedStartingTime.getValue();
+    }
+
+    public SlotOffer getPickedSlotOfferValue() {
+        return mPickedSlotOffer.getValue();
+    }
 
     public MutableLiveData<String> getPickedDate() {
         return mPickedDate;
@@ -38,52 +76,29 @@ public class ParkingBookingViewModel extends ViewModel {
         return mPickedStartingTime;
     }
 
-    public MutableLiveData<String> getPickedEndingTime() {
-        return mPickedEndingTime;
+    public MutableLiveData<SlotOffer> getPickedSlotOffer() {
+        return mPickedSlotOffer;
     }
 
     /**
-     * Computes the time of the day taking, into account the amount of hours to be additionally added.
+     * Returns a DocumentReference of the specified parking lot
+     * in the database.
      *
-     * @param forwardHours The amount of hours added to the current one.
-     *                     (E.g. current= "12 : 30", forwardHours = 2 -> final = "14: 30 ")
-     * @return A String which corresponds to the time (E.g. "12 : 30")
+     * @param selectedLot A parking lot object.
+     * @return A reference of the specified lot in the database.
      */
-    public String initializeToCurrentTime(int forwardHours) {
-        // Access the current time of the day
-        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-        int minute = Calendar.getInstance().get(Calendar.MINUTE);
-        return (Utility.getTimeOf((hour + forwardHours), minute));
+    public DocumentReference observeParkingLotToBeBooked(ParkingLot selectedLot) {
+        return ParkingRepository.observeParkingLot(selectedLot);
     }
 
     /**
-     * Computes the initial value of a Mutable LiveData instance based on specified condition
+     * Stores the specified {@link PrivateParkingBooking} object
+     * to the database.
      *
-     * @param condition Defines which String instance to compute and return
-     * @return A String which a Mutable LiveData object will be initialized to
+     * @param booking A {@link PrivateParkingBooking} object.
+     * @return A {@link Task} object to be handled by the view.
      */
-    public String getInitialValue(int condition) {
-        String dataToBeSet = "";
-        switch (condition) {
-            case CREATING_DATE_DATA: {
-                // Set the livedata's text to the current date
-                final Date currentDate = Calendar.getInstance().getTime();
-                SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
-                String currentDateInString = mSimpleDateFormat.format(currentDate);
-                dataToBeSet = currentDateInString;
-                break;
-            }
-            case CREATING_STARTING_TIME_DATA: {
-                dataToBeSet = initializeToCurrentTime(STARTING_TIME_FORWARD_HOURS);
-                break;
-            }
-            case CREATING_ENDING_TIME_DATA: {
-                dataToBeSet = initializeToCurrentTime(ENDING_TIME_FORWARD_HOURS);
-                break;
-            }
-            default:
-                throw new IllegalArgumentException();
-        }
-        return dataToBeSet;
+    public Task<Void> bookPrivateParking(@NotNull PrivateParkingBooking booking) {
+        return ParkingRepository.bookParkingSlot(booking, true);
     }
 }

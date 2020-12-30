@@ -22,7 +22,7 @@ import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 public class AuthenticatorViewModel extends ViewModel {
 
     private final MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
-    private final MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
+    private final MutableLiveData<LoginResult> authenticatorResult = new MutableLiveData<>();
 
     private final MutableLiveData<String> emailState = new MutableLiveData<>();
     private final MutableLiveData<String> passwordState = new MutableLiveData<>();
@@ -70,7 +70,7 @@ public class AuthenticatorViewModel extends ViewModel {
      */
     public void login(Context context, String username, String password) {
         // can be launched in a separate asynchronous job
-        authenticatorRepository.login(context, username, password, loginResult);
+        authenticatorRepository.login(context, username, password, authenticatorResult);
     }
 
     /**
@@ -85,9 +85,9 @@ public class AuthenticatorViewModel extends ViewModel {
     public void register(String username, String password, boolean isUser, boolean isOperator, Context context) {
         // can be launched in a separate asynchronous job
         try {
-            authenticatorRepository.register(username, password, loginResult, isUser, isOperator, context);
+            authenticatorRepository.register(username, password, authenticatorResult, isUser, isOperator, context);
         } catch (IllegalArgumentException e) {
-            loginResult.setValue(new LoginResult(e.getMessage()));
+            authenticatorResult.setValue(new LoginResult(e.getMessage()));
         }
     }
 
@@ -110,7 +110,7 @@ public class AuthenticatorViewModel extends ViewModel {
      * @param isUser     true if the user selected the checkbox which corresponds to the user. Otherwise, false.
      * @param isOperator true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
      */
-    public void loginDataChanged(String username, String password, boolean isUser, boolean isOperator) {
+    public void dataChanged(String username, String password, boolean isUser, boolean isOperator) {
         passwordState.setValue(password);
         emailState.setValue(username);
         if (!isEmailValid(username)) {
@@ -158,8 +158,8 @@ public class AuthenticatorViewModel extends ViewModel {
         return loginFormState;
     }
 
-    LiveData<LoginResult> getLoginResult() {
-        return loginResult;
+    LiveData<LoginResult> getAuthenticatorResult() {
+        return authenticatorResult;
     }
 
 }

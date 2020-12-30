@@ -26,7 +26,7 @@ public class ShaUtility {
      * @return The hashed version (digest) of the given String
      */
     @NotNull
-    public static String digest(String input) {
+    public static String digest(@NotNull String input) {
         try {
             byte[] bytesOfInput = input.getBytes(UTF_8);
             byte[] result = MessageDigest.getInstance(SHA256).digest(bytesOfInput);

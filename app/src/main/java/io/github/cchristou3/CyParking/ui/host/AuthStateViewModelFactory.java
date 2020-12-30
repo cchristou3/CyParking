@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking;
+package io.github.cchristou3.CyParking.ui.host;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;

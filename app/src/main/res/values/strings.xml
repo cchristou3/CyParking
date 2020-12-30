@@ -19,7 +19,6 @@
     <string name="title_activity_parking_map">Map</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_name">Display Name</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Register</string>
@@ -85,7 +84,7 @@
     <string name="disclaimer">Disclaimer:</string>
     <string name="charges_disclaimer">Around 1.5% of all the credit card transaction fees will be contributed towards the CyParking Application.</string>
     <string name="register_parking_lot">Register Parking Lot</string>
-    <string name="unexpected_error_info">An unexpected error occurred! Diagnostic information from your device was sent to the development team to be processed to avoid future failures.</string>
+    <string name="success_lot_registration">Lot registered successfully!</string>
 
     <!-- Strings related to the registering a parking lot errors -->
     <string name="mobile_phone_error">Not a valid phone number!</string>
@@ -97,9 +96,54 @@
     <string name="error_retrieving_location">Your location could not be processed! Check your GPS settings!</string>
     <string name="error_lot_registration">Oops! Something went wrong! Please check your details and try again.</string>
     <string name="error_lot_already_exists">The Parking Lot already exists!</string>
-    <string name="success_lot_registration">Lot registered successfully!</string>
+
+    <!-- Strings related to the HomeFragment's lot section -->
     <string name="increment_by_one">Increment by one</string>
     <string name="decrement_by_one">Decrement by one</string>
-    <string name="availability">Availability: </string>
+    <string name="availability">Availability: </string> <!-- used in ParkingLot.getAvailability() -->
+
+    <!-- String related to viewing bookings -->
+    <string name="booking_cancellation_confirmation">Are you sure you would like to cancel the booking?</string>
+
+    <!-- Strings related to the ParkingBookingFragment -->
+    <string name="please_choose_an_offer">Please choose an offer</string>
+    <string name="selected_offer">Selected offer: </string>
+    <string name="slot_already_booked">You have already booked this lot.</string>
+    <string name="parse_error_msg">Oops something went wrong. Please restart the application.</string>
+    <string name="date_error_msg">Please choose an appropriate date.</string>
+    <string name="no_space_msg">Unfortunately, the lot is out of available spaces. Please try again later.</string>
+
+    <!-- Strings related to when the user logs out, while being at a screen that requires authentication -->
+    <string name="log_in">Log In</string>
+    <string name="go_back">Go back</string>
+    <string name="logout_of_auth_required_screen">Log in required</string>
+
+    <!-- Strings related to the registering a parking lot errors -->
+    <string name="logout_book_parking_screen_msg">Only users that are logged in can book a parking slot. \nPlease login and try again!</string>
+    <string name="logout_view_bookings_screen_msg">Only users that are logged in can book a parking slot. \nPlease login and try again!</string>
+
+    <!-- Strings related to the hosting activity not being able to find current active fragment -->
+    <string name="unexpected_error_title">An unexpected error occurred</string>
+    <string name="unexpected_error_info">Diagnostic information from your device was sent to the development team to be processed to avoid future failures.</string>
+    <string name="booking_success">Parking has been booked successfully!</string>
+    <string name="undo">UNDO</string>
+    <string name="no_pending_bookings">No pending bookings at the moment!</string>
+
+    <!-- Strings related to the Account and UpdateDialog fragments -->
+    <string name="prompt_name">Display name</string>
+    <string name="update_name">Update Name</string>
+    <string name="update_email">Update Email</string>
+    <string name="update_password">Update Password</string>
+    <string name="hint_name">Enter new name…</string>
+    <string name="hint_email">Enter new email…</string>
+    <string name="hint_password">Enter new password…</string>
+    <string name="not_logged_in_account_1">At the moment you are not logged in. Log in to your account or create a new one by clicking the button below</string>
+    <string name="not_logged_in_account_2">At the moment you are not logged in. Please log in and try again.</string>
+    <string name="click_here">Click here</string>
+    <string name="updating_name">Updating name</string>
+    <string name="updating_email">Updating email</string>
+    <string name="updating_password">Updating password</string>
+    <string name="update">Update</string>
+    <string name="invalid_user_exception_msg">It looks like you signed out of your app. You should sign in again and re-perform this action.</string>
 
 </resources>

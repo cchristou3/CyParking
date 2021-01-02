@@ -72,10 +72,11 @@ The application has the following features so far:
 * Cancel a booking [User]
 * View all available private parking locations within a range [User]
 * View for each locations its available parking spaces [User]
-* Sign in/up [Everyone]
+* Sign in/up/out [Everyone]
 * Update name/email/password [Everyone]
 * Send Feedback [Everyone]
 * Register Parking Lot [Operator]
+* Update lot availability [Operator]
 
 A list of commonly used resources that I find helpful are listed in the acknowledgements.
 

@@ -3,7 +3,6 @@ package io.github.cchristou3.CyParking.ui.parking.slots.booking;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -141,18 +140,25 @@ public class BookingFragment extends Fragment implements Navigable {
         DatabaseObserver.createDocumentReferenceObserver(
                 mBookingViewModel.observeParkingLotToBeBooked(mSelectedParking), // The Document Reference
                 (value, error) -> { // The Event Listener
-                    if (error != null || (value == null || value.toObject(ParkingLot.class) == null))
+                    Log.d(TAG, "Error: " + error);
+                    Log.d(TAG, "Value: " + value);
+                    if (error != null || value == null)
                         return;
                     final ParkingLot lot = value.toObject(ParkingLot.class);
+                    Log.d(TAG, "Lot: " + lot);
                     if (lot == null) {
                         // TODO: Display alert
+                        Log.d(TAG, "lot == null");
                         return;
                     }
 
                     final String availability = lot.getAvailability(requireContext());
-
+                    Log.d(TAG, "availability: " + availability);
                     // Animate color to display a lot availability change to the user
-                    animateAvailabilityColorChanges(lot.getAvailableSpaces(),
+                    ViewUtility.animateAvailabilityColorChanges(
+                            getBinding().fragmentParkingBookingCvParkingAvailability,
+                            getBinding().fragmentParkingBookingTxtParkingAvailability,
+                            lot.getAvailableSpaces(),
                             mSelectedParking.getAvailableSpaces());
 
                     // Update the text of the availability
@@ -231,11 +237,6 @@ public class BookingFragment extends Fragment implements Navigable {
         getBinding().fragmentParkingBookingBtnStartingTimeButton
                 .setOnClickListener(buildListenerForTimePicker(mBookingViewModel.getPickedStartingTime()));
 
-        // TODO: inspect
-        // Set color of "Availability" CardView to the color of its child TextView
-        getBinding().fragmentParkingBookingTxtParkingAvailability.setBackground(
-                ViewUtility.getViewColor(getBinding().fragmentParkingBookingTxtParkingAvailability));
-
         // Set up date picker listener
         getBinding().fragmentParkingBookingBtnDateButton.setOnClickListener(v -> {
             // Access the current date via the a Calendar object
@@ -287,23 +288,6 @@ public class BookingFragment extends Fragment implements Navigable {
                 slotOffers);
         // Bind the spinner with its adapter
         getBinding().fragmentParkingBookingSSlotOffer.setAdapter(volumeAdapter);
-    }
-
-    /**
-     * Changes the background color of the fragment's "availability" view to either green
-     * or red based on availability's change and back to its original background color via
-     * animation.
-     *
-     * @param updatedAvailability The latest availability retrieved from the database.
-     * @param oldAvailability     The current availability.
-     */
-    private void animateAvailabilityColorChanges(int updatedAvailability, int oldAvailability) {
-        if (updatedAvailability != oldAvailability) { // If availability got changed
-            ViewUtility.animateColorChange(getBinding()
-                            .fragmentParkingBookingTxtParkingAvailability,
-                    // If more spaces, animate with green. Otherwise, animate with red
-                    (updatedAvailability > oldAvailability) ? Color.GREEN : Color.RED);
-        }
     }
 
     /**

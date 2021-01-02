@@ -23,4 +23,9 @@
     <dimen name="timestamp">11dp</dimen>
     <dimen name="description">15dp</dimen>
     <dimen name="price">13dp</dimen>
+
+    <!-- Padding for TextViews inside a CardView -->
+    <dimen name="text_view_in_card_view_padding">10dp</dimen>
+    <dimen name="text_view_in_card_view_radius">5dp</dimen>
+
 </resources>

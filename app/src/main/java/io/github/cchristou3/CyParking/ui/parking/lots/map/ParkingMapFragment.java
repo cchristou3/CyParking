@@ -50,6 +50,7 @@ import io.github.cchristou3.CyParking.ui.user.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;
+import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
 /**
  * Purpose: <p>View all nearby parking.
@@ -141,6 +142,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
 
         // Initialize the fragment's snapshot state
         mSnapshotState = new SnapshotState(SnapshotState.INITIAL_DATA_RETRIEVAL);
+        Log.d(TAG, "onViewCreated: " + mSnapshotState.getState());
 
         initializeViewModelsWithObservers();
 
@@ -210,6 +212,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
         DatabaseObserver.createCollectionReferenceObserver(
                 mParkingMapViewModel.getParkingLots(), // Collection reference
                 (value, error) -> { // Event handler
+                    Log.d(TAG, "onStart: ");
                     switch (mSnapshotState.getState()) {
                         case SnapshotState.INITIAL_DATA_RETRIEVAL:
                             if (mUserCurrentLatLng == null) return;
@@ -311,11 +314,21 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
                         if (mMarkerManager.areCoordinatesTheSame(markerOfParking, receivedParkingLatitude, receivedParkingLongitude)) {
                             // then update the private parking's content
                             if (dc.getType() == DocumentChange.Type.MODIFIED) {
+                                // Keep track of the old value of the object's AvailableSpaces
+                                int oldAvailableSpaces = mMarkerManager
+                                        .getParkingLotOf(markerOfParking).getAvailableSpaces();
                                 // Replace the old lot with the new lot.
                                 mMarkerManager.addMarker(receivedParkingLot, markerOfParking);
                                 // Update the info layout's contents if it's showing
-                                if (getBinding().fragmentParkingMapClInfoLayout.getVisibility() == View.VISIBLE) {
+                                if (mParkingMapViewModel.isInfoLayoutShown()) {
                                     mParkingMapViewModel.updateSelectedLotState(receivedParkingLot);
+                                    int updatedAvailableSpaces = receivedParkingLot.getAvailableSpaces();
+                                    ViewUtility.animateAvailabilityColorChanges(
+                                            getBinding().fragmentParkingMapCvInfoLayout, // Parent card view
+                                            getBinding().fragmentParkingMapTxtAvailability, // child
+                                            updatedAvailableSpaces,
+                                            oldAvailableSpaces
+                                    );
                                 }
                             } else { // REMOVED
                                 mMarkerManager.removeMarker(markerOfParking);
@@ -425,12 +438,12 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
             // Get the corresponding hash map object
             name = lot.getLotName();
             availability = lot.getAvailability(requireContext());
-            slotOffer = lot.getSlotOfferList().get(0).toString();
+            slotOffer = "Best offer: " + lot.getBestOffer().toString() + "";
         }
         // Get a reference to the view and update each infoLayout field with the clicked marker's corresponding data
         getBinding().fragmentParkingMapTxtName.setText(name);
-        getBinding().fragmentParkingMapTxtOffer.setText(availability);
-        getBinding().fragmentParkingMapTxtAvailability.setText(slotOffer);
+        getBinding().fragmentParkingMapTxtOffer.setText(slotOffer);
+        getBinding().fragmentParkingMapTxtAvailability.setText(availability);
     }
 
     /**
@@ -439,7 +452,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      * @param visibility The state of the visibility (E.g. View.Gone / View.VISIBLE / View.INVISIBLE)
      */
     private void updateInfoLayoutVisibilityTo(final int visibility) {
-        getBinding().fragmentParkingMapClInfoLayout.setVisibility(visibility);
+        getBinding().fragmentParkingMapCvInfoLayout.setVisibility(visibility);
     }
 
     /**

@@ -5,6 +5,7 @@ import android.os.Parcel;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.firestore.Exclude;
 import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +35,7 @@ import io.github.cchristou3.CyParking.utilities.ShaUtility;
  * {@link #coordinates}, its {@link #parkingID} and its {@link #lotName}.
  *
  * @author Charalambos Christou
- * @version 6.0 29/12/20
+ * @version 7.0 02/01/21
  */
 public class ParkingLot extends Parking {
 
@@ -79,10 +80,11 @@ public class ParkingLot extends Parking {
      * @param operatorMobileNumber The lot's operator's phone number.
      * @param email                The lot's operator's email address.
      */
-    public ParkingLot(Parking.Coordinates coordinates, String operatorMobileNumber, String email) {
+    public ParkingLot(Coordinates coordinates, String operatorMobileNumber, String email, String lotName) {
         super(coordinates, 0);
         this.setParkingID(generateParkingId(coordinates, operatorMobileNumber));
         this.operatorId = email;
+        this.lotName = lotName;
         this.operatorMobileNumber = operatorMobileNumber;
         this.availableSpacesForDisabled = 0;
         this.capacityForDisabled = 0;
@@ -110,7 +112,7 @@ public class ParkingLot extends Parking {
      * @param availableSpacesForDisabled The lot's available spaces for disabled people.
      * @param slotOfferList              The lot's offers.
      */
-    public ParkingLot(Parking.Coordinates coordinates, String lotName, String operatorId, String operatorMobileNumber,
+    public ParkingLot(Coordinates coordinates, String lotName, String operatorId, String operatorMobileNumber,
                       int capacity, int capacityForDisabled, int availableSpacesForDisabled,
                       List<SlotOffer> slotOfferList) {
         super(coordinates, 0);
@@ -190,32 +192,42 @@ public class ParkingLot extends Parking {
     @NonNull
     @Override
     public String toString() {
-        return
-                "LotName: " + lotName + ", "
-                        + "OperatorId: " + operatorId + ", "
-                        + "OperatorMobileNumber: " + operatorMobileNumber + ", "
-                        + "Capacity: " + capacity + ", "
-                        + "AvailableSpaces: " + availableSpaces + ", "
-                        + "CapacityForDisabled: " + capacityForDisabled + ", "
-                        + "AvailableSpacesForDisabled: " + availableSpacesForDisabled + ", "
-                        + "SlotOfferList: " + slotOfferList;
+        return super.toString() +
+                "lotName: " + lotName + ", "
+                + "operatorId: " + operatorId + ", "
+                + "operatorMobileNumber: " + operatorMobileNumber + ", "
+                + "capacity: " + capacity + ", "
+                + "availableSpaces: " + availableSpaces + ", "
+                + "capacityForDisabled: " + capacityForDisabled + ", "
+                + "availableSpacesForDisabled: " + availableSpacesForDisabled + ", "
+                + "slotOfferList: " + slotOfferList;
 
     }
 
     /**
      * Access the latitude of {@link Parking.Coordinates}.
+     * Note: @Exclude annotation is used to inform Firebase not
+     * not map this field during (De/)Serialization, it already exists in
+     * {@link Coordinates}. Omitting it would result into duplication of those
+     * fields.
      *
      * @return The latitude of the lot's coordinate.
      */
+    @Exclude
     public double getLatitude() {
         return coordinates.getLatitude();
     }
 
     /**
      * Access the longitude of {@link Parking.Coordinates}.
+     * Note: @Exclude annotation is used to inform Firebase not
+     * not map this field during (De/)Serialization, it already exists in
+     * {@link Coordinates}. Omitting it would result into duplication of those
+     * fields.
      *
      * @return The longitude of the lot's coordinate.
      */
+    @Exclude
     public double getLongitude() {
         return coordinates.getLongitude();
     }
@@ -246,7 +258,7 @@ public class ParkingLot extends Parking {
      * @param mobileNumber   The operator's mobile number.
      * @return The id of the parking lot.
      */
-    private int generateParkingId(@NotNull final Parking.Coordinates lotCoordinates, @NotNull String mobileNumber) {
+    private int generateParkingId(@NotNull final Coordinates lotCoordinates, @NotNull String mobileNumber) {
         double lat = lotCoordinates.getLatitude() * 1000000; // Get rid most of the decimal part
         double lng = lotCoordinates.getLongitude() * 1000000; // and cast it to an integer
         // E.g. 33.62356 * 1000000 -> (int)336235.6 -> 336235
@@ -424,5 +436,26 @@ public class ParkingLot extends Parking {
         return context.getString(R.string.availability) + " "
                 + (capacity - availableSpaces)
                 + "/" + capacity;
+    }
+
+    /**
+     * Looks for the most beneficial {@link SlotOffer} of the
+     * {@link #slotOfferList}.
+     *
+     * @return The {@link SlotOffer} instance with the smallest ratio
+     * of {@link #slotOfferList}.
+     */
+    public SlotOffer getBestOffer() {
+        if (slotOfferList.size() == 0) {
+            return slotOfferList.get(0);
+        }
+
+        SlotOffer bestOffer = slotOfferList.get(0);
+        for (int i = 1; i < slotOfferList.size(); i++) {
+            if (slotOfferList.get(i).smallerOf(bestOffer)) {
+                bestOffer = slotOfferList.get(i);
+            }
+        }
+        return bestOffer;
     }
 }

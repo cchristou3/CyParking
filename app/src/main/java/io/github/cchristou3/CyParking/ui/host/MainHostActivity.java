@@ -24,6 +24,7 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 
 /**
  * <p>Main host activity of the Application.
@@ -94,6 +95,8 @@ public class MainHostActivity extends AppCompatActivity {
         mAuthStateViewModel.getUserState().observe(this, MainHostActivity.this::updateDrawer);
 
         mAuthStateViewModel.getUserInfo(this);
+
+        ParkingRepository.addDummyParkingData();
     }
 
     /**

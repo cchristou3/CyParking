@@ -61,7 +61,7 @@ public class Booking extends Parking {
      * @param lotName       The lot's name.
      * @param bookingUserId The id the user that issued the booking.
      */
-    public Booking(Parking.Coordinates coordinates, int parkingID, String operatorId, String lotName, String bookingUserId, BookingDetails bookingDetails) {
+    public Booking(Coordinates coordinates, int parkingID, String operatorId, String lotName, String bookingUserId, BookingDetails bookingDetails) {
         super(coordinates, parkingID);
         this.operatorId = operatorId;
         this.lotName = lotName;

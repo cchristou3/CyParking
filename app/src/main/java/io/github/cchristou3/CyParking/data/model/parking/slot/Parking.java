@@ -57,7 +57,7 @@ public class Parking implements Parcelable {
      * @param in Contains the contents of the Parking instance.
      */
     protected Parking(Parcel in) {
-        coordinates = in.readParcelable(Coordinates.class.getClassLoader());
+        coordinates = new Coordinates(in);
         parkingID = in.readInt();
     }
 
@@ -70,7 +70,7 @@ public class Parking implements Parcelable {
      */
     @Override
     public void writeToParcel(@NotNull Parcel dest, int flags) {
-        dest.writeParcelable(coordinates, flags);
+        coordinates.writeToParcel(dest, flags);
         dest.writeInt(parkingID);
     }
 
@@ -158,7 +158,9 @@ public class Parking implements Parcelable {
             }
         };
 
+        @SerializedName("latitude")
         protected double latitude;
+        @SerializedName("longitude")
         protected double longitude;
 
         public Coordinates() { /* no-argument constructor to be used for deserialization */ }

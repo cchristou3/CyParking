@@ -34,6 +34,7 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/fragment_parking_booking_cv_parking_availability"
+        style="@style/CardView.Dark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
@@ -43,6 +44,7 @@
 
         <TextView
             android:id="@+id/fragment_parking_booking_txt_parking_availability"
+            style="@style/ThemeOverlay.AppCompat.Dark"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="10dp"

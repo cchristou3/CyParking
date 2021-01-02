@@ -3,6 +3,7 @@ package io.github.cchristou3.CyParking.utilities;
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -12,8 +13,10 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.ColorInt;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentActivity;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
@@ -23,9 +26,28 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
  * related to the View.</p>
  *
  * @author Charalambos Christou
- * @version 3.0 31/12/20
+ * @version 4.0 03/01/21
  */
 public class ViewUtility {
+
+    /**
+     * Changes the background color of the fragment's "availability" view to either green
+     * or red based on availability's change and back to its original background color via
+     * animation.
+     *
+     * @param updatedAvailability The latest availability retrieved from the database.
+     * @param oldAvailability     The current availability.
+     */
+    public static void animateAvailabilityColorChanges(CardView cardViewParent, @NotNull View child,
+                                                       int updatedAvailability, int oldAvailability) {
+        if (updatedAvailability != oldAvailability) { // If availability got changed
+            ViewUtility.animateColorChange(
+                    cardViewParent,
+                    child,
+                    // If more spaces, animate with green. Otherwise, animate with red
+                    (updatedAvailability > oldAvailability) ? Color.GREEN : Color.RED);
+        }
+    }
 
     /**
      * Hide the virtual keyboard.
@@ -53,13 +75,14 @@ public class ViewUtility {
      * Animates the view's color to the specified color
      * and then back to its original one.
      *
-     * @param view The view to have its color animated.
-     * @param to   The color to animate.
+     * @param cardViewParent A CardView with children.
+     * @param child          The child to have it color animated.
+     * @param to             The color to animate.
      */
-    public static void animateColorChange(View view, @ColorInt int to) {
-        ColorDrawable[] colorDrawables = {new ColorDrawable(to), getViewColor(view)};
+    public static void animateColorChange(CardView cardViewParent, @NotNull View child, @ColorInt int to) {
+        ColorDrawable[] colorDrawables = {new ColorDrawable(to), getCardViewColor(cardViewParent)};
         TransitionDrawable transitionDrawable = new TransitionDrawable(colorDrawables);
-        view.setBackground(transitionDrawable);
+        child.setBackground(transitionDrawable);
         transitionDrawable.startTransition(2000);
     }
 
@@ -67,11 +90,14 @@ public class ViewUtility {
      * Access the background color of the given view's root
      * element.
      *
-     * @param view The view, to have its parent color returned.
+     * @param cardView The CardView to have its color converted into
+     *                 a ColorDrawable.
      * @return The ColorDrawable of the view's root.
      */
-    public static ColorDrawable getViewColor(@NotNull View view) {
-        return (ColorDrawable) view.getRootView().getBackground();
+    @NotNull
+    @Contract("_ -> new")
+    public static ColorDrawable getCardViewColor(@NotNull CardView cardView) {
+        return new ColorDrawable(cardView.getCardBackgroundColor().getDefaultColor());
     }
 
     /**

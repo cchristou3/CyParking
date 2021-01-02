@@ -18,7 +18,7 @@ import java.util.Random;
  * parking lot.
  *
  * @author Charalambos Christou
- * @version 2.0 22/12/2020
+ * @version 3.0 02/01/21
  */
 public class SlotOffer implements Parcelable {
 
@@ -147,5 +147,34 @@ public class SlotOffer implements Parcelable {
     @Override
     public String toString() {
         return "€" + this.price + " for " + this.durationInHours + " hours";
+    }
+
+    /**
+     * Calculates the ratio of the offer.
+     * The smaller it is, the better the offer is
+     * in terms of price and duration.
+     * E.g.
+     * priceA = 0.5, durationInHours = 1 -> ratio = 0.5
+     * priceB = 0.5, durationInHours = 2 -> ratio = 0.25
+     * PriceB is more efficient than priceA.
+     *
+     * @return The efficiency ration of the offer.
+     */
+    public float getRatio() {
+        return price / durationInHours;
+    }
+
+    /**
+     * Compares two {@link SlotOffer} object's efficiency ratio.
+     * Returns true if the current object's ration is smaller than
+     * the given ones.
+     *
+     * @param offer The offer to be compared with.
+     * @return True, if current object's ratio is smaller than the specified ones.
+     * Otherwise, false.
+     */
+    public boolean smallerOf(SlotOffer offer) {
+        if (offer == null) return true;
+        return this.getRatio() < offer.getRatio();
     }
 }

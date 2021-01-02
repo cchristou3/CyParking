@@ -1,5 +1,7 @@
 package io.github.cchristou3.CyParking.data.repository;
 
+import android.util.Log;
+
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -16,6 +18,8 @@ import java.util.List;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
+
+import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment.TAG;
 
 /**
  * Purpose: <p>contain all methods to access the (cloud / local) database's parking nodes.</p>
@@ -91,6 +95,7 @@ public class ParkingRepository {
                         // Thus, in fragment check for this kind of exception and handle it appropriately
                         // TODO: what if the task failed?
                     } else {
+                        Log.d(TAG, "registerParkingLot: " + parkingLotToBeStored);
                         // Add it to the database
                         return FirebaseFirestore.getInstance()
                                 .collection(PARKING_LOTS)
@@ -210,13 +215,13 @@ public class ParkingRepository {
     public static void addDummyParkingData() {
         List<ParkingLot> parkingLotList = new ArrayList<>(Arrays.asList(
                 new ParkingLot(new Parking.Coordinates(34.9214056, 33.621935),
-                        "99999999", "A@gmail.com"),
+                        "99999999", "A@gmail.com", "A name"),
                 new ParkingLot(new Parking.Coordinates(34.9214672,
-                        33.6227833), "88888888", "B@gmail.com"),
+                        33.6227833), "88888888", "B@gmail.com", "Another name"),
                 new ParkingLot(new Parking.Coordinates(34.9210801,
-                        33.6236309), "77777777", "C@gmail.com"),
+                        33.6236309), "77777777", "C@gmail.com", "And another name"),
                 new ParkingLot(new Parking.Coordinates(34.921800,
-                        33.623560), "66666666", "D@gmail.com"))
+                        33.623560), "66666666", "D@gmail.com", "A name again"))
         );
         for (ParkingLot parking : parkingLotList) {
             registerParkingLot(parking);

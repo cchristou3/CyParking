@@ -5,7 +5,7 @@
     android:id="@+id/id_fragment_parking_map"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.parking.lots.ParkingMapFragment">
+    tools:context=".ui.parking.lots.map.ParkingMapFragment">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_parking_map_fcv_map"
@@ -16,10 +16,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:context=".ui.parking.lots.ParkingMapFragment" />
+        tools:context=".ui.parking.lots.map.ParkingMapFragment" />
 
     <androidx.core.widget.ContentLoadingProgressBar
-        android:id="@+id/fragment_parking_map_clp_loadingMarkers"
+        android:id="@+id/fragment_parking_map_clpb_loadingMarkers"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -30,11 +30,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/fragment_parking_map_fcv_map" />
 
-    <LinearLayout
-        android:id="@+id/fragment_parking_map_li_infoLayout"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fragment_parking_map_cl_info_layout"
         android:layout_width="match_parent"
-        android:layout_height="110dp"
-        android:layout_marginLeft="7dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="7dp"
         android:layout_marginRight="7dp"
         android:layout_marginBottom="7dp"
         android:background="@color/white"
@@ -48,37 +48,43 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:id="@+id/linearLayout"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/fragment_parking_map_btn_booking"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/fragment_parking_map_txt_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxLength="17"
+                android:maxLength="25"
                 android:text="122212121212121121212123123123"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="@+id/activity_parking_map_fg_google_map" />
 
             <TextView
-                android:id="@+id/fragment_parking_map_txt_capacity"
+                android:id="@+id/fragment_parking_map_txt_availability"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxLength="17"
+                android:maxLength="25"
                 android:text="122212121212121121212123123123"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="@+id/activity_parking_map_fg_google_map" />
 
             <TextView
-                android:id="@+id/fragment_parking_map_txt_price"
+                android:id="@+id/fragment_parking_map_txt_offer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxLength="17"
+                android:maxLength="25"
                 android:text="122212121212121121212123123123"
                 android:textColor="@color/black"
                 android:textSize="20sp"
@@ -90,26 +96,23 @@
             android:id="@+id/fragment_parking_map_imgbtn_directions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:layout_weight="0.1"
             android:background="@drawable/ic_directions"
-            android:contentDescription="directions"
-            android:padding="27dp" />
+            android:contentDescription="@string/directions"
+            android:padding="27dp"
+            app:layout_constraintBottom_toTopOf="@+id/fragment_parking_map_btn_booking"
+            app:layout_constraintEnd_toEndOf="@+id/fragment_parking_map_btn_booking"
+            app:layout_constraintStart_toStartOf="@+id/fragment_parking_map_btn_booking"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/fragment_parking_map_btn_booking"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="15dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_weight="1"
-            android:text="Book" />
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/book"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

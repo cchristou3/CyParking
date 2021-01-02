@@ -26,7 +26,7 @@
     <string name="welcome">"Welcome! "</string>
     <string name="invalid_email">Not a valid email</string>
     <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="invalid_password">Password must be > 5 characters</string>
     <string name="invalid_role_choice">At least of role must be selected</string>
     <string name="login_failed">"Login failed"</string>
     <string name="title_activity_testing">Testing</string>
@@ -44,6 +44,7 @@
     <string name="feedback_disclaimer">Your feedback is important and helps improve our products. While we cannot reply to all feedback, all comments are taken into consideration.</string>
     <string name="name">Name</string>
     <string name="email">Email</string>
+    <string name="email_low">email</string>
     <string name="email_hint">Enter email here…</string>
     <string name="give_feedback">Give Feedback</string>
     <string name="required">Required</string>
@@ -131,6 +132,7 @@
 
     <!-- Strings related to the Account and UpdateDialog fragments -->
     <string name="prompt_name">Display name</string>
+    <string name="action_update">Update</string>
     <string name="update_name">Update Name</string>
     <string name="update_email">Update Email</string>
     <string name="update_password">Update Password</string>
@@ -145,5 +147,11 @@
     <string name="updating_password">Updating password</string>
     <string name="update">Update</string>
     <string name="invalid_user_exception_msg">It looks like you signed out of your app. You should sign in again and re-perform this action.</string>
+    <string name="feedback_success">Feedback has been sent to the CyParking Team.</string>
+    <string name="feedback_failed">Feedback failed to be sent to the CyParking Team. Please try again later.</string>
+    <string name="login_required_exception">This operation is sensitive and requires recent
+        authentication. Log in again before retrying this request.</string>
+    <string name="directions">directions</string>
+    <string name="book">Book</string>
 
 </resources>

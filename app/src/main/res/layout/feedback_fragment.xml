@@ -94,7 +94,7 @@
                         app:layout_constraintTop_toBottomOf="@+id/feedback_fragment_txt_email_title" />
 
                     <EditText
-                        android:id="@+id/feedback_fragment_et_email_body"
+                        android:id="@+id/feedback_fragment_et_email_input"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/email_hint"
@@ -129,7 +129,7 @@
             <!-- TextArea src: https://learnpainless.com/android/how-to-create-textarea-in-android/ -->
 
             <EditText
-                android:id="@+id/feedback_fragment_et_feedback_body"
+                android:id="@+id/feedback_fragment_et_feedback_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
@@ -158,9 +158,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="@string/send_feedback"
-                app:layout_constraintEnd_toEndOf="@+id/feedback_fragment_et_feedback_body"
-                app:layout_constraintStart_toStartOf="@+id/feedback_fragment_et_feedback_body"
-                app:layout_constraintTop_toBottomOf="@+id/feedback_fragment_et_feedback_body" />
+                app:layout_constraintEnd_toEndOf="@+id/feedback_fragment_et_feedback_input"
+                app:layout_constraintStart_toStartOf="@+id/feedback_fragment_et_feedback_input"
+                app:layout_constraintTop_toBottomOf="@+id/feedback_fragment_et_feedback_input" />
 
             <TextView
                 android:layout_width="0dp"

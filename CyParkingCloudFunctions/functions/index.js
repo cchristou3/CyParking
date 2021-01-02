@@ -24,13 +24,13 @@ exports.filterLocations = functions.https.onRequest(async (req, res) => {
         const userLongitude = req.query.longitude;
         // Get all private parking into Cloud Firestore using the Firebase Admin SDK.
         var filteredReadResult = [];
-        await admin.firestore().collection(constants.PRIVATE_PARKING)
+        await admin.firestore().collection(constants.PARKING_LOTS)
             .get()
             .then(
                 function (querySnapshot) {
                     querySnapshot.forEach(function (doc) {
                         if (doc.exists) {
-                            //console.log(doc.id, " => ", doc.data().slotOfferList);                            
+                            //console.log(doc.id, " => ", doc.data());                            
                             if (helpers.nearbyUser(doc.data(), userLatitude, userLongitude)) {
                                 filteredReadResult.push(doc.data());
                             }
@@ -44,3 +44,11 @@ exports.filterLocations = functions.https.onRequest(async (req, res) => {
     }
     return res.status(403).send('Forbidden!');
 })
+
+/* TODO: Complete after administrator's front-end is done.
+exports.notifyAdminnistrator = functions.firestore
+    .document('feedback/{docId}')
+    .onWrite((change, context) => {
+        // TODO: Send notification to the administrator's system 
+    });
+*/

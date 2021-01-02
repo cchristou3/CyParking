@@ -11,11 +11,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
-import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivateParkingBooking;
+import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
+import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 
 /**
  * Purpose: <p>contain all methods to access the (cloud / local) database's parking nodes.</p>
@@ -25,19 +25,16 @@ import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivatePark
  */
 public class ParkingRepository {
 
-    // Keys related to the ParkingLot objects
-    public static final String LATITUDE_KEY = "latitude";
-    public static final String LONGITUDE_KEY = "longitude";
-
-    // Keys related to the database fields
-    private static final String USER_ID = "userID";
-    private static final String COMPLETED = "completed";
-    private static final String OPERATOR_EMAIL = "operatorEmail";
-    private static final String AVAILABLE_SPACES = "availableSpaces";
-
     // Firebase Firestore paths (nodes)
-    private static final String PRIVATE_PARKING = "private_parking";
-    private static final String PRIVATE_PARKING_BOOKING = "private_parking_bookings";
+    public static final String PARKING_LOTS = "parking_lots";
+    public static final String BOOKING = "bookings";
+    // Keys related to the database fields
+    public static final String OPERATOR_EMAIL = "operatorEmail";
+    private static final String USER_ID = "userID";
+    private static final String BOOKING_USER_ID = "bookingUserId";
+    private static final String COMPLETED = "completed";
+    private static final String AVAILABLE_SPACES = "availableSpaces";
+    private static final String OPERATOR_ID = "operatorId";
 
     /**
      * Returns the bookings of the specified userId,
@@ -49,8 +46,8 @@ public class ParkingRepository {
     @NotNull
     public static Query retrieveUserBookings(String userId) {
         return FirebaseFirestore.getInstance()
-                .collection(PRIVATE_PARKING_BOOKING)
-                .whereEqualTo(USER_ID, userId)
+                .collection(BOOKING)
+                .whereEqualTo(BOOKING_USER_ID, userId)
                 .orderBy(COMPLETED, Query.Direction.ASCENDING); // Show pending bookings first
         // TODO: Make a HTTP request - filter data (get only pending bookings) on the server and send to the client
     }
@@ -64,7 +61,7 @@ public class ParkingRepository {
      */
     @NotNull
     public static CollectionReference observeAllParkingLots() {
-        return FirebaseFirestore.getInstance().collection(PRIVATE_PARKING);
+        return FirebaseFirestore.getInstance().collection(PARKING_LOTS);
     }
 
     /**
@@ -81,7 +78,7 @@ public class ParkingRepository {
     @NotNull
     public static Task<Void> registerParkingLot(@NotNull ParkingLot parkingLotToBeStored) {
         // Add the info to the database
-        return FirebaseFirestore.getInstance().collection(PRIVATE_PARKING)
+        return FirebaseFirestore.getInstance().collection(PARKING_LOTS)
                 .document(parkingLotToBeStored.generateUniqueId())
                 .get()
                 .continueWithTask(task -> {
@@ -96,7 +93,7 @@ public class ParkingRepository {
                     } else {
                         // Add it to the database
                         return FirebaseFirestore.getInstance()
-                                .collection(PRIVATE_PARKING)
+                                .collection(PARKING_LOTS)
                                 .document(parkingLotToBeStored.generateUniqueId())
                                 .set(parkingLotToBeStored);
                     }
@@ -106,16 +103,16 @@ public class ParkingRepository {
     /**
      * Stores the specified object to the database's PRIVATE_PARKING_BOOKING node.
      *
-     * @param privateParkingBookingToBeStored Holds all necessary info about a booking of a private parking
+     * @param bookingToBeStored Holds all necessary info about a booking of a private parking
      * @return A Task<Void> object to be handled in the calling fragment.
      */
     @NotNull
-    private static Task<Void> bookParkingSlot(@NotNull PrivateParkingBooking privateParkingBookingToBeStored) {
+    private static Task<Void> bookParkingSlot(@NotNull Booking bookingToBeStored) {
         // Add the booking info to the database
         return FirebaseFirestore.getInstance()
-                .collection(PRIVATE_PARKING_BOOKING)
-                .document(privateParkingBookingToBeStored.generateUniqueId())
-                .set(privateParkingBookingToBeStored);
+                .collection(BOOKING)
+                .document(bookingToBeStored.generateUniqueId())
+                .set(bookingToBeStored);
     }
 
     /**
@@ -132,9 +129,9 @@ public class ParkingRepository {
      * @throws NullPointerException in case the continuation returns null
      * @see Task#getException()
      */
-    public static Task<Void> bookParkingSlot(@NotNull PrivateParkingBooking booking, boolean checkIfAlreadyExists) {
+    public static Task<Void> bookParkingSlot(@NotNull Booking booking, boolean checkIfAlreadyExists) {
         if (checkIfAlreadyExists) {
-            return FirebaseFirestore.getInstance().collection(PRIVATE_PARKING_BOOKING)
+            return FirebaseFirestore.getInstance().collection(BOOKING)
                     .document(booking.generateUniqueId()).get()
                     .continueWithTask(task -> {
                         if (task.isSuccessful()) {
@@ -159,7 +156,7 @@ public class ParkingRepository {
     public static void cancelParkingBooking(@NotNull String idOfBookingToBeCancelled) {
         // Delete the booking info to the database
         FirebaseFirestore.getInstance()
-                .collection(PRIVATE_PARKING_BOOKING)
+                .collection(BOOKING)
                 .document(idOfBookingToBeCancelled).delete();
     }
 
@@ -172,20 +169,20 @@ public class ParkingRepository {
      */
     @NotNull
     public static DocumentReference observeParkingLot(@NotNull ParkingLot selectedParking) {
-        return FirebaseFirestore.getInstance().collection(PRIVATE_PARKING)
+        return FirebaseFirestore.getInstance().collection(PARKING_LOTS)
                 .document(selectedParking.generateUniqueId());
     }
 
     /**
-     * Returns the operator's parking lot based on his/hers email address.
+     * Returns the operator's parking lot based on his/hers id.
      *
-     * @param email The email address of the operator.
-     * @return A query that returns the parking lot of the operator with the specified email.
+     * @param operatorId The id of the operator.
+     * @return A query that returns the parking lot of the operator with the specified id.
      */
     @NotNull
-    public static Query observeParkingLot(String email) {
+    public static Query observeParkingLot(String operatorId) {
         return observeAllParkingLots()
-                .whereEqualTo(OPERATOR_EMAIL, email).limit(1L);
+                .whereEqualTo(OPERATOR_ID, operatorId).limit(1L);
     }
 
     /**
@@ -212,22 +209,14 @@ public class ParkingRepository {
      */
     public static void addDummyParkingData() {
         List<ParkingLot> parkingLotList = new ArrayList<>(Arrays.asList(
-                new ParkingLot(new HashMap<String, Double>() {{
-                    put(LATITUDE_KEY, 34.9214056);
-                    put(LONGITUDE_KEY, 33.621935);
-                }}, "99999999", "A@gmail.com"),
-                new ParkingLot(new HashMap<String, Double>() {{
-                    put(LATITUDE_KEY, 34.9214672);
-                    put(LONGITUDE_KEY, 33.6227833);
-                }}, "88888888", "B@gmail.com"),
-                new ParkingLot(new HashMap<String, Double>() {{
-                    put(LATITUDE_KEY, 34.9210801);
-                    put(LONGITUDE_KEY, 33.6236309);
-                }}, "77777777", "C@gmail.com"),
-                new ParkingLot(new HashMap<String, Double>() {{
-                    put(LATITUDE_KEY, 34.921800);
-                    put(LONGITUDE_KEY, 33.623560);
-                }}, "66666666", "D@gmail.com"))
+                new ParkingLot(new Parking.Coordinates(34.9214056, 33.621935),
+                        "99999999", "A@gmail.com"),
+                new ParkingLot(new Parking.Coordinates(34.9214672,
+                        33.6227833), "88888888", "B@gmail.com"),
+                new ParkingLot(new Parking.Coordinates(34.9210801,
+                        33.6236309), "77777777", "C@gmail.com"),
+                new ParkingLot(new Parking.Coordinates(34.921800,
+                        33.623560), "66666666", "D@gmail.com"))
         );
         for (ParkingLot parking : parkingLotList) {
             registerParkingLot(parking);

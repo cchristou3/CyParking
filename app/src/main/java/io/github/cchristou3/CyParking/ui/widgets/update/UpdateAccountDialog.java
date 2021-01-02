@@ -5,9 +5,12 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -16,21 +19,28 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
-import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.DialogAccountUpdateBinding;
+import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsFragment;
 import io.github.cchristou3.CyParking.ui.user.AccountFragment;
+import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
+import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 
+import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 import static io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog.getStyleConfiguration;
 
 /**
@@ -40,7 +50,8 @@ import static io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog.getSty
  * @author Charalambos Christou
  * @version 3.0 29/12/20
  */
-public class UpdateAccountDialog extends DialogFragment implements View.OnClickListener, TextWatcher {
+public class UpdateAccountDialog extends DialogFragment implements View.OnClickListener, TextWatcher,
+        Navigable {
 
     // Fragment's constants
     public static final short UPDATE_DISPLAY_NAME = 144;
@@ -88,6 +99,8 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      */
     private void initializeViewModel(short action) {
         String actionFieldTitle, dialogTitle;
+        // Set value of the dialog's title, and the TextView that is above the input
+        // to its corresponding text based on the dialog's action type.
         switch (action) {
             case UPDATE_DISPLAY_NAME:
                 actionFieldTitle = getString(R.string.prompt_name);
@@ -104,14 +117,9 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
             default:
                 throw new IllegalArgumentException("Not a valid action.");
         }
-        // Access the current state of the user
-        LoggedInUser currentUser = new ViewModelProvider(requireActivity())
-                .get(AuthStateViewModel.class).getUser();
-
-        // Pass it in to the UpdateViewModelFactory, which itself
-        // will further pass it to the AccountRepository
+        // Initialize the UpdateViewModel of the fragment and set its initial values.
         mUpdateViewModel = new ViewModelProvider(this,
-                new UpdateViewModelFactory(currentUser)).get(UpdateViewModel.class);
+                new UpdateViewModelFactory()).get(UpdateViewModel.class);
         mUpdateViewModel.getDialogTitle().setValue(dialogTitle);
         mUpdateViewModel.getActionFieldTitle().setValue(actionFieldTitle);
         mUpdateViewModel.setDialogType(action);
@@ -155,7 +163,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         super.onDestroyView();
         getBinding().dialogAccountUpdateMbtnDismiss.setOnClickListener(null);
         getBinding().dialogAccountUpdateMbtnUpdate.setOnClickListener(null);
-        getBinding().dialogAccountUpdateMetInput.removeTextChangedListener(this);
+        getBinding().dialogAccountUpdateEtInput.removeTextChangedListener(this);
         mDialogAccountUpdateBinding = null;
     }
 
@@ -169,11 +177,11 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
             getBinding().dialogAccountUpdateMbtnUpdate.setEnabled(updateFormState.isDataValid());
             if (updateFormState.getError() != null) {
                 // Show error hint
-                getBinding().dialogAccountUpdateMetInput.setError(getString(updateFormState.getError()));
+                getBinding().dialogAccountUpdateEtInput.setError(getString(updateFormState.getError()));
             } else {
                 // Remove error hint if it displays
-                if (getBinding().dialogAccountUpdateMetInput.getError() != null) {
-                    getBinding().dialogAccountUpdateMetInput.setError(null, null);
+                if (getBinding().dialogAccountUpdateEtInput.getError() != null) {
+                    getBinding().dialogAccountUpdateEtInput.setError(null, null);
                 }
             }
         });
@@ -196,17 +204,26 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
 
         // Initialize the UI's content
         final short dialogAction = mUpdateViewModel.getDialogType();
-        setInputTypeTo(dialogAction, getBinding().dialogAccountUpdateMetInput);
+        setInputTypeTo(dialogAction, getBinding().dialogAccountUpdateEtInput);
         // Display the saved value
-        getBinding().dialogAccountUpdateMetInput.setText(mUpdateViewModel.getActionFieldInput().getValue());
+        getBinding().dialogAccountUpdateEtInput.setText(mUpdateViewModel.getActionFieldInput().getValue());
 
         final String hint = getString(
                 ((dialogAction == UPDATE_DISPLAY_NAME) ? R.string.hint_name
                         : (dialogAction == UPDATE_EMAIL) ? R.string.hint_email
                         : R.string.hint_password)
         );
-        getBinding().dialogAccountUpdateMetInput.setHint(hint);
-        getBinding().dialogAccountUpdateMetInput.addTextChangedListener(this);
+        getBinding().dialogAccountUpdateEtInput.setHint(hint);
+        getBinding().dialogAccountUpdateEtInput.addTextChangedListener(this);
+        // Pressing the "enter" on the keyboard will automatically trigger the login method
+        getBinding().dialogAccountUpdateEtInput.setOnEditorActionListener((v, actionId, event) -> {
+            Log.d(TAG, "initializeUi: " + actionId);
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                if (mUpdateViewModel.isFormValid())
+                    getBinding().dialogAccountUpdateMbtnUpdate.performClick();
+            }
+            return false;
+        });
     }
 
     /**
@@ -216,7 +233,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      * @param action           The type of the dialog
      * @param actionFieldInput A UI element of type TextInputEditText
      */
-    private void setInputTypeTo(@NotNull Short action, TextInputEditText actionFieldInput) {
+    private void setInputTypeTo(@NotNull Short action, EditText actionFieldInput) {
         switch (action) {
             case UpdateAccountDialog.UPDATE_PASSWORD:
                 actionFieldInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
@@ -237,17 +254,26 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      */
     @Override
     public void onClick(View v) {
+        changeLoadingBarVisibilityTo(View.VISIBLE);
+
+        // Instantiate the AuthStateViewModel to access the user's state
+        AuthStateViewModel authStateViewModel = new ViewModelProvider(requireActivity())
+                .get(AuthStateViewModel.class);
+
         // Access the field's info
-        final String updatedField = getBinding().dialogAccountUpdateMetInput.getText().toString();
+        final String updatedField = getBinding().dialogAccountUpdateEtInput.getText().toString();
         // Update it and save a reference to its returning Task object
-        Task<Void> updateTask = mUpdateViewModel.updateField(updatedField);
+        Task<Void> updateTask = mUpdateViewModel.updateAccountField(
+                authStateViewModel.getUser(),
+                updatedField);
 
         if (updateTask != null) {
             updateTask.addOnCompleteListener(task -> {
-                // https://firebase.google.com/docs/reference/android/com/google/firebase/auth/FirebaseUser#updateEmail(java.lang.String)
-                // Exceptions for emails
+                changeLoadingBarVisibilityTo(View.GONE);
+
                 if (task.getException() != null) {
-                    displayErrorMessage(task.getException());
+                    Log.d(TAG, "onClick: " + task.getException());
+                    handleError(task.getException());
                     return;
                 }
 
@@ -257,10 +283,38 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
                     final String toastMsg = actionItem + " got updated.";
                     // And display it to the user
                     Toast.makeText(getParentFragment().requireContext(), toastMsg, Toast.LENGTH_SHORT).show();
+                    updateUserState(authStateViewModel, updatedField); // Update the user's state attribute
                     // Hide the dialog
                     dismiss();
                 }
             });
+        } else {
+            getBinding().dialogAccountUpdateClpbLoadingBar.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateUserState(final AuthStateViewModel authStateViewModel, String updatedField) {
+        switch (mUpdateViewModel.getDialogType()) {
+            case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
+                // Update the user's state's display name
+                authStateViewModel.updateAuthState(
+                        authStateViewModel.getUser().setDisplayName(updatedField)
+                );
+                break;
+            case UpdateAccountDialog.UPDATE_EMAIL:
+                // Update the user's state's email
+                authStateViewModel.updateAuthState(
+                        authStateViewModel.getUser().setEmail(updatedField)
+                );
+                break;
+            case UpdateAccountDialog.UPDATE_PASSWORD: /* Do nothing */
+                break;
+        }
+    }
+
+    private void changeLoadingBarVisibilityTo(int visibility) {
+        if (getBinding().dialogAccountUpdateClpbLoadingBar.getVisibility() != visibility) {
+            getBinding().dialogAccountUpdateClpbLoadingBar.setVisibility(visibility);
         }
     }
 
@@ -269,37 +323,48 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      *
      * @param exception The exception whilst updating credentials.
      */
-    private void displayErrorMessage(Exception exception) {
-        String errorMessage = null;
+    private void handleError(@NotNull Exception exception) {
+        Log.d(TAG, "displayErrorMessage: " + exception.getClass());
+        if (exception instanceof FirebaseAuthRecentLoginRequiredException) {
+            AlertBuilder.promptUserToLogIn(requireContext(),
+                    requireActivity(),
+                    this, // Access the parent's Navigable interface implementation
+                    R.string.login_required_exception);
+            dismiss();
+        }
         // Exceptions associated to both email and password
-        if (exception instanceof FirebaseAuthInvalidUserException) {
+        else if (exception instanceof FirebaseAuthInvalidUserException) {
             //  if the current user's account has been disabled, deleted, or its credentials are no longer valid
             AlertBuilder.promptUserToLogIn(requireContext(),
                     requireActivity(),
-                    ((AccountFragment) getParentFragment()), // Access the parent's Navigable interface implementation
+                    this, // Access the parent's Navigable interface implementation
                     R.string.invalid_user_exception_msg);
-            return;
-        }
-        // Exceptions associated to email
-        else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
+            dismiss();
+        } else if (exception instanceof FirebaseAuthWeakPasswordException) {
+            //  if the password is not strong enough
+            Toast.makeText(requireContext(), ((FirebaseAuthWeakPasswordException) exception).getReason(), Toast.LENGTH_SHORT).show();
+        } else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
             // if the email address is malformed
-            errorMessage = "Failed to authenticate: "
-                    + ((FirebaseAuthInvalidCredentialsException) exception);
+            Toast.makeText(requireContext(), "Failed to authenticate: "
+                    + exception.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+
         } else if (exception instanceof FirebaseAuthUserCollisionException) {
             // if there already exists an account with the given email address
-            errorMessage = "Email: " + ((FirebaseAuthUserCollisionException) exception).getEmail()
-                    + " already belongs to another user";
-        }
-        // Exceptions associated to password
-        else if (exception instanceof FirebaseAuthWeakPasswordException) {
-            //  if the password is not strong enough
-            errorMessage = ((FirebaseAuthWeakPasswordException) exception).getReason();
+            Toast.makeText(requireContext(), "Email: " + ((FirebaseAuthUserCollisionException) exception).getEmail()
+                    + " already belongs to another user", Toast.LENGTH_SHORT).show();
+        } else if (exception instanceof FirebaseTooManyRequestsException) {
+            // Many requests from this device can cause unusual activity
+            final Snackbar tooManyRequestsSnackbar =
+                    Snackbar.make(getParentFragment().requireView(), exception.getLocalizedMessage(), Snackbar.LENGTH_INDEFINITE);
+            tooManyRequestsSnackbar.setAction(R.string.dismiss, v -> tooManyRequestsSnackbar.dismiss()).show();
+            dismiss();
+        } else {
+            Toast.makeText(requireContext(), exception.getLocalizedMessage(),
+                    Toast.LENGTH_LONG).show();
+            // TODO: Add logger
         }
 
-        // Display the error message to the user.
-        if (errorMessage != null && !errorMessage.isEmpty()) {
-            Toast.makeText(getParentFragment().requireContext(), errorMessage, Toast.LENGTH_LONG).show();
-        }
+        // TODO: Test all scenarios, and polish fragment.
     }
 
     /**
@@ -321,4 +386,53 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
 
     public void onTextChanged(CharSequence s, int start, int before, int count) { /* ignore */ }
 
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link AuthenticatorFragment}.
+     */
+    @Override
+    public void toAuthenticator() {
+        if (((Navigable) getTargetFragment()) != null)
+            ((Navigable) getTargetFragment()).toAuthenticator();
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link ViewBookingsFragment}.
+     */
+    @Override
+    public void toBookings() {
+        if (((Navigable) getTargetFragment()) != null)
+            ((Navigable) getTargetFragment()).toBookings();
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link AccountFragment}.
+     */
+    @Override
+    public void toAccount() {
+        if (getTargetFragment() != null)
+            ((Navigable) getTargetFragment()).toAccount();
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link FeedbackFragment}.
+     */
+    @Override
+    public void toFeedback() {
+        if (getTargetFragment() != null)
+            ((Navigable) getTargetFragment()).toFeedback();
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link HomeFragment}.
+     */
+    @Override
+    public void toHome() {
+        if (getTargetFragment() != null)
+            ((Navigable) getTargetFragment()).toHome();
+    }
 }

@@ -11,19 +11,24 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/dialog_account_update_met_input"
-        app:layout_constraintStart_toStartOf="@+id/dialog_account_update_met_input" />
+        app:layout_constraintBottom_toTopOf="@+id/dialog_account_update_et_input"
+        app:layout_constraintStart_toStartOf="@+id/dialog_account_update_et_input" />
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/dialog_account_update_met_input"
+    <EditText
+        android:id="@+id/dialog_account_update_et_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
+        android:autofillHints=""
+        android:imeActionLabel="@string/action_update"
+        android:imeOptions="actionDone"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:inputType="textEmailAddress"
+        android:selectAllOnFocus="true"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.button.MaterialButton
@@ -44,7 +49,18 @@
         android:layout_marginBottom="40dp"
         android:text="@string/update"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/dialog_account_update_met_input"
-        app:layout_constraintTop_toBottomOf="@+id/dialog_account_update_met_input" />
+        app:layout_constraintEnd_toEndOf="@+id/dialog_account_update_et_input"
+        app:layout_constraintTop_toBottomOf="@+id/dialog_account_update_et_input" />
+
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/dialog_account_update_clpb_loading_bar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

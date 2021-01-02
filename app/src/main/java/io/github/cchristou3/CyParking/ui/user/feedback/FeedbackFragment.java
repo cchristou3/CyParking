@@ -20,7 +20,8 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
+import io.github.cchristou3.CyParking.data.model.user.Feedback;
+import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FeedbackFragmentBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
@@ -35,7 +36,7 @@ import io.github.cchristou3.CyParking.utilities.ViewUtility;
  * </p>
  *
  * @author Charalambos Christou
- * @version 2.0 28/12/20
+ * @version 3.0 30/12/20
  */
 public class FeedbackFragment extends Fragment implements Navigable, TextWatcher {
 
@@ -75,12 +76,26 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
         // Hook up the send feedback button with an onClickListener and disable it initially
         getBinding().feedbackFragmentMbtnSendFeedback.setEnabled(false);
         getBinding().feedbackFragmentMbtnSendFeedback.setOnClickListener(v -> {
-            // TODO: Store message to Firestore & send notification to administrator via cloud function
-            Toast.makeText(requireContext(), "Not implemented yet!", Toast.LENGTH_SHORT).show();
+            // Store message to Firestore and (TODO) send notification to administrator via cloud function
+            mFeedbackViewModel.sendFeedback(
+                    new Feedback(
+                            ((mAuthStateViewModel.getUser() != null) ? // If logged in
+                                    mAuthStateViewModel.getUser().getEmail() // its email
+                                    : mFeedbackViewModel.getEmail()), // Otherwise, inputted email
+                            mFeedbackViewModel.getFeedback()
+                    )
+            ).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(requireContext(), getString(R.string.feedback_success), Toast.LENGTH_SHORT).show();
+                    goBack(requireActivity().findViewById(R.id.fragment_main_host_nv_nav_view));
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.feedback_failed), Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
         // Get a reference to the feedback TextView of the UI
-        final EditText feedbackTextArea = getBinding().feedbackFragmentEtFeedbackBody;
+        final EditText feedbackTextArea = getBinding().feedbackFragmentEtFeedbackInput;
 
         // If feedbackTextArea is inside a ScrollView then there is an issue while scrolling TextArea’s inner contents.
         // So, when touching the feedbackTextArea forbid the ScrollView from intercepting touch events.
@@ -104,12 +119,12 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
             if (mAuthStateViewModel.getUser() == null) {
                 // Update Email error
                 if (feedbackFormState.getEmailError() != null) {
-                    getBinding().feedbackFragmentEtEmailBody
+                    getBinding().feedbackFragmentEtEmailInput
                             .setError(getString(feedbackFormState.getEmailError()));
                 } else {
                     // Hide error if it shows
-                    if (getBinding().feedbackFragmentEtEmailBody.getError() != null) {
-                        getBinding().feedbackFragmentEtEmailBody.setError(null, null);
+                    if (getBinding().feedbackFragmentEtEmailInput.getError() != null) {
+                        getBinding().feedbackFragmentEtEmailInput.setError(null, null);
                     }
                 }
             }
@@ -124,8 +139,10 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
     public void onDestroyView() {
         super.onDestroyView();
         getBinding().feedbackFragmentMbtnSendFeedback.setOnClickListener(null);
-        getBinding().feedbackFragmentEtFeedbackBody.removeTextChangedListener(this);
-        getBinding().feedbackFragmentEtEmailBody.removeTextChangedListener(this);
+        getBinding().feedbackFragmentEtFeedbackInput.removeTextChangedListener(this);
+        if (mAuthStateViewModel.getUser() == null) {
+            getBinding().feedbackFragmentEtEmailInput.removeTextChangedListener(this);
+        }
         mFeedbackFragmentBinding = null;
     }
 
@@ -163,8 +180,8 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
         getBinding().feedbackFragmentTxtEmailBody.setVisibility(View.GONE);
 
         // Show the edit text related to the email and add a listener
-        getBinding().feedbackFragmentEtEmailBody.setVisibility(View.VISIBLE);
-        getBinding().feedbackFragmentEtEmailBody.addTextChangedListener(this);
+        getBinding().feedbackFragmentEtEmailInput.setVisibility(View.VISIBLE);
+        getBinding().feedbackFragmentEtEmailInput.addTextChangedListener(this);
     }
 
     /**
@@ -181,7 +198,7 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
         getBinding().feedbackFragmentTxtEmailBody.setVisibility(View.VISIBLE);
 
         // Hide the edit text related to the email
-        getBinding().feedbackFragmentEtEmailBody.setVisibility(View.GONE);
+        getBinding().feedbackFragmentEtEmailInput.setVisibility(View.GONE);
 
         // Display user info
         String userDisplayName = user.getDisplayName();
@@ -211,7 +228,7 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
         final LoggedInUser user = mAuthStateViewModel.getUser();
         final String email = (user != null)
                 ? mAuthStateViewModel.getUser().getEmail()
-                : getBinding().feedbackFragmentEtEmailBody.getText().toString();
+                : getBinding().feedbackFragmentEtEmailInput.getText().toString();
         mFeedbackViewModel.formDataChanged(user, textFromFeedbackArea.toString(), email);
     }
 

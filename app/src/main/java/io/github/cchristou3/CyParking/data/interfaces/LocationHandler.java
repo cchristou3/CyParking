@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment;
 
 import io.github.cchristou3.CyParking.data.manager.LocationManager;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
+import io.github.cchristou3.CyParking.ui.parking.lots.register.RegisterLotFragment;
 
 /**
  * Purpose:
@@ -11,7 +12,7 @@ import io.github.cchristou3.CyParking.ui.home.HomeFragment;
  * appropriate callback method to handle
  * incoming LocationResult objects.
  * Used by {@link HomeFragment}
- * and {@link io.github.cchristou3.CyParking.ui.parking.lots.RegisterLotFragment}.
+ * and {@link RegisterLotFragment}.
  *
  * @author Charalambos Christou
  * @version 1.0 21/12/20

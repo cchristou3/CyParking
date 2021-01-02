@@ -4,7 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
+import com.google.firebase.auth.FirebaseAuth;
+
 import io.github.cchristou3.CyParking.data.repository.AccountRepository;
 
 /**
@@ -16,18 +17,12 @@ import io.github.cchristou3.CyParking.data.repository.AccountRepository;
  */
 public class UpdateViewModelFactory implements ViewModelProvider.Factory {
 
-    private final LoggedInUser mLoggedInUser;
-
-    public UpdateViewModelFactory(LoggedInUser loggedInUser) {
-        this.mLoggedInUser = loggedInUser;
-    }
-
     @NonNull
     @Override
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(UpdateViewModel.class)) {
-            return (T) new UpdateViewModel(new AccountRepository(this.mLoggedInUser));
+            return (T) new UpdateViewModel(new AccountRepository(FirebaseAuth.getInstance()));
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

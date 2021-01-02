@@ -15,13 +15,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Set;
 
-import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
-import io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment;
+import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
 /**
- * Purpose: manage {@link Marker} objects of {@link io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment}.
+ * Purpose: manage {@link Marker} objects of {@link ParkingMapFragment}.
  * Responsible for:
  * <p> - Maintaining the user's marker.
  * <p> - Adding/updating/removing markers.
@@ -29,11 +28,9 @@ import io.github.cchristou3.CyParking.utilities.ViewUtility;
  * <p> - Retrieving the marker's corresponding {@link ParkingLot} object.
  *
  * @author Charalambos Christou
- * @version 1.0 22/12/20
+ * @version 2.0 02/1/21
  */
 public class MarkerManager {
-
-    private static final double DEFAULT_DOUBLE_VALUE = 0.0D;
 
     // Holds all Marker - ParkingLot pairs. Used for look up: Marker -> ParkingLot
     final private HashMap<Marker, ParkingLot> mMarkerToValueMap;
@@ -73,7 +70,8 @@ public class MarkerManager {
         mUserMarker = mGoogleMap.addMarker(new MarkerOptions()
                 .title("Title")
                 .position(mCurrentLatLngOfUser)
-                .icon(BitmapDescriptorFactory.fromBitmap(ViewUtility.drawableToBitmap(mUserMapIcon))) // TODO: Replace with an actual icon
+                .icon(BitmapDescriptorFactory.fromBitmap(ViewUtility.drawableToBitmap(mUserMapIcon)))
+                // TODO: Replace with an actual icon
                 .snippet("Current Location!")
                 .title("Me"));
         // Add a tag to it, to differentiate it from the other markers on the map
@@ -91,8 +89,8 @@ public class MarkerManager {
      */
     public boolean areCoordinatesTheSame(Marker markerOfParking, double parkingLatitude, double parkingLongitude) {
         // Access the marker's latitude and longitude
-        double markerLat = getLocationAttributeOf(markerOfParking, ParkingRepository.LATITUDE_KEY);
-        double markerLng = getLocationAttributeOf(markerOfParking, ParkingRepository.LONGITUDE_KEY);
+        double markerLat = getParkingLotOf(markerOfParking).getLatitude();
+        double markerLng = getParkingLotOf(markerOfParking).getLongitude();
         return markerLat == parkingLatitude && markerLng == parkingLongitude;
     }
 
@@ -106,6 +104,15 @@ public class MarkerManager {
     }
 
     /**
+     * Sets the value of the {@link #mSelectedParkingLot} with
+     * the specified argument.
+     */
+    public void setSelectedParkingLot(ParkingLot lot) {
+        mSelectedParkingLot = lot;
+    }
+
+
+    /**
      * Access the key-set of the {@link #mMarkerToValueMap}.
      *
      * @return A Set of all the keys of {@link #mMarkerToValueMap}.
@@ -115,43 +122,21 @@ public class MarkerManager {
     }
 
     /**
-     * Access the selected parking lot's coordinates specified by a key.
-     * Could be either the Latitude or the Longitude.
+     * Access the selected parking lot's latitude.
      *
-     * @param key The key used for look up.
-     * @return The value corresponding to the key.
+     * @return The lot's latitude.
      */
-    public double getSelectedLocationAttribute(String key) {
-        return getCoordinateAttributeWithKey(mSelectedParkingLot, key);
+    public double getSelectedMarkerLatitude() {
+        return mSelectedParkingLot.getLatitude();
     }
 
     /**
-     * Access the marker's associated parking lot's coordinates
-     * based on a key.
-     * Could be either the Latitude or the Longitude.
+     * Access the selected parking lot's longitude.
      *
-     * @param marker The lot's associated marker object.
-     * @param key    The key used for look up.
-     * @return The value corresponding to the key.
+     * @return The lot's longitude.
      */
-    public double getLocationAttributeOf(Marker marker, String key) {
-        return getCoordinateAttributeWithKey(mMarkerToValueMap.get(marker), key);
-    }
-
-    /**
-     * Access the a parking lot's coordinates
-     * based on a key.
-     * Could be either the Latitude or the Longitude.
-     *
-     * @param lot A {@link ParkingLot} object to have it coordinates extracted from.
-     * @param key The key used for look up.
-     * @return The value corresponding to the key.
-     */
-    private double getCoordinateAttributeWithKey(@NotNull ParkingLot lot, String key) {
-        if (lot.getCoordinates().get(key) != null)
-            return lot.getCoordinates().get(key);
-        else
-            return DEFAULT_DOUBLE_VALUE;
+    public double getSelectedMarkerLongitude() {
+        return mSelectedParkingLot.getLongitude();
     }
 
     /**
@@ -199,11 +184,13 @@ public class MarkerManager {
      * @return True, if we have any marker which has the same coordinates. Otherwise, false.
      */
     public boolean anyMatchWithCoordinates(@NotNull LatLng latLng) {
-        // Create a hash map based on clicked location
-        return mMarkerToValueMap.containsValue(new HashMap<String, Double>() {{
-            put(ParkingRepository.LATITUDE_KEY, latLng.latitude);
-            put(ParkingRepository.LONGITUDE_KEY, latLng.longitude);
-        }});
+        // Iterate all markers till you find one that has the same coordinates with the given ones.
+        for (Marker key : this.mMarkerToValueMap.keySet()) {
+            if (this.areCoordinatesTheSame(key, latLng.latitude, latLng.longitude)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -250,8 +237,8 @@ public class MarkerManager {
      * @see #addAll(GoogleMap, ParkingLot[])
      */
     private void addMarker(@NotNull GoogleMap mGoogleMap, @NotNull ParkingLot lot) {
-        double parkingLatitude = lot.getParkingLotAttribute(ParkingRepository.LATITUDE_KEY);
-        double parkingLongitude = lot.getParkingLotAttribute(ParkingRepository.LONGITUDE_KEY);
+        double parkingLatitude = lot.getLatitude();
+        double parkingLongitude = lot.getLongitude();
         addMarker(mGoogleMap, lot, parkingLatitude, parkingLongitude);
     }
 
@@ -281,15 +268,5 @@ public class MarkerManager {
      */
     private void add(Marker marker, ParkingLot lot) {
         mMarkerToValueMap.put(marker, lot);
-    }
-
-    /**
-     * Sets the value of {@link #mSelectedParkingLot} with the
-     * ParkingLot object associated with the specified marker.
-     *
-     * @param marker The marker (key) whose value will be assigned to {@link #mSelectedParkingLot}.
-     */
-    public void setSelectedParking(Marker marker) {
-        mSelectedParkingLot = mMarkerToValueMap.get(marker);
     }
 }

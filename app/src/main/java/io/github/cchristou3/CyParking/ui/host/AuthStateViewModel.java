@@ -13,7 +13,7 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.data.manager.SharedPreferencesManager;
-import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
+import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 
@@ -26,7 +26,7 @@ import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
  * <p>
  * <strong>Note:</strong>
  * <p>
- * The {@link #userState} is initially set to null.
+ * The {@link #mUserState} is initially set to null.
  * Its value is initially updated inside {@link MainHostActivity}'s onCreate method
  * via the invocation of {@link #getUserInfo(Context)}.
  * The state also changes when the user is logging in or registering in {@link AuthenticatorFragment}
@@ -39,7 +39,7 @@ import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 public class AuthStateViewModel extends ViewModel {
 
     // Initially set to null
-    private final MutableLiveData<LoggedInUser> userState = new MutableLiveData<>(null);
+    private final MutableLiveData<LoggedInUser> mUserState = new MutableLiveData<>(null);
     private final AuthenticatorRepository mAuthenticatorRepository;
 
     /**
@@ -58,7 +58,7 @@ public class AuthStateViewModel extends ViewModel {
      * @return A reference to the user's state.
      */
     public MutableLiveData<LoggedInUser> getUserState() {
-        return userState;
+        return mUserState;
     }
 
     /**
@@ -69,7 +69,7 @@ public class AuthStateViewModel extends ViewModel {
      */
     @Nullable
     public LoggedInUser getUser() {
-        return userState.getValue();
+        return mUserState.getValue();
     }
 
     /**
@@ -78,7 +78,7 @@ public class AuthStateViewModel extends ViewModel {
      * @param user The latest {@link LoggedInUser} instance.
      */
     public void updateAuthState(LoggedInUser user) {
-        userState.setValue(user);
+        mUserState.setValue(user);
     }
 
     /**
@@ -101,22 +101,22 @@ public class AuthStateViewModel extends ViewModel {
         // Local data is found
         if (!(roles == null || roles.isEmpty())) {
             Log.d(TAG, "getUserInfo: data found locally");
-            userState.setValue(new LoggedInUser(user, roles));
+            mUserState.setValue(new LoggedInUser(user, roles));
         } else {
             // fetch user's data from the database
             mAuthenticatorRepository.getUser(user)
                     .addOnCompleteListener(task -> {
                         Log.d(TAG, "getUserInfo: data found on server");
                         if (task.getException() != null) {
-                            userState.setValue(null);
+                            mUserState.setValue(null);
                             return;
                         }
                         if (task.isSuccessful()) {
                             try {
                                 final LoggedInUser loggedInUser = task.getResult().toObject(LoggedInUser.class);
-                                userState.setValue(loggedInUser);
+                                mUserState.setValue(loggedInUser);
                             } catch (NullPointerException e) {
-                                userState.setValue(null);
+                                mUserState.setValue(null);
                                 Log.e(TAG, "getUserInfo: ", e);
                             }
                         }

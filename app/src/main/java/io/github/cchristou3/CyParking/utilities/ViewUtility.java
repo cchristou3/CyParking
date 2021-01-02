@@ -9,19 +9,34 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.ColorInt;
+import androidx.fragment.app.FragmentActivity;
 
 import org.jetbrains.annotations.NotNull;
+
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 /**
  * Purpose: <p>Contain all helper / utility methods which the application needs
  * related to the View.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 30/12/20
+ * @version 3.0 31/12/20
  */
 public class ViewUtility {
+
+    /**
+     * Hide the virtual keyboard.
+     *
+     * @param activity Any activity.
+     * @param view     The view to remove the keyboard from.
+     */
+    public static void hideKeyboard(@NotNull FragmentActivity activity, @NotNull View view) {
+        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+    }
 
     /**
      * Scrolls towards the specified view.

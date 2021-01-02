@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
-import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
+import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 
 /**
  * <p>Main host activity of the Application.

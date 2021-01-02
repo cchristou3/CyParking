@@ -28,8 +28,8 @@ import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
 import io.github.cchristou3.CyParking.data.manager.LocationManager;
-import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
+import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentHomeBinding;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModelFactory;
@@ -204,12 +204,11 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
                 this::updateLotContents); // Display the parking lot's contents
 
         // Attach listener to "increment", "decrement" buttons
-        if (mAuthStateViewModel.getUserState().getValue() == null) {
-            return; // Do not attach another SnapshotListener if one is already in place
-        }
-        String email = mAuthStateViewModel.getUserState().getValue().getEmail();
+        if (mAuthStateViewModel.getUser() == null) return;
+
+        String operatorId = mAuthStateViewModel.getUser().getUserId();
         // Get the operator's lot info from the database.
-        getParkingLotInfo(email);
+        getParkingLotInfo(operatorId);
     }
 
     /**
@@ -219,16 +218,15 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      * On initial and consecutive data loads the Ui related to the
      * operator's lot is updated accordingly.
      *
-     * @param email The email of the operator.
+     * @param operatorId The id of the operator.
      */
-    private void getParkingLotInfo(String email) {
+    private void getParkingLotInfo(String operatorId) {
         // Initialize the fragment's QueryObserver
         mDatabaseObserver = DatabaseObserver.createQueryObserver(
-                mOperatorViewModel.observeParkingLot(email), // The Query
+                mOperatorViewModel.observeParkingLot(operatorId), // The Query
                 (value, error) -> { // The Event listener
-                    Log.d(TAG, "getParkingLotInfo: ");
                     if (error != null || value == null) return; // TODO: Handle error
-
+                    Log.d(TAG, "getParkingLotInfo: " + value.getDocuments().size());
                     if (value.getDocuments().size() == 0) { // The operator did not register lot yet
                         displayLotRegistrationLayout();
                         return;
@@ -248,6 +246,8 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
 
                     // Trigger parking lot update.
                     if (userParkingLot != null) {
+                        Log.d(TAG, "getParkingLotInfo: userParkingLot != null");
+                        getBinding().fragmentHomeClRegisterLotInfo.setVisibility(View.VISIBLE);
                         mOperatorViewModel.getParkingLotState().setValue(userParkingLot);
                     }
                 });
@@ -262,6 +262,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      * @param userParkingLot The updated version of the parking lot.
      */
     private void updateLotContents(@NotNull ParkingLot userParkingLot) {
+        checkVisibilityOfAppropriateLayout(View.VISIBLE, View.GONE);
         // Compose the TextViews' text that display the lot's name and capacity.
         final String availability = HomeFragment.this.getString(R.string.availability) + " "
                 + (userParkingLot.getCapacity() - userParkingLot.getAvailableSpaces())
@@ -277,8 +278,9 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      * to register a parking lot.
      */
     private void displayLotRegistrationLayout() {
-        getBinding().fragmentHomeClShowLotInfo.setVisibility(View.GONE); // showLotInfo
-        getBinding().fragmentHomeClRegisterLotInfo.setVisibility(View.VISIBLE); // registerLotInfo
+        checkVisibilityOfAppropriateLayout(View.GONE, View.VISIBLE);
+        getBinding().fragmentHomeClShowLotInfo.setVisibility(View.GONE); // Hide showLotInfo
+        getBinding().fragmentHomeClRegisterLotInfo.setVisibility(View.VISIBLE); // Show registerLotInfo
         // Attach listener to "Register Parking lot" button
         getBinding().fragmentHomeMbtnRegisterParkingLot
                 .setOnClickListener(v ->
@@ -286,6 +288,22 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
                         Navigation.findNavController(HomeFragment.this.requireActivity()
                                 .findViewById(R.id.fragment_main_host_nv_nav_view))
                                 .navigate(R.id.action_nav_home_to_nav_register_lot_fragment));
+    }
+
+    /**
+     * Changes the visibility of "lot info" layout and "register lot" layout,
+     * according to the specified arguments.
+     *
+     * @param lotInfoVisibility     The new visibility of the lot info layout.
+     * @param registerLotVisibility The new visibility of register lot layout.
+     */
+    private void checkVisibilityOfAppropriateLayout(int lotInfoVisibility, int registerLotVisibility) {
+        if (getBinding().fragmentHomeClShowLotInfo.getVisibility() != lotInfoVisibility) {
+            getBinding().fragmentHomeClShowLotInfo.setVisibility(lotInfoVisibility); // showLotInfo
+        }
+        if (getBinding().fragmentHomeClRegisterLotInfo.getVisibility() != registerLotVisibility) {
+            getBinding().fragmentHomeClRegisterLotInfo.setVisibility(registerLotVisibility); // registerLotInfo
+        }
     }
 
     /**

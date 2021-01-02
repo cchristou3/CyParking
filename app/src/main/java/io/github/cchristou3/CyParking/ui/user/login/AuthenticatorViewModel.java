@@ -7,9 +7,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+
+import org.jetbrains.annotations.NotNull;
+
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.pojo.user.login.LoginFormState;
-import io.github.cchristou3.CyParking.data.pojo.user.login.LoginResult;
+import io.github.cchristou3.CyParking.data.pojo.form.login.LoginFormState;
+import io.github.cchristou3.CyParking.data.pojo.form.login.LoginResult;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 
 /**
@@ -21,14 +26,14 @@ import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
  */
 public class AuthenticatorViewModel extends ViewModel {
 
-    private final MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
-    private final MutableLiveData<LoginResult> authenticatorResult = new MutableLiveData<>();
+    private final MutableLiveData<LoginFormState> mLoginFormState = new MutableLiveData<>();
+    private final MutableLiveData<LoginResult> mAuthenticatorResult = new MutableLiveData<>();
 
-    private final MutableLiveData<String> emailState = new MutableLiveData<>();
-    private final MutableLiveData<String> passwordState = new MutableLiveData<>();
-    private final AuthenticatorRepository authenticatorRepository;
+    private final MutableLiveData<String> mEmailState = new MutableLiveData<>();
+    private final MutableLiveData<String> mPasswordState = new MutableLiveData<>();
+    private final AuthenticatorRepository mAuthenticatorRepository;
     // First fragment which appears to the user is the "sign in" tab
-    private final MutableLiveData<Boolean> isUserInSigningInTab = new MutableLiveData<>(true);
+    private final MutableLiveData<Boolean> mIsUserInSigningInTab = new MutableLiveData<>(true);
 
     /**
      * Initialize the ViewModel's AuthenticatorRepository instance with the given
@@ -37,7 +42,7 @@ public class AuthenticatorViewModel extends ViewModel {
      * @param authenticatorRepository An AuthenticatorRepository instance.
      */
     AuthenticatorViewModel(AuthenticatorRepository authenticatorRepository) {
-        this.authenticatorRepository = authenticatorRepository;
+        this.mAuthenticatorRepository = authenticatorRepository;
     }
 
     /**
@@ -65,12 +70,12 @@ public class AuthenticatorViewModel extends ViewModel {
     /**
      * Connect with our backend to log the user in.
      *
-     * @param username The user name of the user.
+     * @param email    The user name of the user.
      * @param password The password of the user.
      */
-    public void login(Context context, String username, String password) {
+    public void login(Context context, String email, String password) {
         // can be launched in a separate asynchronous job
-        authenticatorRepository.login(context, username, password, authenticatorResult);
+        mAuthenticatorRepository.login(context, email, password, mAuthenticatorResult);
     }
 
     /**
@@ -85,10 +90,21 @@ public class AuthenticatorViewModel extends ViewModel {
     public void register(String username, String password, boolean isUser, boolean isOperator, Context context) {
         // can be launched in a separate asynchronous job
         try {
-            authenticatorRepository.register(username, password, authenticatorResult, isUser, isOperator, context);
+            mAuthenticatorRepository.register(username, password, mAuthenticatorResult, isUser, isOperator, context);
         } catch (IllegalArgumentException e) {
-            authenticatorResult.setValue(new LoginResult(e.getMessage()));
+            mAuthenticatorResult.setValue(new LoginResult(e.getMessage()));
         }
+    }
+
+    /**
+     * Re-authenticates the user with the given credentials.
+     *
+     * @param credentials The user's credentials
+     * @return A task to be handled by the view.
+     */
+    @NotNull
+    public Task<AuthResult> reauthenticateUser(String credentials) {
+        return mAuthenticatorRepository.reauthenticateUser(credentials);
     }
 
     /**
@@ -105,22 +121,22 @@ public class AuthenticatorViewModel extends ViewModel {
     /**
      * Validates all elements our our login / registration form.
      *
-     * @param username   The user name of the user.
+     * @param email      The email of the user.
      * @param password   The password of the user.
      * @param isUser     true if the user selected the checkbox which corresponds to the user. Otherwise, false.
      * @param isOperator true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
      */
-    public void dataChanged(String username, String password, boolean isUser, boolean isOperator) {
-        passwordState.setValue(password);
-        emailState.setValue(username);
-        if (!isEmailValid(username)) {
-            loginFormState.setValue(new LoginFormState(R.string.invalid_email, null, null));
+    public void dataChanged(String email, String password, boolean isUser, boolean isOperator) {
+        mPasswordState.setValue(password);
+        mEmailState.setValue(email);
+        if (!isEmailValid(email)) {
+            mLoginFormState.setValue(new LoginFormState(R.string.invalid_email, null, null));
         } else if (!isPasswordValid(password)) {
-            loginFormState.setValue(new LoginFormState(null, R.string.invalid_password, null));
+            mLoginFormState.setValue(new LoginFormState(null, R.string.invalid_password, null));
         } else if (!AreAnyRolesSelected(isUser, isOperator) && !isUserSigningIn()) { // Checks only if the user is registering
-            loginFormState.setValue(new LoginFormState(null, null, R.string.invalid_role_choice));
+            mLoginFormState.setValue(new LoginFormState(null, null, R.string.invalid_role_choice));
         } else {
-            loginFormState.setValue(new LoginFormState(true));
+            mLoginFormState.setValue(new LoginFormState(true));
         }
     }
 
@@ -128,38 +144,42 @@ public class AuthenticatorViewModel extends ViewModel {
      * Getters & Setters
      */
 
+    public void updateEmail(String email) {
+        mEmailState.setValue(email);
+    }
+
     public MutableLiveData<Boolean> getTabState() {
-        return isUserInSigningInTab;
+        return mIsUserInSigningInTab;
     }
 
     public boolean isUserSigningIn() {
-        if (isUserInSigningInTab.getValue() != null)
-            return isUserInSigningInTab.getValue();
+        if (mIsUserInSigningInTab.getValue() != null)
+            return mIsUserInSigningInTab.getValue();
         else
             return false; // By default
     }
 
     public void setUserSigningIn(boolean userSigningIn) {
-        isUserInSigningInTab.setValue(userSigningIn);
+        mIsUserInSigningInTab.setValue(userSigningIn);
     }
 
     /**
      * Getters
      */
     public MutableLiveData<String> getEmailState() {
-        return emailState;
+        return mEmailState;
     }
 
     public MutableLiveData<String> getPasswordState() {
-        return passwordState;
+        return mPasswordState;
     }
 
     MutableLiveData<LoginFormState> getLoginFormState() {
-        return loginFormState;
+        return mLoginFormState;
     }
 
     LiveData<LoginResult> getAuthenticatorResult() {
-        return authenticatorResult;
+        return mAuthenticatorResult;
     }
 
 }

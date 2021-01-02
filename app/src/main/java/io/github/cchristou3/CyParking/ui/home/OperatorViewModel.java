@@ -8,7 +8,7 @@ import com.google.firebase.firestore.Query;
 
 import org.jetbrains.annotations.NotNull;
 
-import io.github.cchristou3.CyParking.data.pojo.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 
 /**
@@ -21,7 +21,7 @@ import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 public class OperatorViewModel extends ViewModel {
 
     // Data member
-    private final MutableLiveData<ParkingLot> parkingLotState = new MutableLiveData<>();
+    private final MutableLiveData<ParkingLot> mParkingLotState = new MutableLiveData<>();
 
     /**
      * Access the the parking lot state.
@@ -29,18 +29,18 @@ public class OperatorViewModel extends ViewModel {
      * @return A reference to the parking lot state.
      */
     public MutableLiveData<ParkingLot> getParkingLotState() {
-        return parkingLotState;
+        return mParkingLotState;
     }
 
     /**
      * Returns a Query object that retrieves the parking lot of the operator
-     * with the specified email address.
+     * with the specified id.
      *
-     * @param email The email address of the operator.
+     * @param operatorId The id of the operator.
      * @return A query that retrieves the operator's parking lot from the database.
      */
-    public Query observeParkingLot(String email) {
-        return ParkingRepository.observeParkingLot(email);
+    public Query observeParkingLot(String operatorId) {
+        return ParkingRepository.observeParkingLot(operatorId);
     }
 
     /**

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Locale;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivateParkingBooking;
+import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 
 /**
  * Purpose: <p> Handles how each item of the RecyclerView will look like. </p>
@@ -31,21 +31,21 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
 
     private static final long DURATION = 500;
     private static View.OnClickListener mOnItemClickListener;
-    private final List<PrivateParkingBooking> bookings;
+    private final List<Booking> mBookings;
     private boolean mOnAttach = true;
 
-    public BookingAdapter(List<PrivateParkingBooking> bookings) {
-        this.bookings = bookings;
+    public BookingAdapter(List<Booking> bookings) {
+        this.mBookings = bookings;
     }
 
     /**
      * Sets the specified OnClickListener with the BookingAdapter's
      * OnClickListener data member.
      *
-     * @param mOnItemClickListener An instance of OnClickListener.
+     * @param onItemClickListener An instance of OnClickListener.
      */
-    public void setOnItemClickListener(View.OnClickListener mOnItemClickListener) {
-        BookingAdapter.mOnItemClickListener = mOnItemClickListener;
+    public static void setOnItemClickListener(View.OnClickListener onItemClickListener) {
+        mOnItemClickListener = onItemClickListener;
     }
 
     /**
@@ -80,12 +80,12 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
 
         setAnimation(holder.itemView, position);
 
-        final String offer = "Slot offer: " + bookings.get(position).getSlotOffer().toString();
+        final String offer = "Slot offer: " + mBookings.get(position).getBookingDetails().getSlotOffer().toString();
         final CharSequence date = "Date: " + DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
-                .format(bookings.get(position).getDateOfBooking());
-        final String time = "Start time: " + bookings.get(position).getStartingTime();
-        final String status = "Status: " + (bookings.get(position).isCompleted() ? "Completed" : "Pending");
-        final String parkingName = "Parking: " + bookings.get(position).getParkingName();
+                .format(mBookings.get(position).getBookingDetails().getDateOfBooking());
+        final String time = "Start time: " + mBookings.get(position).getBookingDetails().getStartingTime();
+        final String status = "Status: " + (mBookings.get(position).isCompleted() ? "Completed" : "Pending");
+        final String parkingName = "Parking: " + mBookings.get(position).getLotName();
 
         holder.status.setText(status);
         holder.offer.setText(offer);
@@ -101,7 +101,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
      */
     @Override
     public int getItemCount() {
-        return bookings.size();
+        return mBookings.size();
     }
 
     /**

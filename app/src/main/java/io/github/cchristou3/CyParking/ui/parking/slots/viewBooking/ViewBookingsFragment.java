@@ -28,7 +28,8 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
-import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivateParkingBooking;
+import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.data.pojo.SnapshotState;
 import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 import io.github.cchristou3.CyParking.databinding.FragmentViewBookingsBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
@@ -38,7 +39,7 @@ import io.github.cchristou3.CyParking.ui.user.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 
-import static io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment.TAG;
+import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment.TAG;
 
 /**
  * Purpose: <p>Shows pending / completed bookings of the user / operator?</p>
@@ -52,25 +53,21 @@ import static io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment.
  */
 public class ViewBookingsFragment extends Fragment implements Navigable {
 
-    // Constant variables
-    private static final int INITIAL_DATA_RETRIEVAL = 0;
-    private static final int LISTENING_TO_DATA_CHANGES = 1;
-
     // Fragment variables
-    private ArrayList<PrivateParkingBooking> privateParkingBookingArrayList;
+    private ArrayList<Booking> mBookingList;
     private AuthStateViewModel mAuthStateViewModel;
     private FragmentViewBookingsBinding mFragmentViewBookingsBinding;
-    private int databaseDataState;
-    private BookingAdapter bookingAdapter;
-    private MutableLiveData<List<PrivateParkingBooking>> bookingList;
+    private BookingAdapter mBookingAdapter;
+    private MutableLiveData<List<Booking>> mObservableBookingList;
+    private SnapshotState mSnapshotState;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Initialize the array-list
-        privateParkingBookingArrayList = new ArrayList<>();
+        mBookingList = new ArrayList<>();
         // Initialize the data retrieval state
-        databaseDataState = INITIAL_DATA_RETRIEVAL;
+        mSnapshotState = new SnapshotState(SnapshotState.INITIAL_DATA_RETRIEVAL);
     }
 
     @Nullable
@@ -96,7 +93,7 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
         });
 
         // Initialize the fragment's ViewModel / LiveData
-        bookingList =
+        mObservableBookingList =
                 new ViewModelProvider(this).get(ViewBookingsViewModel.class).getBookingList();
     }
 
@@ -116,25 +113,31 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
             DatabaseObserver.createQueryObserver(ParkingRepository
                             .retrieveUserBookings(mAuthStateViewModel.getUser().getUserId()),
                     (value, error) -> {
-                        if (error != null || value == null) return; // TODO: Inform user
+                        if (error != null) {
+                            Log.d(TAG, "onStart: " + error.getLocalizedMessage());
+                            return;
+                            // TODO: Inform user
+                        }
+                        if (value == null) return;
+
                         if (!value.isEmpty()) {
-                            switch (databaseDataState) {
-                                case INITIAL_DATA_RETRIEVAL: { // Happens when we first attach the listener
+                            switch (mSnapshotState.getState()) {
+                                case SnapshotState.INITIAL_DATA_RETRIEVAL: { // Happens when we first attach the listener
                                     Log.d(TAG, "INITIAL_DATA_RETRIEVAL: ");
                                     // Fill the list with all the retrieved documents
-                                    InitializeBookingList(value, bookingList);
+                                    InitializeBookingList(value, mObservableBookingList);
                                     // Hide the placeholder container and move on to the next state
                                     getBinding().fragmentViewBookingsSflShimmerLayout.stopShimmerAnimation();
                                     getBinding().fragmentViewBookingsSflShimmerLayout.setVisibility(View.GONE);
-                                    databaseDataState = LISTENING_TO_DATA_CHANGES;
+                                    mSnapshotState.setState(SnapshotState.LISTENING_TO_DATA_CHANGES);
                                     break;
                                 }
-                                case LISTENING_TO_DATA_CHANGES:
+                                case SnapshotState.LISTENING_TO_DATA_CHANGES:
                                     Log.d(TAG, "LISTENING_TO_DATA_CHANGES: ");
                                     /* Amend the list's contents: More efficient.
                                        Instead of creating a new list and re-adding all elements.
                                        We simply add/update/remove the objects that got added/updated/removed */
-                                    UpdateBookingList(value, bookingList);
+                                    UpdateBookingList(value, mObservableBookingList);
                                     break;
                                 default:
                                     throw new IllegalStateException("The state must be one of those:\n" +
@@ -170,7 +173,7 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        bookingAdapter.setOnItemClickListener(null);
+        BookingAdapter.setOnItemClickListener(null);
         mFragmentViewBookingsBinding = null;
     }
 
@@ -189,48 +192,48 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
      * @param bookingsOnServer The bookings list on the server
      * @param localBookings    The bookings on the client side.
      */
-    private void UpdateBookingList(@NotNull QuerySnapshot bookingsOnServer, MutableLiveData<List<PrivateParkingBooking>> localBookings) {
+    private void UpdateBookingList(@NotNull QuerySnapshot bookingsOnServer, MutableLiveData<List<Booking>> localBookings) {
         for (DocumentChange dc : bookingsOnServer.getDocumentChanges()) {
             switch (dc.getType()) {
                 case ADDED:
-                    Log.d(TAG, "onEvent: Added " + dc.getDocument().toObject(PrivateParkingBooking.class));
-                    privateParkingBookingArrayList.add(dc.getDocument()
-                            .toObject(PrivateParkingBooking.class));
+                    Log.d(TAG, "onEvent: Added " + dc.getDocument().toObject(Booking.class));
+                    mBookingList.add(dc.getDocument()
+                            .toObject(Booking.class));
                     // Inform the adapter to add the new item to the view
-                    bookingAdapter.notifyItemInserted(privateParkingBookingArrayList.size());
+                    mBookingAdapter.notifyItemInserted(mBookingList.size());
                     break;
                 case MODIFIED:
-                    Log.d(TAG, "onEvent: Modified " + dc.getDocument().toObject(PrivateParkingBooking.class));
-                    findAndUpdateBooking(privateParkingBookingArrayList,
-                            dc.getDocument().toObject(PrivateParkingBooking.class));
+                    Log.d(TAG, "onEvent: Modified " + dc.getDocument().toObject(Booking.class));
+                    findAndUpdateBooking(mBookingList,
+                            dc.getDocument().toObject(Booking.class));
                     break;
                 case REMOVED:
-                    Log.d(TAG, "onEvent: Removed " + dc.getDocument().toObject(PrivateParkingBooking.class));
-                    int indexOfRemovedObject = privateParkingBookingArrayList.indexOf(dc.getDocument().toObject(PrivateParkingBooking.class));
-                    privateParkingBookingArrayList.remove(dc.getDocument().
-                            toObject(PrivateParkingBooking.class));
+                    Log.d(TAG, "onEvent: Removed " + dc.getDocument().toObject(Booking.class));
+                    int indexOfRemovedObject = mBookingList.indexOf(dc.getDocument().toObject(Booking.class));
+                    mBookingList.remove(dc.getDocument().
+                            toObject(Booking.class));
                     // Inform the adapter to remove the item from the view
-                    bookingAdapter.notifyItemRemoved(indexOfRemovedObject);
+                    mBookingAdapter.notifyItemRemoved(indexOfRemovedObject);
                     break;
             }
         }
-        localBookings.setValue(privateParkingBookingArrayList);
+        localBookings.setValue(mBookingList);
     }
 
     /**
      * Initializes the fragment's RecyclerView and its adapter instance.
-     * Also, initially loads the current QuerySnapshot's documents ({@link PrivateParkingBooking})
+     * Also, initially loads the current QuerySnapshot's documents ({@link Booking})
      * objects to the fragment's ViewModel.
      *
      * @param bookingsOnServer The bookings list on the server
      * @param localBookings    The bookings on the client side.
      */
-    private void InitializeBookingList(@NotNull QuerySnapshot bookingsOnServer, MutableLiveData<List<PrivateParkingBooking>> localBookings) {
+    private void InitializeBookingList(@NotNull QuerySnapshot bookingsOnServer, MutableLiveData<List<Booking>> localBookings) {
         for (DocumentSnapshot doc : bookingsOnServer.getDocuments()) {
-            privateParkingBookingArrayList.add(doc.toObject(PrivateParkingBooking.class));
+            mBookingList.add(doc.toObject(Booking.class));
         }
         // Set the retrieved data as the value of the LiveData
-        localBookings.setValue(privateParkingBookingArrayList);
+        localBookings.setValue(mBookingList);
 
         // Set up RecyclerView
         getBinding().fragmentViewBookingsRvRecyclerview
@@ -238,9 +241,9 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
         getBinding().fragmentViewBookingsRvRecyclerview.setHasFixedSize(true);
 
         // Create new adapter and pass the fetched data.
-        bookingAdapter = new BookingAdapter(privateParkingBookingArrayList);
+        mBookingAdapter = new BookingAdapter(mBookingList);
         // Pass an onItemClickListener to the adapter
-        bookingAdapter.setOnItemClickListener(v ->
+        BookingAdapter.setOnItemClickListener(v ->
                 AlertBuilder.showAlert(requireContext(),
                         android.R.string.dialog_alert_title,
                         R.string.booking_cancellation_confirmation,
@@ -249,12 +252,12 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
                         (dialog, which) -> {
                             RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
                             int position = viewHolder.getAdapterPosition();
-                            final String bookingToBeCancelledId = privateParkingBookingArrayList.get(position).generateUniqueId();
+                            final String bookingToBeCancelledId = mBookingList.get(position).generateUniqueId();
                             ParkingRepository.cancelParkingBooking(bookingToBeCancelledId);
                         },
                         null));
 
-        bookingAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+        mBookingAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
                 Log.d(TAG, "onItemRangeMoved: ");
@@ -267,29 +270,29 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
         });
 
         // Set the recyclerview's adapter
-        getBinding().fragmentViewBookingsRvRecyclerview.setAdapter(bookingAdapter);
+        getBinding().fragmentViewBookingsRvRecyclerview.setAdapter(mBookingAdapter);
     }
 
     /**
-     * Searches the list for the specified PrivateParkingBooking and updates it accordingly
+     * Searches the list for the specified Booking and updates it accordingly
      *
-     * @param bookingArrayList      List of all the bookings of the current logged in user
-     * @param privateParkingBooking The booking which got changed
+     * @param bookingArrayList List of all the bookings of the current logged in user.
+     * @param booking          The booking which got changed.
      */
-    public void findAndUpdateBooking(@NotNull ArrayList<PrivateParkingBooking> bookingArrayList, PrivateParkingBooking privateParkingBooking) {
+    public void findAndUpdateBooking(@NotNull ArrayList<Booking> bookingArrayList, Booking booking) {
         // Traverse the booking list, searching for an object
         for (int i = 0; i < bookingArrayList.size(); i++) {
             // If there was a matching
             if (bookingArrayList.get(i).generateUniqueId()
-                    .equals(privateParkingBooking.generateUniqueId())) {
+                    .equals(booking.generateUniqueId())) {
                 // If it was changed from "Pending" to "Completed", move it at the end of the list
-                if (!bookingArrayList.get(i).isCompleted() && privateParkingBooking.isCompleted()) {
+                if (!bookingArrayList.get(i).isCompleted() && booking.isCompleted()) {
                     // Remove item and notify the adapter
                     bookingArrayList.remove(i);
-                    bookingAdapter.notifyItemRemoved(i);
+                    mBookingAdapter.notifyItemRemoved(i);
                     // Add the item at the end of the list and notify the adapter
-                    bookingArrayList.add(bookingArrayList.size() - 1, privateParkingBooking);
-                    bookingAdapter.notifyItemInserted(bookingArrayList.size() - 1);
+                    bookingArrayList.add(bookingArrayList.size() - 1, booking);
+                    mBookingAdapter.notifyItemInserted(bookingArrayList.size() - 1);
                 }
                 return; // stop iterating
             }

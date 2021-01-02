@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,11 +29,14 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
+import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentAuthenticatorHosteeBinding;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModelFactory;
 import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
+import io.github.cchristou3.CyParking.utilities.ViewUtility;
+
+import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 
 /**
  * <p>A simple {@link Fragment} subclass.
@@ -47,13 +51,12 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
 
     // Constant variables
     public static final String PAGE_TYPE_KEY = "PAGE_TYPE_KEY";
-    private final int[] viewIdsForRoleArea = new int[]{R.id.fragment_login_txt_roles_header, R.id.fragment_login_txt_role_user_title, R.id.fragment_login_cb_role_user_checkbox, R.id.fragment_login_btn_dialog_user_button, R.id.fragment_login_txt_role_operator_title, R.id.fragment_login_cb_role_operator_checkbox, R.id.fragment_login_btn_dialog_operator_button};
     // Fragment variables
     private AuthenticatorViewModel mAuthenticatorViewModel;
     private AuthStateViewModel mAuthStateViewModel;
     private FragmentAuthenticatorHosteeBinding mFragmentAuthenticatorHosteeBinding;
-
-    private short pageType;
+    private boolean mIsReauthenticating = false;
+    private short mPageType;
 
     public AuthenticatorHosteeFragment() { /* Required empty public constructor */ }
 
@@ -82,7 +85,7 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.pageType = getArguments().getShort(PAGE_TYPE_KEY);
+            this.mPageType = getArguments().getShort(PAGE_TYPE_KEY);
         }
     }
 
@@ -121,7 +124,14 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
         mAuthenticatorViewModel = new ViewModelProvider(requireParentFragment(), new AuthenticatorViewModelFactory())
                 .get(AuthenticatorViewModel.class);
 
-        initializeFragment(view);
+        if (getParentFragment() != null && getParentFragment().getArguments() != null) {
+            String email = getParentFragment().getArguments().getString(getString(R.string.email_low));
+            Log.d(TAG, "onViewCreated: " + email);
+            mAuthenticatorViewModel.updateEmail(email);
+            mIsReauthenticating = true;
+        }
+
+        initializeFragment();
     }
 
 
@@ -150,6 +160,8 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
             getBinding().fragmentLoginBtnDialogOperatorButton.setOnClickListener(null);
             getBinding().fragmentLoginCbRoleUserCheckbox.setOnCheckedChangeListener(null);
             getBinding().fragmentLoginCbRoleOperatorCheckbox.setOnCheckedChangeListener(null);
+        } else {
+            getBinding().fragmentLoginEtPassword.setOnEditorActionListener(null);
         }
         getBinding().fragmentLoginEtEmail.removeTextChangedListener(this);
         getBinding().fragmentLoginEtPassword.removeTextChangedListener(this);
@@ -158,10 +170,8 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
 
     /**
      * Sets up the logic of the fragment
-     *
-     * @param view The view of the fragment
      */
-    private void initializeFragment(@NotNull View view) {
+    private void initializeFragment() {
         // Get references to the UI elements
         final EditText emailEditText = getBinding().fragmentLoginEtEmail;
         final EditText passwordEditText = getBinding().fragmentLoginEtPassword;
@@ -174,9 +184,9 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
             emailEditText.addTextChangedListener(this);
             passwordEditText.addTextChangedListener(this);
 
-            switch (pageType) {
+            switch (mPageType) {
                 case AuthenticatorAdapter.LOGIN_TAB:
-                    updateUiForLoggingIn(view);
+                    updateUiForLoggingIn();
                     break;
                 case AuthenticatorAdapter.REGISTRATION_TAB:
                     updateUiForRegistration();
@@ -186,20 +196,20 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
                             + "LOGIN_PAGE\n"
                             + "REGISTRATION_PAGE");
             }
+
+            // Observe any tab changes
+            mAuthenticatorViewModel.getTabState().observe(getViewLifecycleOwner(), state -> {
+                // Set the current tab's EditTexts' values with the values of the previous tab
+                final String emailText = mAuthenticatorViewModel.getEmailState().getValue();
+                final String passwordText = mAuthenticatorViewModel.getPasswordState().getValue();
+                emailEditText.setText(emailText);
+                passwordEditText.setText(passwordText);
+                // Call loginDataChanged to refresh the form's error messages of the current tab,
+                // after receiving the inputs from the previous tab.
+                notifyDataChanged();
+
+            });
         }
-
-        // Observe any tab changes
-        mAuthenticatorViewModel.getTabState().observe(getViewLifecycleOwner(), state -> {
-            // Set the current tab's EditTexts' values with the values of the previous tab
-            final String emailText = mAuthenticatorViewModel.getEmailState().getValue();
-            final String passwordText = mAuthenticatorViewModel.getPasswordState().getValue();
-            emailEditText.setText(emailText);
-            passwordEditText.setText(passwordText);
-            // Call loginDataChanged to refresh the form's error messages of the current tab,
-            // after receiving the inputs from the previous tab.
-            notifyDataChanged();
-
-        });
     }
 
     /**
@@ -230,9 +240,7 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
         userCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
         operatorCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
         // Set up authButton
-        setUpAuthButton(R.string.sign_up, v -> {
-            register();
-        });
+        setUpAuthButton(R.string.sign_up, v -> register());
 
         // Add listeners to both "description" buttons
         getBinding().fragmentLoginBtnDialogUserButton.setOnClickListener(
@@ -262,6 +270,7 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
      */
     private void register() {
         changeVisibilityOfLoadingBarTo(View.VISIBLE);
+        ViewUtility.hideKeyboard(requireActivity(), requireView());
         mAuthenticatorViewModel.register(
                 getBinding().fragmentLoginEtEmail.getText().toString(),
                 getBinding().fragmentLoginEtPassword.getText().toString(),
@@ -281,13 +290,11 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
     /**
      * Prepares the Ui for a user log in attempt.
      * Hides the role area and attaches appropriate listeners.
-     *
-     * @param view The Ui of the fragment.
      */
-    private void updateUiForLoggingIn(View view) {
+    private void updateUiForLoggingIn() {
         // Set up the UI and listeners for logging in
         // Hide unnecessary UI elements
-        hideRoleArea(view);
+        hideRoleArea();
         // Pressing the "enter" on the keyboard will automatically trigger the login method
         getBinding().fragmentLoginEtPassword.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -296,9 +303,7 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
             }
             return false;
         });
-        setUpAuthButton(R.string.sign_in, v -> {
-            login(requireContext());
-        });
+        setUpAuthButton(R.string.sign_in, v -> login(requireContext()));
     }
 
     /**
@@ -317,6 +322,7 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
      */
     private void login(Context requiredContext) {
         changeVisibilityOfLoadingBarTo(View.VISIBLE);
+        ViewUtility.hideKeyboard(requireActivity(), requireView());
         mAuthenticatorViewModel.login(requiredContext,
                 getBinding().fragmentLoginEtEmail.getText().toString(),
                 getBinding().fragmentLoginEtPassword.getText().toString());
@@ -338,7 +344,20 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
             if (loginResult == null || !this.isResumed()) return;
             changeVisibilityOfLoadingBarTo(View.GONE); // hide the loading bar
             if (loginResult.getError() != null) showLoginFailed(loginResult.getError());
-            if (loginResult.getSuccess() != null) updateUiWithUser(loginResult.getSuccess());
+            if (loginResult.getSuccess() != null) {
+                if (this.mIsReauthenticating) {
+                    mAuthenticatorViewModel.reauthenticateUser(getBinding().fragmentLoginEtPassword.getText().toString())
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    updateUiWithUser(loginResult.getSuccess());
+                                } else if (task.getException() != null) {
+                                    showLoginFailed(task.getException().getMessage());
+                                }
+                            });
+                    return;
+                }
+                updateUiWithUser(loginResult.getSuccess());
+            }
         });
     }
 
@@ -406,14 +425,9 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
 
     /**
      * Hides all elements needed for registrations but not for logging in.
-     *
-     * @param view The view of the fragment.
      */
-    private void hideRoleArea(View view) {
-        // Traversing all elements of the ui that are associated to the roles and hide each of one of them
-        for (int resId : viewIdsForRoleArea) {
-            view.findViewById(resId).setVisibility(View.GONE);
-        }
+    private void hideRoleArea() {
+        getBinding().fragmentLoginClRoleSection.setVisibility(View.GONE);
     }
 
     /**

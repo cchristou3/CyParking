@@ -109,7 +109,15 @@
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit"
-            app:popUpTo="@id/nav_account" />
+            app:popUpTo="@id/nav_account">
+
+            <argument
+                android:name="@string/email_low"
+                android:defaultValue="@null"
+                app:argType="string"
+                app:nullable="true" />
+
+        </action>
         <action
             android:id="@+id/action_nav_account_to_nav_view_bookings"
             app:destination="@id/nav_view_bookings"
@@ -138,7 +146,7 @@
 
     <fragment
         android:id="@+id/nav_parking_map_fragment"
-        android:name="io.github.cchristou3.CyParking.ui.parking.lots.ParkingMapFragment"
+        android:name="io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment"
         android:label="Nearby Parking"
         tools:layout="@layout/fragment_parking_map">
         <action
@@ -193,7 +201,7 @@
 
     <fragment
         android:id="@+id/nav_parking_booking_fragment"
-        android:name="io.github.cchristou3.CyParking.ui.parking.slots.booking.ParkingBookingFragment"
+        android:name="io.github.cchristou3.CyParking.ui.parking.slots.booking.BookingFragment"
         android:label="Booking Parking"
         tools:layout="@layout/fragment_parking_booking">
         <action
@@ -332,7 +340,7 @@
 
     <fragment
         android:id="@+id/nav_register_lot_fragment"
-        android:name="io.github.cchristou3.CyParking.ui.parking.lots.RegisterLotFragment"
+        android:name="io.github.cchristou3.CyParking.ui.parking.lots.register.RegisterLotFragment"
         android:label="Parking Lot Registration"
         tools:layout="@layout/register_lot_fragment">
         <action

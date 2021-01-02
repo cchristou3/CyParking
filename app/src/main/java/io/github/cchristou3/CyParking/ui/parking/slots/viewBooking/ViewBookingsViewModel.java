@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
-import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivateParkingBooking;
+import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 
 /**
  * Purpose: <p>Data persistence when orientation changes.
@@ -17,7 +17,7 @@ import io.github.cchristou3.CyParking.data.pojo.parking.slot.booking.PrivatePark
 public class ViewBookingsViewModel extends ViewModel {
 
     // Data member
-    final private MutableLiveData<List<PrivateParkingBooking>> bookingList =
+    final private MutableLiveData<List<Booking>> mBookingList =
             new MutableLiveData<>();
 
     /**
@@ -25,7 +25,7 @@ public class ViewBookingsViewModel extends ViewModel {
      *
      * @return The state of the booking list.
      */
-    public MutableLiveData<List<PrivateParkingBooking>> getBookingList() {
-        return bookingList;
+    public MutableLiveData<List<Booking>> getBookingList() {
+        return mBookingList;
     }
 }

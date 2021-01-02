@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class PhoneEditText extends androidx.appcompat.widget.AppCompatEditText implements TextWatcher {
 
-    private int latestEditableLength = 0;
+    private int mLatestEditableLength = 0;
 
     /**
      * The following three constructors call the corresponding constructor of the Base class.
@@ -66,12 +66,12 @@ public final class PhoneEditText extends androidx.appcompat.widget.AppCompatEdit
     public void afterTextChanged(@NotNull Editable updatedEditable) {
         // If the received Editable has shorter length than the previously stored one
         // then the user is using backspace to remove characters.
-        if (updatedEditable.length() < latestEditableLength) {
-            latestEditableLength = updatedEditable.length();
+        if (updatedEditable.length() < mLatestEditableLength) {
+            mLatestEditableLength = updatedEditable.length();
             // If the cursor is pointing in positions where there space is, then
             // remove the space at that position.
-            if (latestEditableLength == 2 || latestEditableLength == 5 || latestEditableLength == 8) {
-                updatedEditable.replace(latestEditableLength - 1, latestEditableLength, "");
+            if (mLatestEditableLength == 2 || mLatestEditableLength == 5 || mLatestEditableLength == 8) {
+                updatedEditable.replace(mLatestEditableLength - 1, mLatestEditableLength, "");
             }
             // and terminate the method.
             return;
@@ -83,7 +83,7 @@ public final class PhoneEditText extends androidx.appcompat.widget.AppCompatEdit
             updatedEditable.insert(length, " ");
         }
         // Keep track of the editable's length
-        latestEditableLength = updatedEditable.length();
+        mLatestEditableLength = updatedEditable.length();
     }
 
     /**

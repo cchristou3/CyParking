@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
-import io.github.cchristou3.CyParking.data.pojo.user.LoggedInUser;
+import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentAccountBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
@@ -34,7 +34,6 @@ import io.github.cchristou3.CyParking.ui.widgets.update.UpdateAccountDialog;
 public class AccountFragment extends Fragment implements Navigable {
 
     // Fragment's data members
-    public static final int ACCOUNT_FRAGMENT = 253;
     private final String TAG = AccountFragment.this.getClass().getName();
     private AuthStateViewModel mAuthStateViewModel;
     private FragmentAccountBinding mFragmentAccountBinding;
@@ -159,10 +158,11 @@ public class AccountFragment extends Fragment implements Navigable {
                 int nightModeFlags = this.requireContext()
                         .getResources()
                         .getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-                UpdateAccountDialog.newInstance(
+                UpdateAccountDialog dialog = UpdateAccountDialog.newInstance(
                         nightModeFlags,
-                        action)
-                        .show(fm, TAG);
+                        action);
+                dialog.setTargetFragment(this, 1);
+                dialog.show(fm, TAG);
             }
         };
     }
@@ -182,8 +182,13 @@ public class AccountFragment extends Fragment implements Navigable {
      */
     @Override
     public void toAuthenticator() {
+        Bundle emailBundle = null;
+        if (mAuthStateViewModel.getUser() != null) {
+            emailBundle = new Bundle();
+            emailBundle.putString(getString(R.string.email_low), mAuthStateViewModel.getUser().getEmail());
+        }
         Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
-                .navigate(R.id.action_nav_account_to_nav_authenticator_fragment);
+                .navigate(R.id.action_nav_account_to_nav_authenticator_fragment, emailBundle);
     }
 
     /**

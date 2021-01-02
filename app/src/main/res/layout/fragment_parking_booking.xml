@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.parking.slots.booking.ParkingBookingFragment">
+    tools:context=".ui.parking.slots.booking.BookingFragment">
 
     <Space
         android:id="@+id/fragment_parking_booking_s_space_one"
@@ -149,7 +149,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.core.widget.ContentLoadingProgressBar
-        android:id="@+id/fragment_parking_clp_loading_bar"
+        android:id="@+id/fragment_parking_clpb_loading_bar"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="100dp"
         android:layout_height="100dp"

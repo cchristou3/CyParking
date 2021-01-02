@@ -1,19 +1,21 @@
 package io.github.cchristou3.CyParking.ui.widgets.update;
 
+import android.util.Log;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
-
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import com.google.firebase.auth.FirebaseAuth;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.pojo.user.update.UpdateFormState;
+import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.data.pojo.form.update.UpdateFormState;
 import io.github.cchristou3.CyParking.data.repository.AccountRepository;
+import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel;
+
+import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 
 /**
  * Purpose: <p>Data persistence when orientation changes.
@@ -24,12 +26,12 @@ import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel;
  */
 public class UpdateViewModel extends ViewModel {
 
-    final private MutableLiveData<String> dialogTitle = new MutableLiveData<>();
-    final private MutableLiveData<String> actionFieldTitle = new MutableLiveData<>();
-    final private MutableLiveData<String> actionFieldInput = new MutableLiveData<>("");
-    final private MutableLiveData<UpdateFormState> updateFormState = new MutableLiveData<>();
+    final private MutableLiveData<String> mDialogTitle = new MutableLiveData<>();
+    final private MutableLiveData<String> mActionFieldTitle = new MutableLiveData<>();
+    final private MutableLiveData<String> mActionFieldInput = new MutableLiveData<>("");
+    final private MutableLiveData<UpdateFormState> mUpdateFormState = new MutableLiveData<>();
 
-    final private AccountRepository accountRepository;
+    final private AccountRepository mAccountRepository;
     private short mDialogType = UpdateAccountDialog.UPDATE_DISPLAY_NAME; // By default
 
     /**
@@ -39,7 +41,7 @@ public class UpdateViewModel extends ViewModel {
      * @param accountRepository An AccountRepository instance
      */
     public UpdateViewModel(AccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
+        this.mAccountRepository = accountRepository;
     }
 
     /**
@@ -49,27 +51,27 @@ public class UpdateViewModel extends ViewModel {
      * @param updatedField The text value of the UI element
      */
     public void formDataChanged(String updatedField) {
-        actionFieldInput.setValue(updatedField);
+        mActionFieldInput.setValue(updatedField);
         switch (mDialogType) {
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
                 if (updatedField != null && !updatedField.trim().isEmpty()) {
-                    updateFormState.setValue(new UpdateFormState(true));
+                    mUpdateFormState.setValue(new UpdateFormState(true));
                 } else {
-                    updateFormState.setValue(new UpdateFormState(R.string.invalid_username));
+                    mUpdateFormState.setValue(new UpdateFormState(R.string.invalid_username));
                 }
                 break;
             case UpdateAccountDialog.UPDATE_EMAIL:
                 if (AuthenticatorViewModel.isEmailValid(updatedField)) {
-                    updateFormState.setValue(new UpdateFormState(true));
+                    mUpdateFormState.setValue(new UpdateFormState(true));
                 } else {
-                    updateFormState.setValue(new UpdateFormState(R.string.invalid_email));
+                    mUpdateFormState.setValue(new UpdateFormState(R.string.invalid_email));
                 }
                 break;
             case UpdateAccountDialog.UPDATE_PASSWORD:
                 if (AuthenticatorViewModel.isPasswordValid(updatedField)) {
-                    updateFormState.setValue(new UpdateFormState(true));
+                    mUpdateFormState.setValue(new UpdateFormState(true));
                 } else {
-                    updateFormState.setValue(new UpdateFormState(R.string.invalid_password));
+                    mUpdateFormState.setValue(new UpdateFormState(R.string.invalid_password));
                 }
                 break;
         }
@@ -82,69 +84,56 @@ public class UpdateViewModel extends ViewModel {
      * @param updatedField The new value of a user's attribute
      * @return An instance of Task<Void> to handle the UI changes back to the fragment.
      */
-    public Task<Void> updateField(String updatedField) {
+    public Task<Void> updateAccountField(LoggedInUser user, String updatedField) {
         switch (mDialogType) {
-            // TODO: For email and display name,
-            //  use another continueWithTask to
-            //  update their fields in the Firestore database as well.
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
-                return accountRepository.updateDisplayName(updatedField);
+                return mAccountRepository.updateDisplayName(updatedField)
+                        .continueWithTask(task -> {
+                            Log.d(TAG, "New display name then: " + task.getResult());
+                            if (task.isSuccessful()) {
+                                return AuthenticatorRepository.getInstance(FirebaseAuth.getInstance())
+                                        .updateUserDisplayName(user.getUserId(), updatedField);
+                            }
+                            return null;
+                        });
             case UpdateAccountDialog.UPDATE_EMAIL:
-                return accountRepository.updateEmail(updatedField)
-                        .continueWithTask(getContinuation(updatedField));
+                return mAccountRepository.updateEmail(updatedField)
+                        .continueWithTask(task -> {
+                            Log.d(TAG, "then: " + task.getResult());
+                            if (task.isSuccessful()) {
+                                AuthenticatorRepository.getInstance(FirebaseAuth.getInstance())
+                                        .updateUserEmail(user.getUserId(), user.getEmail(), updatedField);
+                                return task;
+                            }
+                            return null;
+                        });
             case UpdateAccountDialog.UPDATE_PASSWORD:
-                return accountRepository.updatePassword(updatedField)
-                        .continueWithTask(getContinuation(updatedField));
+                return mAccountRepository.updatePassword(updatedField);
             default:
                 return null;
         }
     }
 
-    /**
-     * src: https://firebase.google.com/docs/auth/android/manage-users#re-authenticate_a_user
-     * Re-authenticate the user automatically
-     *
-     * @param updatedField The user's field that got updated
-     * @return A Continuation instance.
-     */
-    @NotNull
-    @Contract(pure = true)
-    private Continuation<Void, Task<Void>> getContinuation(String updatedField) {
-        return task -> {
-            if (task.getException() instanceof FirebaseAuthRecentLoginRequiredException) {
-                // TODO: Test
-                return reauthenticateUser(updatedField);
-            }
-            return task;
-        };
-    }
-
-    /**
-     * Internally invokes FirebaseUser#reauthenticate
-     * to reauthenticate the user. Normally, the user is prompt
-     * to re enter their credentials. In this case, we use the user's
-     * latest entered credentials to avoid additional steps.
-     *
-     * @param credentials The user's credentials
-     */
-    public Task<Void> reauthenticateUser(String credentials) throws IllegalStateException {
-        // TODO: Prompt user to re-enter details (e.g. in another dialog)
-        return accountRepository.reauthenticateUser(credentials);
+    public boolean isFormValid() {
+        if (getUpdateFormState().getValue() != null)
+            return getUpdateFormState().getValue().isDataValid();
+        else
+            return false;
     }
 
     /**
      * Getters for all data members
      */
     public MutableLiveData<String> getDialogTitle() {
-        return dialogTitle;
+        return mDialogTitle;
     }
 
     public MutableLiveData<String> getActionFieldTitle() {
-        return actionFieldTitle;
+        return mActionFieldTitle;
     }
 
     public MutableLiveData<String> getActionFieldInput() {
-        return actionFieldInput;
+        return mActionFieldInput;
     }
 
     public short getDialogType() {
@@ -161,6 +150,6 @@ public class UpdateViewModel extends ViewModel {
     }
 
     public MutableLiveData<UpdateFormState> getUpdateFormState() {
-        return updateFormState;
+        return mUpdateFormState;
     }
 }

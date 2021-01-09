@@ -154,4 +154,7 @@
     <string name="directions">directions</string>
     <string name="book">Book</string>
 
+    <!-- String related to test cases   -->
+    <string name="any_error">Error</string>
+
 </resources>

@@ -87,7 +87,7 @@ public class ViewUtility {
     }
 
     /**
-     * Access the background color of the given view's root
+     * Access the background color of the given CardView
      * element.
      *
      * @param cardView The CardView to have its color converted into

@@ -18,6 +18,7 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.databinding.FragmentAuthenticationBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
+import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 
 /**
  * Purpose: <p>To host the two tabs (Sign in, Sign up) </p>
@@ -71,7 +72,7 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.user.AccountFragment}.
+     * {@link AccountFragment}.
      */
     @Override
     public void toAccount() {

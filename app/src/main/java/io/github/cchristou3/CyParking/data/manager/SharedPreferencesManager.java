@@ -61,6 +61,7 @@ public class SharedPreferencesManager {
      * @param value The value that the key is associated with
      */
     public void setValue(String key, List<String> value) {
+        if (value == null) throw new NullPointerException();
         SharedPreferences.Editor editor = mSharedPrefs.edit();   // to store a value, we need an editor
         editor.putStringSet(key, new HashSet<>(value)); // set its value based value given
         editor.apply(); // 'apply' to ensure that the value is 'remembered'

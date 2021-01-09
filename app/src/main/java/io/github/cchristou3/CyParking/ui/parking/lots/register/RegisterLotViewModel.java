@@ -7,16 +7,19 @@ import androidx.lifecycle.ViewModel;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
-import java.util.regex.Pattern;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormState;
 import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
+
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.areSlotOffersValid;
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidCapacity;
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidLotLatLng;
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidLotName;
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidPhoneNumber;
 
 /**
  * Purpose: <p>Data persistence when orientation changes.
@@ -36,6 +39,23 @@ public class RegisterLotViewModel extends ViewModel {
     private final MutableLiveData<List<SlotOffer>> mSlotOfferList = new MutableLiveData<>();
     private final MutableLiveData<RegisterLotFormState> mRegisterLotFormState = new MutableLiveData<>();
 
+    /**
+     * Updates the values of
+     * <p>{@link #mOperatorMobileNumber}
+     * <p>{@link #mLotCapacity}
+     * <p>{@link #mLotName}
+     * <p>{@link #mLotLatLng}
+     * <p>{@link #mSlotOfferList}
+     * with the specified attributes
+     * and updates the {@link #mRegisterLotFormState}
+     * based on them.
+     *
+     * @param operatorMobileNumber The operatorMobileNumber of the lot.
+     * @param lotCapacity          The Capacity of the lot.
+     * @param lotName              The Name of the lot.
+     * @param lotLatLng            The LatLng of the lot.
+     * @param slotOfferList        The slotOfferList of the lot.
+     */
     public void lotRegistrationDataChanged(final String operatorMobileNumber, final Integer lotCapacity,
                                            final String lotName, final LatLng lotLatLng,
                                            final List<SlotOffer> slotOfferList) {
@@ -59,7 +79,7 @@ public class RegisterLotViewModel extends ViewModel {
         } else if (!isValidLotLatLng(lotLatLng)) {
             mRegisterLotFormState.setValue(new RegisterLotFormState(null,
                     null, null, null, R.string.lot_lat_lng_error));
-        } else if (!AreSlotOffersValid(slotOfferList)) {
+        } else if (!areSlotOffersValid(slotOfferList)) {
             mRegisterLotFormState.setValue(new RegisterLotFormState(null,
                     null, null, R.string.lot_slot_offer_error, null));
         } else {
@@ -67,54 +87,22 @@ public class RegisterLotViewModel extends ViewModel {
         }
     }
 
+    /**
+     * Stores the specified {@link ParkingLot} instance to the database.
+     *
+     * @param parkingLot The lot to be added to the database.
+     * @return A {@link Task<Void>} object to be handled by the view.
+     */
     public Task<Void> registerParkingLot(ParkingLot parkingLot) {
         return ParkingRepository.registerParkingLot(parkingLot);
     }
 
-    // Return the LiveData instance of it, to limit any direct changes to it outside of the ViewModel.
-    public LiveData<String> getOperatorMobileNumber() {
-        return mOperatorMobileNumber;
-    }
-
-    public LiveData<Integer> getLotCapacity() {
-        return mLotCapacity;
-    }
-
-    public LiveData<String> getLotName() {
-        return mLotName;
-    }
-
-    public LiveData<LatLng> getLotLatLng() {
-        return mLotLatLng;
-    }
-
-    public LiveData<List<SlotOffer>> getSlotOfferList() {
-        return mSlotOfferList;
-    }
-
+    /**
+     * Getter of the {@link RegisterLotViewModel#mRegisterLotFormState}.
+     *
+     * @return the LiveData instance of it, to limit any direct changes to it outside of the ViewModel.
+     */
     public LiveData<RegisterLotFormState> getRegisterLotFormState() {
         return mRegisterLotFormState;
-    }
-
-    // Validation methods
-
-    public boolean isValidPhoneNumber(final String mobileNumber) {
-        return Pattern.compile("^\\d{8}$").matcher(mobileNumber).matches();
-    }
-
-    public boolean isValidCapacity(final int lotCapacity) {
-        return lotCapacity > 0;
-    }
-
-    public boolean isValidLotName(final String lotName) {
-        return lotName != null && !lotName.trim().isEmpty();
-    }
-
-    public boolean isValidLotLatLng(final LatLng lotLatLng) {
-        return lotLatLng != null;
-    }
-
-    public boolean AreSlotOffersValid(@NotNull final List<SlotOffer> slotOfferList) {
-        return slotOfferList.size() > 0;
     }
 }

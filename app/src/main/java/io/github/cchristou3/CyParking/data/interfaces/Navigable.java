@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
+import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 
 /**
  * Purpose: Provide a Navigation API to be implemented by all the
@@ -57,7 +58,7 @@ public interface Navigable {
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.user.AccountFragment}.
+     * {@link AccountFragment}.
      */
     void toAccount();
 

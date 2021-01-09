@@ -26,6 +26,7 @@ import io.github.cchristou3.CyParking.databinding.FeedbackFragmentBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
+import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
 /**
@@ -107,6 +108,7 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
         mFeedbackViewModel.getFormState().observe(getViewLifecycleOwner(), feedbackFormState -> {
             getBinding().feedbackFragmentMbtnSendFeedback
                     .setEnabled(feedbackFormState.isDataValid());
+            // TODO: 09/01/2021 Check for email input
             // Show validity status for the feedback message
             if (feedbackFormState.getFeedbackMessageError() != null) {
                 feedbackTextArea.setError(getString(feedbackFormState.getFeedbackMessageError()));
@@ -254,7 +256,7 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.user.AccountFragment}.
+     * {@link AccountFragment}.
      */
     @Override
     public void toAccount() {

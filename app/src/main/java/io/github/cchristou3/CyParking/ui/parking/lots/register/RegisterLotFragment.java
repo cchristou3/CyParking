@@ -42,6 +42,7 @@ import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
 import io.github.cchristou3.CyParking.databinding.RegisterLotFragmentBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
@@ -489,7 +490,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.user.AccountFragment}.
+     * {@link AccountFragment}.
      */
     @Override
     public void toAccount() {

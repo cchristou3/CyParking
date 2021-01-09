@@ -10,7 +10,7 @@ import com.google.firebase.firestore.DocumentReference;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.user.Feedback;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
-import io.github.cchristou3.CyParking.data.pojo.form.FeedbackFormState;
+import io.github.cchristou3.CyParking.data.pojo.form.feedback.FeedbackFormState;
 import io.github.cchristou3.CyParking.data.repository.FeedbackRepository;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel;
 
@@ -48,7 +48,7 @@ public class FeedbackViewModel extends ViewModel {
         }
         // Validate feedback message
         if (feedbackMessage != null && !feedbackMessage.trim().isEmpty()) {
-            mFormState.setValue(new FeedbackFormState(null, true));
+            mFormState.setValue(new FeedbackFormState(true));
         } else {
             mFormState.setValue(new FeedbackFormState(null, R.string.invalid_feedback));
         }

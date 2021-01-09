@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.ui.user;
+package io.github.cchristou3.CyParking.ui.user.account;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -203,7 +203,7 @@ public class AccountFragment extends Fragment implements Navigable {
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.user.AccountFragment}.
+     * {@link AccountFragment}.
      */
     @Override
     public void toAccount() {

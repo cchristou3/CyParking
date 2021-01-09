@@ -42,14 +42,13 @@ public class Booking extends Parking {
     private String lotName;
     // User that makes the booking attributes
     @SerializedName("userId")
-    private String bookingUserId; // TODO ADD userId and email of both users
+    private String bookingUserId;
     @SerializedName("bookingDetails")
     private BookingDetails bookingDetails;
 
     public Booking() {
         super();
     } /* no-argument constructor to be used for deserialization */
-
 
     /**
      * Public Constructor.
@@ -153,7 +152,9 @@ public class Booking extends Parking {
      * p1.generateUniqueId() == p2.generateUniqueId() -> true
      *
      * @return the hashed version of the parking's generated id
+     * @see BookingTest
      */
+    @SuppressWarnings("JavadocReference")
     @Override
     public String generateUniqueId() {
         // Hash (SHA256) it to has a fixed length of 32 characters

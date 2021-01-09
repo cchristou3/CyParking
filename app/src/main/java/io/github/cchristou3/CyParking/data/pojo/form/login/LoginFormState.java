@@ -23,7 +23,7 @@ public class LoginFormState extends EmailFormState {
      * @param roleError     The id of the error related to the role.
      */
     public LoginFormState(@Nullable Integer emailError, @Nullable Integer passwordError, @Nullable Integer roleError) {
-        super(emailError, false);
+        super(emailError);
         this.mPasswordError = passwordError;
         this.mRoleError = roleError;
     }
@@ -34,7 +34,7 @@ public class LoginFormState extends EmailFormState {
      * @param isDataValid true of the data in the form is valid
      */
     public LoginFormState(boolean isDataValid) {
-        super(null, isDataValid);
+        super(isDataValid);
         this.mPasswordError = null;
         this.mRoleError = null;
     }

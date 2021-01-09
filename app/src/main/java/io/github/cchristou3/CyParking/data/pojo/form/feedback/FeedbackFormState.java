@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.data.pojo.form;
+package io.github.cchristou3.CyParking.data.pojo.form.feedback;
 
 import androidx.annotation.Nullable;
 
@@ -21,7 +21,7 @@ public class FeedbackFormState extends EmailFormState {
      * @param feedbackMessageError The id of the error related to the feedback
      */
     public FeedbackFormState(@Nullable Integer emailError, @Nullable Integer feedbackMessageError) {
-        super(emailError, false);
+        super(emailError);
         this.mFeedbackMessageError = feedbackMessageError;
     }
 
@@ -30,8 +30,8 @@ public class FeedbackFormState extends EmailFormState {
      *
      * @param isDataValid true of the data in the form is valid
      */
-    public FeedbackFormState(@Nullable Integer emailError, boolean isDataValid) {
-        super(emailError, isDataValid);
+    public FeedbackFormState(boolean isDataValid) {
+        super(isDataValid);
         this.mFeedbackMessageError = null;
     }
 

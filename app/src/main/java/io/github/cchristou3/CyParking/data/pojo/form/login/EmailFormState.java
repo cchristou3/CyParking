@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.data.pojo.form.login;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import io.github.cchristou3.CyParking.data.pojo.form.FormState;
@@ -15,16 +16,24 @@ public class EmailFormState extends FormState {
     private final Integer mEmailError;
 
     /**
-     * Initialize the EmailFormState instance's
-     * emailError and isDataValid members with the
-     * given arguments.
+     * Constructor used when there is an error in the emailFormState
+     * (E.g. invalid email, empty email, etc.)
      *
-     * @param emailError  The id of the error related to the email
+     * @param emailError The id of the error related to the email.
+     */
+    public EmailFormState(@NonNull Integer emailError) {
+        super(false);
+        this.mEmailError = emailError;
+    }
+
+    /**
+     * Constructor used when the {@link EmailFormState} object is valid.
+     *
      * @param isDataValid The validity of the data of the form
      */
-    public EmailFormState(@Nullable Integer emailError, boolean isDataValid) {
+    public EmailFormState(boolean isDataValid) {
         super(isDataValid);
-        this.mEmailError = emailError;
+        this.mEmailError = null;
     }
 
     /**

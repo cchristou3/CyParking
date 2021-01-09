@@ -34,6 +34,7 @@ import io.github.cchristou3.CyParking.databinding.FragmentHomeBinding;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModelFactory;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
+import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 
 import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 
@@ -361,7 +362,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.user.AccountFragment}.
+     * {@link AccountFragment}.
      */
     @Override
     public void toAccount() {

@@ -49,6 +49,7 @@ public class SlotOffer implements Parcelable {
      * @param price    The price.
      */
     public SlotOffer(float duration, float price) {
+        checkIfValid(duration, price);
         this.durationInHours = duration;
         this.price = price;
     }
@@ -73,6 +74,28 @@ public class SlotOffer implements Parcelable {
         return new SlotOffer(generator.nextInt(10 + 1) + 1,
                 generator.nextInt(10 + 1) + 1
         );
+    }
+
+    /**
+     * Checks whether both arguments are in a valid range.
+     *
+     * @param duration The duration of the offer.
+     * @param price    The price of the offer.
+     */
+    private void checkIfValid(float duration, float price) throws IllegalArgumentException {
+        checkIfValid(duration);
+        checkIfValid(price);
+    }
+
+    /**
+     * Checks whether the specified attribute is greater than 0.
+     *
+     * @param attribute The value to be validated.
+     * @throws IllegalArgumentException if the attribute is <= 0
+     */
+    private void checkIfValid(float attribute) throws IllegalArgumentException {
+        if (attribute <= 0)
+            throw new IllegalArgumentException("Value " + attribute + " is not valid. It must be greater than 0.");
     }
 
     /**
@@ -172,6 +195,7 @@ public class SlotOffer implements Parcelable {
      * @param offer The offer to be compared with.
      * @return True, if current object's ratio is smaller than the specified ones.
      * Otherwise, false.
+     * @see #getRatio()
      */
     public boolean smallerOf(SlotOffer offer) {
         if (offer == null) return true;

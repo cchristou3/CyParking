@@ -5,15 +5,17 @@ import android.os.Parcel;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.Exclude;
 import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
+import java.util.regex.Pattern;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
@@ -80,7 +82,10 @@ public class ParkingLot extends Parking {
      * @param operatorMobileNumber The lot's operator's phone number.
      * @param email                The lot's operator's email address.
      */
-    public ParkingLot(Coordinates coordinates, String operatorMobileNumber, String email, String lotName) {
+    public ParkingLot(
+            @NonNull Coordinates coordinates, @NonNull String operatorMobileNumber,
+            @NonNull String email, @NonNull String lotName
+    ) {
         super(coordinates, 0);
         this.setParkingID(generateParkingId(coordinates, operatorMobileNumber));
         this.operatorId = email;
@@ -111,11 +116,19 @@ public class ParkingLot extends Parking {
      * @param capacityForDisabled        The lot's capacity for disabled people.
      * @param availableSpacesForDisabled The lot's available spaces for disabled people.
      * @param slotOfferList              The lot's offers.
+     * @throws IllegalArgumentException If the capacity is invalid, or the available spaces are not
+     *                                  in the bounds of the capacity's value.
      */
     public ParkingLot(Coordinates coordinates, String lotName, String operatorId, String operatorMobileNumber,
                       int capacity, int capacityForDisabled, int availableSpacesForDisabled,
-                      List<SlotOffer> slotOfferList) {
+                      List<SlotOffer> slotOfferList) throws IllegalArgumentException, IllegalArgumentException {
         super(coordinates, 0);
+        if (!isValidCapacity(capacity)) {
+            throw new IllegalArgumentException("Capacity cannot be equal or less than 0.");
+        }
+        if (!areAvailableSpacesValid(availableSpaces)) {
+            throw new IllegalArgumentException("The available spaces must be in range of 0..capacity (inclusive).");
+        }
         this.setParkingID(generateParkingId(coordinates, operatorMobileNumber));
         this.lotName = lotName;
         this.operatorId = operatorId;
@@ -149,6 +162,31 @@ public class ParkingLot extends Parking {
         for (int i = 0; i < size; i++) {
             slotOfferList.add(in.readParcelable(SlotOffer.class.getClassLoader()));
         }
+    }
+
+    // Validation methods
+    public static boolean isValidPhoneNumber(final String mobileNumber) {
+        return Pattern.compile("^\\d{8}$").matcher(mobileNumber).matches();
+    }
+
+    public static boolean isValidCapacity(final int lotCapacity) {
+        return lotCapacity > 0;
+    }
+
+    public static boolean isValidLotName(final String lotName) {
+        return lotName != null && !lotName.trim().isEmpty();
+    }
+
+    public static boolean isValidLotLatLng(final LatLng lotLatLng) {
+        return lotLatLng != null;
+    }
+
+    public static boolean areSlotOffersValid(@NotNull final List<SlotOffer> slotOfferList) {
+        return slotOfferList != null && slotOfferList.size() > 0;
+    }
+
+    public boolean areAvailableSpacesValid(final int availableSpaces) {
+        return availableSpaces > 0 && availableSpaces <= this.capacity;
     }
 
     /**
@@ -258,16 +296,12 @@ public class ParkingLot extends Parking {
      * @param mobileNumber   The operator's mobile number.
      * @return The id of the parking lot.
      */
-    private int generateParkingId(@NotNull final Coordinates lotCoordinates, @NotNull String mobileNumber) {
+    private int generateParkingId(@NotNull final Coordinates lotCoordinates, @NotNull String mobileNumber)
+            throws ClassCastException, NumberFormatException, NullPointerException {
         double lat = lotCoordinates.getLatitude() * 1000000; // Get rid most of the decimal part
         double lng = lotCoordinates.getLongitude() * 1000000; // and cast it to an integer
         // E.g. 33.62356 * 1000000 -> (int)336235.6 -> 336235
-        try {
-            return (int) (Integer.parseInt(mobileNumber) + lat + lng);
-        } catch (ClassCastException | NumberFormatException e) {
-            byte[] bytesOfObject = (mobileNumber + lat + lng).getBytes();
-            return UUID.nameUUIDFromBytes(bytesOfObject).hashCode();
-        }
+        return (int) (Integer.parseInt(mobileNumber) + lat + lng);
     }
 
     /**
@@ -446,7 +480,10 @@ public class ParkingLot extends Parking {
      * of {@link #slotOfferList}.
      */
     public SlotOffer getBestOffer() {
-        if (slotOfferList.size() == 0) {
+        if (!areSlotOffersValid(slotOfferList)) {
+            throw new EmptyStackException();
+        }
+        if (slotOfferList.size() == 1) {
             return slotOfferList.get(0);
         }
 

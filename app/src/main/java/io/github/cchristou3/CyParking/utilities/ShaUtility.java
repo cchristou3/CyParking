@@ -31,7 +31,7 @@ public class ShaUtility {
             byte[] bytesOfInput = input.getBytes(UTF_8);
             byte[] result = MessageDigest.getInstance(SHA256).digest(bytesOfInput);
             return bytesToHex(result);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException | NullPointerException e) {
             return input;
         }
     }
@@ -43,7 +43,7 @@ public class ShaUtility {
      * @return The corresponding String of the given bytes
      */
     @NotNull
-    private static String bytesToHex(@NotNull byte[] bytes) {
+    public static String bytesToHex(@NotNull byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format("%02x", b));

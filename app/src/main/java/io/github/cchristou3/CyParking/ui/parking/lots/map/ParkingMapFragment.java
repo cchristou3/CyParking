@@ -46,7 +46,7 @@ import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.parking.slots.booking.BookingFragment;
 import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsFragment;
-import io.github.cchristou3.CyParking.ui.user.AccountFragment;
+import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;

@@ -25,10 +25,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.StringReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -69,7 +72,7 @@ import io.github.cchristou3.CyParking.utilities.ViewUtility;
  * </p>
  *
  * @author Charalambos Christou
- * @version 7.0 03/1/21
+ * @version 8.0 12/01/21
  */
 public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener, Navigable, LocationHandler {
@@ -353,7 +356,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      * When such a request occurs, a cloud function is executed, which filters
      * the parking locations. Only the ones which are nearby the user are sent back
      * too the client.
-     * <strong>Note: In case the user exits the fragment before the HTTP response is returned,
+     * <strong>Note: In case the user exits the fragment before the HTTPS response is returned,
      * the view would be destroyed when the onRequestFinish listener will get
      * triggered. Thus, it will cause a NullPointerException when trying to access
      * the {@link FragmentParkingMapBinding#fragmentParkingMapClpbLoadingMarkers}.
@@ -364,21 +367,33 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      */
     public void fetchParkingLots(@NotNull LatLng latLng) {
         getBinding().fragmentParkingMapClpbLoadingMarkers.show(); // Show loading bar
-        mParkingMapViewModel.fetchParkingLots(requireContext(), latLng.latitude, latLng.longitude,
-                response -> {
-                    // Zoom in
-                    mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
-                    // Convert json object into an array of ParkingLot objects and add for each a marker to the map.
-                    mMarkerManager.addAll(mGoogleMap, new Gson().fromJson(response, ParkingLot[].class));
-                },
-                requestFinished -> { // Hide the loading bar once the request has finished
-                    try {
-                        if (getBinding().fragmentParkingMapClpbLoadingMarkers.isShown()) {
-                            getBinding().fragmentParkingMapClpbLoadingMarkers.hide();
-                        }
-                    } catch (NullPointerException ignore) {
+        mParkingMapViewModel.fetchParkingLots(latLng.latitude, latLng.longitude, new HttpsCallHandler() {
+            @Override
+            public void onSuccess(String rawJsonResponse) {
+                // Zoom in
+                Log.d(TAG, "Before parsing: " + rawJsonResponse);
+                mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
+                // Convert json object into an array of ParkingLot objects and add for each a marker to the map.
+                JsonReader reader = new JsonReader(new StringReader(rawJsonResponse));
+                reader.setLenient(true);
+                ParkingLot[] result = new Gson().fromJson(reader, ParkingLot[].class);
+                Log.d(TAG, "Parsed: " + Arrays.toString(result));
+                mMarkerManager.addAll(mGoogleMap, result);
+                try {
+                    if (getBinding().fragmentParkingMapClpbLoadingMarkers.isShown()) {
+                        getBinding().fragmentParkingMapClpbLoadingMarkers.hide();
                     }
-                });
+                } catch (NullPointerException ignore) { /* view got destroyed */ }
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                if (exception == null) return;
+                // Plan B: Reload map
+                Toast.makeText(requireContext(), "Unexpected error occurred!\n" + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(ParkingMapFragment.TAG, "Error of class " + exception.getClass() + ": " + exception.getMessage());
+            }
+        });
     }
 
     /**
@@ -437,7 +452,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
         if (lot != null) {
             // Get the corresponding hash map object
             name = lot.getLotName();
-            availability = lot.getAvailability(requireContext());
+            availability = lot.getLotAvailability(requireContext());
             slotOffer = "Best offer: " + lot.getBestOffer().toString() + "";
         }
         // Get a reference to the view and update each infoLayout field with the clicked marker's corresponding data
@@ -571,5 +586,11 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
     public void toHome() {
         Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
                 .navigate(R.id.action_nav_parking_map_fragment_to_nav_home);
+    }
+
+    interface HttpsCallHandler {
+        void onSuccess(String rawJsonResponse);
+
+        void onFailure(Exception exception);
     }
 }

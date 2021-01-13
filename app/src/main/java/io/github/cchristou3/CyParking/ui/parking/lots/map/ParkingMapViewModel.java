@@ -1,25 +1,20 @@
 package io.github.cchristou3.CyParking.ui.parking.lots.map;
 
-import android.content.Context;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.FirebaseFunctionsException;
 
-import io.github.cchristou3.CyParking.R;
+import java.util.HashMap;
+
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
-
-import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment.TAG;
 
 /**
  * <p>A ViewModel implementation, adopted to the ParkingMapFragment fragment.
@@ -128,7 +123,7 @@ public class ParkingMapViewModel extends ViewModel {
 
     ///////////////////////////////////////////////////////////////////////////
     // APIs -  fetching the parking lots from the database via
-    // HTTP (Volley) / FirebaseFirestore API
+    // Firebase Cloud Functions / FirebaseFirestore API
     ///////////////////////////////////////////////////////////////////////////
 
     /**
@@ -143,39 +138,37 @@ public class ParkingMapViewModel extends ViewModel {
     }
 
     /**
-     * Using Volley (REST) - triggers cloud function.
+     * Sends an HTTPS request via a callable cloud-function.
+     * The response contains all the parking lots
+     * that are nearby the given coordinates
      *
-     * @param context             The context of the current visible fragment.
-     * @param userLatitude        The user's latest retrieved latitude.
-     * @param userLongitude       The user's latest retrieved longitude.
-     * @param responseHandler     The handler for the HTTP request.
-     * @param onFinishedUiHandler The handler for the completion of the HTTP request.
+     * @param userLatitude  The user's latest retrieved latitude.
+     * @param userLongitude The user's latest retrieved longitude.
+     * @param handler       The handler for the cloud function's HTTPS request.
      */
-    public void fetchParkingLots(Context context, double userLatitude, double userLongitude,
-                                 Response.Listener<String> responseHandler,
-                                 RequestQueue.RequestFinishedListener<String> onFinishedUiHandler) {
-        final RequestQueue requestQueue = Volley.newRequestQueue(context);
-        final Request<String> requestForParkingLots = new StringRequest(Request.Method.GET,
-                context.getString(R.string.firestore_api_url) + "?latitude=" + userLatitude + "&longitude=" + userLongitude,
-                responseHandler,
-                error -> {// No wifi?
-                    // TODO: inform the user
-                    // Plan B: Reload map
-                    Toast.makeText(context, "Unexpected error occurred!\n" + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Volley error: " + error.getMessage());
+    public void fetchParkingLots(double userLatitude, double userLongitude,
+                                 ParkingMapFragment.HttpsCallHandler handler) {
+        FirebaseFunctions.getInstance()
+                .getHttpsCallable("filterLocations")
+                .call(new HashMap<String, Double>() {{ // The request's data.
+                    put("latitude", userLatitude);
+                    put("longitude", userLongitude);
+                }})
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult().getData() != null) {
+                        handler.onSuccess(task.getResult().getData().toString());
+                    } else {
+                        handler.onFailure(task.getException());
+                        if (task.getException() instanceof FirebaseNetworkException) {
+                            Log.d(ParkingMapFragment.TAG, "fetchParkingLots: " + task.getException());
+                        } else if (task.getException() instanceof FirebaseFunctionsException) {
+                            FirebaseFunctionsException exception = ((FirebaseFunctionsException) task.getException());
+                            FirebaseFunctionsException.Code code = exception.getCode();
+                            Object details = exception.getDetails();
+                            Log.e(ParkingMapFragment.TAG, "FirebaseFunctionsException error: code: "
+                                    + code + ", Details: " + details);
+                        }
+                    }
                 });
-
-        requestQueue.add(requestForParkingLots); // Add the request to the queue
-        // Add a Request Finished Listener to handle the Ui and the clean up
-        requestQueue.addRequestFinishedListener(new RequestQueue.RequestFinishedListener<String>() {
-            @Override
-            public void onRequestFinished(Request<String> request) {
-                // Update Ui
-                onFinishedUiHandler.onRequestFinished(request);
-                // Clean up both the listeners
-                requestQueue.removeRequestFinishedListener(onFinishedUiHandler);
-                requestQueue.removeRequestFinishedListener(this);
-            }
-        });
     }
 }

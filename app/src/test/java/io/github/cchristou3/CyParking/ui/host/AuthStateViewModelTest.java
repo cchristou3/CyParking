@@ -56,7 +56,7 @@ public class AuthStateViewModelTest {
 
     @Test
     public void updateAuthState_setsNewValue() throws InterruptedException {
-        // When that the state is updated
+        // When the state is updated
         authStateViewModel.updateAuthState(Mockito.mock(LoggedInUser.class));
         // Then the state's value is no longer null
         assertThat(getOrAwaitValue(authStateViewModel.getUserState()), not(nullValue()));

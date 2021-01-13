@@ -6,7 +6,6 @@ import android.view.View;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.functions.FirebaseFunctionsException;
 
@@ -21,6 +20,9 @@ import io.github.cchristou3.CyParking.data.repository.ParkingMapRepository;
  * @version 1.0 29/12/20
  */
 public class ParkingMapViewModel extends ViewModel {
+
+    private static final String TAG = ParkingMapViewModel.class.getName();
+
 
     private final MutableLiveData<ParkingLot> mSelectedLotState =
             new MutableLiveData<>(null);
@@ -157,16 +159,23 @@ public class ParkingMapViewModel extends ViewModel {
                         handler.onSuccess(task.getResult().getData().toString());
                     } else {
                         handler.onFailure(task.getException());
-                        if (task.getException() instanceof FirebaseNetworkException) {
-                            Log.d(ParkingMapFragment.TAG, "fetchParkingLots: " + task.getException());
-                        } else if (task.getException() instanceof FirebaseFunctionsException) {
-                            FirebaseFunctionsException exception = ((FirebaseFunctionsException) task.getException());
-                            FirebaseFunctionsException.Code code = exception.getCode();
-                            Object details = exception.getDetails();
-                            Log.e(ParkingMapFragment.TAG, "FirebaseFunctionsException error: code: "
-                                    + code + ", Details: " + details);
-                        }
+                        logError(task.getException());
                     }
                 });
+    }
+
+    /**
+     * Reports error to the logcat.
+     *
+     * @param exception The given exception.
+     */
+    private void logError(Exception exception) {
+        if (exception instanceof FirebaseFunctionsException) {
+            FirebaseFunctionsException.Code code = ((FirebaseFunctionsException) exception).getCode();
+            Object details = ((FirebaseFunctionsException) exception).getDetails();
+            Log.e(TAG, "FirebaseFunctionsException error: code: "
+                    + code + ", Details: " + details);
+        }
+        Log.d(TAG, exception.getClass() + ": " + exception);
     }
 }

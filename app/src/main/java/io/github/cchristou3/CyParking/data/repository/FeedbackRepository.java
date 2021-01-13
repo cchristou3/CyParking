@@ -13,11 +13,9 @@ import io.github.cchristou3.CyParking.data.model.user.Feedback;
  * messages to the administrator.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 30/12/20
+ * @version 2.0 12/01/21
  */
-public class FeedbackRepository {
-
-    public static final String FEEDBACK = "feedback";
+public final class FeedbackRepository extends RepositoryData {
 
     /**
      * Stores the given {@link Feedback} instance in the database.

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -278,17 +279,26 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
         // coordinates lotName operatorId operatorMobileNumber capacity capacityForDisabled availableSpacesForDisabled slotOfferList
         return new ParkingLot(
                 new Parking.Coordinates(
-                        Double.parseDouble(getBinding().registerLotFragmentEtLocationLat.getText().toString()),
-                        Double.parseDouble(getBinding().registerLotFragmentEtLocationLng.getText().toString())
+                        fromViewTextToDouble(getBinding().registerLotFragmentEtLocationLat),
+                        fromViewTextToDouble(getBinding().registerLotFragmentEtLocationLng)
                 ),  // coordinates
                 getBinding().registerLotFragmentEtLotName.getText().toString(), // lotName
                 mAuthStateViewModel.getUser().getUserId(), // operatorId
                 getBinding().registerLotFragmentEtPhoneBody.getNonSpacedText(), // operatorMobileNumber
                 Integer.parseInt(getBinding().registerLotFragmentEtCapacity.getText().toString()), // capacity
-                0, // capacityForDisabled
-                0, // availableSpacesForDisabled
                 mSlotOfferList // slotOfferList
         );
+    }
+
+    /**
+     * Extracts the numeric text of the given argument
+     * and converts it to a double.
+     *
+     * @param editText The view to extract the text from.
+     * @return A double representation of the numeric text.
+     */
+    private double fromViewTextToDouble(@NotNull EditText editText) {
+        return Double.parseDouble(editText.getText().toString());
     }
 
     /**

@@ -1,21 +1,16 @@
-package io.github.cchristou3.CyParking.ui.widgets.update;
+package io.github.cchristou3.CyParking.ui.user.account.update;
 
-import android.util.Log;
-
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.pojo.form.update.UpdateFormState;
 import io.github.cchristou3.CyParking.data.repository.AccountRepository;
-import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel;
-
-import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 
 /**
  * Purpose: <p>Data persistence when orientation changes.
@@ -87,26 +82,10 @@ public class UpdateViewModel extends ViewModel {
     public Task<Void> updateAccountField(LoggedInUser user, String updatedField) {
         switch (mDialogType) {
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
-                return mAccountRepository.updateDisplayName(updatedField)
-                        .continueWithTask(task -> {
-                            Log.d(TAG, "New display name then: " + task.getResult());
-                            if (task.isSuccessful()) {
-                                return AuthenticatorRepository.getInstance(FirebaseAuth.getInstance())
-                                        .updateUserDisplayName(user.getUserId(), updatedField);
-                            }
-                            return null;
-                        });
+                return mAccountRepository.updateDisplayName(updatedField, user);
+
             case UpdateAccountDialog.UPDATE_EMAIL:
-                return mAccountRepository.updateEmail(updatedField)
-                        .continueWithTask(task -> {
-                            Log.d(TAG, "then: " + task.getResult());
-                            if (task.isSuccessful()) {
-                                AuthenticatorRepository.getInstance(FirebaseAuth.getInstance())
-                                        .updateUserEmail(user.getUserId(), user.getEmail(), updatedField);
-                                return task;
-                            }
-                            return null;
-                        });
+                return mAccountRepository.updateEmail(updatedField, user);
             case UpdateAccountDialog.UPDATE_PASSWORD:
                 return mAccountRepository.updatePassword(updatedField);
             default:
@@ -114,6 +93,11 @@ public class UpdateViewModel extends ViewModel {
         }
     }
 
+    /**
+     * Checks the state of the form.
+     *
+     * @return True, if the form is in valid state. Otherwise, false.
+     */
     public boolean isFormValid() {
         if (getUpdateFormState().getValue() != null)
             return getUpdateFormState().getValue().isDataValid();
@@ -122,20 +106,57 @@ public class UpdateViewModel extends ViewModel {
     }
 
     /**
-     * Getters for all data members
+     * Access the {@link #mDialogTitle} of the ViewModel.
+     *
+     * @return A reference to {@link #mDialogTitle}.
      */
-    public MutableLiveData<String> getDialogTitle() {
+    public LiveData<String> getDialogTitle() {
         return mDialogTitle;
     }
 
-    public MutableLiveData<String> getActionFieldTitle() {
+    /**
+     * Updates the value of {@link #mDialogTitle}
+     * with the given argument.
+     *
+     * @param title The new value of {@link #mDialogTitle}.
+     */
+    public void updateDialogTitle(String title) {
+        mDialogTitle.setValue(title);
+    }
+
+    /**
+     * Access the {@link #mActionFieldTitle} of the ViewModel.
+     *
+     * @return A reference to {@link #mActionFieldTitle}.
+     */
+    public LiveData<String> getActionFieldTitle() {
         return mActionFieldTitle;
     }
 
-    public MutableLiveData<String> getActionFieldInput() {
+    /**
+     * Updates the value of {@link #mDialogTitle}
+     * with the given argument.
+     *
+     * @param title The new value of {@link #mDialogTitle}.
+     */
+    public void updateActionFieldTitle(String title) {
+        mActionFieldTitle.setValue(title);
+    }
+
+    /**
+     * Access the {@link #mActionFieldInput} of the ViewModel.
+     *
+     * @return A reference to {@link #mActionFieldInput}.
+     */
+    public LiveData<String> getActionFieldInput() {
         return mActionFieldInput;
     }
 
+    /**
+     * Access the {@link #mDialogType} of the ViewModel.
+     *
+     * @return A reference to {@link #mDialogType}.
+     */
     public short getDialogType() {
         return mDialogType;
     }
@@ -149,7 +170,12 @@ public class UpdateViewModel extends ViewModel {
         this.mDialogType = dialogState;
     }
 
-    public MutableLiveData<UpdateFormState> getUpdateFormState() {
+    /**
+     * Access the {@link #mUpdateFormState} of the ViewModel.
+     *
+     * @return A reference to {@link #mDialogType}.
+     */
+    public LiveData<UpdateFormState> getUpdateFormState() {
         return mUpdateFormState;
     }
 }

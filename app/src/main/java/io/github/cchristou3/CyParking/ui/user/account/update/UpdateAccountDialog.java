@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.ui.widgets.update;
+package io.github.cchristou3.CyParking.ui.user.account.update;
 
 import android.os.Bundle;
 import android.text.Editable;
@@ -120,8 +120,8 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         // Initialize the UpdateViewModel of the fragment and set its initial values.
         mUpdateViewModel = new ViewModelProvider(this,
                 new UpdateViewModelFactory()).get(UpdateViewModel.class);
-        mUpdateViewModel.getDialogTitle().setValue(dialogTitle);
-        mUpdateViewModel.getActionFieldTitle().setValue(actionFieldTitle);
+        mUpdateViewModel.updateDialogTitle(dialogTitle);
+        mUpdateViewModel.updateActionFieldTitle(actionFieldTitle);
         mUpdateViewModel.setDialogType(action);
     }
 

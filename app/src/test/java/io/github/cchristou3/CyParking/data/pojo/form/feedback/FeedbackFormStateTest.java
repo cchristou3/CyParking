@@ -11,7 +11,7 @@ import io.github.cchristou3.CyParking.R;
 public class FeedbackFormStateTest {
 
     @Test
-    public void feedbackFormState_with_two_errors() {
+    public void feedbackFormState_twoErrors__thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -23,7 +23,7 @@ public class FeedbackFormStateTest {
     }
 
     @Test
-    public void feedbackFormState_with_email_error() {
+    public void feedbackFormState_emailError_emailErrorNotNullInvalid() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -35,7 +35,7 @@ public class FeedbackFormStateTest {
     }
 
     @Test
-    public void feedbackFormState_with_feedback_message_error() {
+    public void feedbackFormState_feedbackMessageError_feedbackMessageErrorNotNullInvalid() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -47,7 +47,7 @@ public class FeedbackFormStateTest {
     }
 
     @Test
-    public void feedbackFormState_without_error() {
+    public void feedbackFormState_withoutErrors_allErrorsNullValidIsTrue() {
         // Given
         boolean isValid = true;
         // When

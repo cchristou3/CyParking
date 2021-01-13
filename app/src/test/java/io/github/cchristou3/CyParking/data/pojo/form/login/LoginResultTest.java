@@ -1,19 +1,15 @@
 package io.github.cchristou3.CyParking.data.pojo.form.login;
 
-import com.google.firebase.auth.FirebaseUser;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.LinkedList;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link LoginResult} class.
@@ -21,21 +17,16 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class LoginResultTest {
 
-    private LoggedInUser mockLoggedInUser;
-
     @Mock
-    private FirebaseUser mockFirebaseUser;
+    private LoggedInUser mockLoggedInUser;
 
     @Before
     public void setUp() {
-        when(mockFirebaseUser.getUid()).thenReturn("123123");
-        when(mockFirebaseUser.getDisplayName()).thenReturn("Name");
-        when(mockFirebaseUser.getEmail()).thenReturn("a@gmail.com");
-        mockLoggedInUser = new LoggedInUser(mockFirebaseUser, new LinkedList<>());
+        mockLoggedInUser = Mockito.mock(LoggedInUser.class);
     }
 
     @Test
-    public void loginResult_with_success() {
+    public void loginResult_success_ErrorIsNullSuccessIsNotNull() {
         // Given
         LoggedInUser user = mockLoggedInUser;
         // When
@@ -45,7 +36,7 @@ public class LoginResultTest {
     }
 
     @Test
-    public void loginResult_with_error() {
+    public void loginResult_error_ErrorIsNotNullSuccessIsNull() {
         // Given
         String error = "any_error";
         // When

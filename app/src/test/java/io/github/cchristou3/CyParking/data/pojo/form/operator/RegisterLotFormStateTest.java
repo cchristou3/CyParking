@@ -11,7 +11,23 @@ import io.github.cchristou3.CyParking.R;
 public class RegisterLotFormStateTest {
 
     @Test
-    public void registerFormState_with_five_errors() {
+    public void registerFormState_withoutErrors_validIsTrue() {
+        // Given
+        Integer error = R.string.any_error;
+        // When
+        RegisterLotFormState state =
+                new RegisterLotFormState(true);
+        // Then
+        Assert.assertTrue(state.getMobileNumberError() == null
+                && state.getLotNameError() == null
+                && state.getLotCapacityError() == null
+                && state.getSlotOfferError() == null
+                && state.getLatLngError() == null
+                && state.isDataValid());
+    }
+
+    @Test
+    public void registerFormState_fiveErrors_ErrorsNotNullValidIsFalse() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -31,7 +47,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_mobile_error() {
+    public void registerFormState_mobileError_mobileErrorNotNullValidIsFalse() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -51,7 +67,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_lot_name_error() {
+    public void registerFormState_lotNameError_lotNameErrorNotNullValidIsFalse() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -71,7 +87,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_lot_capacity_error() {
+    public void registerFormState_lotCapacityError_lotCapacityErrorNotNullValidIsFalse() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -91,7 +107,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_slot_offer_error() {
+    public void registerFormState_slotOfferError_slotOfferErrorNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -111,7 +127,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_lot_latLng_error() {
+    public void registerFormState_lotLatLngError_lotLatLngNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -131,7 +147,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_mobile_lot_name_error() {
+    public void registerFormState_mobileLotNameErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -151,7 +167,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_mobile_lot_capacity_error() {
+    public void registerFormState_mobileLotCapacityErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -171,7 +187,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_mobile_slot_offer_error() {
+    public void registerFormState_mobileSlotOfferErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -191,7 +207,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_mobile_latLng_error() {
+    public void registerFormState_mobileLatLngErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -211,7 +227,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_lot_name_lot_capacity_error() {
+    public void registerFormState_lotNameLotCapacityErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -231,7 +247,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_lot_name_slot_offer_error() {
+    public void registerFormState_lotNameSlotOfferErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -251,7 +267,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_lot_name_latLng_error() {
+    public void registerFormState_lotNameLatLngErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -271,7 +287,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_lot_capacity_slot_offer_error() {
+    public void registerFormState_lotCapacitySlotOfferErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -291,7 +307,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_slot_offer_latLng_error() {
+    public void registerFormState_slotOfferLatLngErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -311,7 +327,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_mobile_name_capacity_error() {
+    public void registerFormState_mobileNameCapacityErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -331,7 +347,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_mobile_name_slot_offer_error() {
+    public void registerFormState_mobileNameSlotOfferErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -351,7 +367,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_mobile_name_latLng_error() {
+    public void registerFormState_mobileNameLatLngErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -371,7 +387,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_name_capacity_slot_offer_error() {
+    public void registerFormState_nameCapacitySlotOfferErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -391,7 +407,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_name_capacity_latLng_error() {
+    public void registerFormState_nameCapacityLatLngErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -411,7 +427,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_capacity_slot_offer_latLng_error() {
+    public void registerFormState_capacitySlotOfferLatLngErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -431,7 +447,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_all_errors_except_mobile() {
+    public void registerFormState_allErrorsExceptMobile_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -451,7 +467,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_all_errors_except_lot_name() {
+    public void registerFormState_allErrorsExceptLotName_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -471,7 +487,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_all_errors_except_lot_capacity() {
+    public void registerFormState_allErrorsExceptLotCapacity_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -491,7 +507,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_all_errors_except_lot_slot_offer() {
+    public void registerFormState_allErrorsExceptLotSlotOffer_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When
@@ -511,7 +527,7 @@ public class RegisterLotFormStateTest {
     }
 
     @Test
-    public void registerFormState_with_all_errors_except_lot_latLng() {
+    public void registerFormState_allErrorsExceptLotLatLng_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.any_error;
         // When

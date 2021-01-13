@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.firestore.Exclude;
 import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.NotNull;
@@ -49,9 +50,8 @@ public class SlotOffer implements Parcelable {
      * @param price    The price.
      */
     public SlotOffer(float duration, float price) {
-        checkIfValid(duration, price);
-        this.durationInHours = duration;
-        this.price = price;
+        this.durationInHours = checkIfValid(duration);
+        this.price = checkIfValid(price);
     }
 
     /**
@@ -70,6 +70,7 @@ public class SlotOffer implements Parcelable {
      * @return An instance of {@link SlotOffer}.
      */
     @NotNull
+    @Exclude
     public static SlotOffer getRandomInstance(final Random generator) {
         return new SlotOffer(generator.nextInt(10 + 1) + 1,
                 generator.nextInt(10 + 1) + 1
@@ -77,25 +78,16 @@ public class SlotOffer implements Parcelable {
     }
 
     /**
-     * Checks whether both arguments are in a valid range.
-     *
-     * @param duration The duration of the offer.
-     * @param price    The price of the offer.
-     */
-    private void checkIfValid(float duration, float price) throws IllegalArgumentException {
-        checkIfValid(duration);
-        checkIfValid(price);
-    }
-
-    /**
      * Checks whether the specified attribute is greater than 0.
      *
      * @param attribute The value to be validated.
+     * @return The given float.
      * @throws IllegalArgumentException if the attribute is <= 0
      */
-    private void checkIfValid(float attribute) throws IllegalArgumentException {
+    private float checkIfValid(float attribute) throws IllegalArgumentException {
         if (attribute <= 0)
             throw new IllegalArgumentException("Value " + attribute + " is not valid. It must be greater than 0.");
+        return attribute;
     }
 
     /**
@@ -183,6 +175,7 @@ public class SlotOffer implements Parcelable {
      *
      * @return The efficiency ration of the offer.
      */
+    @Exclude
     public float getRatio() {
         return price / durationInHours;
     }

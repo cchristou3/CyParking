@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.ui.widgets.update;
+package io.github.cchristou3.CyParking.ui.user.account.update;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;

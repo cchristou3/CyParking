@@ -17,6 +17,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +25,6 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
-import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 
 /**
  * <p>Main host activity of the Application.
@@ -64,7 +64,7 @@ public class MainHostActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FirebaseApp.initializeApp(this);
+        FirebaseApp.initializeApp(this.getApplicationContext());
         setContentView(R.layout.fragment_main_host);
 
         // Set up ActionBar
@@ -94,9 +94,7 @@ public class MainHostActivity extends AppCompatActivity {
 
         mAuthStateViewModel.getUserState().observe(this, MainHostActivity.this::updateDrawer);
 
-        mAuthStateViewModel.getUserInfo(this);
-
-        ParkingRepository.addDummyParkingData();
+        mAuthStateViewModel.getUserInfo(this, FirebaseAuth.getInstance().getCurrentUser());
     }
 
     /**

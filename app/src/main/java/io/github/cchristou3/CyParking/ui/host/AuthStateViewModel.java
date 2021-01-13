@@ -3,11 +3,11 @@ package io.github.cchristou3.CyParking.ui.host;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
@@ -28,13 +28,13 @@ import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
  * <p>
  * The {@link #mUserState} is initially set to null.
  * Its value is initially updated inside {@link MainHostActivity}'s onCreate method
- * via the invocation of {@link #getUserInfo(Context)}.
+ * via the invocation of {@link #getUserInfo(Context, FirebaseUser)}.
  * The state also changes when the user is logging in or registering in {@link AuthenticatorFragment}
  * and when signing out by clicking the action bar's "sign out" option.
  * </p>
  *
  * @author Charalambos Christou
- * @version 1.0 25/12/20
+ * @version 2.0 12/01/21
  */
 public class AuthStateViewModel extends ViewModel {
 
@@ -87,12 +87,8 @@ public class AuthStateViewModel extends ViewModel {
      *
      * @param context The context of the screen.
      */
-    public void getUserInfo(Context context) {
-        // Access the FirebaseUser instance via FirebaseAuth
-        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
+    public void getUserInfo(@NonNull Context context, @Nullable FirebaseUser user) {
         if (user == null) return; // If user not set (logged in), terminate the method.
-
         // Otherwise,
         // Access the user's role locally via the SharedPreferences using the
         // user's id as the key

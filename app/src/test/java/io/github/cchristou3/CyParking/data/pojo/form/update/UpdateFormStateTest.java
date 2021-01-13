@@ -13,17 +13,17 @@ import static org.junit.Assert.assertFalse;
 public class UpdateFormStateTest {
 
     @Test
-    public void updateFormState_passing_true() {
+    public void updateFormState_passingTrue_returnsTrue() {
         Assert.assertTrue(new UpdateFormState(true).isDataValid());
     }
 
     @Test
-    public void updateFormState_passing_false() {
+    public void updateFormState_passingFalse_returnsFalse() {
         assertFalse(new UpdateFormState(false).isDataValid());
     }
 
     @Test
-    public void updateFormState_with_error() {
+    public void updateFormState_error_validIsFalseErrorIsNotNull() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -33,7 +33,7 @@ public class UpdateFormStateTest {
     }
 
     @Test
-    public void updateFormState_without_error() {
+    public void updateFormState_withoutError_validIsTrueErrorIsNull() {
         // Given
         boolean isValid = true;
         // When

@@ -23,7 +23,7 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentAccountBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
-import io.github.cchristou3.CyParking.ui.widgets.update.UpdateAccountDialog;
+import io.github.cchristou3.CyParking.ui.user.account.update.UpdateAccountDialog;
 
 /**
  * Purpose: <p>Going to get replaced with another Navigation option</p>

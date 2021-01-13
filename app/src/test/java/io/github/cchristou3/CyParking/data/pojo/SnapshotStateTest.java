@@ -9,7 +9,7 @@ import org.junit.Test;
 public class SnapshotStateTest {
 
     @Test
-    public void snapshotState_initialize_with_initial_data_retrieval_state() {
+    public void snapshotState_initializeWithInitialDataRetrievalState_returnsTheSameState() {
         // Given
         byte state = SnapshotState.INITIAL_DATA_RETRIEVAL;
         // When
@@ -19,7 +19,7 @@ public class SnapshotStateTest {
     }
 
     @Test
-    public void snapshotState_initialize_with_listening_to_changes_state() {
+    public void snapshotState_initializeWithListeningToChangesState_returnsTheSameState() {
         // Given
         byte state = SnapshotState.LISTENING_TO_DATA_CHANGES;
         // When
@@ -29,7 +29,7 @@ public class SnapshotStateTest {
     }
 
     @Test
-    public void setState_with_listening_to_changes_state() {
+    public void setState_listeningToChangesState_returns_returnsTheSameState() {
         // Given
         SnapshotState snapshotState = new SnapshotState(SnapshotState.INITIAL_DATA_RETRIEVAL);
         // When

@@ -1,11 +1,13 @@
 package io.github.cchristou3.CyParking.data.model.parking.lot;
 
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,15 +17,16 @@ import java.util.Random;
 
 import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
 
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.Availability.isCapacityValid;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.areSlotOffersValid;
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidCapacity;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidLotLatLng;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidLotName;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidPhoneNumber;
 
-/**
+/*
  * Unit tests for the {@link ParkingLot} class.
  */
+@RunWith(AndroidJUnit4.class)
 public class ParkingLotTest {
     ParkingLot parkingLot;
 
@@ -31,7 +34,7 @@ public class ParkingLotTest {
     // generateParkingId - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void generateParkingId_valid_parameters() {
+    public void generateParkingId_validParameters_returnsExpectedParkingID() {
         // Given
         parkingLot = new ParkingLot(new Parking.Coordinates(1, 2),
                 "11111111", "1@gmail.com", "name");
@@ -42,19 +45,19 @@ public class ParkingLotTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void generateParkingId_null_coordinates() {
+    public void generateParkingId_nullCoordinates_throwsException() {
         parkingLot = new ParkingLot(null,
                 "11111111", "1@gmail.com", "name");
     }
 
     @Test(expected = NumberFormatException.class)
-    public void generateParkingId_null_mobile() {
+    public void generateParkingId_nullMobile_throwsException() {
         parkingLot = new ParkingLot(new Parking.Coordinates(1, 2),
                 null, "1@gmail.com", "name");
     }
 
     @Test(expected = NumberFormatException.class)
-    public void generateParkingId_invalid_format_mobile() {
+    public void generateParkingId_invalidFormatMobile_throwsException() {
         parkingLot = new ParkingLot(new Parking.Coordinates(1, 2),
                 "sdsasdsa123", "1@gmail.com", "name");
     }
@@ -68,13 +71,13 @@ public class ParkingLotTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test
-    public void getAvailability_valid_values() {
+    public void getAvailability_validValues_returnsExpectedString() {
         // Given
         parkingLot = new ParkingLot();
         parkingLot.setCapacity(20);
         parkingLot.setAvailableSpaces(20);
         // When
-        String output = parkingLot.getAvailability(ApplicationProvider.getApplicationContext());
+        String output = parkingLot.getLotAvailability(ApplicationProvider.getApplicationContext());
         // Then
         Assert.assertEquals("Availability: 0/20", output);
     }
@@ -88,7 +91,7 @@ public class ParkingLotTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test(expected = EmptyStackException.class) // Then
-    public void getBestOffer_null_list() {
+    public void getBestOffer_nullList_throwsException() {
         // Given
         parkingLot = new ParkingLot();
         // When
@@ -96,7 +99,7 @@ public class ParkingLotTest {
     }
 
     @Test(expected = EmptyStackException.class) // Then
-    public void getBestOffer_no_offers() {
+    public void getBestOffer_noOffers_throwsException() {
         // Given
         parkingLot = new ParkingLot();
         parkingLot.setSlotOfferList(Collections.emptyList());
@@ -105,7 +108,7 @@ public class ParkingLotTest {
     }
 
     @Test
-    public void getBestOffer_one_offer() {
+    public void getBestOffer_oneOffer_returnsThatOffer() {
         // Given
         parkingLot = new ParkingLot();
         parkingLot.setSlotOfferList(new ArrayList<>(Arrays.asList(
@@ -118,7 +121,7 @@ public class ParkingLotTest {
     }
 
     @Test
-    public void getBestOffer_many_offers() {
+    public void getBestOffer_manyOffers_returnsExpectedOffer() {
         // Given
         parkingLot = new ParkingLot();
         parkingLot.setSlotOfferList(new ArrayList<>(Arrays.asList(
@@ -137,32 +140,32 @@ public class ParkingLotTest {
     // isValidPhoneNumber - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void isValidPhoneNumber_empty() {
+    public void isValidPhoneNumber_empty_returnsFalse() {
         Assert.assertFalse(isValidPhoneNumber(""));
     }
 
     @Test(expected = NullPointerException.class)
-    public void isValidPhoneNumber_null() {
+    public void isValidPhoneNumber_null__throwsException() {
         isValidPhoneNumber(null);
     }
 
     @Test
-    public void isValidPhoneNumber_with_chars() {
+    public void isValidPhoneNumber_withChars_returnsFalse() {
         Assert.assertFalse(isValidPhoneNumber("asdd"));
     }
 
     @Test
-    public void isValidPhoneNumber_too_small() {
+    public void isValidPhoneNumber_tooSmall_returnsFalse() {
         Assert.assertFalse(isValidPhoneNumber("12"));
     }
 
     @Test
-    public void isValidPhoneNumber_too_big() {
+    public void isValidPhoneNumber_tooBig_returnsFalse() {
         Assert.assertFalse(isValidPhoneNumber("999999999999999999"));
     }
 
     @Test
-    public void isValidPhoneNumber_valid_number() {
+    public void isValidPhoneNumber_valid8DigitNumber_returnsTrue() {
         Assert.assertTrue(isValidPhoneNumber("99999999"));
     }
 
@@ -174,18 +177,18 @@ public class ParkingLotTest {
     // isValidCapacity - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void isValidCapacity_zero_input() {
-        Assert.assertFalse(isValidCapacity(0));
+    public void isValidCapacity_zeroInput_returnsFalse() {
+        Assert.assertFalse(isCapacityValid(0));
     }
 
     @Test
-    public void isValidCapacity_negative_input() {
-        Assert.assertFalse(isValidCapacity(-2));
+    public void isValidCapacity_negativeInput_returnsFalse() {
+        Assert.assertFalse(isCapacityValid(-2));
     }
 
     @Test
-    public void isValidCapacity_valid_input() {
-        Assert.assertTrue(isValidCapacity(20));
+    public void isValidCapacity_validInput_returnsTrue() {
+        Assert.assertTrue(isCapacityValid(20));
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -196,27 +199,27 @@ public class ParkingLotTest {
     // isValidLotName - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void isValidLotName_with_null() {
+    public void isValidLotName_withNull_returnsFalse() {
         Assert.assertFalse(isValidLotName(null));
     }
 
     @Test
-    public void isValidLotName_with_empty() {
+    public void isValidLotName_withEmpty_returnsFalse() {
         Assert.assertFalse(isValidLotName(""));
     }
 
     @Test
-    public void isValidLotName_with_spaces() {
+    public void isValidLotName_withSpaces_returnsFalse() {
         Assert.assertFalse(isValidLotName("   "));
     }
 
     @Test
-    public void isValidLotName_small_name() {
+    public void isValidLotName_smallName_returnsFalse() {
         Assert.assertTrue(isValidLotName("1"));
     }
 
     @Test
-    public void isValidLotName_large_name() {
+    public void isValidLotName_largeName_returnsTrue() {
         Assert.assertTrue(isValidLotName("1234567890-sdfghj"));
     }
 
@@ -228,12 +231,12 @@ public class ParkingLotTest {
     // isValidLotLatLng - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void isValidLotLatLng_with_null() {
+    public void isValidLotLatLng_withNull_returnsFalse() {
         Assert.assertFalse(isValidLotLatLng(null));
     }
 
     @Test
-    public void isValidLotLatLng_with_non_null() {
+    public void isValidLotLatLng_withNonNull_returnsTrue() {
         Assert.assertTrue(isValidLotLatLng(new LatLng(1, 2)));
     }
     ///////////////////////////////////////////////////////////////////////////
@@ -244,60 +247,21 @@ public class ParkingLotTest {
     // AreSlotOffersValid - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void areSlotOffersValid_with_empty_list() {
+    public void areSlotOffersValid_withEmptyList_returnsFalse() {
         Assert.assertFalse(areSlotOffersValid(new ArrayList<>()));
     }
 
     @Test
-    public void areSlotOffersValid_with_null_list() {
+    public void areSlotOffersValid_withNullList_returnsFalse() {
         Assert.assertFalse(areSlotOffersValid(null));
     }
 
     @Test
-    public void areSlotOffersValid_with_valid_list() {
+    public void areSlotOffersValid_withValidList_returnsTrue() {
         Assert.assertTrue(areSlotOffersValid(new ArrayList<>(Collections
                 .singletonList(SlotOffer.getRandomInstance(new Random())))));
     }
     ///////////////////////////////////////////////////////////////////////////
     // AreSlotOffersValid - END
-    ///////////////////////////////////////////////////////////////////////////
-
-    ///////////////////////////////////////////////////////////////////////////
-    // AreAvailableSpacesValid - START
-    ///////////////////////////////////////////////////////////////////////////
-    @Test
-    public void areAvailableSpacesValid_negative_spaces() {
-        // Given
-        parkingLot = new ParkingLot();
-        parkingLot.setCapacity(20);
-        // When
-        boolean output = parkingLot.areAvailableSpacesValid(-1);
-        // Then
-        Assert.assertFalse(output);
-    }
-
-    @Test
-    public void areAvailableSpacesValid_spaces_greater_than_capacity() {
-        // Given
-        parkingLot = new ParkingLot();
-        parkingLot.setCapacity(20);
-        // When
-        boolean output = parkingLot.areAvailableSpacesValid(21);
-        // Then
-        Assert.assertFalse(output);
-    }
-
-    @Test
-    public void areAvailableSpacesValid_spaces_in_valid_range() {
-        // Given
-        parkingLot = new ParkingLot();
-        parkingLot.setCapacity(20);
-        // When
-        boolean output = parkingLot.areAvailableSpacesValid(13);
-        // Then
-        Assert.assertTrue(output);
-    }
-    ///////////////////////////////////////////////////////////////////////////
-    // AreAvailableSpacesValid - END
     ///////////////////////////////////////////////////////////////////////////
 }

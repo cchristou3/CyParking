@@ -50,7 +50,7 @@ import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
  * </p>
  *
  * @author Charalambos Christou
- * @version 6.0 28/12/20
+ * @version 7.0 12/01/21
  */
 public class HomeFragment extends Fragment implements Navigable, LocationHandler {
 
@@ -199,12 +199,12 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
         // Set up the Ui for the operator
         getBinding().fragmentHomeCvLotInfo.setVisibility(View.VISIBLE);
         // Initialize the OperatorViewModel
-        mOperatorViewModel = new ViewModelProvider(this).get(OperatorViewModel.class);
+        mOperatorViewModel = new ViewModelProvider(this,
+                new OperatorViewModelFactory()).get(OperatorViewModel.class);
         // Attach observer to update the view's parking lot info whenever it changes
         mOperatorViewModel.getParkingLotState().observe(getViewLifecycleOwner(),
                 this::updateLotContents); // Display the parking lot's contents
 
-        // Attach listener to "increment", "decrement" buttons
         if (mAuthStateViewModel.getUser() == null) return;
 
         String operatorId = mAuthStateViewModel.getUser().getUserId();
@@ -238,6 +238,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
 
                     // If the operator has registered a lot already, display its info
                     final ParkingLot userParkingLot = value.getDocuments().get(0).toObject(ParkingLot.class);
+                    if (userParkingLot == null) return;
 
                     // Get a reference to the document
                     final DocumentReference ref = value.getDocuments().get(0).getReference();
@@ -246,11 +247,10 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
                     HomeFragment.this.setUpOperatorButtons(ref, userParkingLot);
 
                     // Trigger parking lot update.
-                    if (userParkingLot != null) {
-                        Log.d(TAG, "getParkingLotInfo: userParkingLot != null");
-                        getBinding().fragmentHomeClRegisterLotInfo.setVisibility(View.VISIBLE);
-                        mOperatorViewModel.getParkingLotState().setValue(userParkingLot);
-                    }
+                    Log.d(TAG, "getParkingLotInfo: userParkingLot != null");
+                    getBinding().fragmentHomeClRegisterLotInfo.setVisibility(View.VISIBLE);
+                    mOperatorViewModel.updateLotState(userParkingLot);
+
                 });
         // Register it for lifecycle observation
         mDatabaseObserver.registerLifecycleObserver(getLifecycle());
@@ -265,9 +265,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
     private void updateLotContents(@NotNull ParkingLot userParkingLot) {
         checkVisibilityOfAppropriateLayout(View.VISIBLE, View.GONE);
         // Compose the TextViews' text that display the lot's name and capacity.
-        final String availability = HomeFragment.this.getString(R.string.availability) + " "
-                + (userParkingLot.getCapacity() - userParkingLot.getAvailableSpaces())
-                + "/" + userParkingLot.getCapacity();
+        final String availability = userParkingLot.getLotAvailability(requireContext());
         final String name = HomeFragment.this.getString(R.string.lot_name) + " " + userParkingLot.getLotName();
         // Update their texts with the above ones
         getBinding().fragmentHomeTxtLotCapacity.setText(availability);
@@ -314,6 +312,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      * @param userParkingLot The latest retrieved parking lot of the database.
      */
     private void setUpOperatorButtons(DocumentReference ref, ParkingLot userParkingLot) {
+        // Attach listeners to "increment", "decrement" buttons
         getBinding().fragmentHomeBtnIncrement.setOnClickListener(v -> {
             // If the lot has available spaces decrease its value by one
             // E.g. 40/40 -> do nothing

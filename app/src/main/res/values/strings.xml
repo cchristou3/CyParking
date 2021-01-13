@@ -156,5 +156,6 @@
 
     <!-- String related to test cases   -->
     <string name="any_error">Error</string>
+    <string name="any">Any</string>
 
 </resources>

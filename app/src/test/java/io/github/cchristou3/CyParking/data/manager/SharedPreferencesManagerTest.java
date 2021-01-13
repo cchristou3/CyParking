@@ -3,9 +3,11 @@ package io.github.cchristou3.CyParking.data.manager;
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import java.util.Arrays;
 /**
  * Unit tests for the {@link SharedPreferencesManager}.
  */
+@RunWith(AndroidJUnit4.class)
 public class SharedPreferencesManagerTest {
 
     private final Context context = ApplicationProvider.getApplicationContext();
@@ -23,7 +26,7 @@ public class SharedPreferencesManagerTest {
     // setValue - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void set_get_Value_valid_key() {
+    public void setGetValue_setValidPairKeyValue_returnsTheSame() {
         // Given
         ArrayList<String> input = new ArrayList<>(Arrays.asList("1", "2"));
         String key = "key";
@@ -34,7 +37,7 @@ public class SharedPreferencesManagerTest {
     }
 
     @Test
-    public void set_get_Value_empty_key() {
+    public void setGetValue_emptyKey_returnsTheSame() {
         // Given
         ArrayList<String> input = new ArrayList<>(Arrays.asList("1", "2"));
         String key = "";
@@ -45,7 +48,7 @@ public class SharedPreferencesManagerTest {
     }
 
     @Test
-    public void set_get_Value_null_key() {
+    public void setGetValue_nullKey_returnsTheSame() {
         // Given
         ArrayList<String> input = new ArrayList<>(Arrays.asList("1", "2"));
         String key = null;
@@ -56,16 +59,16 @@ public class SharedPreferencesManagerTest {
     }
 
     @Test(expected = NullPointerException.class) // Then
-    public void set_get_Value_null_value_expect_nullpointerexception() {
+    public void setValue_nullValue_throwsException() {
         // Given
-        ArrayList<String> input = null;// new ArrayList<>(Arrays.asList("1", "2"));
+        ArrayList<String> input = null;
         String key = null;
         // When
         manager.setValue(key, input);
     }
 
     @Test
-    public void set_get_Value_value_empty_list() {
+    public void setGetValue_valueEmptyList_returnsEmptyList() {
         // Given
         ArrayList<String> input = new ArrayList<>();
         String key = null;
@@ -83,7 +86,7 @@ public class SharedPreferencesManagerTest {
     // destroySharedPreferencesManager - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void destroySharedPreferencesManager() {
+    public void destroySharedPreferencesManager_removesAllPairs() {
         // Given
         ArrayList<String> input = new ArrayList<>();
         String key = null;

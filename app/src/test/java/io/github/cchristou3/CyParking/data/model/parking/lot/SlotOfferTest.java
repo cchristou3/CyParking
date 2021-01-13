@@ -14,22 +14,22 @@ public class SlotOfferTest {
     // SlotOffer(float,float) - START
     ///////////////////////////////////////////////////////////////////////////
     @Test(expected = IllegalArgumentException.class)
-    public void slotOffer_zero_duration() {
+    public void slotOffer_zeroDuration_throwsException() {
         new SlotOffer(0, 2);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void slotOffer_negative_duration() {
+    public void slotOffer_negativeDuration_throwsException() {
         new SlotOffer(-1, 2);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void slotOffer_zero_price() {
+    public void slotOffer_zeroPrice_throwsException() {
         new SlotOffer(2, 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void slotOffer_negative_price() {
+    public void slotOffer_negativePrice_throwsException() {
         new SlotOffer(2, -1);
     }
     ///////////////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ public class SlotOfferTest {
     // getRandomInstance - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void getRandomInstance_never_nulls() {
+    public void getRandomInstance_neverReturnsNulls_true() {
         Random random = new Random();
         for (int i = 0; i < 20; i++) {
             Assert.assertNotNull(SlotOffer.getRandomInstance(random));
@@ -55,7 +55,7 @@ public class SlotOfferTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test
-    public void toString_valid_return() {
+    public void toString_validObject_returnExpectedString() {
         // Given
         SlotOffer slotOffer = new SlotOffer(1, 1);
         // When
@@ -71,7 +71,7 @@ public class SlotOfferTest {
     // getRatio - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void getRatio_duration_price_are_same() {
+    public void getRatio_durationPriceAreSame_returnOne() {
         // Given
         SlotOffer slotOffer = new SlotOffer(1, 1);
         // When
@@ -81,17 +81,17 @@ public class SlotOfferTest {
     }
 
     @Test
-    public void getRatio_duration_greater_than_price() {
+    public void getRatio_durationGreaterThanPrice_returnsSmallerThanOne() {
         // Given
         SlotOffer slotOffer = new SlotOffer(2, 1);
         // When
         float ratio = slotOffer.getRatio();
         // Then
-        Assert.assertEquals(0.f, ratio, 0.5f);
+        Assert.assertEquals(0.5f, ratio, 0.5f);
     }
 
     @Test
-    public void getRatio_price_greater_than_duration() {
+    public void getRatio_priceGreaterThanDuration_returnsGreaterThanOne() {
         // Given
         SlotOffer slotOffer = new SlotOffer(1, 2);
         // When
@@ -107,7 +107,7 @@ public class SlotOfferTest {
     // smallerOf - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void smallerOf_with_null() {
+    public void smallerOf_null_returnsNonNullObject() {
         // Given
         SlotOffer a = new SlotOffer(1, 2);
         SlotOffer b = null;
@@ -118,7 +118,7 @@ public class SlotOfferTest {
     }
 
     @Test
-    public void smallerOf_with_a_smaller_b() {
+    public void smallerOf_aSmallerB_returnsTrueForA() {
         // Given
         SlotOffer a = new SlotOffer(1, 2);
         SlotOffer b = new SlotOffer(2, 2);
@@ -129,14 +129,14 @@ public class SlotOfferTest {
     }
 
     @Test
-    public void smallerOf_with_b_smaller_a() {
+    public void smallerOf_bSmallerA_returnsTrueForB() {
         // Given
         SlotOffer a = new SlotOffer(2, 2);
         SlotOffer b = new SlotOffer(1, 2);
         // When
-        boolean AsmallerOfB = a.smallerOf(b);
+        boolean BsmallerOfA = a.smallerOf(b);
         // Then
-        Assert.assertTrue(AsmallerOfB);
+        Assert.assertTrue(BsmallerOfA);
     }
     ///////////////////////////////////////////////////////////////////////////
     // smallerOf - END

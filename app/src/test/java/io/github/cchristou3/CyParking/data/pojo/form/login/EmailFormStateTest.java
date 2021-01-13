@@ -14,17 +14,17 @@ import static org.junit.Assert.assertFalse;
 public class EmailFormStateTest {
 
     @Test
-    public void emailFormState_passing_true() {
+    public void emailFormState_passingTrue_returnsTrue() {
         Assert.assertTrue(new EmailFormState(true).isDataValid());
     }
 
     @Test
-    public void emailFormState_passing_false() {
+    public void emailFormState_passingFalse_returnsFalse() {
         assertFalse(new EmailFormState(false).isDataValid());
     }
 
     @Test
-    public void updateFormState_with_error() {
+    public void updateFormState_error_errorNotNullInvalid() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -34,7 +34,7 @@ public class EmailFormStateTest {
     }
 
     @Test
-    public void updateFormState_without_error() {
+    public void updateFormState_withoutError_errorIsNullValidIsTrue() {
         // Given
         boolean isValid = true;
         // When

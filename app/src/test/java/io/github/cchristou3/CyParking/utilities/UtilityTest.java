@@ -26,7 +26,7 @@ public class UtilityTest {
     // dateToString(int, int, int) - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void dateToString_with_valid_ymd_values() {
+    public void dateToString_validYMD_returnsSameYMD() {
         // Given
         int year = 2020, month = 11, day = 20;
         // When
@@ -35,9 +35,9 @@ public class UtilityTest {
         Assert.assertEquals("20-11-2020", output);
     }
 
-
+    // subjectUnderTest_actionOrInput_resultState
     @Test(expected = IllegalArgumentException.class) // Then
-    public void dateToString_with_month_over_12() {
+    public void dateToString_monthOver12_throwsException() {
         // Given
         int year = 2020, month = 13, day = 20;
         // When
@@ -45,7 +45,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class) // Then
-    public void dateToString_with_negative_month() {
+    public void dateToString_negativeMonth_throwsException() {
         // Given
         int year = 2020, month = -10, day = 20;
         // When
@@ -53,7 +53,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class)// Then
-    public void dateToString_with_day_over_21() {
+    public void dateToString_dayOver21_throwsException() {
         // Given
         int year = 2020, month = 10, day = 32;
         // When
@@ -61,7 +61,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class)// Then
-    public void dateToString_with_negative_day() {
+    public void dateToString_negativeDay_throwsException() {
         // Given
         int year = 2020, month = 10, day = -20;
         // When
@@ -77,7 +77,7 @@ public class UtilityTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test
-    public void testDateToString_with_zero_time() {
+    public void testDateToString_zeroTime_returnsFirstDate() {
         // Given
         Date input = new Date(0);
         // When
@@ -95,12 +95,12 @@ public class UtilityTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test
-    public void getCurrentDate_greater_or_equals_to_todays_date() {
+    public void getCurrentDate_greaterOrEqualsToTodayDate_returnsNumberGreaterOrEqualToZero() {
         Assert.assertFalse(getCurrentDate().compareTo(new Date()) >= 0);
     }
 
     @Test
-    public void getCurrentDate_greater_than_date_of_time_zero() {
+    public void getCurrentDate_greaterThanDateOfTimeZero_returnsNegativeNumber() {
         Assert.assertFalse(getCurrentDate().compareTo(new Date(0)) < 0);
     }
 
@@ -113,7 +113,7 @@ public class UtilityTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test(expected = ParseException.class) // Then
-    public void fromStringToDate_invalid_input_format() throws ParseException {
+    public void fromStringToDate_invalidInputFormat_throwsException() throws ParseException {
         // Given
         String input = "12//////12/12";
         // When
@@ -121,7 +121,7 @@ public class UtilityTest {
     }
 
     @Test
-    public void fromStringToDate_valid_input_format() throws ParseException {
+    public void fromStringToDate_validInputFormat_returnsExpectedString() throws ParseException {
         // Given
         String input = "08-01-2021";
         // When
@@ -139,7 +139,7 @@ public class UtilityTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test
-    public void isNearbyUser_in_same_position() {
+    public void isNearbyUser_inSamePosition_returnsTrue() {
         // Given
         LatLng latLng1 = new LatLng(1.00002D, 1.00002D);
         double lat2 = 1.00002D;
@@ -151,7 +151,7 @@ public class UtilityTest {
     }
 
     @Test
-    public void isNearbyUser_out_of_range() {
+    public void isNearbyUser_outOfRange_returnsFalse() {
         // Given
         LatLng latLng1 = new LatLng(2.00002D, 2.00002D);
         double lat2 = 1.00002D;
@@ -171,7 +171,7 @@ public class UtilityTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test
-    public void getTimeOf_single_digit_input() {
+    public void getTimeOf_singleDigitInput_returnsExpectedString() {
         // Given
         int hours = 1, minutes = 1;
         // When
@@ -181,7 +181,7 @@ public class UtilityTest {
     }
 
     @Test
-    public void getTimeOf_double_digit_input() {
+    public void getTimeOf_doubleDigitInput_returnsExpectedString() {
         // Given
         int hours = 10, minutes = 12;
         // When
@@ -191,7 +191,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class)// Then
-    public void getTimeOf_greater_hours() {
+    public void getTimeOf_greaterHours_throwsException() {
         // Given
         int hours = 24, minutes = 12;
         // When
@@ -199,7 +199,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class)// Then
-    public void getTimeOf_negative_hours() {
+    public void getTimeOf_negativeHours_throwsException() {
         // Given
         int hours = -1, minutes = 12;
         // When
@@ -207,7 +207,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class)// Then
-    public void getTimeOf_greater_minutes() {
+    public void getTimeOf_greaterMinutes_throwsException() {
         // Given
         int hours = 20, minutes = 60;
         // When
@@ -215,7 +215,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class)// Then
-    public void getTimeOf_negative_minutes() {
+    public void getTimeOf_negativeMinutes_throwsException() {
         // Given
         int hours = 1, minutes = -1;
         // When
@@ -231,7 +231,7 @@ public class UtilityTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test
-    public void getDateOf_with_valid_parameters() {
+    public void getDateOf_validParameters_returnsExpectedString() {
         // Given
         int[] years = {2001, 2020, 1950}, months = {1, 12, 4}, days = {1, 5, 8};
         String[] expectedDates = {"Mon Jan 01 00:00:00 EET 2001", "Sat Dec 05 00:00:00 EET 2020", "Sat Apr 08 00:00:00 EET 1950"};
@@ -254,7 +254,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class) // Then
-    public void getDateOf_with_zero_year() {
+    public void getDateOf_zeroYear_throwsException() {
         // Given
         int year = 0, month = 10, day = 20;
 
@@ -263,7 +263,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class) // Then
-    public void getDateOf_with_negative_year() {
+    public void getDateOf_negativeYear_throwsException() {
         // Given
         int year = -10, month = 10, day = 20;
 
@@ -272,7 +272,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class) // Then
-    public void getDateOf_with_large_month() {
+    public void getDateOf_largeMonth_throwsException() {
         // Given
         int year = 10, month = 30, day = 20;
 
@@ -281,7 +281,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class) // Then
-    public void getDateOf_with_zero_month() {
+    public void getDateOf_zeroMonth_throwsException() {
         // Given
         int year = 10, month = 0, day = 20;
 
@@ -290,7 +290,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class) // Then
-    public void getDateOf_with_greater_day() {
+    public void getDateOf_greaterDay_throwsException() {
         // Given
         int year = 10, month = 10, day = 40;
 
@@ -299,7 +299,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class) // Then
-    public void getDateOf_with_zero_day() {
+    public void getDateOf_zeroDay_throwsException() {
         // Given
         int year = 10, month = 10, day = 0;
 
@@ -316,7 +316,7 @@ public class UtilityTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test
-    public void getVolume_valid_parameters() {
+    public void getVolume_validParameters_returnsExpectedArray() {
         // Given
         float multiplicand = 1;
         int startFrom = 0, endTo = 3;
@@ -327,7 +327,7 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class) // Then
-    public void getVolume_invalid_endTo() {
+    public void getVolume_invalidEndTo_throwsException() {
         // Given
         float multiplicand = 1;
         int startFrom = 0, endTo = -3;
@@ -344,27 +344,27 @@ public class UtilityTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkIfFieldsValid_invalid_year() {
+    public void checkIfFieldsValid_invalidYear_throwsException() {
         checkIfFieldsValid(0, 2, 3);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkIfFieldsValid_greater_month() {
+    public void checkIfFieldsValid_greaterMonth_throwsException() {
         checkIfFieldsValid(1, 13, 3);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkIfFieldsValid_smaller_month() {
+    public void checkIfFieldsValid_smallerMonth_throwsException() {
         checkIfFieldsValid(1, 0, 3);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkIfFieldsValid_greater_day() {
+    public void checkIfFieldsValid_greaterDay_throwsException() {
         checkIfFieldsValid(1, 12, 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkIfFieldsValid_smaller_day() {
+    public void checkIfFieldsValid_smallerDay_throwsException() {
         checkIfFieldsValid(1, 1, 32);
     }
 
@@ -378,22 +378,22 @@ public class UtilityTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkIfFieldsValid_greater_hour() {
+    public void checkIfFieldsValid_greaterHour_throwsException() {
         checkIfFieldsValid(24, 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkIfFieldsValid_smaller_hour() {
+    public void checkIfFieldsValid_smallerHour_throwsException() {
         checkIfFieldsValid(-1, 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkIfFieldsValid_greater_minute() {
+    public void checkIfFieldsValid_greaterMinute_throwsException() {
         checkIfFieldsValid(1, 60);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkIfFieldsValid_smaller_minute() {
+    public void checkIfFieldsValid_smallerMinute_throwsException() {
         checkIfFieldsValid(1, -1);
     }
 

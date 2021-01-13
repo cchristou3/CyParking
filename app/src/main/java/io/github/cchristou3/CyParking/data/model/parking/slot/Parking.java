@@ -135,11 +135,7 @@ public class Parking implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        return "Id: " + parkingID
-                + ", coordinates: { "
-                + "latitude:" + coordinates.latitude
-                + ", longitude:" + coordinates.longitude
-                + " }";
+        return "Id: " + parkingID + ", " + coordinates.toString();
     }
 
     /**
@@ -185,6 +181,19 @@ public class Parking implements Parcelable {
             longitude = in.readDouble();
         }
 
+        /**
+         * Returns a string representation of the object.
+         *
+         * @return a string representation of the object.
+         */
+        @NotNull
+        @Override
+        public String toString() {
+            return "coordinates: { "
+                    + "latitude:" + latitude
+                    + ", longitude:" + longitude
+                    + " }";
+        }
 
         /**
          * @see Parking#writeToParcel

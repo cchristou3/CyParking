@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class ShaUtilityTest {
 
     @Test
-    public void digest_hash_works_as_expected() {
+    public void digest_hash1_returnsExpectedDigest() {
         // Given
         String input = "1";
 
@@ -23,7 +23,7 @@ public class ShaUtilityTest {
     }
 
     @Test
-    public void digest_hash_empty() {
+    public void digest_hashEmpty_returnsExpectedDigest() {
         // Given
         String input = "";
 
@@ -35,7 +35,7 @@ public class ShaUtilityTest {
     }
 
     @Test
-    public void digest_hash_with_null() {
+    public void digest_hashNull_returnsNull() {
         // Given
         String input = null;
 
@@ -47,7 +47,7 @@ public class ShaUtilityTest {
     }
 
     @Test
-    public void bytesToHex_with_normal_values() {
+    public void bytesToHex_zerosBytes_returnsZeros() {
         // Given
         byte[] input = new byte[10];
         Arrays.fill(input, (byte) 0);
@@ -60,7 +60,7 @@ public class ShaUtilityTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void bytesToHex_with_null() {
+    public void bytesToHex_withNull_throwsException() {
         // Given
         byte[] input = null;
 

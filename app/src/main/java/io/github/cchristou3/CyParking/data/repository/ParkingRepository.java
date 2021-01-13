@@ -5,7 +5,6 @@ import android.util.Log;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
@@ -25,20 +24,9 @@ import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragm
  * Purpose: <p>contain all methods to access the (cloud / local) database's parking nodes.</p>
  *
  * @author Charalambos Christou
- * @version 6.0 28/12/20
+ * @version 7.0 12/01/21
  */
-public class ParkingRepository {
-
-    // Firebase Firestore paths (nodes)
-    public static final String PARKING_LOTS = "parking_lots";
-    public static final String BOOKING = "bookings";
-    // Keys related to the database fields
-    public static final String OPERATOR_EMAIL = "operatorEmail";
-    private static final String USER_ID = "userID";
-    private static final String BOOKING_USER_ID = "bookingUserId";
-    private static final String COMPLETED = "completed";
-    private static final String AVAILABLE_SPACES = "availableSpaces";
-    private static final String OPERATOR_ID = "operatorId";
+public final class ParkingRepository extends RepositoryData {
 
     /**
      * Returns the bookings of the specified userId,
@@ -176,36 +164,6 @@ public class ParkingRepository {
     public static DocumentReference observeParkingLot(@NotNull ParkingLot selectedParking) {
         return FirebaseFirestore.getInstance().collection(PARKING_LOTS)
                 .document(selectedParking.generateUniqueId());
-    }
-
-    /**
-     * Returns the operator's parking lot based on his/hers id.
-     *
-     * @param operatorId The id of the operator.
-     * @return A query that returns the parking lot of the operator with the specified id.
-     */
-    @NotNull
-    public static Query observeParkingLot(String operatorId) {
-        return observeAllParkingLots()
-                .whereEqualTo(OPERATOR_ID, operatorId).limit(1L);
-    }
-
-    /**
-     * Increases the the number of available spaces of the current lot reference.
-     *
-     * @param lotReference A DocumentReference of the lot
-     */
-    public static void incrementAvailableSpacesOf(@NotNull final DocumentReference lotReference) {
-        lotReference.update(AVAILABLE_SPACES, FieldValue.increment(1));
-    }
-
-    /**
-     * Decreases the the number of available spaces of the current lot reference.
-     *
-     * @param lotReference A DocumentReference of the lot
-     */
-    public static void decrementAvailableSpacesOf(@NotNull final DocumentReference lotReference) {
-        lotReference.update(AVAILABLE_SPACES, FieldValue.increment(-1));
     }
 
     /**

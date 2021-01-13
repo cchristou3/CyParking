@@ -15,8 +15,8 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormState;
 import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.Availability.isCapacityValid;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.areSlotOffersValid;
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidCapacity;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidLotLatLng;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidLotName;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidPhoneNumber;
@@ -73,7 +73,7 @@ public class RegisterLotViewModel extends ViewModel {
         } else if (!isValidLotName(lotName)) {
             mRegisterLotFormState.setValue(new RegisterLotFormState(null,
                     R.string.lot_name_error, null, null, null));
-        } else if (!isValidCapacity(lotCapacity)) {
+        } else if (!isCapacityValid(lotCapacity)) {
             mRegisterLotFormState.setValue(new RegisterLotFormState(null,
                     null, R.string.lot_capacity_error, null, null));
         } else if (!isValidLotLatLng(lotLatLng)) {

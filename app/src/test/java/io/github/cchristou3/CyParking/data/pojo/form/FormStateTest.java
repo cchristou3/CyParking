@@ -11,12 +11,12 @@ import static org.junit.Assert.assertFalse;
 public class FormStateTest {
 
     @Test
-    public void formState_passing_true() {
+    public void formState_passingTrue_returnsTrue() {
         Assert.assertTrue(new FormState(true).isDataValid());
     }
 
     @Test
-    public void formState_passing_false() {
+    public void formState_passingFalse_returnsFalse() {
         assertFalse(new FormState(false).isDataValid());
     }
 }

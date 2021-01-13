@@ -2,6 +2,7 @@ package io.github.cchristou3.CyParking.data.model.parking.lot;
 
 import android.content.Context;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
@@ -15,7 +16,6 @@ import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Random;
-import java.util.regex.Pattern;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
@@ -37,7 +37,7 @@ import io.github.cchristou3.CyParking.utilities.ShaUtility;
  * {@link #coordinates}, its {@link #parkingID} and its {@link #lotName}.
  *
  * @author Charalambos Christou
- * @version 7.0 02/01/21
+ * @version 8.0 12/01/21
  */
 public class ParkingLot extends Parking {
 
@@ -59,18 +59,15 @@ public class ParkingLot extends Parking {
     private String operatorId;
     @SerializedName("operatorMobileNumber")
     private String operatorMobileNumber;
-    @SerializedName("capacity")
-    private int capacity;
-    @SerializedName("availableSpaces")
-    private int availableSpaces;
-    @SerializedName("capacityForDisabled")
-    private int capacityForDisabled;
-    @SerializedName("availableSpacesForDisabled")
-    private int availableSpacesForDisabled;
+    @SerializedName("availability")
+    private Availability availability;
     @SerializedName("slotOfferList")
     private List<SlotOffer> slotOfferList;
 
-    public ParkingLot() { /* no-argument constructor to be used for deserialization */ }
+    /* no-argument constructor to be used for deserialization */
+    public ParkingLot() {
+        this.availability = new Availability();
+    }
 
     /**
      * Public Constructor.
@@ -86,21 +83,19 @@ public class ParkingLot extends Parking {
             @NonNull Coordinates coordinates, @NonNull String operatorMobileNumber,
             @NonNull String email, @NonNull String lotName
     ) {
-        super(coordinates, 0);
+        super();
+        this.setCoordinates(coordinates);
         this.setParkingID(generateParkingId(coordinates, operatorMobileNumber));
         this.operatorId = email;
         this.lotName = lotName;
         this.operatorMobileNumber = operatorMobileNumber;
-        this.availableSpacesForDisabled = 0;
-        this.capacityForDisabled = 0;
+        this.availability = new Availability();
         this.slotOfferList = new ArrayList<>();
+        // Generate a random list of slot offers
         final Random generator = new Random();
         for (int i = 0; i < generator.nextInt(5 + 1) + 1; i++) {
             this.slotOfferList.add(SlotOffer.getRandomInstance(generator));
         }
-
-        this.capacity = generator.nextInt(60 + 10) + 10;
-        this.availableSpaces = this.capacity;
     }
 
     /**
@@ -108,35 +103,25 @@ public class ParkingLot extends Parking {
      * Initialize all the attributes of the class with the given arguments.
      * Besides, the {@link #parkingID} is generated and set.
      *
-     * @param coordinates                The position of the lot.
-     * @param lotName                    The lot's name.
-     * @param operatorId                 The lot's operator's email address.
-     * @param operatorMobileNumber       The lot's operator's phone number.
-     * @param capacity                   The lot's capacity.
-     * @param capacityForDisabled        The lot's capacity for disabled people.
-     * @param availableSpacesForDisabled The lot's available spaces for disabled people.
-     * @param slotOfferList              The lot's offers.
+     * @param coordinates          The position of the lot.
+     * @param lotName              The lot's name.
+     * @param operatorId           The lot's operator's email address.
+     * @param operatorMobileNumber The lot's operator's phone number.
+     * @param capacity             The lot's capacity.
+     * @param slotOfferList        The lot's offers.
      * @throws IllegalArgumentException If the capacity is invalid, or the available spaces are not
      *                                  in the bounds of the capacity's value.
      */
-    public ParkingLot(Coordinates coordinates, String lotName, String operatorId, String operatorMobileNumber,
-                      int capacity, int capacityForDisabled, int availableSpacesForDisabled,
-                      List<SlotOffer> slotOfferList) throws IllegalArgumentException, IllegalArgumentException {
+    public ParkingLot(
+            Coordinates coordinates, String lotName, String operatorId,
+            String operatorMobileNumber, int capacity, List<SlotOffer> slotOfferList
+    ) throws IllegalArgumentException {
         super(coordinates, 0);
-        if (!isValidCapacity(capacity)) {
-            throw new IllegalArgumentException("Capacity cannot be equal or less than 0.");
-        }
-        if (!areAvailableSpacesValid(availableSpaces)) {
-            throw new IllegalArgumentException("The available spaces must be in range of 0..capacity (inclusive).");
-        }
         this.setParkingID(generateParkingId(coordinates, operatorMobileNumber));
         this.lotName = lotName;
         this.operatorId = operatorId;
         this.operatorMobileNumber = operatorMobileNumber;
-        this.capacity = capacity;
-        this.availableSpaces = capacity;
-        this.capacityForDisabled = capacityForDisabled;
-        this.availableSpacesForDisabled = availableSpacesForDisabled;
+        this.availability = new Availability(capacity, capacity).checkIfValid();
         this.slotOfferList = slotOfferList;
     }
 
@@ -152,10 +137,7 @@ public class ParkingLot extends Parking {
         lotName = in.readString();
         operatorId = in.readString();
         operatorMobileNumber = in.readString();
-        capacity = in.readInt();
-        availableSpaces = in.readInt();
-        capacityForDisabled = in.readInt();
-        availableSpacesForDisabled = in.readInt();
+        availability = Availability.CREATOR.createFromParcel(in);
 
         slotOfferList = new ArrayList<>();
         int size = in.readInt();
@@ -164,29 +146,45 @@ public class ParkingLot extends Parking {
         }
     }
 
-    // Validation methods
-    public static boolean isValidPhoneNumber(final String mobileNumber) {
-        return Pattern.compile("^\\d{8}$").matcher(mobileNumber).matches();
+    /**
+     * Check whether the given mobile number is valid.
+     *
+     * @param mobileNumber The mobile number to be validated.
+     * @return True, if it consists of 8 digits. Otherwise, false.
+     */
+    public static boolean isValidPhoneNumber(@NotNull final String mobileNumber) {
+        return mobileNumber.length() == 8; //Pattern.compile("^\\d{8}$").matcher(mobileNumber).matches();
+        // TODO: 12/01/2021 Add appropriate pattern
     }
 
-    public static boolean isValidCapacity(final int lotCapacity) {
-        return lotCapacity > 0;
-    }
-
+    /**
+     * Check whether the given lot name is valid.
+     *
+     * @param lotName The lot name to be validated.
+     * @return True, if it non-null and non-empty. Otherwise, false.
+     */
     public static boolean isValidLotName(final String lotName) {
         return lotName != null && !lotName.trim().isEmpty();
     }
 
+    /**
+     * Check whether the given latitude and longitude are valid.
+     *
+     * @param lotLatLng The latitude and longitude to be validated.
+     * @return True, if it non-null. Otherwise, false.
+     */
     public static boolean isValidLotLatLng(final LatLng lotLatLng) {
         return lotLatLng != null;
     }
 
+    /**
+     * Check whether the given slot offer list are valid.
+     *
+     * @param slotOfferList The slot offer list to be validated.
+     * @return True, if it non-null and non-empty. Otherwise, false.
+     */
     public static boolean areSlotOffersValid(@NotNull final List<SlotOffer> slotOfferList) {
-        return slotOfferList != null && slotOfferList.size() > 0;
-    }
-
-    public boolean areAvailableSpacesValid(final int availableSpaces) {
-        return availableSpaces > 0 && availableSpaces <= this.capacity;
+        return slotOfferList != null && !slotOfferList.isEmpty();
     }
 
     /**
@@ -202,10 +200,7 @@ public class ParkingLot extends Parking {
         dest.writeString(lotName);
         dest.writeString(operatorId);
         dest.writeString(operatorMobileNumber);
-        dest.writeInt(capacity);
-        dest.writeInt(availableSpaces);
-        dest.writeInt(capacityForDisabled);
-        dest.writeInt(availableSpacesForDisabled);
+        availability.writeToParcel(dest, flags);
 
         int size = slotOfferList.size();
         dest.writeInt(size);
@@ -234,40 +229,9 @@ public class ParkingLot extends Parking {
                 "lotName: " + lotName + ", "
                 + "operatorId: " + operatorId + ", "
                 + "operatorMobileNumber: " + operatorMobileNumber + ", "
-                + "capacity: " + capacity + ", "
-                + "availableSpaces: " + availableSpaces + ", "
-                + "capacityForDisabled: " + capacityForDisabled + ", "
-                + "availableSpacesForDisabled: " + availableSpacesForDisabled + ", "
+                + "availability: " + availability + ", "
                 + "slotOfferList: " + slotOfferList;
 
-    }
-
-    /**
-     * Access the latitude of {@link Parking.Coordinates}.
-     * Note: @Exclude annotation is used to inform Firebase not
-     * not map this field during (De/)Serialization, it already exists in
-     * {@link Coordinates}. Omitting it would result into duplication of those
-     * fields.
-     *
-     * @return The latitude of the lot's coordinate.
-     */
-    @Exclude
-    public double getLatitude() {
-        return coordinates.getLatitude();
-    }
-
-    /**
-     * Access the longitude of {@link Parking.Coordinates}.
-     * Note: @Exclude annotation is used to inform Firebase not
-     * not map this field during (De/)Serialization, it already exists in
-     * {@link Coordinates}. Omitting it would result into duplication of those
-     * fields.
-     *
-     * @return The longitude of the lot's coordinate.
-     */
-    @Exclude
-    public double getLongitude() {
-        return coordinates.getLongitude();
     }
 
     /**
@@ -302,6 +266,132 @@ public class ParkingLot extends Parking {
         double lng = lotCoordinates.getLongitude() * 1000000; // and cast it to an integer
         // E.g. 33.62356 * 1000000 -> (int)336235.6 -> 336235
         return (int) (Integer.parseInt(mobileNumber) + lat + lng);
+    }
+
+
+    /**
+     * Access the latitude of {@link Parking.Coordinates}.
+     * Note: @Exclude annotation is used to inform Firebase to not
+     * map this field during (De/)Serialization, it already exists in
+     * {@link Coordinates}. Omitting it would result into duplication of those
+     * fields.
+     *
+     * @return The latitude of the lot's coordinate.
+     */
+    @Exclude
+    public double getLatitude() {
+        return coordinates.getLatitude();
+    }
+
+    /**
+     * Access the longitude of {@link Parking.Coordinates}.
+     * Note: @Exclude annotation is used to inform Firebase to
+     * not map this field during (De/)Serialization, it already exists in
+     * {@link Coordinates}. Omitting it would result into duplication of those
+     * fields.
+     *
+     * @return The longitude of the lot's coordinate.
+     */
+    @Exclude
+    public double getLongitude() {
+        return coordinates.getLongitude();
+    }
+
+    /**
+     * Invokes {@link #availability#getAvailability()} method.
+     *
+     * @return The string representation of the lot's availability.
+     * @see #availability#getAvailability()
+     */
+    @Exclude
+    public String getLotAvailability(@NotNull Context context) {
+        return availability.getAvailability(context);
+    }
+
+    /**
+     * Get the capacity of the parking lot.
+     *
+     * @return The {@link #availability#capacity}.
+     */
+    @Exclude
+    public int getAvailableSpaces() {
+        return availability.availableSpaces;
+    }
+
+    /**
+     * Assign the valie of {@link #availability#availableSpaces}
+     * to the given argument.
+     *
+     * @param availableSpaces The new availableSpaces of the lot.
+     */
+    @Exclude
+    public void setAvailableSpaces(int availableSpaces) {
+        availability.availableSpaces = availableSpaces;
+    }
+
+    /**
+     * Get the availableSpaces of this parking lot.
+     *
+     * @return The {@link #availability#availableSpaces}.
+     */
+    @Exclude
+    public int getCapacity() {
+        return availability.capacity;
+    }
+
+    /**
+     * Assign the valie of {@link #availability#capacity}
+     * to the given argument.
+     *
+     * @param capacity The new capacity of the lot.
+     */
+    @Exclude
+    public void setCapacity(int capacity) {
+        availability.capacity = capacity;
+    }
+
+    /**
+     * Looks for the most beneficial {@link SlotOffer} of the
+     * {@link #slotOfferList}.
+     *
+     * @return The {@link SlotOffer} instance with the smallest ratio
+     * of {@link #slotOfferList}.
+     */
+    @Exclude
+    public SlotOffer getBestOffer() {
+        if (!areSlotOffersValid(slotOfferList)) {
+            throw new EmptyStackException();
+        }
+        if (slotOfferList.size() == 1) {
+            return slotOfferList.get(0);
+        }
+
+        SlotOffer bestOffer = slotOfferList.get(0);
+        for (int i = 1; i < slotOfferList.size(); i++) {
+            if (slotOfferList.get(i).smallerOf(bestOffer)) {
+                bestOffer = slotOfferList.get(i);
+            }
+        }
+        return bestOffer;
+    }
+
+    /**
+     * Get the availability of this parking lot.
+     *
+     * @return The {@link ParkingLot#availability}.
+     */
+    public Availability getAvailability() {
+        return availability;
+    }
+
+    /**
+     * Assign the {@link ParkingLot#availability} with the specified
+     * argument.
+     *
+     * @param availability The number of hours
+     */
+    public void setAvailability(Availability availability) {
+        this.availability = availability;
     }
 
     /**
@@ -362,82 +452,6 @@ public class ParkingLot extends Parking {
     }
 
     /**
-     * Get the capacity of this parking lot.
-     *
-     * @return The {@link ParkingLot#capacity}.
-     */
-    public int getCapacity() {
-        return capacity;
-    }
-
-    /**
-     * Assign the {@link ParkingLot#capacity} with the specified
-     * argument.
-     *
-     * @param capacity The number of hours
-     */
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
-    }
-
-    /**
-     * Get the availableSpaces of this parking lot.
-     *
-     * @return The {@link ParkingLot#availableSpaces}.
-     */
-    public int getAvailableSpaces() {
-        return availableSpaces;
-    }
-
-    /**
-     * Assign the {@link ParkingLot#availableSpaces} with the specified
-     * argument.
-     *
-     * @param availableSpaces The number of hours
-     */
-    public void setAvailableSpaces(int availableSpaces) {
-        this.availableSpaces = availableSpaces;
-    }
-
-    /**
-     * Get the capacityForDisabled of this parking lot.
-     *
-     * @return The {@link ParkingLot#capacityForDisabled}.
-     */
-    public int getCapacityForDisabled() {
-        return capacityForDisabled;
-    }
-
-    /**
-     * Assign the {@link ParkingLot#capacityForDisabled} with the specified
-     * argument.
-     *
-     * @param capacityForDisabled The number of hours
-     */
-    public void setCapacityForDisabled(int capacityForDisabled) {
-        this.capacityForDisabled = capacityForDisabled;
-    }
-
-    /**
-     * Get the availableSpacesForDisabled of this parking lot.
-     *
-     * @return The {@link ParkingLot#availableSpacesForDisabled}.
-     */
-    public int getAvailableSpacesForDisabled() {
-        return availableSpacesForDisabled;
-    }
-
-    /**
-     * Assign the {@link ParkingLot#availableSpacesForDisabled} with the specified
-     * argument.
-     *
-     * @param availableSpacesForDisabled The number of hours
-     */
-    public void setAvailableSpacesForDisabled(int availableSpacesForDisabled) {
-        this.availableSpacesForDisabled = availableSpacesForDisabled;
-    }
-
-    /**
      * Get the slotOfferList of this parking lot.
      *
      * @return The {@link ParkingLot#slotOfferList}.
@@ -456,43 +470,168 @@ public class ParkingLot extends Parking {
         this.slotOfferList = slotOfferList;
     }
 
-    /**
-     * Calculates the current availability (the amount of slots are currently taken)
-     * of the parking lot.
-     * E.g. availableSpaces = 20, capacity = 30
-     * It will generate the string "Availability: 10/30".
-     *
-     * @param context The context to use.  Usually your {@link android.app.Application}
-     *                or {@link android.app.Activity} object.
-     * @return A string representation of the lot's availability status.
-     */
-    public String getAvailability(@NotNull Context context) {
-        return context.getString(R.string.availability) + " "
-                + (capacity - availableSpaces)
-                + "/" + capacity;
-    }
-
-    /**
-     * Looks for the most beneficial {@link SlotOffer} of the
-     * {@link #slotOfferList}.
-     *
-     * @return The {@link SlotOffer} instance with the smallest ratio
-     * of {@link #slotOfferList}.
-     */
-    public SlotOffer getBestOffer() {
-        if (!areSlotOffersValid(slotOfferList)) {
-            throw new EmptyStackException();
-        }
-        if (slotOfferList.size() == 1) {
-            return slotOfferList.get(0);
-        }
-
-        SlotOffer bestOffer = slotOfferList.get(0);
-        for (int i = 1; i < slotOfferList.size(); i++) {
-            if (slotOfferList.get(i).smallerOf(bestOffer)) {
-                bestOffer = slotOfferList.get(i);
+    public static final class Availability implements Parcelable {
+        public static final Creator<Availability> CREATOR = new Creator<Availability>() {
+            @Override
+            public Availability createFromParcel(Parcel in) {
+                return new Availability(in);
             }
+
+            @Override
+            public Availability[] newArray(int size) {
+                return new Availability[size];
+            }
+        };
+        @SerializedName("capacity")
+        private int capacity;
+        @SerializedName("availableSpaces")
+        private int availableSpaces;
+
+        /**
+         * Public Constructor.
+         * Initialize all the attributes of the class with the given arguments.
+         *
+         * @param capacity        The lot's to be capacity
+         * @param availableSpaces The lot's available spaces.
+         */
+        public Availability(int capacity, int availableSpaces) {
+            this.capacity = capacity;
+            this.availableSpaces = availableSpaces;
         }
-        return bestOffer;
+
+        /**
+         * Default constructor.
+         * Initializes the object's capacity
+         * and available spaces
+         * with the same random integer.
+         */
+        public Availability() {
+            this.capacity = new Random().nextInt(60 + 10) + 10;
+            this.availableSpaces = capacity;
+        }
+
+        /**
+         * Constructor to be used by the Parcelable interface
+         * to initialize the Availability instance with the specified
+         * {@link Parcel}.
+         *
+         * @param in Contains the contents of the ParkingLot instance.
+         */
+        protected Availability(@NotNull Parcel in) {
+            capacity = in.readInt();
+            availableSpaces = in.readInt();
+        }
+
+        /**
+         * Checks whether the given capacity is valid.
+         *
+         * @param capacity The capacity to be validated.
+         * @return True, if greater than zero. Otherwise, false.
+         */
+        public static boolean isCapacityValid(int capacity) {
+            return capacity > 0;
+        }
+
+        /**
+         * Checks whether the calling object has valid
+         * {@link #capacity} and {@link #availability}.
+         *
+         * @return The calling object.
+         * @throws IllegalArgumentException if at least one is not valid.
+         */
+        public Availability checkIfValid()
+                throws IllegalArgumentException {
+            if (!(isCapacityValid(capacity) && (availableSpaces >= 0 && availableSpaces <= capacity))) {
+                throw new IllegalArgumentException("The available spaces must be in range of 0..capacity (inclusive).");
+            }
+            return this;
+        }
+
+        /**
+         * Get the capacity of the parking lot.
+         *
+         * @return The {@link Availability#capacity}.
+         */
+        public int getCapacity() {
+            return capacity;
+        }
+
+        /**
+         * Assign the {@link Availability#capacity} with the specified
+         * argument.
+         *
+         * @param capacity The capacity of the availability object.
+         */
+        public void setCapacity(int capacity) {
+            this.capacity = capacity;
+        }
+
+        /**
+         * Get the availableSpaces of this parking lot.
+         *
+         * @return The {@link Availability#availableSpaces}.
+         */
+        public int getAvailableSpaces() {
+            return availableSpaces;
+        }
+
+        /**
+         * Assign the {@link Availability#availableSpaces} with the specified
+         * argument.
+         *
+         * @param availableSpaces The number of available hours
+         */
+        public void setAvailableSpaces(int availableSpaces) {
+            this.availableSpaces = availableSpaces;
+        }
+
+        /**
+         * Non-implemented Parcelable method.
+         */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        /**
+         * Flatten this object in to a Parcel.
+         *
+         * @param dest  The Parcel in which the object should be written.
+         * @param flags Additional flags about how the object should be written.
+         *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
+         */
+        @Override
+        public void writeToParcel(@NotNull Parcel dest, int flags) {
+            dest.writeInt(capacity);
+            dest.writeInt(availableSpaces);
+        }
+
+        /**
+         * Calculates the current availability (the amount of slots are currently taken)
+         * of the parking lot.
+         * E.g. availableSpaces = 20, capacity = 30
+         * It will generate the string "Availability: 10/30".
+         *
+         * @param context The context to use.  Usually your {@link android.app.Application}
+         *                or {@link android.app.Activity} object.
+         * @return A string representation of the lot's availability status.
+         * @see #toString()
+         */
+        @NotNull
+        @Exclude
+        public String getAvailability(@NotNull Context context) {
+            return context.getString(R.string.availability) + " " + toString();
+        }
+
+        /**
+         * Returns a string representation of the object.
+         *
+         * @return a string representation of the object.
+         */
+        @NonNull
+        @Override
+        public String toString() {
+            return (capacity - availableSpaces) + "/" + capacity;
+        }
     }
 }

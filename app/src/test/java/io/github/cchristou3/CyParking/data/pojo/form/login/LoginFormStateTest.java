@@ -12,7 +12,20 @@ import io.github.cchristou3.CyParking.data.pojo.form.feedback.FeedbackFormState;
 public class LoginFormStateTest {
 
     @Test
-    public void loginFormState_with_three_errors() {
+    public void loginFormState_withoutErrors_allErrorNullValidIsTrue() {
+        // Given
+        boolean isValid = true;
+        // When
+        LoginFormState state = new LoginFormState(isValid);
+        // Then
+        Assert.assertTrue(state.getPasswordError() == null
+                && state.getEmailError() == null
+                && state.getRoleError() == null
+                && state.isDataValid());
+    }
+
+    @Test
+    public void loginFormState_threeErrors_allErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -25,7 +38,7 @@ public class LoginFormStateTest {
     }
 
     @Test
-    public void feedbackFormState_with_email_error() {
+    public void feedbackFormState_emailError_emailErrorNotNullInvalid() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -38,7 +51,7 @@ public class LoginFormStateTest {
     }
 
     @Test
-    public void feedbackFormState_with_password_error() {
+    public void feedbackFormState_passwordError_passwordErrorNotNullInvalid() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -51,7 +64,7 @@ public class LoginFormStateTest {
     }
 
     @Test
-    public void feedbackFormState_with_role_error() {
+    public void feedbackFormState_roleError_roleErrorNotNullInvalid() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -64,7 +77,7 @@ public class LoginFormStateTest {
     }
 
     @Test
-    public void feedbackFormState_with_email_password_error() {
+    public void feedbackFormState_emailPasswordErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -77,7 +90,7 @@ public class LoginFormStateTest {
     }
 
     @Test
-    public void feedbackFormState_with_email_role_error() {
+    public void feedbackFormState_emailRoleErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -90,7 +103,7 @@ public class LoginFormStateTest {
     }
 
     @Test
-    public void feedbackFormState_with_password_role_error() {
+    public void feedbackFormState_passwordRoleErrors_thoseErrorsNotNullInvalid() {
         // Given
         Integer error = R.string.lot_name_error;
         // When
@@ -103,7 +116,7 @@ public class LoginFormStateTest {
     }
 
     @Test
-    public void feedbackFormState_without_error() {
+    public void feedbackFormState_withoutError_allErrorsNullValidIsTrue() {
         // Given
         boolean isValid = true;
         // When

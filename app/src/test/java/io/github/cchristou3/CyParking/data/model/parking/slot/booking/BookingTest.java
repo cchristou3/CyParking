@@ -28,7 +28,7 @@ public class BookingTest {
                     new SlotOffer(1, 1));
 
     @Test
-    public void generateUniqueId_same_objects_different_completed_status() {
+    public void generateUniqueId_sameObjectsDifferentCompletedStatus_returnsSameIds() {
         // Given
         Booking a = new Booking(COORDINATES, PARKING_ID, OPERATOR_ID,
                 LOT_NAME, ISSUER_ID, bookingDetailsA); // Completed set false by default.
@@ -43,7 +43,7 @@ public class BookingTest {
     }
 
     @Test
-    public void generateUniqueId_different_objects() {
+    public void generateUniqueId_differentObjects_returnsDifferentIds() {
         // Given
         Booking a = new Booking(COORDINATES, PARKING_ID, OPERATOR_ID,
                 LOT_NAME, ISSUER_ID, bookingDetailsA); // Completed set false by default.

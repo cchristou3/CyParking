@@ -152,7 +152,7 @@ public class BookingFragment extends Fragment implements Navigable {
                         return;
                     }
 
-                    final String availability = lot.getAvailability(requireContext());
+                    final String availability = lot.getLotAvailability(requireContext());
                     Log.d(TAG, "availability: " + availability);
                     // Animate color to display a lot availability change to the user
                     ViewUtility.animateAvailabilityColorChanges(
@@ -223,7 +223,7 @@ public class BookingFragment extends Fragment implements Navigable {
     private void initializeUi() {
         // Set their text to their corresponding value
         final String parkingID = "ParkingID: " + mSelectedParking.getParkingID(); // Compose parking id text
-        final String availability = mSelectedParking.getAvailability(requireContext()); // Compose lot availability text
+        final String availability = mSelectedParking.getLotAvailability(requireContext()); // Compose lot availability text
         getBinding().fragmentParkingBookingTxtParkingName.setText(parkingID); // Set parking name
         getBinding().fragmentParkingBookingTxtParkingAvailability.setText(availability); // Set parking availability
 

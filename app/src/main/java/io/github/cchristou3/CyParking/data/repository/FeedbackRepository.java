@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.data.model.user.Feedback;
 
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.FEEDBACK;
+
 /**
  * Purpose: <p>contain methods to send feedback or error
  * messages to the administrator.</p>
@@ -15,7 +17,7 @@ import io.github.cchristou3.CyParking.data.model.user.Feedback;
  * @author Charalambos Christou
  * @version 2.0 12/01/21
  */
-public final class FeedbackRepository extends RepositoryData {
+public final class FeedbackRepository {
 
     /**
      * Stores the given {@link Feedback} instance in the database.

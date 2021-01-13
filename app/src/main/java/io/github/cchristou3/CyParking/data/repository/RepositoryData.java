@@ -17,9 +17,15 @@ class RepositoryData {
 
     // Additional fields for payments...
 
+    // Cloud functions
+    static final String FILTER_LOCATIONS = "filterLocations";
+
     // Database fields
     static final String BOOKING_USER_ID = "bookingUserId";
     static final String COMPLETED = "completed";
     static final String USER_EMAIL = "email";
     static final String USER_DISPLAY_NAME = "displayName";
+    static final String LATITUDE = "latitude";
+    static final String LONGITUDE = "longitude";
+
 }

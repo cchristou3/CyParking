@@ -8,13 +8,10 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.FirebaseFunctionsException;
 
-import java.util.HashMap;
-
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
+import io.github.cchristou3.CyParking.data.repository.ParkingMapRepository;
 
 /**
  * <p>A ViewModel implementation, adopted to the ParkingMapFragment fragment.
@@ -30,6 +27,12 @@ public class ParkingMapViewModel extends ViewModel {
 
     private final MutableLiveData<Integer> mInfoLayoutState =
             new MutableLiveData<>(View.GONE);
+
+    private final ParkingMapRepository mParkingMapRepository;
+
+    public ParkingMapViewModel(ParkingMapRepository parkingMapRepository) {
+        this.mParkingMapRepository = parkingMapRepository;
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Methods related to the selected Lot State
@@ -134,7 +137,7 @@ public class ParkingMapViewModel extends ViewModel {
      * in the database.
      */
     public CollectionReference getParkingLots() {
-        return ParkingRepository.observeAllParkingLots();
+        return mParkingMapRepository.observeAllParkingLots();
     }
 
     /**
@@ -148,12 +151,7 @@ public class ParkingMapViewModel extends ViewModel {
      */
     public void fetchParkingLots(double userLatitude, double userLongitude,
                                  ParkingMapFragment.HttpsCallHandler handler) {
-        FirebaseFunctions.getInstance()
-                .getHttpsCallable("filterLocations")
-                .call(new HashMap<String, Double>() {{ // The request's data.
-                    put("latitude", userLatitude);
-                    put("longitude", userLongitude);
-                }})
+        mParkingMapRepository.fetchParkingLots(userLatitude, userLongitude)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult().getData() != null) {
                         handler.onSuccess(task.getResult().getData().toString());

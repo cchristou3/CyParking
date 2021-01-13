@@ -6,7 +6,7 @@ import com.google.firebase.firestore.Query;
 
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.cchristou3.CyParking.data.repository.ParkingRepository.observeAllParkingLots;
+import io.github.cchristou3.CyParking.data.repository.ParkingMapRepository;
 
 /**
  * Purpose: contain operator-related methods.
@@ -15,9 +15,9 @@ import static io.github.cchristou3.CyParking.data.repository.ParkingRepository.o
  * for operator-role users.
  *
  * @author Charalambos Christou
- * @version 12/01/21
+ * @version 2.0 13/01/21
  */
-public class DefaultOperatorRepository implements OperatorRepository {
+public class DefaultOperatorRepository extends ParkingMapRepository implements OperatorRepository {
 
     private static final String OPERATOR_ID = "operatorId";
     private final String AVAILABLE_SPACES = "availability.availableSpaces";

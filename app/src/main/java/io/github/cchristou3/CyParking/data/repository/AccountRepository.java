@@ -15,6 +15,10 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.FEEDBACK;
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USERS;
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USER_DISPLAY_NAME;
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USER_EMAIL;
 import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 
 /**
@@ -26,7 +30,7 @@ import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
  * @author Charalambos Christou
  * @version 4.0 12/01/21
  */
-public final class AccountRepository extends RepositoryData {
+public final class AccountRepository {
 
     private final FirebaseUser mFirebaseUser;
 
@@ -115,7 +119,7 @@ public final class AccountRepository extends RepositoryData {
      */
     private void updateEmailFromFeedbackNode(String oldEmail, String newEmail) {
         // Update the email from the FEEDBACK node
-        FirebaseFirestore.getInstance().collection(FeedbackRepository.FEEDBACK)
+        FirebaseFirestore.getInstance().collection(FEEDBACK)
                 .whereEqualTo(USER_EMAIL, oldEmail).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 // Iterate all documents (feedback messages) that contain the old email

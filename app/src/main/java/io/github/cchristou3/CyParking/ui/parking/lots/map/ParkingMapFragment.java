@@ -174,8 +174,10 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      */
     private void initializeViewModelsWithObservers() {
         // Initialize the mParkingMapViewModel and the mAuthStateViewModel
-        mParkingMapViewModel = new ViewModelProvider(this).get(ParkingMapViewModel.class);
-        mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
+        mParkingMapViewModel = new ViewModelProvider(this, new ParkingMapViewModelFactory())
+                .get(ParkingMapViewModel.class);
+        mAuthStateViewModel = new ViewModelProvider(requireActivity())
+                .get(AuthStateViewModel.class);
 
         // Attach observer to ParkingMapViewModel's info layout state
         mParkingMapViewModel.getInfoLayoutState().observe(getViewLifecycleOwner(),

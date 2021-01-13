@@ -22,6 +22,8 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.pojo.form.login.LoginResult;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USERS;
+
 /**
  * Purpose: <p>Class that handles authentication w/ login credentials and retrieves user information.
  * Further, it requests authentication and user information from the remote data source and
@@ -30,7 +32,7 @@ import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
  * @author Charalambos Christou
  * @version 3.0 12/01/21
  */
-public class AuthenticatorRepository extends RepositoryData {
+public class AuthenticatorRepository {
 
     // Non-constant-non-static data members
     private static volatile AuthenticatorRepository INSTANCE;

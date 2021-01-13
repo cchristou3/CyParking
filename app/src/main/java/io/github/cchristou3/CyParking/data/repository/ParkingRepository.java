@@ -3,7 +3,6 @@ package io.github.cchristou3.CyParking.data.repository;
 import android.util.Log;
 
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -18,6 +17,10 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.BOOKING;
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.BOOKING_USER_ID;
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.COMPLETED;
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.PARKING_LOTS;
 import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment.TAG;
 
 /**
@@ -26,7 +29,7 @@ import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragm
  * @author Charalambos Christou
  * @version 7.0 12/01/21
  */
-public final class ParkingRepository extends RepositoryData {
+public final class ParkingRepository {
 
     /**
      * Returns the bookings of the specified userId,
@@ -42,18 +45,6 @@ public final class ParkingRepository extends RepositoryData {
                 .whereEqualTo(BOOKING_USER_ID, userId)
                 .orderBy(COMPLETED, Query.Direction.ASCENDING); // Show pending bookings first
         // TODO: Make a HTTP request - filter data (get only pending bookings) on the server and send to the client
-    }
-
-    /**
-     * An observer is attached to the current collection, to listen for changes
-     * concerning the parking lots (available spaces, prices).
-     * Removal of observer is self-managed by the hosting activity.
-     *
-     * @return The {@link CollectionReference} reference to be observed.
-     */
-    @NotNull
-    public static CollectionReference observeAllParkingLots() {
-        return FirebaseFirestore.getInstance().collection(PARKING_LOTS);
     }
 
     /**

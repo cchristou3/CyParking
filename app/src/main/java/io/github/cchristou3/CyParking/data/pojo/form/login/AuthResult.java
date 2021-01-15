@@ -10,17 +10,17 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
  * @author Charalambos Christou
  * @version 2.0 23/12/20
  */
-public class LoginResult {
+public class AuthResult {
     @Nullable
     private LoggedInUser mSuccess;
     @Nullable
     private String mError;
 
-    public LoginResult(@Nullable String error) {
+    public AuthResult(@Nullable String error) {
         this.mError = error;
     }
 
-    public LoginResult(@Nullable LoggedInUser success) {
+    public AuthResult(@Nullable LoggedInUser success) {
         this.mSuccess = success;
     }
 

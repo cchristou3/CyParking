@@ -12,10 +12,10 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 
 
 /**
- * Unit tests for the {@link LoginResult} class.
+ * Unit tests for the {@link AuthResult} class.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class LoginResultTest {
+public class AuthResultTest {
 
     @Mock
     private LoggedInUser mockLoggedInUser;
@@ -30,7 +30,7 @@ public class LoginResultTest {
         // Given
         LoggedInUser user = mockLoggedInUser;
         // When
-        LoginResult result = new LoginResult(user);
+        AuthResult result = new AuthResult(user);
         // Then
         Assert.assertTrue(result.getError() == null && result.getSuccess() != null);
     }
@@ -40,7 +40,7 @@ public class LoginResultTest {
         // Given
         String error = "any_error";
         // When
-        LoginResult result = new LoginResult(error);
+        AuthResult result = new AuthResult(error);
         // Then
         Assert.assertTrue(result.getError() != null && result.getSuccess() == null);
     }

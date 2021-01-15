@@ -20,7 +20,7 @@ import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.Availability.isCapacityValid;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.areSlotOffersValid;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidLotLatLng;
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidLotName;
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidName;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidPhoneNumber;
 
 /*
@@ -144,9 +144,9 @@ public class ParkingLotTest {
         Assert.assertFalse(isValidPhoneNumber(""));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void isValidPhoneNumber_null__throwsException() {
-        isValidPhoneNumber(null);
+    @Test
+    public void isValidPhoneNumber_null_returnsFalse() {
+        Assert.assertFalse(isValidPhoneNumber(null));
     }
 
     @Test
@@ -200,27 +200,27 @@ public class ParkingLotTest {
     ///////////////////////////////////////////////////////////////////////////
     @Test
     public void isValidLotName_withNull_returnsFalse() {
-        Assert.assertFalse(isValidLotName(null));
+        Assert.assertFalse(isValidName(null));
     }
 
     @Test
     public void isValidLotName_withEmpty_returnsFalse() {
-        Assert.assertFalse(isValidLotName(""));
+        Assert.assertFalse(isValidName(""));
     }
 
     @Test
     public void isValidLotName_withSpaces_returnsFalse() {
-        Assert.assertFalse(isValidLotName("   "));
+        Assert.assertFalse(isValidName("   "));
     }
 
     @Test
     public void isValidLotName_smallName_returnsFalse() {
-        Assert.assertTrue(isValidLotName("1"));
+        Assert.assertTrue(isValidName("1"));
     }
 
     @Test
     public void isValidLotName_largeName_returnsTrue() {
-        Assert.assertTrue(isValidLotName("1234567890-sdfghj"));
+        Assert.assertTrue(isValidName("1234567890-sdfghj"));
     }
 
     ///////////////////////////////////////////////////////////////////////////

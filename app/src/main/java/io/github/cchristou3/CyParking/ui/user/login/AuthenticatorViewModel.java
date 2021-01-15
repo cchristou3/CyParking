@@ -3,12 +3,13 @@ package io.github.cchristou3.CyParking.ui.user.login;
 import android.content.Context;
 import android.util.Patterns;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import org.jetbrains.annotations.NotNull;
@@ -20,8 +21,8 @@ import java.util.List;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.manager.SharedPreferencesManager;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
-import io.github.cchristou3.CyParking.data.pojo.form.login.LoginFormState;
-import io.github.cchristou3.CyParking.data.pojo.form.login.LoginResult;
+import io.github.cchristou3.CyParking.data.pojo.form.login.AuthFormState;
+import io.github.cchristou3.CyParking.data.pojo.form.login.AuthResult;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 
@@ -34,8 +35,8 @@ import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
  */
 public class AuthenticatorViewModel extends ViewModel {
 
-    private final MutableLiveData<LoginFormState> mLoginFormState = new MutableLiveData<>();
-    private final MutableLiveData<LoginResult> mAuthenticatorResult = new MutableLiveData<>();
+    private final MutableLiveData<AuthFormState> mAuthFormState = new MutableLiveData<>();
+    private final MutableLiveData<AuthResult> mAuthResultState = new MutableLiveData<>();
 
     private final MutableLiveData<String> mEmailState = new MutableLiveData<>();
     private final MutableLiveData<String> mPasswordState = new MutableLiveData<>();
@@ -88,18 +89,16 @@ public class AuthenticatorViewModel extends ViewModel {
                 .addOnCompleteListener(loginTask -> {
                     // Check whether an exception occurred
                     if (loginTask.getException() != null) {
-                        mAuthenticatorResult.setValue(
-                                new LoginResult(loginTask.getException().getMessage())
-                        );
+                        updateAuthResult(loginTask.getException().getMessage());
                         return;
                     }
                     // If the user successfully signed in
-                    if (loginTask.isSuccessful()) {
+                    if (loginTask.isSuccessful() && loginTask.getResult().getUser() != null) {
                         mAuthenticatorRepository.getUserInfo(context, loginTask.getResult().getUser(),
                                 new AuthenticatorRepository.UserDataHandler() {
                                     @Override
                                     public void onLocalData(List<String> roles) {
-                                        updateLoginResultWithUser(new LoggedInUser(loginTask.getResult().getUser(), roles));
+                                        updateAuthResult(loginTask.getResult().getUser(), roles);
                                     }
 
                                     @Override
@@ -111,31 +110,16 @@ public class AuthenticatorViewModel extends ViewModel {
                                         } catch (NullPointerException ignored) {
                                         }
                                         // A user without roles will be treated as a not-logged-in user.
-                                        updateLoginResultWithUser(loggedInUser);
+                                        updateAuthResult(loggedInUser);
                                     }
 
                                     @Override
                                     public void onRemoteDataFailure(Exception exception) {
-                                        updateLoginResultWithUser(new LoggedInUser(
-                                                loginTask.getResult().getUser(), null));
+                                        updateAuthResult(exception.getMessage());
                                     }
                                 });
                     }
                 });
-    }
-
-    /**
-     * Updates the value of loginResult
-     * based on the given LoggedInUser argument.
-     *
-     * @param user A {@link LoggedInUser} object.
-     */
-    private void updateLoginResultWithUser(@Nullable LoggedInUser user) {
-        // Trigger loginResult observer update
-        mAuthenticatorResult.setValue(
-                user == null ?
-                        new LoginResult("Login failed") : // TODO: 14/01/2021 Replace with getString(R.string....)
-                        new LoginResult(user)); // Roles
     }
 
     /**
@@ -154,7 +138,7 @@ public class AuthenticatorViewModel extends ViewModel {
                     .addOnCompleteListener(task -> {
                         // Check whether an exception occurred
                         if (task.getException() != null) {
-                            mAuthenticatorResult.setValue(new LoginResult(task.getException().getMessage()));
+                            mAuthResultState.setValue(new AuthResult(task.getException().getMessage()));
                             return;
                         }
 
@@ -173,14 +157,14 @@ public class AuthenticatorViewModel extends ViewModel {
                             final LoggedInUser loggedInUser = new LoggedInUser(task.getResult().getUser(), listOfRoles);
                             // Initialize the Repository's LoggedInUser instance
                             // and trigger loginResult observer update
-                            updateLoginResultWithUser(loggedInUser);
+                            updateAuthResult(loggedInUser);
 
                             // Save the user's data to the server
                             mAuthenticatorRepository.addUser(loggedInUser);
                         }
                     });
         } catch (IllegalArgumentException e) {
-            mAuthenticatorResult.setValue(new LoginResult(e.getMessage()));
+            mAuthResultState.setValue(new AuthResult(e.getMessage()));
         }
     }
 
@@ -191,7 +175,7 @@ public class AuthenticatorViewModel extends ViewModel {
      * @return A task to be handled by the view.
      */
     @NotNull
-    public Task<AuthResult> reauthenticateUser(String credentials) {
+    public Task<com.google.firebase.auth.AuthResult> reauthenticateUser(String credentials) {
         return mAuthenticatorRepository.reauthenticateUser(credentials);
     }
 
@@ -202,7 +186,7 @@ public class AuthenticatorViewModel extends ViewModel {
      * @param isOperator true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
      * @return True if the user picked any of the roles. Otherwise, false.
      */
-    private boolean AreAnyRolesSelected(boolean isUser, boolean isOperator) {
+    private boolean areAnyRolesSelected(boolean isUser, boolean isOperator) {
         return isUser || isOperator;
     }
 
@@ -216,30 +200,74 @@ public class AuthenticatorViewModel extends ViewModel {
      */
     public void dataChanged(String email, String password, boolean isUser, boolean isOperator) {
         mPasswordState.setValue(password);
-        mEmailState.setValue(email);
+        updateEmail(email);
         if (!isEmailValid(email)) {
-            mLoginFormState.setValue(new LoginFormState(R.string.invalid_email, null, null));
+            updateFromState(R.string.invalid_email, null, null);
         } else if (!isPasswordValid(password)) {
-            mLoginFormState.setValue(new LoginFormState(null, R.string.invalid_password, null));
-        } else if (!AreAnyRolesSelected(isUser, isOperator) && !isUserSigningIn()) { // Checks only if the user is registering
-            mLoginFormState.setValue(new LoginFormState(null, null, R.string.invalid_role_choice));
+            updateFromState(null, R.string.invalid_password, null);
+        } else if (!areAnyRolesSelected(isUser, isOperator) && !isUserSigningIn()) { // Checks only if the user is registering
+            updateFromState(null, null, R.string.invalid_role_choice);
         } else {
-            mLoginFormState.setValue(new LoginFormState(true));
+            updateFromStateToValid();
         }
     }
 
     /**
-     * Getters & Setters
+     * Updates the value of {@link #mAuthFormState}
+     * based on the given error ids.
+     *
+     * @param emailError    The id of the email error.
+     * @param passwordError The id of the password error.
+     * @param roleError     The id of the role error.
      */
+    private void updateFromState(Integer emailError, Integer passwordError, Integer roleError) {
+        updateFromState(new AuthFormState(emailError, passwordError, roleError));
+    }
 
+    /**
+     * Updates the value of {@link #mAuthFormState}
+     * to valid.
+     */
+    private void updateFromStateToValid() {
+        updateFromState(new AuthFormState(true));
+    }
+
+    /**
+     * Updates the value of {@link #mAuthFormState}
+     * based on the given {@link AuthFormState} instance.
+     *
+     * @param authFormState The new value of {@link #mAuthFormState}.
+     */
+    private void updateFromState(@NonNull AuthFormState authFormState) {
+        this.mAuthFormState.setValue(authFormState);
+    }
+
+    /**
+     * Updates the value of {@link #mEmailState}
+     * to the given string.
+     *
+     * @param email The new value of {@link #mEmailState}.
+     */
     public void updateEmail(String email) {
         mEmailState.setValue(email);
     }
 
-    public MutableLiveData<Boolean> getTabState() {
+    /**
+     * Access the {@link #mIsUserInSigningInTab}
+     * in its LiveData form.
+     *
+     * @return The LiveData reference of {@link #mIsUserInSigningInTab}.
+     */
+    public LiveData<Boolean> getTabState() {
         return mIsUserInSigningInTab;
     }
 
+    /**
+     * Access the value of {@link #mIsUserInSigningInTab}.
+     *
+     * @return The value of {@link #mIsUserInSigningInTab} if not null.
+     * Otherwise, false.
+     */
     public boolean isUserSigningIn() {
         if (mIsUserInSigningInTab.getValue() != null)
             return mIsUserInSigningInTab.getValue();
@@ -247,27 +275,96 @@ public class AuthenticatorViewModel extends ViewModel {
             return false; // By default
     }
 
-    public void setUserSigningIn(boolean userSigningIn) {
+    /**
+     * Updates the value of {@link #mIsUserInSigningInTab}
+     * to the given boolean.
+     *
+     * @param userSigningIn The new value of {@link #mIsUserInSigningInTab}.
+     */
+    public void isUserSigningIn(boolean userSigningIn) {
         mIsUserInSigningInTab.setValue(userSigningIn);
     }
 
     /**
-     * Getters
+     * Updates the value of loginResult
+     * based on the given LoggedInUser instance.
+     *
+     * @param user The current {@link LoggedInUser} instance.
      */
-    public MutableLiveData<String> getEmailState() {
+    private void updateAuthResult(@Nullable LoggedInUser user) {
+        updateAuthResult(new AuthResult(user));
+    }
+
+    /**
+     * Updates the value of loginResult
+     * based on the given error.
+     *
+     * @param error The error message from the backend.
+     */
+    private void updateAuthResult(String error) {
+        updateAuthResult(new AuthResult(error));
+    }
+
+    /**
+     * Updates the value of loginResult
+     * based on the given FirebaseUser instance and
+     * its list of roles.
+     *
+     * @param user  A {@link FirebaseUser} object.
+     * @param roles A list that holds the user's roles.
+     */
+    private void updateAuthResult(FirebaseUser user, List<String> roles) {
+        updateAuthResult(new LoggedInUser(user, roles));
+    }
+
+    /**
+     * Updates the value of loginResult
+     * based on the given AuthResult instance.
+     *
+     * @param authResult A {@link AuthResult} object.
+     */
+    private void updateAuthResult(AuthResult authResult) {
+        this.mAuthResultState.setValue(authResult);
+    }
+
+    /**
+     * Access the {@link #mEmailState}
+     * in its LiveData form.
+     *
+     * @return The LiveData reference of {@link #mEmailState}.
+     */
+    public LiveData<String> getEmailState() {
         return mEmailState;
     }
 
-    public MutableLiveData<String> getPasswordState() {
+    /**
+     * Access the {@link #mPasswordState}
+     * in its LiveData form.
+     *
+     * @return The LiveData reference of {@link #mPasswordState}.
+     */
+    public LiveData<String> getPasswordState() {
         return mPasswordState;
     }
 
-    MutableLiveData<LoginFormState> getLoginFormState() {
-        return mLoginFormState;
+    /**
+     * Access the {@link #mAuthFormState}
+     * in its LiveData form.
+     *
+     * @return The LiveData reference of {@link #mAuthFormState}.
+     */
+    LiveData<AuthFormState> getFormState() {
+        return mAuthFormState;
     }
 
-    LiveData<LoginResult> getAuthenticatorResult() {
-        return mAuthenticatorResult;
+    /**
+     * Access the {@link #mAuthResultState}
+     * in its LiveData form.
+     *
+     * @return The LiveData reference of {@link #mAuthResultState}.
+     */
+    LiveData<AuthResult> getAuthenticatorResult() {
+        return mAuthResultState;
     }
 
 }

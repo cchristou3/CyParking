@@ -1,14 +1,13 @@
 package io.github.cchristou3.CyParking.ui.home;
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.ui.InstantTaskRuler;
 
 import static io.github.cchristou3.CyParking.ui.LiveDataTestUtil.getOrAwaitValue;
 import static org.hamcrest.CoreMatchers.is;
@@ -20,10 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * Unit tests for the {@link OperatorViewModel} class.
  */
 @RunWith(AndroidJUnit4.class)
-public class OperatorViewModelTest {
-
-    @Rule
-    public InstantTaskExecutorRule instantExecutorRule = new InstantTaskExecutorRule();
+public class OperatorViewModelTest extends InstantTaskRuler {
 
     // Subject under test
     private OperatorViewModel operatorViewModel;

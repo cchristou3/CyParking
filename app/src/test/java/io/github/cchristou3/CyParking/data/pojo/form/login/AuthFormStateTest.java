@@ -7,16 +7,16 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.pojo.form.feedback.FeedbackFormState;
 
 /**
- * Unit tests for the {@link LoginFormState} class.
+ * Unit tests for the {@link AuthFormState} class.
  */
-public class LoginFormStateTest {
+public class AuthFormStateTest {
 
     @Test
     public void loginFormState_withoutErrors_allErrorNullValidIsTrue() {
         // Given
         boolean isValid = true;
         // When
-        LoginFormState state = new LoginFormState(isValid);
+        AuthFormState state = new AuthFormState(isValid);
         // Then
         Assert.assertTrue(state.getPasswordError() == null
                 && state.getEmailError() == null
@@ -29,7 +29,7 @@ public class LoginFormStateTest {
         // Given
         Integer error = R.string.lot_name_error;
         // When
-        LoginFormState state = new LoginFormState(error, error, error);
+        AuthFormState state = new AuthFormState(error, error, error);
         // Then
         Assert.assertTrue(state.getPasswordError().equals(error)
                 && state.getEmailError().equals(error)
@@ -42,7 +42,7 @@ public class LoginFormStateTest {
         // Given
         Integer error = R.string.lot_name_error;
         // When
-        LoginFormState state = new LoginFormState(error, null, null);
+        AuthFormState state = new AuthFormState(error, null, null);
         // Then
         Assert.assertTrue(state.getPasswordError() == null
                 && state.getEmailError().equals(error)
@@ -55,7 +55,7 @@ public class LoginFormStateTest {
         // Given
         Integer error = R.string.lot_name_error;
         // When
-        LoginFormState state = new LoginFormState(null, error, null);
+        AuthFormState state = new AuthFormState(null, error, null);
         // Then
         Assert.assertTrue(state.getPasswordError().equals(error)
                 && state.getEmailError() == null
@@ -68,7 +68,7 @@ public class LoginFormStateTest {
         // Given
         Integer error = R.string.lot_name_error;
         // When
-        LoginFormState state = new LoginFormState(null, null, error);
+        AuthFormState state = new AuthFormState(null, null, error);
         // Then
         Assert.assertTrue(state.getPasswordError() == null
                 && state.getEmailError() == null
@@ -81,7 +81,7 @@ public class LoginFormStateTest {
         // Given
         Integer error = R.string.lot_name_error;
         // When
-        LoginFormState state = new LoginFormState(error, error, null);
+        AuthFormState state = new AuthFormState(error, error, null);
         // Then
         Assert.assertTrue(state.getPasswordError().equals(error)
                 && state.getEmailError().equals(error)
@@ -94,7 +94,7 @@ public class LoginFormStateTest {
         // Given
         Integer error = R.string.lot_name_error;
         // When
-        LoginFormState state = new LoginFormState(error, null, error);
+        AuthFormState state = new AuthFormState(error, null, error);
         // Then
         Assert.assertTrue(state.getPasswordError() == null
                 && state.getEmailError().equals(error)
@@ -107,7 +107,7 @@ public class LoginFormStateTest {
         // Given
         Integer error = R.string.lot_name_error;
         // When
-        LoginFormState state = new LoginFormState(null, error, error);
+        AuthFormState state = new AuthFormState(null, error, error);
         // Then
         Assert.assertTrue(state.getPasswordError().equals(error)
                 && state.getEmailError() == null

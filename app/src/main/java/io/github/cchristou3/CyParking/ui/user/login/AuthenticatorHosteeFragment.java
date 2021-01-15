@@ -145,7 +145,7 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
     public void onPause() {
         super.onPause();
         // Reverse the ViewModel's isUserSigningIn attribute as we move to the other tab
-        mAuthenticatorViewModel.setUserSigningIn(!mAuthenticatorViewModel.isUserSigningIn());
+        mAuthenticatorViewModel.isUserSigningIn(!mAuthenticatorViewModel.isUserSigningIn());
     }
 
     /**
@@ -298,7 +298,7 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
         // Pressing the "enter" on the keyboard will automatically trigger the login method
         getBinding().fragmentLoginEtPassword.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                if (mAuthenticatorViewModel.getLoginFormState().getValue().isDataValid())
+                if (mAuthenticatorViewModel.getFormState().getValue().isDataValid())
                     login(requireContext());
             }
             return false;
@@ -367,7 +367,7 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
      */
     private void attachObserverToForm() {
         // Add an observer to the login form state
-        mAuthenticatorViewModel.getLoginFormState().observe(getViewLifecycleOwner(), loginFormState -> {
+        mAuthenticatorViewModel.getFormState().observe(getViewLifecycleOwner(), loginFormState -> {
             if (loginFormState == null) return;
             getBinding().fragmentLoginBtnAuthButton
                     .setEnabled(loginFormState.isDataValid());

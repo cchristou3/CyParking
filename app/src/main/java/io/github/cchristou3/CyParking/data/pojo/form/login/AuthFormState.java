@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
  * @author Charalambos Christou
  * @version 2.0 12/12/20
  */
-public class LoginFormState extends EmailFormState {
+public class AuthFormState extends EmailFormState {
 
     @Nullable
     private final Integer mPasswordError;
@@ -22,7 +22,7 @@ public class LoginFormState extends EmailFormState {
      * @param passwordError The id of the error related to the password.
      * @param roleError     The id of the error related to the role.
      */
-    public LoginFormState(@Nullable Integer emailError, @Nullable Integer passwordError, @Nullable Integer roleError) {
+    public AuthFormState(@Nullable Integer emailError, @Nullable Integer passwordError, @Nullable Integer roleError) {
         super(emailError);
         this.mPasswordError = passwordError;
         this.mRoleError = roleError;
@@ -33,7 +33,7 @@ public class LoginFormState extends EmailFormState {
      *
      * @param isDataValid true of the data in the form is valid
      */
-    public LoginFormState(boolean isDataValid) {
+    public AuthFormState(boolean isDataValid) {
         super(isDataValid);
         this.mPasswordError = null;
         this.mRoleError = null;

@@ -37,7 +37,7 @@ import io.github.cchristou3.CyParking.utilities.ViewUtility;
  * </p>
  *
  * @author Charalambos Christou
- * @version 3.0 30/12/20
+ * @version 4.0 14/01/21
  */
 public class FeedbackFragment extends Fragment implements Navigable, TextWatcher {
 
@@ -68,11 +68,13 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // Initialize mFeedbackViewModel and mAuthStateViewModel
-        mFeedbackViewModel = new ViewModelProvider(this).get(FeedbackViewModel.class);
+        mFeedbackViewModel = new ViewModelProvider(this,
+                new FeedbackViewModelFactory()).get(FeedbackViewModel.class);
         mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
 
         // Update the UI based on the user's logged in status
-        updateUI(mAuthStateViewModel.getUser());
+        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), this::updateUI);
+
 
         // Hook up the send feedback button with an onClickListener and disable it initially
         getBinding().feedbackFragmentMbtnSendFeedback.setEnabled(false);

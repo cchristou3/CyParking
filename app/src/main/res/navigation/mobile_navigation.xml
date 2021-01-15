@@ -384,10 +384,5 @@
             app:popExitAnim="@anim/fragment_fade_exit"
             app:popUpTo="@id/nav_register_lot_fragment" />
     </fragment>
-    <action
-        android:id="@+id/action_global_nav_authenticator_fragment"
-        app:destination="@id/nav_authenticator_fragment"
-        app:popUpTo="@id/mobile_navigation" />
-
 
 </navigation>

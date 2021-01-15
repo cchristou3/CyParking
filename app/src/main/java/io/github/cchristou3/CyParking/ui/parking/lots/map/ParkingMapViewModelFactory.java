@@ -1,19 +1,19 @@
-package io.github.cchristou3.CyParking.ui.host;
+package io.github.cchristou3.CyParking.ui.parking.lots.map;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
+import io.github.cchristou3.CyParking.data.repository.ParkingMapRepository;
 
 /**
- * Purpose: <p>ViewModel provider factory to instantiate AuthStateViewModel.
- * Required given AuthStateViewModel has a non-empty constructor</p>
+ * Purpose: <p>ViewModel provider factory to instantiate ParkingMapViewModel.
+ * Required given ParkingMapViewModel has a non-empty constructor</p>
  *
  * @author Charalambos Christou
- * @version 1.0 24/12/20
+ * @version 1.0 1/11/20
  */
-public class AuthStateViewModelFactory implements ViewModelProvider.Factory {
+public class ParkingMapViewModelFactory implements ViewModelProvider.Factory {
 
     /**
      * Creates a new instance of the given {@code Class}.
@@ -26,8 +26,8 @@ public class AuthStateViewModelFactory implements ViewModelProvider.Factory {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        if (modelClass.isAssignableFrom(AuthStateViewModel.class)) {
-            return (T) new AuthStateViewModel(new AuthenticatorRepository());
+        if (modelClass.isAssignableFrom(ParkingMapViewModel.class)) {
+            return (T) new ParkingMapViewModel(new ParkingMapRepository());
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

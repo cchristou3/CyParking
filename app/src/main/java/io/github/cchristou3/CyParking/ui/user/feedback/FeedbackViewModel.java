@@ -28,6 +28,18 @@ public class FeedbackViewModel extends ViewModel {
     final private MutableLiveData<String> mFeedbackState = new MutableLiveData<>();
     final private MutableLiveData<FeedbackFormState> mFormState = new MutableLiveData<>();
 
+    private final FeedbackRepository mFeedbackRepository;
+
+    /**
+     * Initialize the ViewModel's FeedbackRepository instance
+     * with the given argument.
+     *
+     * @param feedbackRepository An FeedbackRepository instance.
+     */
+    public FeedbackViewModel(FeedbackRepository feedbackRepository) {
+        this.mFeedbackRepository = feedbackRepository;
+    }
+
     /**
      * Updates the {@link #mFormState}'s value based on the given arguments.
      *
@@ -42,7 +54,7 @@ public class FeedbackViewModel extends ViewModel {
 
             // If not logged in, validate the given email
             if (!AuthenticatorViewModel.isEmailValid(recipientEmail)) {
-                mFormState.setValue(new FeedbackFormState(R.string.invalid_email, R.string.invalid_feedback));
+                mFormState.setValue(new FeedbackFormState(R.string.invalid_email, null));
                 return; // If not valid, do not check for further user faults (in text).
             }
         }
@@ -61,7 +73,7 @@ public class FeedbackViewModel extends ViewModel {
      * @return Task to be handled by the view.
      */
     public Task<DocumentReference> sendFeedback(Feedback feedback) {
-        return FeedbackRepository.sendFeedback(feedback);
+        return mFeedbackRepository.sendFeedback(feedback);
     }
 
     /**

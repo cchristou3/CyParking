@@ -30,7 +30,7 @@ import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
  * @author Charalambos Christou
  * @version 4.0 12/01/21
  */
-public final class AccountRepository {
+public class AccountRepository {
 
     private final FirebaseUser mFirebaseUser;
 

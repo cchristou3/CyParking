@@ -32,6 +32,12 @@ public class ParkingMapViewModel extends ViewModel {
 
     private final ParkingMapRepository mParkingMapRepository;
 
+    /**
+     * Initialize the ViewModel's ParkingMapRepository instance
+     * with the given argument.
+     *
+     * @param parkingMapRepository An ParkingMapRepository instance.
+     */
     public ParkingMapViewModel(ParkingMapRepository parkingMapRepository) {
         this.mParkingMapRepository = parkingMapRepository;
     }
@@ -139,7 +145,7 @@ public class ParkingMapViewModel extends ViewModel {
      * in the database.
      */
     public CollectionReference getParkingLots() {
-        return mParkingMapRepository.observeAllParkingLots();
+        return mParkingMapRepository.getParkingLotsNode();
     }
 
     /**

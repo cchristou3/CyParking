@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.ui.parking.lots.map;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.StringReader;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -214,10 +216,20 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
         mLocationManager = new LocationManager(requireContext(), this, this, false);
         // Initialize a firebase firestore observer to inform us about changes in the DB
         // The callback of the SnapshotListener gets triggered straight away when we attach it
+
+        // Solution to
+        // https://stackoverflow.com/questions/27978188/google-maps-v2-mapfragment-is-extremely-laggy-on-returning-from-the-backstack
+        // TODO: 15/01/2021 Find a better workaround
+        WeakReference<Dialog> dial = new WeakReference<>(new Dialog(requireContext()));
+        dial.get().show();
+        dial.get().dismiss();
+        dial.clear();
+        dial = null;
+        ///////////////////////////////////////////////////////////////
+
         DatabaseObserver.createCollectionReferenceObserver(
                 mParkingMapViewModel.getParkingLots(), // Collection reference
                 (value, error) -> { // Event handler
-                    Log.d(TAG, "onStart: ");
                     switch (mSnapshotState.getState()) {
                         case SnapshotState.INITIAL_DATA_RETRIEVAL:
                             if (mUserCurrentLatLng == null) return;
@@ -237,6 +249,17 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
                     }
                 }
         ).registerLifecycleObserver(getLifecycle());
+    }
+
+    /**
+     * Called when the fragment is visible to the user and actively running.
+     * This is generally
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        //getBinding().fragmentParkingMapFcvMap.clearFocus();
+        getBinding().fragmentParkingMapFcvMap.requestFocus();
     }
 
     /**
@@ -516,6 +539,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap; // Save a reference of the GoogleMap instance
         // Start listening to the user's location updates
+        Log.d(TAG, "onMapReady: ");
         mLocationManager.requestUserLocationUpdates(this);
 
         // Add listeners to the markers + map

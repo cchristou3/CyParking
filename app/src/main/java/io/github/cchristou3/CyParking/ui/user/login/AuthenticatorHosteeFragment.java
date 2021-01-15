@@ -36,8 +36,6 @@ import io.github.cchristou3.CyParking.ui.host.AuthStateViewModelFactory;
 import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
-import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
-
 /**
  * <p>A simple {@link Fragment} subclass.
  * Purpose: Use the {@link AuthenticatorHosteeFragment#newInstance} factory method to
@@ -51,6 +49,7 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
 
     // Constant variables
     public static final String PAGE_TYPE_KEY = "PAGE_TYPE_KEY";
+    private final String TAG = AuthenticatorHosteeFragment.this.getClass().getName() + "UniqueTag";
     // Fragment variables
     private AuthenticatorViewModel mAuthenticatorViewModel;
     private AuthStateViewModel mAuthStateViewModel;
@@ -121,7 +120,9 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
 
         // By passing the parent (AuthenticationFragment)'s ViewModelStoreOwner
         // Both tabs share the same LoginViewModel instance
-        mAuthenticatorViewModel = new ViewModelProvider(requireParentFragment(), new AuthenticatorViewModelFactory())
+        mAuthenticatorViewModel = new ViewModelProvider(requireParentFragment(), new AuthenticatorViewModelFactory(
+                mAuthStateViewModel.getAuthenticatorRepository() // Both ViewModels use the same instance of AuthenticatorRepository
+        ))
                 .get(AuthenticatorViewModel.class);
 
         if (getParentFragment() != null && getParentFragment().getArguments() != null) {
@@ -130,7 +131,6 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
             mAuthenticatorViewModel.updateEmail(email);
             mIsReauthenticating = true;
         }
-
         initializeFragment();
     }
 

@@ -1,7 +1,17 @@
 package io.github.cchristou3.CyParking.data.pojo;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
 import io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment;
 import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsFragment;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.CLASS;
 
 /**
  * Purpose: Represent the state of a given fragment in terms of its
@@ -50,7 +60,22 @@ public class SnapshotState {
      *
      * @param state The new state of the {@link SnapshotState} instance.
      */
-    public void setState(byte state) {
+    public void setState(@ByteRange(from = 0, to = 1) byte state) {
         this.mState = state;
+    }
+
+
+    @Retention(CLASS)
+    @Target({METHOD, PARAMETER, FIELD, LOCAL_VARIABLE, ANNOTATION_TYPE})
+    @interface ByteRange {
+        /**
+         * Smallest value, inclusive
+         */
+        long from() default Byte.MIN_VALUE;
+
+        /**
+         * Largest value, inclusive
+         */
+        long to() default Byte.MAX_VALUE;
     }
 }

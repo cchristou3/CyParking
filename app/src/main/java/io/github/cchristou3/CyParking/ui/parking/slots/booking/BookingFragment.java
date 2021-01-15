@@ -15,7 +15,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
@@ -39,7 +38,6 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.BookingDetails;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
-import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 import io.github.cchristou3.CyParking.databinding.FragmentParkingBookingBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
@@ -189,7 +187,8 @@ public class BookingFragment extends Fragment implements Navigable {
         // Instantiate the fragment's ViewModels
         mAuthStateViewModel = new ViewModelProvider(requireActivity())  // Access the same instance as its hosting activity
                 .get(AuthStateViewModel.class);
-        mBookingViewModel = new ViewModelProvider(this).get(BookingViewModel.class);
+        mBookingViewModel = new ViewModelProvider(this,
+                new BookingViewModelFactory()).get(BookingViewModel.class);
     }
 
     /**
@@ -235,7 +234,7 @@ public class BookingFragment extends Fragment implements Navigable {
 
         // Set up time pickers' listeners
         getBinding().fragmentParkingBookingBtnStartingTimeButton
-                .setOnClickListener(buildListenerForTimePicker(mBookingViewModel.getPickedStartingTime()));
+                .setOnClickListener(buildListenerForTimePicker());
 
         // Set up date picker listener
         getBinding().fragmentParkingBookingBtnDateButton.setOnClickListener(v -> {
@@ -283,7 +282,7 @@ public class BookingFragment extends Fragment implements Navigable {
         final SlotOffer[] slotOffers = new SlotOffer[numOfOffers];
         mSelectedParking.getSlotOfferList().toArray(slotOffers);
         // Initialize an ArrayAdapter
-        final ArrayAdapter<SlotOffer> volumeAdapter = new ArrayAdapter<>(getContext(),
+        final ArrayAdapter<SlotOffer> volumeAdapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item,
                 slotOffers);
         // Bind the spinner with its adapter
@@ -332,7 +331,7 @@ public class BookingFragment extends Fragment implements Navigable {
                             // Display undo option
                             Snackbar.make(requireView(), getString(R.string.booking_success), Snackbar.LENGTH_LONG)
                                     .setAction(R.string.undo,
-                                            v -> ParkingRepository.cancelParkingBooking(booking.generateUniqueId())).show();
+                                            v -> mBookingViewModel.cancelBooking(booking.generateUniqueId())).show();
                             // Navigate one screen back
                             goBack(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view));
                             return;
@@ -348,7 +347,7 @@ public class BookingFragment extends Fragment implements Navigable {
     /**
      * Changes the visibility of the loading bar to the specified value.
      *
-     * @param visibility The new visibility status of the laoding bar.
+     * @param visibility The new visibility status of the loading bar.
      */
     private void changeLoadingBarVisibilityTo(int visibility) {
         getBinding().fragmentParkingClpbLoadingBar.setVisibility(visibility);
@@ -391,12 +390,12 @@ public class BookingFragment extends Fragment implements Navigable {
      */
     @NotNull
     @Contract(pure = true)
-    private View.OnClickListener buildListenerForTimePicker(@NotNull MutableLiveData<String> stringMutableLiveData) {
+    private View.OnClickListener buildListenerForTimePicker() {
         return v -> {
             TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
                     AlertDialog.THEME_HOLO_DARK, // TODO: useful for night mode THEME_HOLO_LIGHT
                     // Triggers TextView's Update
-                    (view, hourOfDay, minute) -> stringMutableLiveData.setValue(Utility.getTimeOf(hourOfDay, minute)),
+                    (view, hourOfDay, minute) -> mBookingViewModel.updateStartingTime(hourOfDay, minute),
                     Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
                     Calendar.getInstance().get(Calendar.MINUTE),
                     true);

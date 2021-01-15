@@ -23,12 +23,12 @@
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Register</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome! "</string>
+    <string name="welcome">Welcome! </string>
     <string name="invalid_email">Not a valid email</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be > 5 characters</string>
     <string name="invalid_role_choice">At least of role must be selected</string>
-    <string name="login_failed">"Login failed"</string>
+    <string name="login_failed">Login failed</string>
     <string name="title_activity_testing">Testing</string>
     <string name="tab_text_1">Tab 1</string>
     <string name="tab_text_2">Tab 2</string>

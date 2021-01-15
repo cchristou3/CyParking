@@ -92,7 +92,7 @@ public class MainHostActivity extends AppCompatActivity {
         mAuthStateViewModel = new ViewModelProvider(this, new AuthStateViewModelFactory())
                 .get(AuthStateViewModel.class);
 
-        mAuthStateViewModel.getUserState().observe(this, MainHostActivity.this::updateDrawer);
+        mAuthStateViewModel.getUserState().observe(this, this::updateDrawer);
 
         mAuthStateViewModel.getUserInfo(this, FirebaseAuth.getInstance().getCurrentUser());
     }

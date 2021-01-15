@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,7 +21,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
@@ -30,7 +28,6 @@ import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.data.pojo.SnapshotState;
-import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 import io.github.cchristou3.CyParking.databinding.FragmentViewBookingsBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
@@ -58,7 +55,7 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
     private AuthStateViewModel mAuthStateViewModel;
     private FragmentViewBookingsBinding mFragmentViewBookingsBinding;
     private BookingAdapter mBookingAdapter;
-    private MutableLiveData<List<Booking>> mObservableBookingList;
+    private ViewBookingsViewModel mViewBookingsViewModel;
     private SnapshotState mSnapshotState;
 
     @Override
@@ -93,8 +90,9 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
         });
 
         // Initialize the fragment's ViewModel / LiveData
-        mObservableBookingList =
-                new ViewModelProvider(this).get(ViewBookingsViewModel.class).getBookingList();
+        mViewBookingsViewModel =
+                new ViewModelProvider(this, new ViewBookingsViewModelFactory())
+                        .get(ViewBookingsViewModel.class);
     }
 
     /**
@@ -110,9 +108,10 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
             // Show placeholder layout and hide the filter buttons
             getBinding().fragmentViewBookingsSflShimmerLayout.startShimmerAnimation();
 
-            DatabaseObserver.createQueryObserver(ParkingRepository
+            DatabaseObserver.createQueryObserver(
+                    mViewBookingsViewModel // The Query
                             .retrieveUserBookings(mAuthStateViewModel.getUser().getUserId()),
-                    (value, error) -> {
+                    (value, error) -> { // The event listener
                         if (error != null) {
                             Log.d(TAG, "onStart: " + error.getLocalizedMessage());
                             return;
@@ -125,20 +124,21 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
                                 case SnapshotState.INITIAL_DATA_RETRIEVAL: { // Happens when we first attach the listener
                                     Log.d(TAG, "INITIAL_DATA_RETRIEVAL: ");
                                     // Fill the list with all the retrieved documents
-                                    InitializeBookingList(value, mObservableBookingList);
+                                    InitializeBookingList(value);
                                     // Hide the placeholder container and move on to the next state
                                     getBinding().fragmentViewBookingsSflShimmerLayout.stopShimmerAnimation();
                                     getBinding().fragmentViewBookingsSflShimmerLayout.setVisibility(View.GONE);
                                     mSnapshotState.setState(SnapshotState.LISTENING_TO_DATA_CHANGES);
                                     break;
                                 }
-                                case SnapshotState.LISTENING_TO_DATA_CHANGES:
+                                case SnapshotState.LISTENING_TO_DATA_CHANGES: {
                                     Log.d(TAG, "LISTENING_TO_DATA_CHANGES: ");
                                     /* Amend the list's contents: More efficient.
                                        Instead of creating a new list and re-adding all elements.
                                        We simply add/update/remove the objects that got added/updated/removed */
-                                    UpdateBookingList(value, mObservableBookingList);
+                                    updateBookingList(value);
                                     break;
+                                }
                                 default:
                                     throw new IllegalStateException("The state must be one of those:\n" +
                                             "INITIAL_DATA_RETRIEVAL\n" +
@@ -190,9 +190,8 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
      * Syncs the local booking list of the user with the one on the server.
      *
      * @param bookingsOnServer The bookings list on the server
-     * @param localBookings    The bookings on the client side.
      */
-    private void UpdateBookingList(@NotNull QuerySnapshot bookingsOnServer, MutableLiveData<List<Booking>> localBookings) {
+    private void updateBookingList(@NotNull QuerySnapshot bookingsOnServer) {
         for (DocumentChange dc : bookingsOnServer.getDocumentChanges()) {
             switch (dc.getType()) {
                 case ADDED:
@@ -217,7 +216,7 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
                     break;
             }
         }
-        localBookings.setValue(mBookingList);
+        mViewBookingsViewModel.updateBookingList(mBookingList);
     }
 
     /**
@@ -226,14 +225,13 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
      * objects to the fragment's ViewModel.
      *
      * @param bookingsOnServer The bookings list on the server
-     * @param localBookings    The bookings on the client side.
      */
-    private void InitializeBookingList(@NotNull QuerySnapshot bookingsOnServer, MutableLiveData<List<Booking>> localBookings) {
+    private void InitializeBookingList(@NotNull QuerySnapshot bookingsOnServer) {
         for (DocumentSnapshot doc : bookingsOnServer.getDocuments()) {
             mBookingList.add(doc.toObject(Booking.class));
         }
         // Set the retrieved data as the value of the LiveData
-        localBookings.setValue(mBookingList);
+        mViewBookingsViewModel.updateBookingList(mBookingList);
 
         // Set up RecyclerView
         getBinding().fragmentViewBookingsRvRecyclerview
@@ -253,7 +251,7 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
                             RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
                             int position = viewHolder.getAdapterPosition();
                             final String bookingToBeCancelledId = mBookingList.get(position).generateUniqueId();
-                            ParkingRepository.cancelParkingBooking(bookingToBeCancelledId);
+                            mViewBookingsViewModel.cancelParkingBooking(bookingToBeCancelledId);
                         },
                         null));
 

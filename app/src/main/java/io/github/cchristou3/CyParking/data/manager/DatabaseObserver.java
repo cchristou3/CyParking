@@ -193,7 +193,7 @@ public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver
      */
     private void removeSnapshotListenerFromDatabaseQuery() {
         if (mListenerRegistration != null) {
-            Log.d(TAG, "unregisterDatabaseObserver: SnapshotListener removed!");
+            Log.d(TAG, "SnapshotListener removed!");
             mListenerRegistration.remove();
             mListenerRegistration = null;
         }

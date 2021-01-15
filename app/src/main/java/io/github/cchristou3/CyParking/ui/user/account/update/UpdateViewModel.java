@@ -10,7 +10,10 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.pojo.form.update.UpdateFormState;
 import io.github.cchristou3.CyParking.data.repository.AccountRepository;
-import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel;
+
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidName;
+import static io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel.isEmailValid;
+import static io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel.isPasswordValid;
 
 /**
  * Purpose: <p>Data persistence when orientation changes.
@@ -49,27 +52,37 @@ public class UpdateViewModel extends ViewModel {
         mActionFieldInput.setValue(updatedField);
         switch (mDialogType) {
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
-                if (updatedField != null && !updatedField.trim().isEmpty()) {
-                    mUpdateFormState.setValue(new UpdateFormState(true));
+                if (isValidName(updatedField)) {
+                    updateFormState(new UpdateFormState(true));
                 } else {
-                    mUpdateFormState.setValue(new UpdateFormState(R.string.invalid_username));
+                    updateFormState(new UpdateFormState(R.string.invalid_username));
                 }
                 break;
             case UpdateAccountDialog.UPDATE_EMAIL:
-                if (AuthenticatorViewModel.isEmailValid(updatedField)) {
-                    mUpdateFormState.setValue(new UpdateFormState(true));
+                if (isEmailValid(updatedField)) {
+                    updateFormState(new UpdateFormState(true));
                 } else {
-                    mUpdateFormState.setValue(new UpdateFormState(R.string.invalid_email));
+                    updateFormState(new UpdateFormState(R.string.invalid_email));
                 }
                 break;
             case UpdateAccountDialog.UPDATE_PASSWORD:
-                if (AuthenticatorViewModel.isPasswordValid(updatedField)) {
-                    mUpdateFormState.setValue(new UpdateFormState(true));
+                if (isPasswordValid(updatedField)) {
+                    updateFormState(new UpdateFormState(true));
                 } else {
-                    mUpdateFormState.setValue(new UpdateFormState(R.string.invalid_password));
+                    updateFormState(new UpdateFormState(R.string.invalid_password));
                 }
                 break;
         }
+    }
+
+    /**
+     * Assigns the value of {@link #mUpdateFormState} to
+     * the given argument.
+     *
+     * @param newFormState The new state of the form.
+     */
+    private void updateFormState(UpdateFormState newFormState) {
+        mUpdateFormState.setValue(newFormState);
     }
 
     /**
@@ -144,12 +157,12 @@ public class UpdateViewModel extends ViewModel {
     }
 
     /**
-     * Access the {@link #mActionFieldInput} of the ViewModel.
+     * Access the value of {@link #mActionFieldInput} of the ViewModel.
      *
-     * @return A reference to {@link #mActionFieldInput}.
+     * @return The value of {@link #mActionFieldInput}.
      */
-    public LiveData<String> getActionFieldInput() {
-        return mActionFieldInput;
+    public String getActionFieldInput() {
+        return mActionFieldInput.getValue();
     }
 
     /**

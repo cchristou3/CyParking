@@ -10,8 +10,8 @@ import com.google.firebase.firestore.Query;
 
 import org.jetbrains.annotations.NotNull;
 
+import io.github.cchristou3.CyParking.data.interfaces.OperatorRepository;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.repository.operator.OperatorRepository;
 
 /**
  * Purpose: <p>Data persistence when orientation changes.
@@ -27,8 +27,14 @@ public class OperatorViewModel extends ViewModel {
 
     private final OperatorRepository mDefaultOperatorRepository;
 
-    public OperatorViewModel(OperatorRepository mDefaultOperatorRepository) {
-        this.mDefaultOperatorRepository = mDefaultOperatorRepository;
+    /**
+     * Initialize the ViewModel's OperatorRepository instance
+     * with the given argument.
+     *
+     * @param defaultOperatorRepository An OperatorRepository instance.
+     */
+    public OperatorViewModel(OperatorRepository defaultOperatorRepository) {
+        this.mDefaultOperatorRepository = defaultOperatorRepository;
     }
 
     /**

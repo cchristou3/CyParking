@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.ui.parking.slots.booking;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -11,8 +12,10 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
-import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
+import io.github.cchristou3.CyParking.data.repository.BookingRepository;
 import io.github.cchristou3.CyParking.utilities.Utility;
+
+import static io.github.cchristou3.CyParking.utilities.Utility.getTimeOf;
 
 /**
  * <p>A ViewModel implementation, adopted to the {@link BookingFragment} fragment.
@@ -31,6 +34,18 @@ public class BookingViewModel extends ViewModel {
     private final MutableLiveData<SlotOffer> mPickedSlotOffer =
             new MutableLiveData<>();
 
+    private final BookingRepository mBookingRepository;
+
+    /**
+     * Initialize the ViewModel's BookingRepository instance
+     * with the given argument.
+     *
+     * @param bookingRepository An BookingRepository instance.
+     */
+    public BookingViewModel(BookingRepository bookingRepository) {
+        this.mBookingRepository = bookingRepository;
+    }
+
     /**
      * Updates the value of {@link #mPickedSlotOffer} with the
      * specified one.
@@ -39,6 +54,17 @@ public class BookingViewModel extends ViewModel {
      */
     public void updateSlotOffer(SlotOffer newSlotOffer) {
         mPickedSlotOffer.setValue(newSlotOffer);
+    }
+
+    /**
+     * Updates the value of {@link #mPickedStartingTime} with the
+     * specified one.
+     *
+     * @param hours   The selected hour.
+     * @param minutes The selected minutes.
+     */
+    public void updateStartingTime(int hours, int minutes) {
+        mPickedStartingTime.setValue(getTimeOf(hours, minutes));
     }
 
     /**
@@ -54,7 +80,7 @@ public class BookingViewModel extends ViewModel {
     }
 
     /**
-     * Getters for all its data members
+     * Getters for all its LiveData members
      */
     public String getPickedDateValue() {
         return mPickedDate.getValue();
@@ -68,15 +94,15 @@ public class BookingViewModel extends ViewModel {
         return mPickedSlotOffer.getValue();
     }
 
-    public MutableLiveData<String> getPickedDate() {
+    public LiveData<String> getPickedDate() {
         return mPickedDate;
     }
 
-    public MutableLiveData<String> getPickedStartingTime() {
+    public LiveData<String> getPickedStartingTime() {
         return mPickedStartingTime;
     }
 
-    public MutableLiveData<SlotOffer> getPickedSlotOffer() {
+    public LiveData<SlotOffer> getPickedSlotOffer() {
         return mPickedSlotOffer;
     }
 
@@ -88,7 +114,7 @@ public class BookingViewModel extends ViewModel {
      * @return A reference of the specified lot in the database.
      */
     public DocumentReference observeParkingLotToBeBooked(ParkingLot selectedLot) {
-        return ParkingRepository.observeParkingLot(selectedLot);
+        return mBookingRepository.observeParkingLot(selectedLot);
     }
 
     /**
@@ -99,6 +125,16 @@ public class BookingViewModel extends ViewModel {
      * @return A {@link Task} object to be handled by the view.
      */
     public Task<Void> bookParkingLot(@NotNull Booking booking) {
-        return ParkingRepository.bookParkingSlot(booking, true);
+        return mBookingRepository.bookParkingSlot(booking, true);
+    }
+
+    /**
+     * Deletes the specified document using the document ID
+     *
+     * @param idOfBookingToBeCancelled The id of the document which we want to delete
+     */
+    public void cancelBooking(@NotNull String idOfBookingToBeCancelled) {
+        // Delete the booking info to the database
+        mBookingRepository.cancelParkingBooking(idOfBookingToBeCancelled);
     }
 }

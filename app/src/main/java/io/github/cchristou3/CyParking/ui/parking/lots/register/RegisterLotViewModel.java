@@ -10,15 +10,15 @@ import com.google.android.gms.tasks.Task;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.data.interfaces.OperatorRepository;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormState;
-import io.github.cchristou3.CyParking.data.repository.ParkingRepository;
 
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.Availability.isCapacityValid;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.areSlotOffersValid;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidLotLatLng;
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidLotName;
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidName;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidPhoneNumber;
 
 /**
@@ -38,6 +38,18 @@ public class RegisterLotViewModel extends ViewModel {
     private final MutableLiveData<LatLng> mLotLatLng = new MutableLiveData<>();
     private final MutableLiveData<List<SlotOffer>> mSlotOfferList = new MutableLiveData<>();
     private final MutableLiveData<RegisterLotFormState> mRegisterLotFormState = new MutableLiveData<>();
+
+    private final OperatorRepository mOperatorRepository;
+
+    /**
+     * Initialize the ViewModel's OperatorRepository instance
+     * with the given argument.
+     *
+     * @param operatorRepository An OperatorRepository instance.
+     */
+    public RegisterLotViewModel(OperatorRepository operatorRepository) {
+        this.mOperatorRepository = operatorRepository;
+    }
 
     /**
      * Updates the values of
@@ -70,7 +82,7 @@ public class RegisterLotViewModel extends ViewModel {
         if (!isValidPhoneNumber(operatorMobileNumber)) {
             mRegisterLotFormState.setValue(new RegisterLotFormState(R.string.mobile_phone_error,
                     null, null, null, null));
-        } else if (!isValidLotName(lotName)) {
+        } else if (!isValidName(lotName)) {
             mRegisterLotFormState.setValue(new RegisterLotFormState(null,
                     R.string.lot_name_error, null, null, null));
         } else if (!isCapacityValid(lotCapacity)) {
@@ -94,7 +106,7 @@ public class RegisterLotViewModel extends ViewModel {
      * @return A {@link Task<Void>} object to be handled by the view.
      */
     public Task<Void> registerParkingLot(ParkingLot parkingLot) {
-        return ParkingRepository.registerParkingLot(parkingLot);
+        return mOperatorRepository.registerParkingLot(parkingLot);
     }
 
     /**

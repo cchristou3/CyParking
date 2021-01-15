@@ -16,10 +16,12 @@ import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.data.repository.BookingRepository;
 import io.github.cchristou3.CyParking.utilities.ShaUtility;
 
 /**
@@ -152,19 +154,19 @@ public class ParkingLot extends Parking {
      * @param mobileNumber The mobile number to be validated.
      * @return True, if it consists of 8 digits. Otherwise, false.
      */
-    public static boolean isValidPhoneNumber(@NotNull final String mobileNumber) {
-        return mobileNumber.length() == 8; //Pattern.compile("^\\d{8}$").matcher(mobileNumber).matches();
+    public static boolean isValidPhoneNumber(final String mobileNumber) {
+        return mobileNumber != null && Pattern.compile("^\\d{8}$").matcher(mobileNumber).matches();
         // TODO: 12/01/2021 Add appropriate pattern
     }
 
     /**
-     * Check whether the given lot name is valid.
+     * Check whether the given name is valid.
      *
-     * @param lotName The lot name to be validated.
+     * @param name The name to be validated.
      * @return True, if it non-null and non-empty. Otherwise, false.
      */
-    public static boolean isValidLotName(final String lotName) {
-        return lotName != null && !lotName.trim().isEmpty();
+    public static boolean isValidName(final String name) {
+        return name != null && !name.trim().isEmpty();
     }
 
     /**
@@ -183,7 +185,7 @@ public class ParkingLot extends Parking {
      * @param slotOfferList The slot offer list to be validated.
      * @return True, if it non-null and non-empty. Otherwise, false.
      */
-    public static boolean areSlotOffersValid(@NotNull final List<SlotOffer> slotOfferList) {
+    public static boolean areSlotOffersValid(final List<SlotOffer> slotOfferList) {
         return slotOfferList != null && !slotOfferList.isEmpty();
     }
 
@@ -241,7 +243,7 @@ public class ParkingLot extends Parking {
      * Used as the DocumentID for the Firestore database's PRIVATE_PARKING node.
      *
      * @return A digest unique to each object
-     * @see io.github.cchristou3.CyParking.data.repository.ParkingRepository
+     * @see BookingRepository
      * @see Booking#generateUniqueId()
      */
     @Override

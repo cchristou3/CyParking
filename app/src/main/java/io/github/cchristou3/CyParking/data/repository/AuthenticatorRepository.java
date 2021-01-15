@@ -1,8 +1,10 @@
 package io.github.cchristou3.CyParking.data.repository;
 
 import android.content.Context;
+import android.util.Log;
 
-import androidx.lifecycle.MutableLiveData;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -14,53 +16,33 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.data.manager.SharedPreferencesManager;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
-import io.github.cchristou3.CyParking.data.pojo.form.login.LoginResult;
-import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USERS;
+import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 
 /**
  * Purpose: <p>Class that handles authentication w/ login credentials and retrieves user information.
  * Further, it requests authentication and user information from the remote data source and
- * maintains an in-memory cache of login status and user credentials information.</p>
+ * maintains an in-memory cache of login status (TODO:) and user credentials information.</p>
  *
  * @author Charalambos Christou
- * @version 3.0 12/01/21
+ * @version 4.0 14/01/21
  */
 public class AuthenticatorRepository {
 
-    // Non-constant-non-static data members
-    private static volatile AuthenticatorRepository INSTANCE;
     private final FirebaseAuth mDataSource;
 
     /**
      * Private Constructor : singleton access.
      * Initializes the Repository's {@link FirebaseAuth}
-     * member with the given argument.
-     *
-     * @param dataSource The data source to be used as an Auth API.
+     * member with its current available instance.
      */
-    private AuthenticatorRepository(@NotNull FirebaseAuth dataSource) {
-        this.mDataSource = dataSource;
-    }
-
-    /**
-     * Returns a new instance of the data source, if there isn't already one.
-     * Otherwise returns the existing instance.
-     *
-     * @param dataSource A FirebaseAuth object
-     * @return A LoginRepository instance
-     */
-    public static AuthenticatorRepository getInstance(FirebaseAuth dataSource) {
-        if (INSTANCE == null) {
-            INSTANCE = new AuthenticatorRepository(dataSource);
-        }
-        return INSTANCE;
+    public AuthenticatorRepository() {
+        this.mDataSource = FirebaseAuth.getInstance();
     }
 
     /**
@@ -76,134 +58,37 @@ public class AuthenticatorRepository {
     }
 
     /**
-     * Sign the user in with the given username (email) and password.
+     * Sign the user in with the given email (email) and password.
      * Once successfully logged in, the user's roles are accessed locally
      * or if not found, on the server, and then the loginResult is updated
      * which itself triggers a Ui update.
      *
-     * @param username    A string which corresponds to the email of the user.
-     * @param password    A string which corresponds to the password of the user.
-     * @param loginResult A MutableLiveData which handles the authentication result.
+     * @param email    A string that corresponds to the email of the user.
+     * @param password A string that corresponds to the password of the user.
+     * @return A {@link Task<AuthResult>} to be handled by the caller.
      */
-    public void login(Context context, String username, String password, MutableLiveData<LoginResult> loginResult) {
+    public Task<AuthResult> login(String email, String password) {
         // handle login
         // Handle loggedInUser authentication
-        mDataSource.signInWithEmailAndPassword(username, password)
-                .addOnCompleteListener(loginTask -> {
-                    // Check whether an exception occurred
-                    if (loginTask.getException() != null) {
-                        loginResult.setValue(new LoginResult(loginTask.getException().getMessage()));
-                        return;
-                    }
-
-                    // If the user successfully signed in
-                    if (loginTask.isSuccessful() && loginTask.getResult().getUser() != null) {
-                        // Access the data related to user locally via the SharedPreferencesManager
-                        // using his/her Uid as the key
-                        List<String> listOfRoles = new SharedPreferencesManager(context.getApplicationContext())
-                                .getValue(loginTask.getResult().getUser().getUid());
-
-                        // If the user has data stored locally
-                        if (!(listOfRoles == null || listOfRoles.isEmpty())) {
-                            // then
-                            updateLoginResultWithUser(new LoggedInUser(loginTask.getResult().getUser(), listOfRoles), loginResult);
-                        } else {
-                            // Otherwise, the user does not have data stored locally (cache was cleared or changed device).
-                            // Fetch the user's data from the server
-                            updateLoginResultWithFetchedData(loginTask.getResult().getUser(), loginResult);
-                        }
-                    }
-                });
+        return mDataSource.signInWithEmailAndPassword(email, password);
     }
 
     /**
-     * Fetch the user's data from the Firestore database and
-     * update the loginResult accordingly.
+     * Sign the user up with the given email (email) and password
      *
-     * @param currentFirebaseUser The current FirebaseUser instance.
-     * @param loginResult         A MutableLiveData which handles the authentication result.
+     * @param email      A string which corresponds to the email of the user.
+     * @param password   A string which corresponds to the password of the user.
+     * @param isUser     true if the user selected the checkbox which corresponds to the user. Otherwise, false.
+     * @param isOperator true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
+     * @return A {@link Task<AuthResult>} to be handled by the caller.
      */
-    private void updateLoginResultWithFetchedData(@NotNull FirebaseUser currentFirebaseUser, MutableLiveData<LoginResult> loginResult) {
-        AuthenticatorRepository.this.getUser(currentFirebaseUser)
-                .addOnCompleteListener(retrieveUserDataTask -> {
-                    // The task was unsuccessful, the user has no data stored on the server
-                    // and an exception occurred
-                    if (retrieveUserDataTask.getException() != null &&
-                            !(retrieveUserDataTask.isSuccessful()
-                                    && retrieveUserDataTask.getResult().getData() != null)) {
-                        updateLoginResultWithUser(new LoggedInUser(currentFirebaseUser, null), loginResult);
-                        return;
-                        // TODO: Ask the user to re-enter his credentials or to create a new account
-                    }
-                    // The task was successful and the user has data stored on the server
-                    LoggedInUser user = null;
-                    try {
-                        user = retrieveUserDataTask.getResult().toObject(LoggedInUser.class);
-                    } catch (NullPointerException ignored) {
-                    }
-                    // A user with roles will be treated as a un-logged-in user.
-                    List<String> roles = (user != null) ? user.getRoles() : null;
-                    updateLoginResultWithUser(new LoggedInUser(currentFirebaseUser, roles), loginResult);
-                });
-    }
-
-    /**
-     * Updates the value of loginResult
-     * based on the given LoggedInUser argument.
-     *
-     * @param user        A {@link LoggedInUser} object.
-     * @param loginResult A MutableLiveData which handles the authentication result.
-     */
-    private void updateLoginResultWithUser(@NotNull LoggedInUser user, @NotNull MutableLiveData<LoginResult> loginResult) {
-        // Trigger loginResult observer update
-        loginResult.setValue(new LoginResult(user)); // Roles
-    }
-
-    /**
-     * Sign the user up with the given username (email) and password
-     *
-     * @param username    A string which corresponds to the email of the user.
-     * @param password    A string which corresponds to the password of the user.
-     * @param loginResult A MutableLiveData which handles the authentication result.
-     * @param isUser      true if the user selected the checkbox which corresponds to the user. Otherwise, false.
-     * @param isOperator  true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
-     * @param context     The context of the current tab.
-     */
-    public void register(String username, String password, MutableLiveData<LoginResult> loginResult,
-                         boolean isUser, boolean isOperator, Context context) throws IllegalArgumentException {
+    public Task<AuthResult> register(String email, String password,
+                                     boolean isUser, boolean isOperator) throws IllegalArgumentException {
         if (!isUser && !isOperator)
             throw new IllegalArgumentException("At least one of the given roles must be selected!");
         // handle registration. A registered User is also a loggedInUser
         // Handle loggedInUser authentication
-        mDataSource.createUserWithEmailAndPassword(username, password)
-                .addOnCompleteListener(task -> {
-                    // Check whether an exception occurred
-                    if (task.getException() != null) {
-                        loginResult.setValue(new LoginResult(task.getException().getMessage()));
-                        return;
-                    }
-
-                    // If the user successfully registered
-                    if (task.isSuccessful() && task.getResult().getUser() != null) {
-                        // Create a list to store the user's selected role(s)
-                        List<String> listOfRoles = new ArrayList<>();
-                        if (isUser) listOfRoles.add(MainHostActivity.USER);
-                        if (isOperator) listOfRoles.add(MainHostActivity.OPERATOR);
-
-                        // Save the user's roles locally via SharedPreferences
-                        // Each user in the database has a unique Uid. Thus, to be used as the key.
-                        new SharedPreferencesManager(context.getApplicationContext())
-                                .setValue(task.getResult().getUser().getUid(), listOfRoles);
-
-                        final LoggedInUser loggedInUser = new LoggedInUser(task.getResult().getUser(), listOfRoles);
-                        // Initialize the Repository's LoggedInUser instance
-                        // and trigger loginResult observer update
-                        updateLoginResultWithUser(loggedInUser, loginResult);
-
-                        // Save the user's data to the server
-                        addUser(loggedInUser);
-                    }
-                });
+        return mDataSource.createUserWithEmailAndPassword(email, password);
     }
 
     /**
@@ -211,7 +96,7 @@ public class AuthenticatorRepository {
      *
      * @param user The current LoggedInUser instance.
      */
-    private void addUser(@NotNull LoggedInUser user) {
+    public void addUser(@NotNull LoggedInUser user) {
         // Map users to a document via their autogenerated uid
         FirebaseFirestore.getInstance().collection(USERS)
                 .document(user.getUserId())
@@ -231,9 +116,79 @@ public class AuthenticatorRepository {
     }
 
     /**
+     * Initially retrieves the user's data locally. If not found,
+     * fetches them from the backend.
+     * The events are handled via a {@link UserDataHandler} instance
+     * that is provided by the caller.
+     *
+     * @param context The context to use.
+     * @param user    The current FirebaseUser instance provided either by
+     *                {@link FirebaseAuth#getCurrentUser()} or {@link AuthResult#getUser()}.
+     * @param handler The handler of the user's data both.
+     * @see io.github.cchristou3.CyParking.ui.host.AuthStateViewModel#getUserInfo(Context, FirebaseUser)
+     * @see io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel#login(Context, String, String)
+     */
+    public void getUserInfo(@NonNull Context context, @Nullable FirebaseUser user, @NonNull UserDataHandler handler) {
+        if (user == null) return; // If user not set (logged in), terminate the method.
+        // Otherwise,
+        // Access the user's role locally via the SharedPreferences using the
+        // user's id as the key
+        List<String> roles = new SharedPreferencesManager(context.getApplicationContext()).getValue(user.getUid());
+        // Local data is found
+        if (!(roles == null || roles.isEmpty())) {
+            handler.onLocalData(roles);
+        } else {
+            // fetch user's data from the database
+            this.getUser(user)
+                    .addOnCompleteListener(task -> {
+                        Log.d(TAG, "getUserInfo: data found on server");
+                        if (task.getException() != null) {
+                            handler.onRemoteDataFailure(task.getException());
+                            return;
+                        }
+                        if (task.isSuccessful()) {
+                            handler.onRemoteDataSuccess(task);
+                        }
+                    });
+        }
+    }
+
+    /**
      * Signs the user out.
      */
     public void signOut() {
         mDataSource.signOut();
+    }
+
+    /**
+     * Purpose: Provide callbacks to be used when retrieving the user's data.
+     * Initially the data is looked up locally. If no data was found locally,
+     * then the user's data are looked up from the server.
+     *
+     * @see AuthenticatorRepository#getUserInfo(Context, FirebaseUser, UserDataHandler)
+     */
+    public interface UserDataHandler {
+        /**
+         * Invoked when the user's data was found locally.
+         *
+         * @param roles The roles of the user that are stored locally.
+         */
+        void onLocalData(List<String> roles);
+
+        /**
+         * Invoked when the user's data was found on the server's
+         * database.
+         *
+         * @param task The {@link Task} instance that contains the user's data.
+         */
+        void onRemoteDataSuccess(Task<DocumentSnapshot> task);
+
+        /**
+         * Invoked when an error occurred when retrieving the user's
+         * data from the server.
+         *
+         * @param exception The error that caused the requests's failure.
+         */
+        void onRemoteDataFailure(Exception exception);
     }
 }

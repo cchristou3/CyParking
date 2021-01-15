@@ -101,7 +101,8 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
         super.onViewCreated(view, savedInstanceState);
 
         // Initialize the fragment's ViewModel instance
-        mRegisterLotViewModel = new ViewModelProvider(this).get(RegisterLotViewModel.class);
+        mRegisterLotViewModel = new ViewModelProvider(this,
+                new RegisterLotViewModelFactory()).get(RegisterLotViewModel.class);
 
         mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
 

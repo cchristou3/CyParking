@@ -206,7 +206,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         final short dialogAction = mUpdateViewModel.getDialogType();
         setInputTypeTo(dialogAction, getBinding().dialogAccountUpdateEtInput);
         // Display the saved value
-        getBinding().dialogAccountUpdateEtInput.setText(mUpdateViewModel.getActionFieldInput().getValue());
+        getBinding().dialogAccountUpdateEtInput.setText(mUpdateViewModel.getActionFieldInput());
 
         final String hint = getString(
                 ((dialogAction == UPDATE_DISPLAY_NAME) ? R.string.hint_name

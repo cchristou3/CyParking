@@ -30,10 +30,16 @@ public class LoggedInUser implements Parcelable {
         }
     };
 
-    private final String userId;
-    private final List<String> roles;
+    private String userId;
+    private List<String> roles;
     private String displayName;
     private String email;
+
+    /**
+     * No-argument constructor required for deserialization
+     */
+    public LoggedInUser() {
+    }
 
     /**
      * Public Constructor.

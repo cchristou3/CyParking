@@ -15,9 +15,9 @@ import static io.github.cchristou3.CyParking.data.repository.RepositoryData.FEED
  * messages to the administrator.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 12/01/21
+ * @version 3.0 14/01/21
  */
-public final class FeedbackRepository {
+public class FeedbackRepository {
 
     /**
      * Stores the given {@link Feedback} instance in the database.
@@ -26,7 +26,7 @@ public final class FeedbackRepository {
      * @return Task to be handled by the view.
      */
     @NotNull
-    public static Task<DocumentReference> sendFeedback(Feedback feedback) {
+    public Task<DocumentReference> sendFeedback(Feedback feedback) {
         return FirebaseFirestore.getInstance().collection(FEEDBACK).add(feedback);
     }
 }

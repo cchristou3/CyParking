@@ -8,11 +8,12 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.List;
 
-import io.github.cchristou3.CyParking.data.manager.SharedPreferencesManager;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
@@ -53,6 +54,15 @@ public class AuthStateViewModel extends ViewModel {
     }
 
     /**
+     * Access the {@link #mAuthenticatorRepository}.
+     *
+     * @return A reference to {@link #mAuthenticatorRepository}.
+     */
+    public AuthenticatorRepository getAuthenticatorRepository() {
+        return mAuthenticatorRepository;
+    }
+
+    /**
      * Access the user's state.
      *
      * @return A reference to the user's state.
@@ -88,36 +98,29 @@ public class AuthStateViewModel extends ViewModel {
      * @param context The context of the screen.
      */
     public void getUserInfo(@NonNull Context context, @Nullable FirebaseUser user) {
-        if (user == null) return; // If user not set (logged in), terminate the method.
-        // Otherwise,
-        // Access the user's role locally via the SharedPreferences using the
-        // user's id as the key
-        List<String> roles = new SharedPreferencesManager(context.getApplicationContext()).getValue(user.getUid());
+        mAuthenticatorRepository.getUserInfo(context, user, new AuthenticatorRepository.UserDataHandler() {
+            @Override
+            public void onLocalData(List<String> roles) {
+                Log.d(TAG, "getUserInfo: data found locally");
+                mUserState.setValue(new LoggedInUser(user, roles));
+            }
 
-        // Local data is found
-        if (!(roles == null || roles.isEmpty())) {
-            Log.d(TAG, "getUserInfo: data found locally");
-            mUserState.setValue(new LoggedInUser(user, roles));
-        } else {
-            // fetch user's data from the database
-            mAuthenticatorRepository.getUser(user)
-                    .addOnCompleteListener(task -> {
-                        Log.d(TAG, "getUserInfo: data found on server");
-                        if (task.getException() != null) {
-                            mUserState.setValue(null);
-                            return;
-                        }
-                        if (task.isSuccessful()) {
-                            try {
-                                final LoggedInUser loggedInUser = task.getResult().toObject(LoggedInUser.class);
-                                mUserState.setValue(loggedInUser);
-                            } catch (NullPointerException e) {
-                                mUserState.setValue(null);
-                                Log.e(TAG, "getUserInfo: ", e);
-                            }
-                        }
-                    });
-        }
+            @Override
+            public void onRemoteDataSuccess(Task<DocumentSnapshot> task) {
+                try {
+                    final LoggedInUser loggedInUser = task.getResult().toObject(LoggedInUser.class);
+                    mUserState.setValue(loggedInUser);
+                } catch (NullPointerException e) {
+                    onRemoteDataFailure(e);
+                    Log.e(TAG, "getUserInfo: ", e);
+                }
+            }
+
+            @Override
+            public void onRemoteDataFailure(Exception exception) {
+                mUserState.setValue(null);
+            }
+        });
     }
 
     /**

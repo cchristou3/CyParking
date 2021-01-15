@@ -9,13 +9,21 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.data.manager.SharedPreferencesManager;
+import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.pojo.form.login.LoginFormState;
 import io.github.cchristou3.CyParking.data.pojo.form.login.LoginResult;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
+import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 
 /**
  * Purpose: <p>Data persistence when orientation changes. Shared amongst all tab fragments.
@@ -46,15 +54,15 @@ public class AuthenticatorViewModel extends ViewModel {
     }
 
     /**
-     * A placeholder username validation check.
+     * A placeholder email validation check.
      *
-     * @param username The username of the user.
+     * @param email The email of the user.
      * @return true if it passes the criteria.
      */
-    public static boolean isEmailValid(String username) {
-        if (username == null || username.trim().isEmpty()) return false;
+    public static boolean isEmailValid(String email) {
+        if (email == null || email.trim().isEmpty()) return false;
 
-        return Patterns.EMAIL_ADDRESS.matcher(username).matches();
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
     /**
@@ -75,7 +83,59 @@ public class AuthenticatorViewModel extends ViewModel {
      */
     public void login(Context context, String email, String password) {
         // can be launched in a separate asynchronous job
-        mAuthenticatorRepository.login(context, email, password, mAuthenticatorResult);
+        mAuthenticatorRepository.
+                login(email, password)
+                .addOnCompleteListener(loginTask -> {
+                    // Check whether an exception occurred
+                    if (loginTask.getException() != null) {
+                        mAuthenticatorResult.setValue(
+                                new LoginResult(loginTask.getException().getMessage())
+                        );
+                        return;
+                    }
+                    // If the user successfully signed in
+                    if (loginTask.isSuccessful()) {
+                        mAuthenticatorRepository.getUserInfo(context, loginTask.getResult().getUser(),
+                                new AuthenticatorRepository.UserDataHandler() {
+                                    @Override
+                                    public void onLocalData(List<String> roles) {
+                                        updateLoginResultWithUser(new LoggedInUser(loginTask.getResult().getUser(), roles));
+                                    }
+
+                                    @Override
+                                    public void onRemoteDataSuccess(Task<DocumentSnapshot> retrieveUserDataTask) {
+                                        // The task was successful and the user has data stored on the server
+                                        LoggedInUser loggedInUser = null;
+                                        try {
+                                            loggedInUser = retrieveUserDataTask.getResult().toObject(LoggedInUser.class);
+                                        } catch (NullPointerException ignored) {
+                                        }
+                                        // A user without roles will be treated as a not-logged-in user.
+                                        updateLoginResultWithUser(loggedInUser);
+                                    }
+
+                                    @Override
+                                    public void onRemoteDataFailure(Exception exception) {
+                                        updateLoginResultWithUser(new LoggedInUser(
+                                                loginTask.getResult().getUser(), null));
+                                    }
+                                });
+                    }
+                });
+    }
+
+    /**
+     * Updates the value of loginResult
+     * based on the given LoggedInUser argument.
+     *
+     * @param user A {@link LoggedInUser} object.
+     */
+    private void updateLoginResultWithUser(@Nullable LoggedInUser user) {
+        // Trigger loginResult observer update
+        mAuthenticatorResult.setValue(
+                user == null ?
+                        new LoginResult("Login failed") : // TODO: 14/01/2021 Replace with getString(R.string....)
+                        new LoginResult(user)); // Roles
     }
 
     /**
@@ -90,7 +150,35 @@ public class AuthenticatorViewModel extends ViewModel {
     public void register(String username, String password, boolean isUser, boolean isOperator, Context context) {
         // can be launched in a separate asynchronous job
         try {
-            mAuthenticatorRepository.register(username, password, mAuthenticatorResult, isUser, isOperator, context);
+            mAuthenticatorRepository.register(username, password, isUser, isOperator)
+                    .addOnCompleteListener(task -> {
+                        // Check whether an exception occurred
+                        if (task.getException() != null) {
+                            mAuthenticatorResult.setValue(new LoginResult(task.getException().getMessage()));
+                            return;
+                        }
+
+                        // If the user successfully registered
+                        if (task.isSuccessful() && task.getResult().getUser() != null) {
+                            // Create a list to store the user's selected role(s)
+                            List<String> listOfRoles = new ArrayList<>();
+                            if (isUser) listOfRoles.add(MainHostActivity.USER);
+                            if (isOperator) listOfRoles.add(MainHostActivity.OPERATOR);
+
+                            // Save the user's roles locally via SharedPreferences
+                            // Each user in the database has a unique Uid. Thus, to be used as the key.
+                            new SharedPreferencesManager(context.getApplicationContext())
+                                    .setValue(task.getResult().getUser().getUid(), listOfRoles);
+
+                            final LoggedInUser loggedInUser = new LoggedInUser(task.getResult().getUser(), listOfRoles);
+                            // Initialize the Repository's LoggedInUser instance
+                            // and trigger loginResult observer update
+                            updateLoginResultWithUser(loggedInUser);
+
+                            // Save the user's data to the server
+                            mAuthenticatorRepository.addUser(loggedInUser);
+                        }
+                    });
         } catch (IllegalArgumentException e) {
             mAuthenticatorResult.setValue(new LoginResult(e.getMessage()));
         }

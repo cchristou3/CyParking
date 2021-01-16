@@ -2,6 +2,18 @@ const constants = require('./constants')
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
+
+const deleteAll = function (querySnapshot) {
+    console.log("Object: "+JSON.stringify(querySnapshot))
+    querySnapshot.forEach(function (doc) {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc)
+        doc.ref.delete();
+    });
+}
+module.exports.deleteAll = deleteAll;
+
+
 // Determines whether the given location is inside the range
 const nearbyUser = function (parking, userLatitude, userLongitude) {
     try {

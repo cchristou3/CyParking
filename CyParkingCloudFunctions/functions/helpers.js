@@ -1,7 +1,6 @@
 const constants = require('./constants')
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-// Helper Functions
 
 // Determines whether the given location is inside the range
 const nearbyUser = function (parking, userLatitude, userLongitude) {

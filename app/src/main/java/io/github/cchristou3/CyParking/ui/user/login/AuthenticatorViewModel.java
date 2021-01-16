@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -23,15 +24,17 @@ import io.github.cchristou3.CyParking.data.manager.SharedPreferencesManager;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.pojo.form.login.AuthFormState;
 import io.github.cchristou3.CyParking.data.pojo.form.login.AuthResult;
+import io.github.cchristou3.CyParking.data.repository.AccountRepository;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
-import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
+
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isNameValid;
 
 /**
  * Purpose: <p>Data persistence when orientation changes. Shared amongst all tab fragments.
  * Used when the user tries to login/register.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 1/11/20
+ * @version 2.0 16/01/21
  */
 public class AuthenticatorViewModel extends ViewModel {
 
@@ -39,6 +42,7 @@ public class AuthenticatorViewModel extends ViewModel {
     private final MutableLiveData<AuthResult> mAuthResultState = new MutableLiveData<>();
 
     private final MutableLiveData<String> mEmailState = new MutableLiveData<>();
+    private final MutableLiveData<String> mNameState = new MutableLiveData<>();
     private final MutableLiveData<String> mPasswordState = new MutableLiveData<>();
     private final AuthenticatorRepository mAuthenticatorRepository;
     // First fragment which appears to the user is the "sign in" tab
@@ -125,16 +129,17 @@ public class AuthenticatorViewModel extends ViewModel {
     /**
      * Connect with our backend to sign the user up.
      *
-     * @param username   The user name of the user.
+     * @param email      The email of the user.
+     * @param name       The name of the user.
      * @param password   The password of the user.
      * @param isUser     true if the user selected the checkbox which corresponds to the user. Otherwise, false.
      * @param isOperator true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
      * @param context    The context of the current tab.
      */
-    public void register(String username, String password, boolean isUser, boolean isOperator, Context context) {
+    public void register(String email, String name, String password, boolean isUser, boolean isOperator, Context context) {
         // can be launched in a separate asynchronous job
         try {
-            mAuthenticatorRepository.register(username, password, isUser, isOperator)
+            mAuthenticatorRepository.register(email, password, isUser, isOperator)
                     .addOnCompleteListener(task -> {
                         // Check whether an exception occurred
                         if (task.getException() != null) {
@@ -146,8 +151,8 @@ public class AuthenticatorViewModel extends ViewModel {
                         if (task.isSuccessful() && task.getResult().getUser() != null) {
                             // Create a list to store the user's selected role(s)
                             List<String> listOfRoles = new ArrayList<>();
-                            if (isUser) listOfRoles.add(MainHostActivity.USER);
-                            if (isOperator) listOfRoles.add(MainHostActivity.OPERATOR);
+                            if (isUser) listOfRoles.add(LoggedInUser.USER);
+                            if (isOperator) listOfRoles.add(LoggedInUser.OPERATOR);
 
                             // Save the user's roles locally via SharedPreferences
                             // Each user in the database has a unique Uid. Thus, to be used as the key.
@@ -155,12 +160,18 @@ public class AuthenticatorViewModel extends ViewModel {
                                     .setValue(task.getResult().getUser().getUid(), listOfRoles);
 
                             final LoggedInUser loggedInUser = new LoggedInUser(task.getResult().getUser(), listOfRoles);
+                            loggedInUser.setDisplayName(name);
+
                             // Initialize the Repository's LoggedInUser instance
                             // and trigger loginResult observer update
                             updateAuthResult(loggedInUser);
 
-                            // Save the user's data to the server
+                            // Save the user's data to the server asynchronously
                             mAuthenticatorRepository.addUser(loggedInUser);
+
+                            // Update the user's display name asynchronously
+                            new AccountRepository(FirebaseAuth.getInstance())
+                                    .updateDisplayName(loggedInUser.getDisplayName(), loggedInUser);
                         }
                     });
         } catch (IllegalArgumentException e) {
@@ -195,21 +206,35 @@ public class AuthenticatorViewModel extends ViewModel {
      *
      * @param email      The email of the user.
      * @param password   The password of the user.
-     * @param isUser     true if the user selected the checkbox which corresponds to the user. Otherwise, false.
-     * @param isOperator true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
+     * @param isUser     true if the user checked the checkbox which corresponds to the user. Otherwise, false.
+     * @param isOperator true if the user checked the checkbox which corresponds to the operator. Otherwise, false.
      */
-    public void dataChanged(String email, String password, boolean isUser, boolean isOperator) {
+    public void dataChanged(String email, String name, String password, boolean isUser, boolean isOperator) {
         mPasswordState.setValue(password);
         updateEmail(email);
         if (!isEmailValid(email)) {
-            updateFromState(R.string.invalid_email, null, null);
+            updateFromState(R.string.invalid_email, null, null, null);
+        } else if (!isUserSigningIn() && !isNameValid(name)) {
+            updateFromState(null, R.string.invalid_name, null, null);
         } else if (!isPasswordValid(password)) {
-            updateFromState(null, R.string.invalid_password, null);
-        } else if (!areAnyRolesSelected(isUser, isOperator) && !isUserSigningIn()) { // Checks only if the user is registering
-            updateFromState(null, null, R.string.invalid_role_choice);
+            updateFromState(null, null, R.string.invalid_password, null);
+        } else if (!isUserSigningIn() && !areAnyRolesSelected(isUser, isOperator)) { // Checks only if the user is registering
+            updateFromState(null, null, null, R.string.invalid_role_choice);
         } else {
             updateFromStateToValid();
         }
+    }
+
+    /**
+     * Returns the validity of {@link #mAuthFormState}.
+     *
+     * @return True, if {@link #mAuthFormState} is valid. Otherwise, fasle.
+     */
+    public boolean isFormValid() {
+        if (this.mAuthFormState.getValue() != null)
+            return this.mAuthFormState.getValue().isDataValid();
+        else
+            return false;
     }
 
     /**
@@ -217,11 +242,12 @@ public class AuthenticatorViewModel extends ViewModel {
      * based on the given error ids.
      *
      * @param emailError    The id of the email error.
+     * @param nameError     The id of the name error.
      * @param passwordError The id of the password error.
      * @param roleError     The id of the role error.
      */
-    private void updateFromState(Integer emailError, Integer passwordError, Integer roleError) {
-        updateFromState(new AuthFormState(emailError, passwordError, roleError));
+    private void updateFromState(Integer emailError, Integer nameError, Integer passwordError, Integer roleError) {
+        updateFromState(new AuthFormState(emailError, nameError, passwordError, roleError));
     }
 
     /**

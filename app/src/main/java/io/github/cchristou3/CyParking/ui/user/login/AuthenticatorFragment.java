@@ -1,10 +1,22 @@
 package io.github.cchristou3.CyParking.ui.user.login;
 
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+
+import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
+import io.github.cchristou3.CyParking.databinding.FragmentAuthenticationBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 
@@ -20,24 +32,24 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
 
     public AuthenticatorFragment() {/* Required empty public constructor */}
 
-//    @Override
-//    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container,
-//                             Bundle savedInstanceState) {
-//        // Inflate the layout for this fragment
-//        FragmentAuthenticationBinding binding = FragmentAuthenticationBinding.inflate(inflater);
-//        AuthenticatorAdapter sectionsPagerAdapter = new AuthenticatorAdapter(getChildFragmentManager(),
-//                getLifecycle());
-//        final ViewPager2 viewPager = binding.fragmentAuthenticationVp2ViewPager2;
-//        viewPager.setAdapter(sectionsPagerAdapter);
-//        final TabLayout tabLayout = binding.fragmentAuthenticationTlTabs;
-//        new TabLayoutMediator(tabLayout, viewPager,
-//                (tab, position) -> {
-//                    tab.setText((position == 0) ? getString(R.string.sign_in) : getString(R.string.sign_up));
-//                    tab.setTabLabelVisibility(TabLayout.TAB_LABEL_VISIBILITY_LABELED);
-//                }
-//        ).attach();
-//        return binding.getRoot();
-//    }
+    @Override
+    public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        FragmentAuthenticationBinding binding = FragmentAuthenticationBinding.inflate(inflater);
+        AuthenticatorAdapter sectionsPagerAdapter = new AuthenticatorAdapter(getChildFragmentManager(),
+                getLifecycle());
+        final ViewPager2 viewPager = binding.fragmentAuthenticationVp2ViewPager2;
+        viewPager.setAdapter(sectionsPagerAdapter);
+        final TabLayout tabLayout = binding.fragmentAuthenticationTlTabs;
+        new TabLayoutMediator(tabLayout, viewPager,
+                (tab, position) -> {
+                    tab.setText((position == 0) ? getString(R.string.sign_in) : getString(R.string.sign_up));
+                    tab.setTabLabelVisibility(TabLayout.TAB_LABEL_VISIBILITY_LABELED);
+                }
+        ).attach();
+        return binding.getRoot();
+    }
 
 
     /**

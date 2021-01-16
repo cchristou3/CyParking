@@ -80,7 +80,7 @@ public class AuthenticatorViewModelTest extends InstantTaskRuler {
         // Given the user is signing in
         authenticatorViewModel.isUserSigningIn(true);
         // When he inputs valid password and email
-        authenticatorViewModel.dataChanged("test@gmail.com", "123456", false, false);
+        authenticatorViewModel.dataChanged("test@gmail.com", null, "123456", false, false);
         // Then the form state should update to valid and errors should be null
         AuthFormState state = getOrAwaitValue(authenticatorViewModel.getFormState());
         assertThat(state.isDataValid(), is(true));
@@ -93,7 +93,7 @@ public class AuthenticatorViewModelTest extends InstantTaskRuler {
         // Given the user is signing in
         authenticatorViewModel.isUserSigningIn(true);
         // When he inputs valid password and email
-        authenticatorViewModel.dataChanged("test", "123456", false, false);
+        authenticatorViewModel.dataChanged("test", null, "123456", false, false);
         // Then the form state should update to valid and errors should be null
         AuthFormState state = getOrAwaitValue(authenticatorViewModel.getFormState());
         assertThat(state.isDataValid(), is(not(true)));
@@ -106,7 +106,7 @@ public class AuthenticatorViewModelTest extends InstantTaskRuler {
         // Given the user is signing in
         authenticatorViewModel.isUserSigningIn(true);
         // When he inputs valid password and email
-        authenticatorViewModel.dataChanged("test", "16", false, false);
+        authenticatorViewModel.dataChanged("test", null, "16", false, false);
         // Then the form state should update to valid and errors should be null
         AuthFormState state = getOrAwaitValue(authenticatorViewModel.getFormState());
         assertThat(state.isDataValid(), is(not(true)));
@@ -114,71 +114,91 @@ public class AuthenticatorViewModelTest extends InstantTaskRuler {
         assertThat(state.getEmailError(), is(not(nullValue())));
     }
 
-    //
+    ////////////////////////////////////
     @Test
-    public void dataChanged_userNotSigningIn_validEmailValidPasswordIsUserIsNotOper_setsFormStateToValid() throws InterruptedException {
+    public void dataChanged_userNotSigningIn_validEmailValidNameValidPasswordIsUserIsNotOper_setsFormStateToValid() throws InterruptedException {
         // Given the user is signing in
         authenticatorViewModel.isUserSigningIn(false);
         // When he inputs valid password and email
-        authenticatorViewModel.dataChanged("test@gmail.com", "123456", true, false);
+        authenticatorViewModel.dataChanged("test@gmail.com", "name", "123456", true, false);
         // Then the form state should update to valid and errors should be null
         AuthFormState state = getOrAwaitValue(authenticatorViewModel.getFormState());
         assertThat(state.isDataValid(), is(true));
         assertThat(state.getPasswordError(), is(nullValue()));
+        assertThat(state.getNameError(), is(nullValue()));
         assertThat(state.getEmailError(), is(nullValue()));
         assertThat(state.getRoleError(), is(nullValue()));
     }
 
     @Test
-    public void dataChanged_userNotSigningIn_validEmailValidPasswordIsNotUserIsNotOper_setsFormStateToValid() throws InterruptedException {
+    public void dataChanged_userNotSigningIn_validEmailValidNameValidPasswordIsNotUserIsNotOper_setsFormStateToValid() throws InterruptedException {
         // Given the user is signing in
         authenticatorViewModel.isUserSigningIn(false);
         // When he inputs valid password and email
-        authenticatorViewModel.dataChanged("test@gmail.com", "123456", false, false);
+        authenticatorViewModel.dataChanged("test@gmail.com", "Name", "123456", false, false);
         // Then the form state should update to valid and errors should be null
         AuthFormState state = getOrAwaitValue(authenticatorViewModel.getFormState());
         assertThat(state.isDataValid(), is(not(true)));
         assertThat(state.getPasswordError(), is(nullValue()));
+        assertThat(state.getNameError(), is(nullValue()));
         assertThat(state.getEmailError(), is(nullValue()));
         assertThat(state.getRoleError(), is(not(nullValue())));
     }
 
     @Test
-    public void dataChanged_userNotSigningIn_validEmailValidPasswordIsNotUserIsOper_setsFormStateToValid() throws InterruptedException {
+    public void dataChanged_userNotSigningIn_validEmailValidNameValidPasswordIsNotUserIsOper_setsFormStateToValid() throws InterruptedException {
         // Given the user is signing in
         authenticatorViewModel.isUserSigningIn(false);
         // When he inputs valid password and email
-        authenticatorViewModel.dataChanged("test@gmail.com", "123456", false, true);
+        authenticatorViewModel.dataChanged("test@gmail.com", "name", "123456", false, true);
         // Then the form state should update to valid and errors should be null
         AuthFormState state = getOrAwaitValue(authenticatorViewModel.getFormState());
         assertThat(state.isDataValid(), is(true));
         assertThat(state.getPasswordError(), is(nullValue()));
+        assertThat(state.getNameError(), is(nullValue()));
         assertThat(state.getEmailError(), is(nullValue()));
         assertThat(state.getRoleError(), is(nullValue()));
     }
 
     @Test
-    public void dataChanged_userNotSigningIn_invalidEmailValidPassword_setsFormStateToValid() throws InterruptedException {
+    public void dataChanged_userNotSigningIn_invalidEmailValidNameValidPassword_setsFormStateToValid() throws InterruptedException {
         // Given the user is signing in
         authenticatorViewModel.isUserSigningIn(false);
         // When he inputs valid password and email
-        authenticatorViewModel.dataChanged("test", "123456", false, false);
+        authenticatorViewModel.dataChanged("test", "name", "123456", false, false);
         // Then the form state should update to valid and errors should be null
         AuthFormState state = getOrAwaitValue(authenticatorViewModel.getFormState());
         assertThat(state.isDataValid(), is(not(true)));
+        assertThat(state.getNameError(), is(nullValue()));
         assertThat(state.getPasswordError(), is(nullValue()));
         assertThat(state.getEmailError(), is(not(nullValue())));
     }
 
     @Test
-    public void dataChanged_userNotSigningIn_invalidEmailInvalidPassword_setsFormStateToValid() throws InterruptedException {
+    public void dataChanged_userNotSigningIn_validEmailInvalidNameValidPasswordIsNotUserIsNotOper_setsFormStateToValid() throws InterruptedException {
         // Given the user is signing in
         authenticatorViewModel.isUserSigningIn(false);
         // When he inputs valid password and email
-        authenticatorViewModel.dataChanged("test", "16", false, false);
+        authenticatorViewModel.dataChanged("test@gmail.com", null, "123456", false, false);
         // Then the form state should update to valid and errors should be null
         AuthFormState state = getOrAwaitValue(authenticatorViewModel.getFormState());
         assertThat(state.isDataValid(), is(not(true)));
+        assertThat(state.getPasswordError(), is(nullValue()));
+        assertThat(state.getNameError(), is(not(nullValue())));
+        assertThat(state.getEmailError(), is(nullValue()));
+        assertThat(state.getRoleError(), is(nullValue()));
+    }
+
+    @Test
+    public void dataChanged_userNotSigningIn_invalidEmailValidNameInvalidPassword_setsFormStateToValid() throws InterruptedException {
+        // Given the user is signing in
+        authenticatorViewModel.isUserSigningIn(false);
+        // When he inputs valid password and email
+        authenticatorViewModel.dataChanged("test", "name", "16", false, false);
+        // Then the form state should update to valid and errors should be null
+        AuthFormState state = getOrAwaitValue(authenticatorViewModel.getFormState());
+        assertThat(state.isDataValid(), is(not(true)));
+        assertThat(state.getNameError(), is(nullValue()));
         assertThat(state.getPasswordError(), is(nullValue()));
         assertThat(state.getEmailError(), is(not(nullValue())));
     }

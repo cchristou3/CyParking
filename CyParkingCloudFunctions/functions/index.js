@@ -1,16 +1,14 @@
 // The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
-const functions = require('firebase-functions');
-
+import * as functions from 'firebase-functions';
 
 // The Firebase Admin SDK to access Cloud Firestore.
-const admin = require('firebase-admin');
+import * as admin from 'firebase-admin';
 admin.initializeApp();
 
-const cors = require('cors')({ origin: true }); // Required for HTTP functions
-
 // Import helper functions and constants.
-const helpers = require('./helpers');
-const constants = require('./constants')
+import { deleteDocs, logError, nearbyUser } from './helpers';
+import { PARKING_LOTS, FEEDBACK, EMAIL, BOOKINGS, BOOKING_USER_ID, OPERATOR_ID, USERS, EQUALS }
+    from './constants';
 
 /**
  * When invoked, queries all parking lots from the database and filters them
@@ -28,14 +26,14 @@ exports.filterLocations = functions.https.onCall(async (data, context) => {
     const userLongitude = data.longitude;
     // Get all private parking into Cloud Firestore using the Firebase Admin SDK.
     var filteredReadResult = [];
-    await admin.firestore().collection(constants.PARKING_LOTS)
+    await admin.firestore().collection(PARKING_LOTS)
         .get()
         .then(
-            function (querySnapshot) {
+            (querySnapshot) => {
                 querySnapshot.forEach(function (doc) {
                     if (doc.exists) {
                         console.log(doc.id, " => ", doc.data());
-                        if (helpers.nearbyUser(doc.data(), userLatitude, userLongitude)) {
+                        if (nearbyUser(doc.data(), userLatitude, userLongitude)) {
                             filteredReadResult.push(doc.data());
                         }
                     }
@@ -55,61 +53,35 @@ exports.filterLocations = functions.https.onCall(async (data, context) => {
 exports.cleanupUser = functions.auth.user().onDelete(async (user) => {
     console.log(user.email + ' is about to get deleted')
     // Delete any feedback messages related to this user    
-    admin.firestore().collection(constants.FEEDBACK)
-        .where(constants.EMAIL, constants.EQUALS, user.email).get()
-        .then((querySnapshot) => {
-            querySnapshot.docs.forEach((doc) => {
-                console.log("Delete message: " + JSON.stringify(doc.data()))
-                doc.ref.delete();
-            })
-        })
-        .catch(function (error) {
-            console.log("Error getting documents: ", error);
-        });
+    admin.firestore().collection(FEEDBACK)
+        .where(EMAIL, EQUALS, user.email).get()
+        .then((querySnapshot) => deleteDocs(querySnapshot))
+        .catch((error) => logError(error, FEEDBACK));
 
     // Delete any bookings that the user created
-    admin.firestore().collection(constants.BOOKINGS)
-        .where(constants.BOOKING_USER_ID, constants.EQUALS, user.uid).get()
-        .then((querySnapshot) => {
-            querySnapshot.docs.forEach((doc) => {
-                console.log("User booking: " + JSON.stringify(doc.data()))
-                doc.ref.delete();
-            })
-        })
-        .catch(function (error) {
-            console.log("Error getting documents: ", error);
-        });
+    admin.firestore().collection(BOOKINGS)
+        .where(BOOKING_USER_ID, EQUALS, user.uid).get()
+        .then((querySnapshot) => deleteDocs(querySnapshot))
+        .catch((error) => logError(error, BOOKINGS + ' issuer'));
 
     // Delete any bookings that the user's lot was booked.
-    admin.firestore().collection(constants.BOOKINGS)
-        .where(constants.OPERATOR_ID, constants.EQUALS, user.uid).get()
-        .then((querySnapshot) => {
-            querySnapshot.docs.forEach((doc) => {
-                console.log("Owner booking: " + JSON.stringify(doc.data()))
-                doc.ref.delete();
-            })
-        })
-        .catch(function (error) {
-            console.log("Error getting documents: ", error);
-        });
+    admin.firestore().collection(BOOKINGS)
+        .where(OPERATOR_ID, EQUALS, user.uid).get()
+        .then((querySnapshot) => deleteDocs(querySnapshot))
+        .catch((error) => logError(error, BOOKINGS + ' owner'));
 
 
     // // Delete any parking lots related to this user
-    admin.firestore().collection(constants.PARKING_LOTS).where(constants.OPERATOR_ID, constants.EQUALS, user.uid).get()
-        .then((querySnapshot) => {
-            querySnapshot.docs.forEach((doc) => {
-                console.log("Lot owner message: " + JSON.stringify(doc.data()))
-                doc.ref.delete();
-            })
-        })
-        .catch(function (error) {
-            console.log("Error getting documents: ", error);
-        });
+    admin.firestore().collection(PARKING_LOTS).where(OPERATOR_ID, EQUALS, user.uid).get()
+        .then((querySnapshot) => deleteDocs(querySnapshot))
+        .catch((error) => logError(error, PARKING_LOTS));
 
-    admin.firestore().collection(constants.USERS).doc(user.uid).delete()
+    admin.firestore().collection(USERS).doc(user.uid).delete()
         .then(function (writeResult) {
             console.log('Result: ' + writeResult)
-        });
+        })
+        .catch((error) => logError(error, USER));
+
     console.log(user.email + ' got deleted')
     return;
 });

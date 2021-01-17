@@ -1,20 +1,42 @@
-const constants = require('./constants')
+
+import { MAXIMUM_DISTANCE_FROM_USER } from './constants';
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
-
-const deleteAll = function (querySnapshot) {
-    console.log("Object: "+JSON.stringify(querySnapshot))
-    querySnapshot.forEach(function (doc) {
-        // doc.data() is never undefined for query doc snapshots
-        console.log(doc)
+/**
+ * Deletes all documents of the given `QuerySnapShot`.
+ * 
+ * @param {FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>} querySnapshot 
+ * A `QuerySnapShot` that contains zero or more `QueryDocumentSnapshot` objects.
+ */
+const deleteDocs = (querySnapshot) => {
+    querySnapshot.docs.forEach((doc) => {
+        console.log("Delete message: " + JSON.stringify(doc.data()))
         doc.ref.delete();
-    });
+    })
 }
-module.exports.deleteAll = deleteAll;
+module.exports.deleteDocs = deleteDocs;
 
 
-// Determines whether the given location is inside the range
+/**
+ * Logs the error. Logged errors can be found in 
+ * Firebase console -> Fucntions -> Logs.
+ * @param error An error.
+ * @param title The title associated with the error.
+ */
+const logError = (error, title) => {
+    console.error(title + ': ', error)
+}
+module.exports.logError = logError;
+
+
+/**
+ * Determines whether the given location is inside the range.
+ * 
+ * @param parking A parking lot object.
+ * @param userLatitude The user's latitude.
+ * @param userLongitude The user's longitude.
+ */
 const nearbyUser = function (parking, userLatitude, userLongitude) {
     try {
         // User's lat lng
@@ -40,7 +62,7 @@ const nearbyUser = function (parking, userLatitude, userLongitude) {
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         var d = R * c; // d is the total distance in metres
 
-        return (d <= constants.MAXIMUM_DISTANCE_FROM_USER);
+        return (d <= MAXIMUM_DISTANCE_FROM_USER);
     } catch (error) {
         return false;
     }

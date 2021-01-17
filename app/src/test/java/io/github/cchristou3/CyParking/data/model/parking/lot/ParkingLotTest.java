@@ -19,8 +19,8 @@ import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
 
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.Availability.isCapacityValid;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.areSlotOffersValid;
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidLotLatLng;
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidName;
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isLotLatLngValid;
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isNameValid;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidPhoneNumber;
 
 /*
@@ -196,51 +196,51 @@ public class ParkingLotTest {
     ///////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////
-    // isValidLotName - START
+    // isNameValid - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void isValidLotName_withNull_returnsFalse() {
-        Assert.assertFalse(isValidName(null));
+    public void isNameValid_withNull_returnsFalse() {
+        Assert.assertFalse(isNameValid(null));
     }
 
     @Test
-    public void isValidLotName_withEmpty_returnsFalse() {
-        Assert.assertFalse(isValidName(""));
+    public void isNameValid_withEmpty_returnsFalse() {
+        Assert.assertFalse(isNameValid(""));
     }
 
     @Test
-    public void isValidLotName_withSpaces_returnsFalse() {
-        Assert.assertFalse(isValidName("   "));
+    public void isNameValid_withSpaces_returnsFalse() {
+        Assert.assertFalse(isNameValid("   "));
     }
 
     @Test
-    public void isValidLotName_smallName_returnsFalse() {
-        Assert.assertTrue(isValidName("1"));
+    public void isNameValid_smallName_returnsFalse() {
+        Assert.assertTrue(isNameValid("1"));
     }
 
     @Test
-    public void isValidLotName_largeName_returnsTrue() {
-        Assert.assertTrue(isValidName("1234567890-sdfghj"));
+    public void isNameValid_largeName_returnsTrue() {
+        Assert.assertTrue(isNameValid("1234567890-sdfghj"));
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // isValidLotName - END
+    // isNameValid - END
     ///////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////
-    // isValidLotLatLng - START
+    // isLotLatLngValid - START
     ///////////////////////////////////////////////////////////////////////////
     @Test
-    public void isValidLotLatLng_withNull_returnsFalse() {
-        Assert.assertFalse(isValidLotLatLng(null));
+    public void isLotLatLngValid_withNull_returnsFalse() {
+        Assert.assertFalse(isLotLatLngValid(null));
     }
 
     @Test
-    public void isValidLotLatLng_withNonNull_returnsTrue() {
-        Assert.assertTrue(isValidLotLatLng(new LatLng(1, 2)));
+    public void isLotLatLngValid_withNonNull_returnsTrue() {
+        Assert.assertTrue(isLotLatLngValid(new LatLng(1, 2)));
     }
     ///////////////////////////////////////////////////////////////////////////
-    // isValidLotLatLng - END
+    // isLotLatLngValid - END
     ///////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////

@@ -1,5 +1,7 @@
 package io.github.cchristou3.CyParking.ui.host;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import org.junit.Test;
 
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
@@ -20,6 +22,8 @@ public class AuthStateViewModelFactoryTest {
     }
 
     /**
+     * Exception caused by calling {@link FirebaseAuth#getInstance()}.
+     *
      * @see AuthenticatorRepository#AuthenticatorRepository()
      */
     @Test(expected = ExceptionInInitializerError.class)

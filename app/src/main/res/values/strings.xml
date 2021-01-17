@@ -20,14 +20,16 @@
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
+    <string name="name_surname">Name &amp; Surname</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Register</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">Welcome! </string>
+    <string name="welcome">"Welcome! "</string>
     <string name="invalid_email">Not a valid email</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be > 5 characters</string>
     <string name="invalid_role_choice">At least of role must be selected</string>
+    <string name="invalid_name">This field must not be left empty</string>
     <string name="login_failed">Login failed</string>
     <string name="title_activity_testing">Testing</string>
     <string name="tab_text_1">Tab 1</string>
@@ -120,8 +122,9 @@
     <string name="logout_of_auth_required_screen">Log in required</string>
 
     <!-- Strings related to the registering a parking lot errors -->
-    <string name="logout_book_parking_screen_msg">Only users that are logged in can book a parking slot. \nPlease login and try again!</string>
-    <string name="logout_view_bookings_screen_msg">Only users that are logged in can book a parking slot. \nPlease login and try again!</string>
+    <string name="logout_book_parking_screen_msg">Booking a parking slot requires authentication. \nPlease login and try again!</string>
+    <string name="logout_view_bookings_screen_msg">Viewing bookings requires authentication. \nPlease login and try again!</string>
+    <string name="logout_register_lot_screen_msg">Registering a parking lot requires authentication. \nPlease login and try again!</string>
 
     <!-- Strings related to the hosting activity not being able to find current active fragment -->
     <string name="unexpected_error_title">An unexpected error occurred</string>

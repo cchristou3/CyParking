@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.Exclude;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +15,7 @@ import java.util.List;
  * Also, exposes authenticated user details to the UI.
  *
  * @author Charalambos Christou
- * @version 1.0 1/11/20
+ * @version 2.0 16/01/21
  */
 public class LoggedInUser implements Parcelable {
 
@@ -29,7 +30,8 @@ public class LoggedInUser implements Parcelable {
             return new LoggedInUser[size];
         }
     };
-
+    public static final String USER = "User";
+    public static final String OPERATOR = "Operator";
     private String userId;
     private List<String> roles;
     private String displayName;
@@ -96,6 +98,22 @@ public class LoggedInUser implements Parcelable {
 
     public List<String> getRoles() {
         return roles;
+    }
+
+    @Exclude
+    public boolean isUser() {
+        return isRole(USER);
+    }
+
+    // TODO: 17/01/2021 Add comments
+    @Exclude
+    public boolean isOperator() {
+        return isRole(OPERATOR);
+    }
+
+    @Exclude
+    private boolean isRole(String role) {
+        return (roles != null) && roles.contains(role);
     }
 
     /**

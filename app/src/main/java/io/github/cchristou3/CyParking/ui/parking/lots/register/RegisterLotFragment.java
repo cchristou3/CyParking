@@ -12,7 +12,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -36,6 +35,7 @@ import java.util.List;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
+import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.manager.LocationManager;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
@@ -47,11 +47,12 @@ import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
+import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf;
+
 /**
  * Purpose: Allow the operator-typed user to register
  * their Parking Lot to the application's system.
  * <p>
- * TODO: Observe user state
  *
  * @author Charalambos Christou
  * @version 2.0 28/12/20
@@ -106,11 +107,27 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
 
         mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
 
+        addObserverToAuthState();
+
         // Initialize the slot offer container
         mSlotOfferList = new ArrayList<>();
 
         initializeUi();
         addObserverToForm();
+    }
+
+    /**
+     * Observer the user's auth state.
+     * When the user logs out, he is prompted to either return to previous
+     * screen or log in.
+     */
+    private void addObserverToAuthState() { // TODO: 16/01/2021 Test
+        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
+            if (loggedInUser == null) { // User has logged out
+                AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
+                        R.string.logout_register_lot_screen_msg);
+            }
+        });
     }
 
     /**
@@ -161,20 +178,25 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
             getBinding().registerLotFragmentBtnRegisterLot.setEnabled(registerLotFormState.isDataValid());
 
             // Update the view's related to the lot's info
-            if (updateErrorOf(getBinding().registerLotFragmentEtPhoneBody, registerLotFormState.getMobileNumberError())) {
+            if (updateErrorOf(requireContext(),
+                    getBinding().registerLotFragmentEtPhoneBody, registerLotFormState.getMobileNumberError())) {
                 return;
             }
-            if (updateErrorOf(getBinding().registerLotFragmentEtLotName, registerLotFormState.getLotNameError())) {
+            if (updateErrorOf(requireContext(),
+                    getBinding().registerLotFragmentEtLotName, registerLotFormState.getLotNameError())) {
                 return;
             }
-            if (updateErrorOf(getBinding().registerLotFragmentEtCapacity, registerLotFormState.getLotCapacityError())) {
+            if (updateErrorOf(requireContext(),
+                    getBinding().registerLotFragmentEtCapacity, registerLotFormState.getLotCapacityError())) {
                 return;
             }
             // Update the view's related to the lot's location
-            if (updateErrorOf(getBinding().registerLotFragmentEtLocationLat, registerLotFormState.getLatLngError())) {
+            if (updateErrorOf(requireContext(),
+                    getBinding().registerLotFragmentEtLocationLat, registerLotFormState.getLatLngError())) {
                 return;
             }
-            if (updateErrorOf(getBinding().registerLotFragmentEtLocationLng, registerLotFormState.getLatLngError())) {
+            if (updateErrorOf(requireContext(),
+                    getBinding().registerLotFragmentEtLocationLng, registerLotFormState.getLatLngError())) {
                 return;
             }
             // Update the view's related to the lot's slot offers
@@ -332,25 +354,6 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
                 lotLatLng,
                 mSlotOfferList
         );
-    }
-
-    /**
-     * Updates the specified TextView's error status with the given error.
-     * The method is used for Buttons and EditTexts (Derived classes of TextView).
-     *
-     * @param viewToBeUpdated A Button or EditText instance.
-     * @param error           The id of the error associated with the specified View object.
-     */
-    private boolean updateErrorOf(TextView viewToBeUpdated, @Nullable Integer error) {
-        if (error != null) {
-            viewToBeUpdated.setError(getString(error));
-            return true;
-        } else {
-            if (viewToBeUpdated.getError() != null) {
-                viewToBeUpdated.setError(null, null);
-            }
-            return false;
-        }
     }
 
     /**

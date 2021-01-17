@@ -23,6 +23,7 @@ public class Utility {
     private static final double MAXIMUM_METERS_FROM_USER = 1000.0D;
     private static final String DATE_PATTERN = "dd-MM-yyyy";
 
+
     /**
      * Creates a string representation of the date accumulated by the specified
      * year, month and day.

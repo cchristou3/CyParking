@@ -37,8 +37,6 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 public class MainHostActivity extends AppCompatActivity {
 
     // Activity constants
-    public static final String USER = "User";
-    public static final String OPERATOR = "Operator";
     public static final String TAG = MainHostActivity.class.getName() + "UniqueTag";
     private static final int HOME = R.id.nav_home;
     private static final int VIEW_BOOKINGS = R.id.nav_view_bookings;
@@ -177,8 +175,8 @@ public class MainHostActivity extends AppCompatActivity {
         // Logged in user can
         // see/perform bookings
         if (currentUser != null && !(currentUser.getRoles() == null || currentUser.getRoles().isEmpty())) {
-            boolean isUser = currentUser.getRoles().contains(USER);
-            boolean isOperator = currentUser.getRoles().contains(OPERATOR);
+            boolean isUser = currentUser.isUser();
+            boolean isOperator = currentUser.isOperator();
             // TODO: Do underlying Drawer update
             if (!isOperator && !isUser) return;// If neither stop here.
             if (isOperator && !isUser) { // Is an operator but not a user

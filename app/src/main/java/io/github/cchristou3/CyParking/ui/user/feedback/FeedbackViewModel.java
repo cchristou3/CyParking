@@ -12,7 +12,8 @@ import io.github.cchristou3.CyParking.data.model.user.Feedback;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.pojo.form.feedback.FeedbackFormState;
 import io.github.cchristou3.CyParking.data.repository.FeedbackRepository;
-import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel;
+
+import static io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel.isEmailValid;
 
 
 /**
@@ -53,7 +54,7 @@ public class FeedbackViewModel extends ViewModel {
             mEmailState.setValue(recipientEmail); // Persist the email string
 
             // If not logged in, validate the given email
-            if (!AuthenticatorViewModel.isEmailValid(recipientEmail)) {
+            if (!isEmailValid(recipientEmail)) {
                 mFormState.setValue(new FeedbackFormState(R.string.invalid_email, null));
                 return; // If not valid, do not check for further user faults (in text).
             }

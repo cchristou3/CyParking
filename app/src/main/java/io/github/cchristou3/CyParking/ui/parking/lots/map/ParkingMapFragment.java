@@ -512,8 +512,10 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      */
     private void navigateToBookingScreen() {
         // If the user is not logged in, display a Toast msg
-        if (mAuthStateViewModel.getUser() == null) {
-            Toast.makeText(requireContext(), "You need to be logged in to book a parking slot!", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "navigateToBookingScreen: " + mAuthStateViewModel.getUser().getRoles());
+        if (mAuthStateViewModel.getUser() == null || !mAuthStateViewModel.getUser().isUser()) {
+            // TODO: 16/01/2021 Replace string with getString(R.string...)
+            Toast.makeText(requireContext(), "You need to be logged as a 'User' in to book a parking slot!", Toast.LENGTH_SHORT).show();
             return;
         }
         if (mMarkerManager.getSelectedParkingLot() != null) {

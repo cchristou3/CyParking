@@ -35,7 +35,7 @@ public class BookingRepository {
     public Query retrieveUserBookings(String userId) {
         return getBookingsNode()
                 .whereEqualTo(BOOKING_USER_ID, userId)
-                .orderBy(COMPLETED, Query.Direction.ASCENDING); // Show pending bookings first
+                .orderBy(COMPLETED, Query.Direction.ASCENDING).limit(20); // Show pending bookings first
         // TODO: Make a callable function - filter data (get only pending bookings) on the server and send to the client
     }
 

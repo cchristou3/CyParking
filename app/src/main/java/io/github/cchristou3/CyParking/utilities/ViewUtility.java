@@ -1,6 +1,7 @@
 package io.github.cchristou3.CyParking.utilities;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -11,8 +12,11 @@ import android.graphics.drawable.TransitionDrawable;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CheckBox;
+import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentActivity;
 
@@ -26,9 +30,57 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
  * related to the View.</p>
  *
  * @author Charalambos Christou
- * @version 4.0 03/01/21
+ * @version 5.0 16/01/21
  */
 public class ViewUtility {
+
+    /**
+     * Updates the specified Checkboxes' error status with the given error.
+     * Used in {@link io.github.cchristou3.CyParking.ui.user.login.AuthenticatorHosteeFragment}.
+     * The "[Data type]..." syntax is useful when more roles are going to be added.
+     * Assuming the user did not pick any of the roles, it will iterate through all
+     * the given checkboxes to set their error messages.
+     *
+     * @param context    The context of the caller.
+     * @param checkBoxes An array of checkboxes,
+     * @param error      The id of the error associated with the specified View object.
+     */
+    public static void updateErrorOf(Context context, @Nullable Integer error, CheckBox... checkBoxes) {
+        if (error != null) {
+            for (CheckBox checkbox :
+                    checkBoxes) {
+                checkbox.setError(context.getString(error));
+            }
+        } else {
+            for (CheckBox checkbox :
+                    checkBoxes) {
+                if (checkbox.getError() != null) {
+                    checkbox.setError(null, null);
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates the specified TextView's error status with the given error.
+     * The method is used for TextView instances and any of its subclasses.
+     *
+     * @param context         The context of the caller.
+     * @param viewToBeUpdated A TextView (including all its subclasses) instance.
+     * @param error           The id of the error associated with the specified View object.
+     * @return True if the error was non-null. Otherwise, false.
+     */
+    public static boolean updateErrorOf(Context context, TextView viewToBeUpdated, @Nullable Integer error) {
+        if (error != null) {
+            viewToBeUpdated.setError(context.getString(error));
+            return true;
+        } else {
+            if (viewToBeUpdated.getError() != null) {
+                viewToBeUpdated.setError(null, null);
+            }
+            return false;
+        }
+    }
 
     /**
      * Changes the background color of the fragment's "availability" view to either green

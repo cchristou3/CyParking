@@ -1,6 +1,5 @@
 package io.github.cchristou3.CyParking.data.pojo.form.login;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import io.github.cchristou3.CyParking.data.pojo.form.FormState;
@@ -21,7 +20,7 @@ public class EmailFormState extends FormState {
      *
      * @param emailError The id of the error related to the email.
      */
-    public EmailFormState(@NonNull Integer emailError) {
+    public EmailFormState(Integer emailError) {
         super(false);
         this.mEmailError = emailError;
     }

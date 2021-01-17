@@ -83,7 +83,7 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
         // Attach an observer to the user's state.
         // If the user logs out while being in this screen, an alert is shown
         mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
-            if (loggedInUser == null) {
+            if (loggedInUser == null) { // User has logged out
                 AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
                         R.string.logout_view_bookings_screen_msg);
             }
@@ -107,7 +107,6 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
         if (mAuthStateViewModel.getUser() != null) {
             // Show placeholder layout and hide the filter buttons
             getBinding().fragmentViewBookingsSflShimmerLayout.startShimmerAnimation();
-
             DatabaseObserver.createQueryObserver(
                     mViewBookingsViewModel // The Query
                             .retrieveUserBookings(mAuthStateViewModel.getUser().getUserId()),

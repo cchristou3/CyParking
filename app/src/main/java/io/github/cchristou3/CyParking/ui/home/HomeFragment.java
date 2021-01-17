@@ -175,8 +175,8 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
         }
 
         // Check whether logged in.
-        boolean isOperator = loggedInUser.getRoles().contains(MainHostActivity.OPERATOR);
-        boolean isUser = loggedInUser.getRoles().contains(MainHostActivity.USER);
+        boolean isOperator = loggedInUser.getRoles().contains(LoggedInUser.OPERATOR);
+        boolean isUser = loggedInUser.getRoles().contains(LoggedInUser.USER);
         if (!isOperator && !isUser) {
             return;// If neither stop here.
         }

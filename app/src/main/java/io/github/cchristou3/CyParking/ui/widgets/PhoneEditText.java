@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
  * as such as 99 99 99 99.
  *
  * @author Charalambos Christou
- * @version 1.0 22/12/20
+ * @version 2.0 17/01/21
  */
 public final class PhoneEditText extends androidx.appcompat.widget.AppCompatEditText implements TextWatcher {
 
@@ -68,7 +68,7 @@ public final class PhoneEditText extends androidx.appcompat.widget.AppCompatEdit
         // then the user is using backspace to remove characters.
         if (updatedEditable.length() < mLatestEditableLength) {
             mLatestEditableLength = updatedEditable.length();
-            // If the cursor is pointing in positions where there space is, then
+            // If the cursor is pointing in positions where there is space, then
             // remove the space at that position.
             if (mLatestEditableLength == 2 || mLatestEditableLength == 5 || mLatestEditableLength == 8) {
                 updatedEditable.replace(mLatestEditableLength - 1, mLatestEditableLength, "");
@@ -94,7 +94,10 @@ public final class PhoneEditText extends androidx.appcompat.widget.AppCompatEdit
      */
     @NotNull
     public String getNonSpacedText() {
-        return super.getText().toString().replace(" ", "");
+        if (super.getText() != null)
+            return super.getText().toString().replace(" ", "");
+        else
+            return "";
     }
 
     /**

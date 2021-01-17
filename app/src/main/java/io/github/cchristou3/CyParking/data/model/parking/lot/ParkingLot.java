@@ -165,8 +165,8 @@ public class ParkingLot extends Parking {
      * @param name The name to be validated.
      * @return True, if it non-null and non-empty. Otherwise, false.
      */
-    public static boolean isValidName(final String name) {
-        return name != null && !name.trim().isEmpty();
+    public static boolean isNameValid(final String name) {
+        return !(name == null || name.trim().isEmpty());
     }
 
     /**
@@ -175,7 +175,7 @@ public class ParkingLot extends Parking {
      * @param lotLatLng The latitude and longitude to be validated.
      * @return True, if it non-null. Otherwise, false.
      */
-    public static boolean isValidLotLatLng(final LatLng lotLatLng) {
+    public static boolean isLotLatLngValid(final LatLng lotLatLng) {
         return lotLatLng != null;
     }
 

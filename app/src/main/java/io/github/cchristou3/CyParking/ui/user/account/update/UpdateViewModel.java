@@ -11,7 +11,7 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.pojo.form.update.UpdateFormState;
 import io.github.cchristou3.CyParking.data.repository.AccountRepository;
 
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidName;
+import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isNameValid;
 import static io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel.isEmailValid;
 import static io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel.isPasswordValid;
 
@@ -52,7 +52,7 @@ public class UpdateViewModel extends ViewModel {
         mActionFieldInput.setValue(updatedField);
         switch (mDialogType) {
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
-                if (isValidName(updatedField)) {
+                if (isNameValid(updatedField)) {
                     updateFormState(new UpdateFormState(true));
                 } else {
                     updateFormState(new UpdateFormState(R.string.invalid_username));

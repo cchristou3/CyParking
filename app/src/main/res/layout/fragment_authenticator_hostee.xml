@@ -20,7 +20,7 @@
             android:layout_height="wrap_content">
 
             <EditText
-                android:id="@+id/fragment_login_et_email"
+                android:id="@+id/fragment_hostee_auth_et_email"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
@@ -34,11 +34,23 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
-                android:id="@+id/fragment_login_et_password"
+                android:id="@+id/fragment_hostee_auth_et_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginEnd="24dp"
+                android:hint="@string/name_surname"
+                android:inputType="textPersonName"
+                android:selectAllOnFocus="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_et_email" />
+
+            <EditText
+                android:id="@+id/fragment_hostee_auth_et_password"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
                 android:hint="@string/prompt_password"
                 android:imeActionLabel="@string/action_sign_in_short"
@@ -47,20 +59,20 @@
                 android:selectAllOnFocus="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_login_et_email" />
+                app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_et_name" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/fragment_login_cl_role_section"
+
+                android:id="@+id/fragment_hostee_auth_cl_role_section"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/fragment_login_et_password"
-                app:layout_constraintStart_toStartOf="@+id/fragment_login_et_password"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_login_et_password">
+                app:layout_constraintEnd_toEndOf="@+id/fragment_hostee_auth_et_password"
+                app:layout_constraintStart_toStartOf="@+id/fragment_hostee_auth_et_password"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_et_password">
 
                 <TextView
-                    android:id="@+id/fragment_login_txt_roles_header"
+                    android:id="@+id/fragment_hostee_auth_txt_roles_header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Choose roles:"
@@ -68,89 +80,88 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <Button
-                    android:id="@+id/fragment_login_btn_auth_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="start"
-                    android:layout_marginStart="48dp"
-                    android:layout_marginTop="30dp"
-                    android:layout_marginEnd="48dp"
-                    android:layout_marginBottom="64dp"
-                    android:enabled="false"
-                    android:text="@string/action_sign_in"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_login_btn_dialog_operator_button"
-                    app:layout_constraintVertical_bias="0.2" />
-
                 <TextView
-                    android:id="@+id/fragment_login_txt_role_user_title"
+                    android:id="@+id/fragment_hostee_auth_txt_role_user_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
                     android:text="User"
                     android:textSize="23sp"
-                    app:layout_constraintStart_toStartOf="@+id/fragment_login_txt_roles_header"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_login_txt_roles_header" />
+                    app:layout_constraintStart_toStartOf="@+id/fragment_hostee_auth_txt_roles_header"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_txt_roles_header" />
 
                 <com.google.android.material.checkbox.MaterialCheckBox
-                    android:id="@+id/fragment_login_cb_role_user_checkbox"
+                    android:id="@+id/fragment_hostee_auth_cb_role_user_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="100dp"
                     android:layout_marginLeft="100dp"
                     android:button="@drawable/checkbox"
-                    app:layout_constraintBottom_toBottomOf="@+id/fragment_login_txt_role_user_title"
+                    app:layout_constraintBottom_toBottomOf="@+id/fragment_hostee_auth_txt_role_user_title"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/fragment_login_txt_role_user_title"
-                    app:layout_constraintTop_toTopOf="@+id/fragment_login_txt_role_user_title" />
+                    app:layout_constraintStart_toEndOf="@+id/fragment_hostee_auth_txt_role_user_title"
+                    app:layout_constraintTop_toTopOf="@+id/fragment_hostee_auth_txt_role_user_title" />
 
                 <Button
-                    android:id="@+id/fragment_login_btn_dialog_user_button"
+                    android:id="@+id/fragment_hostee_auth_btn_dialog_user_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:text="View Description"
-                    app:layout_constraintStart_toStartOf="@+id/fragment_login_txt_role_user_title"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_login_txt_role_user_title" />
+                    app:layout_constraintStart_toStartOf="@+id/fragment_hostee_auth_txt_role_user_title"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_txt_role_user_title" />
 
                 <TextView
-                    android:id="@+id/fragment_login_txt_role_operator_title"
+                    android:id="@+id/fragment_hostee_auth_txt_role_operator_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
                     android:text="Operator"
                     android:textSize="23sp"
-                    app:layout_constraintStart_toStartOf="@+id/fragment_login_txt_role_user_title"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_login_btn_dialog_user_button" />
+                    app:layout_constraintStart_toStartOf="@+id/fragment_hostee_auth_txt_role_user_title"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_btn_dialog_user_button" />
 
                 <com.google.android.material.checkbox.MaterialCheckBox
-                    android:id="@+id/fragment_login_cb_role_operator_checkbox"
+                    android:id="@+id/fragment_hostee_auth_cb_role_operator_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="100dp"
                     android:layout_marginLeft="100dp"
                     android:button="@drawable/checkbox"
-                    app:layout_constraintBottom_toBottomOf="@+id/fragment_login_txt_role_operator_title"
+                    app:layout_constraintBottom_toBottomOf="@+id/fragment_hostee_auth_txt_role_operator_title"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/fragment_login_txt_role_user_title"
-                    app:layout_constraintTop_toTopOf="@+id/fragment_login_txt_role_operator_title" />
+                    app:layout_constraintStart_toEndOf="@+id/fragment_hostee_auth_txt_role_user_title"
+                    app:layout_constraintTop_toTopOf="@+id/fragment_hostee_auth_txt_role_operator_title" />
 
                 <Button
-                    android:id="@+id/fragment_login_btn_dialog_operator_button"
+                    android:id="@+id/fragment_hostee_auth_btn_dialog_operator_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:text="View Description"
-                    app:layout_constraintStart_toStartOf="@+id/fragment_login_txt_role_user_title"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_login_txt_role_operator_title" />
+                    app:layout_constraintStart_toStartOf="@+id/fragment_hostee_auth_txt_role_user_title"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_txt_role_operator_title" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <Button
+                android:id="@+id/fragment_hostee_auth_btn_auth_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginEnd="48dp"
+                android:layout_marginBottom="64dp"
+                android:enabled="false"
+                android:text="@string/action_sign_in"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_cl_role_section" />
+
             <ProgressBar
-                android:id="@+id/fragment_login_pb_loading"
+                android:id="@+id/fragment_hostee_auth_pb_loading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -160,11 +171,10 @@
                 android:layout_marginBottom="64dp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/fragment_login_et_password"
-                app:layout_constraintStart_toStartOf="@+id/fragment_login_et_password"
+                app:layout_constraintEnd_toEndOf="@+id/fragment_hostee_auth_et_password"
+                app:layout_constraintStart_toStartOf="@+id/fragment_hostee_auth_et_password"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.3" />
-
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

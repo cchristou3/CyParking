@@ -12,7 +12,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -24,6 +23,7 @@ import io.github.cchristou3.CyParking.databinding.FragmentAccountBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.user.account.update.UpdateAccountDialog;
+import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorHosteeFragment;
 
 /**
  * Purpose: <p>Going to get replaced with another Navigation option</p>
@@ -179,6 +179,10 @@ public class AccountFragment extends Fragment implements Navigable {
     /**
      * Navigates from the current Fragment subclass to the
      * {@link io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment}.
+     * If the user is logged in, his email is passed on when navigating to the
+     * authenticator fragment. The email is then set to the email text field.
+     *
+     * @see AuthenticatorHosteeFragment#checkIfUserReAuthenticating()
      */
     @Override
     public void toAuthenticator() {
@@ -187,7 +191,7 @@ public class AccountFragment extends Fragment implements Navigable {
             emailBundle = new Bundle();
             emailBundle.putString(getString(R.string.email_low), mAuthStateViewModel.getUser().getEmail());
         }
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_account_to_nav_authenticator_fragment, emailBundle);
     }
 
@@ -197,7 +201,7 @@ public class AccountFragment extends Fragment implements Navigable {
      */
     @Override
     public void toBookings() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_account_to_nav_view_bookings);
     }
 
@@ -216,7 +220,7 @@ public class AccountFragment extends Fragment implements Navigable {
      */
     @Override
     public void toFeedback() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_account_to_nav_feedback);
     }
 
@@ -226,7 +230,7 @@ public class AccountFragment extends Fragment implements Navigable {
      */
     @Override
     public void toHome() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_account_to_nav_home);
     }
 }

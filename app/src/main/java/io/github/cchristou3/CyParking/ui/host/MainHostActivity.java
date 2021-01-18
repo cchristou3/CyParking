@@ -11,7 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -45,7 +47,7 @@ public class MainHostActivity extends AppCompatActivity {
     private static final int TO_SETTINGS = R.id.action_settings;
     private static final int SIGN_OUT = R.id.action_sign_out;
     private static final int SIGN_IN = R.id.action_sign_in;
-
+    public static int NAV_VIEW_ID = R.id.fragment_main_host_nv_nav_view;
     // Activity variables
     private Menu mActionBarMenu;
     private Menu mDrawerMenu;
@@ -71,7 +73,7 @@ public class MainHostActivity extends AppCompatActivity {
 
         // Set up drawer
         mDrawerLayout = findViewById(R.id.fragment_main_host_dl_drawer_layout);
-        NavigationView navigationView = findViewById(R.id.fragment_main_host_nv_nav_view);
+        NavigationView navigationView = findViewById(NAV_VIEW_ID);
 
         mDrawerMenu = navigationView.getMenu();
         // Attach listeners to the drawer's items
@@ -80,11 +82,7 @@ public class MainHostActivity extends AppCompatActivity {
             mDrawerMenu.getItem(i).setOnMenuItemClickListener(this::onMenuItemClick);
         }
 
-        // Set up the NavController, bind it with the specified view (fragment_main_host_nv_nav_view)
-        // The fragments can access the same controller by passing in the same view (fragment_main_host_nv_nav_view)
-        Navigation.setViewNavController(findViewById(R.id.fragment_main_host_nv_nav_view),
-                NavHostFragment.findNavController(getSupportFragmentManager().getFragments().get(0) // Access the NavHostFragment
-                        .getChildFragmentManager().getFragments().get(0)));
+        setApplicationNavController();
 
         // Initialize the activity's ViewModel instance
         mAuthStateViewModel = new ViewModelProvider(this, new AuthStateViewModelFactory())
@@ -152,7 +150,7 @@ public class MainHostActivity extends AppCompatActivity {
                 break;
             case SIGN_IN:
                 try {
-                    getActiveFragment().toAuthenticator();
+                    getActiveNavigableFragment().toAuthenticator();
                 } catch (IllegalStateException e) {
                     Log.d(TAG, "onOptionsItemSelected: error: " + e.getMessage());
                     Toast.makeText(this, "Failed to navigate to login screen!", Toast.LENGTH_SHORT).show();
@@ -164,14 +162,29 @@ public class MainHostActivity extends AppCompatActivity {
         return true;
     }
 
+
+    /**
+     * Binds the {@link NavController} instance with the
+     * NavigationView of id {@link #NAV_VIEW_ID}.
+     * All fragments of the application can access the
+     * same instance of the NavController via the
+     * NavigationView.
+     *
+     * @see Navigable#getNavController(FragmentActivity)
+     */
+    public void setApplicationNavController() {
+        // Set up the NavController, bind it with the specified view (NAV_HOST_ID)
+        // The fragments can access the same controller by passing in the same view (NAV_HOST_ID)
+        Navigation.setViewNavController(findViewById(NAV_VIEW_ID),
+                NavHostFragment.findNavController(getActiveFragment()));
+    }
+
     /**
      * Updates the drawer's items based on the given LoggedInUser object.
      *
      * @param currentUser The latest {@link LoggedInUser} object.
      */
     private void updateDrawer(LoggedInUser currentUser) {
-        // TODO: If a user signs out while being in a fragment that requires authentication
-        //  then show message to user (alert) and navigate him back to home fragment (+ pop back stack)
         // Logged in user can
         // see/perform bookings
         if (currentUser != null && !(currentUser.getRoles() == null || currentUser.getRoles().isEmpty())) {
@@ -232,16 +245,16 @@ public class MainHostActivity extends AppCompatActivity {
         final int menuItemId = item.getItemId();
         switch (menuItemId) {
             case HOME:
-                getActiveFragment().toHome();
+                getActiveNavigableFragment().toHome();
                 break;
             case VIEW_BOOKINGS:
-                getActiveFragment().toBookings();
+                getActiveNavigableFragment().toBookings();
                 break;
             case MY_ACCOUNT:
-                getActiveFragment().toAccount();
+                getActiveNavigableFragment().toAccount();
                 break;
             case FEEDBACK:
-                getActiveFragment().toFeedback();
+                getActiveNavigableFragment().toFeedback();
                 break;
         }
         mDrawerLayout.close();
@@ -249,15 +262,15 @@ public class MainHostActivity extends AppCompatActivity {
     }
 
     /**
-     * Access the current active fragment.
+     * Access the current active fragment that implements
+     * the {@link Navigable} interface.
      *
-     * @return A reference to the current active fragment.
+     * @return A reference to the current active fragment's
+     * {@link Navigable} interface.
      */
-    private Navigable getActiveFragment() {
+    private Navigable getActiveNavigableFragment() {
         try {
-            Fragment activeFragment = getSupportFragmentManager().getFragments().get(0) // Access the NavHostFragment
-                    .getChildFragmentManager().getFragments().get(0); // Get a reference to the visible fragment
-            return (Navigable) activeFragment;
+            return (Navigable) getActiveFragment();
         } catch (NullPointerException | ClassCastException e) {
             AlertBuilder.showAlert(this,
                     R.string.app_name,
@@ -267,5 +280,15 @@ public class MainHostActivity extends AppCompatActivity {
             );
             return Navigable.empty();
         }
+    }
+
+    /**
+     * Access the current active fragment.
+     *
+     * @return A reference to the current active fragment.
+     */
+    private Fragment getActiveFragment() {
+        return getSupportFragmentManager().getFragments().get(0) // Access the NavHostFragment
+                .getChildFragmentManager().getFragments().get(0); // Get a reference to the visible fragment
     }
 }

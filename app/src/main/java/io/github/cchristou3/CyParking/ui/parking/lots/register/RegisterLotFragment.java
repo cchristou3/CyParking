@@ -18,7 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -121,7 +120,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
      * When the user logs out, he is prompted to either return to previous
      * screen or log in.
      */
-    private void addObserverToAuthState() { // TODO: 16/01/2021 Test
+    private void addObserverToAuthState() {
         mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
             if (loggedInUser == null) { // User has logged out
                 AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
@@ -437,7 +436,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
                         // Display message to user.
                         Toast.makeText(RegisterLotFragment.this.requireContext(), RegisterLotFragment.this.getString(R.string.success_lot_registration), Toast.LENGTH_SHORT).show();
                         // Navigate back to home screen
-                        Navigation.findNavController(RegisterLotFragment.this.getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+                        getNavController(requireActivity())
                                 .popBackStack();
                     } else if (task.getException() instanceof NullPointerException
                             && task.getException().getMessage().equals("Continuation returned null")) {
@@ -488,7 +487,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
      */
     @Override
     public void toAuthenticator() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_register_lot_fragment_to_nav_authenticator_fragment);
     }
 
@@ -498,7 +497,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
      */
     @Override
     public void toBookings() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_register_lot_fragment_to_nav_view_bookings);
     }
 
@@ -508,7 +507,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
      */
     @Override
     public void toAccount() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_register_lot_fragment_to_nav_account);
     }
 
@@ -518,7 +517,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
      */
     @Override
     public void toFeedback() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_register_lot_fragment_to_nav_feedback);
     }
 
@@ -528,7 +527,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
      */
     @Override
     public void toHome() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_register_lot_fragment_to_nav_home);
     }
 

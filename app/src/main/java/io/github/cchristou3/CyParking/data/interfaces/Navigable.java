@@ -1,27 +1,34 @@
 package io.github.cchristou3.CyParking.data.interfaces;
 
-import android.view.View;
-
+import androidx.fragment.app.FragmentActivity;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
+import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 
 /**
  * Purpose: Provide a Navigation API to be implemented by all the
  * Fragments (subclasses) of the application.
  * Its methods to be used by the current active Fragment subclass
- * to navigate up to another Fragment subclass.
+ * to navigate to another Fragment subclass.
  * Any Fragment subclass (independent of the Navigation's back stack) can navigate
  * to up to 5 different global (Drawer/ActionBar) destinations (not top level).
+ * Simultaneously, the interface provides a default method ({@link #goBack(FragmentActivity)})
+ * to allow the fragments to pop the navigation BackStack - to return to previous
+ * fragment instance.
+ * Lastly, it allows access to a {@link NavController} via its
+ * default method {@link #getNavController(FragmentActivity)}.
  *
  * @author Charalambos Christou
- * @version 3.0 27/12/20
+ * @version 4.0 18/01/21
  */
 public interface Navigable {
+
     /**
      * Creates an instance of the Navigable interface
      * with no method implementations.
@@ -77,10 +84,25 @@ public interface Navigable {
     /**
      * Navigates to the latest destination of the BackStack.
      *
-     * @param navHostView The {@link androidx.navigation.fragment.NavHostFragment} of the
-     *                    caller.
+     * @param activity The activity that contains the
+     *                 {@link androidx.navigation.fragment.NavHostFragment}.
      */
-    default void goBack(View navHostView) {
-        Navigation.findNavController(navHostView).popBackStack();
+    default void goBack(@NotNull FragmentActivity activity) {
+        getNavController(activity).popBackStack();
+    }
+
+    /**
+     * Provides a convenient way of accessing the
+     * {@link NavController} instance of the application.
+     *
+     * @param activity The parent {@link FragmentActivity}.
+     * @return The NavController associated with the NavigationView
+     * of id NAV_VIEW_ID.
+     * @see MainHostActivity#NAV_VIEW_ID
+     * @see MainHostActivity#setApplicationNavController()
+     */
+    default NavController getNavController(@NotNull FragmentActivity activity) {
+        return Navigation.findNavController(
+                activity.findViewById(MainHostActivity.NAV_VIEW_ID));
     }
 }

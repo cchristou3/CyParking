@@ -1,8 +1,6 @@
 package io.github.cchristou3.CyParking.ui.parking.slots.booking;
 
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -46,6 +43,7 @@ import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsF
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
+import io.github.cchristou3.CyParking.ui.widgets.TimePickerDialog;
 import io.github.cchristou3.CyParking.utilities.Utility;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
@@ -145,7 +143,13 @@ public class BookingFragment extends Fragment implements Navigable {
                     final ParkingLot lot = value.toObject(ParkingLot.class);
                     Log.d(TAG, "Lot: " + lot);
                     if (lot == null) {
-                        // TODO: Display alert
+                        AlertBuilder.showAlert(
+                                requireContext(),
+                                R.string.no_lot_found_title,
+                                R.string.no_lot_found_msg,
+                                android.R.string.ok,
+                                (dialog, which) -> goBack(requireActivity())
+                        );
                         Log.d(TAG, "lot == null");
                         return;
                     }
@@ -333,7 +337,7 @@ public class BookingFragment extends Fragment implements Navigable {
                                     .setAction(R.string.undo,
                                             v -> mBookingViewModel.cancelBooking(booking.generateUniqueId())).show();
                             // Navigate one screen back
-                            goBack(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view));
+                            goBack(requireActivity());
                             return;
                         }
                         // Otherwise, display an error message to the user
@@ -385,20 +389,16 @@ public class BookingFragment extends Fragment implements Navigable {
      * OnClick: Creates a TimePickerDialog with its own OnTimeSetListener.
      * OnTimeSetListener-onClick: Updates the value of the specified LiveData Object.
      *
-     * @param stringMutableLiveData LiveData which handles persistence of a String
      * @return An View.OnClickListener
      */
     @NotNull
     @Contract(pure = true)
     private View.OnClickListener buildListenerForTimePicker() {
         return v -> {
-            TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
-                    AlertDialog.THEME_HOLO_DARK, // TODO: useful for night mode THEME_HOLO_LIGHT
-                    // Triggers TextView's Update
-                    (view, hourOfDay, minute) -> mBookingViewModel.updateStartingTime(hourOfDay, minute),
-                    Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
-                    Calendar.getInstance().get(Calendar.MINUTE),
-                    true);
+            TimePickerDialog timePickerDialog = new TimePickerDialog(
+                    requireContext(),
+                    (view, hourOfDay, minute) -> mBookingViewModel.updateStartingTime(hourOfDay, minute)
+            );
             timePickerDialog.show();
         };
     }
@@ -422,7 +422,7 @@ public class BookingFragment extends Fragment implements Navigable {
     public void toAuthenticator() {
         // The user must be logged in to be in this fragment (Booking screen).
         // However, the method will be needed, in case the user logs out while being in this screen.
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_parking_booking_fragment_to_nav_authenticator_fragment);
     }
 
@@ -432,7 +432,7 @@ public class BookingFragment extends Fragment implements Navigable {
      */
     @Override
     public void toBookings() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_parking_booking_fragment_to_nav_view_bookings);
     }
 
@@ -442,7 +442,7 @@ public class BookingFragment extends Fragment implements Navigable {
      */
     @Override
     public void toAccount() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_parking_booking_fragment_to_nav_account);
     }
 
@@ -452,7 +452,7 @@ public class BookingFragment extends Fragment implements Navigable {
      */
     @Override
     public void toFeedback() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_parking_booking_fragment_to_nav_feedback);
     }
 
@@ -462,7 +462,7 @@ public class BookingFragment extends Fragment implements Navigable {
      */
     @Override
     public void toHome() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_parking_booking_fragment_to_nav_home);
     }
 }

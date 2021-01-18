@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
@@ -67,7 +66,7 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
      */
     @Override
     public void toBookings() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_authenticator_fragment_to_nav_view_bookings);
     }
 
@@ -77,7 +76,7 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
      */
     @Override
     public void toAccount() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_authenticator_fragment_to_nav_account);
     }
 
@@ -87,7 +86,7 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
      */
     @Override
     public void toFeedback() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_authenticator_fragment_to_nav_feedback);
     }
 
@@ -97,7 +96,7 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
      */
     @Override
     public void toHome() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_authenticator_fragment_to_nav_home);
     }
 }

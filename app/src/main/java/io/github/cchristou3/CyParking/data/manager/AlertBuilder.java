@@ -14,9 +14,26 @@ import io.github.cchristou3.CyParking.data.interfaces.Navigable;
  * Purpose: Contain all logic related to creating an AlertDialog.
  *
  * @author Charalambos Christou
- * @version 1.0 28/12/20
+ * @version 2.0 18/01/21
  */
 public class AlertBuilder {
+
+    /**
+     * Creates a new instance of {@link AlertDialog.Builder}
+     * with the given arguments. Note that the AlertDialog's
+     * cancelable option is set to false.
+     *
+     * @param context The context to make use of.
+     * @param title   The title of the alert.
+     * @param message The message of the alert.
+     * @return An instance of {@link AlertDialog.Builder}.
+     */
+    private static AlertDialog.Builder instantiateAlert(Context context, int title, int message) {
+        return new AlertDialog.Builder(context)
+                .setMessage(message)
+                .setTitle(title)
+                .setCancelable(false);
+    }
 
     /**
      * Display an {@link AlertDialog} in the given context with the specified title,
@@ -35,9 +52,7 @@ public class AlertBuilder {
     public static void showAlert(Context context, int title, int message, int positiveButtonText, int negativeButtonText,
                                  @Nullable DialogInterface.OnClickListener positiveActionHandler,
                                  @Nullable DialogInterface.OnClickListener negativeActionHandler) {
-        new AlertDialog.Builder(context)
-                .setMessage(message)
-                .setTitle(title)
+        instantiateAlert(context, title, message)
                 .setPositiveButton(positiveButtonText,
                         positiveActionHandler) // To be provided by the programmer
                 .setNegativeButton(negativeButtonText,
@@ -60,9 +75,7 @@ public class AlertBuilder {
      */
     public static void showAlert(Context context, int title, int message, int neutralButtonText,
                                  @Nullable DialogInterface.OnClickListener neutralActionHandler) {
-        new AlertDialog.Builder(context)
-                .setMessage(message)
-                .setTitle(title)
+        instantiateAlert(context, title, message)
                 .setNeutralButton(neutralButtonText,
                         neutralActionHandler) // To be provided by the programmer
                 .create()
@@ -89,8 +102,7 @@ public class AlertBuilder {
                 R.string.go_back,
                 (dialog, which) -> navigable.toAuthenticator(), // Go to log in screen
                 (dialog, which) -> // Navigate one screen back
-                        navigable.goBack(activity
-                                .findViewById(R.id.fragment_main_host_nv_nav_view))
+                        navigable.goBack(activity)
         );
     }
 }

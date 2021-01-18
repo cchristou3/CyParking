@@ -99,7 +99,6 @@ public class Utility {
      */
     @NotNull
     public static Date getCurrentDate() {
-        // TODO: Replace with new Date();
         final Calendar currentDate = Calendar.getInstance();
         currentDate.setTime(Calendar.getInstance().getTime());
         currentDate.set(Calendar.HOUR_OF_DAY, 0);

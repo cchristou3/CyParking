@@ -100,13 +100,11 @@ public class AccountRepository {
 
     /**
      * Updates the user's email in the database.
-     * TODO: Migrate into a cloud function
-     * src: https://stackoverflow.com/questions/53836195/firebase-functions-update-all-documents-inside-a-collection
      *
      * @param newEmail The new email of the user.
      */
     public void updateUserEmail(String userId, String oldEmail, String newEmail) {
-        FirebaseFunctions.getInstance() // TODO: 17/01/2021 Test 
+        FirebaseFunctions.getInstance()
                 .getHttpsCallable("updateEmail")
                 .call(new HashMap<String, String>() {{
                     put("newEmail", newEmail);

@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
@@ -233,7 +232,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
                         return;
                     }
 
-                    // Remove listeners to the register lot button button TODO: Check
+                    // Remove listeners from the register lot button button
                     getBinding().fragmentHomeMbtnRegisterParkingLot.setOnClickListener(null);
 
                     // If the operator has registered a lot already, display its info
@@ -284,8 +283,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
         getBinding().fragmentHomeMbtnRegisterParkingLot
                 .setOnClickListener(v ->
                         // Navigate to the parking lot registration form
-                        Navigation.findNavController(HomeFragment.this.requireActivity()
-                                .findViewById(R.id.fragment_main_host_nv_nav_view))
+                        getNavController(requireActivity())
                                 .navigate(R.id.action_nav_home_to_nav_register_lot_fragment));
     }
 
@@ -345,7 +343,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      */
     @Override
     public void toAuthenticator() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_home_to_nav_authenticator_fragment);
     }
 
@@ -355,7 +353,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      */
     @Override
     public void toBookings() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_home_to_nav_view_bookings);
     }
 
@@ -365,7 +363,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      */
     @Override
     public void toAccount() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_home_to_nav_account);
     }
 
@@ -375,7 +373,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      */
     @Override
     public void toFeedback() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_home_to_nav_feedback);
     }
 
@@ -400,7 +398,8 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
             // Pass it to the ParkingMapFragment
             EventBus.getDefault().postSticky(new LatLng(userLatestLocation.getLatitude(), userLatestLocation.getLongitude()));
             // Navigate to the ParkingMapFragment
-            Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view)).navigate(R.id.action_home_to_parking_map);
+            getNavController(requireActivity())
+                    .navigate(R.id.action_home_to_parking_map);
         } else {
             // Inform the user something wrong happened
             Toast.makeText(requireContext(), getString(R.string.error_retrieving_location), Toast.LENGTH_SHORT).show();

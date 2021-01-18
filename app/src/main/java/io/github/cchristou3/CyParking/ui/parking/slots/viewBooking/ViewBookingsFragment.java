@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -306,7 +305,7 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
          *  If a user is logged in, the action bar option to "sign in" is hidden.
          *  However, in case the user is in this screen and decides to logout,
          *  an alert will be displayed. */
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_view_bookings_to_nav_authenticator_fragment);
     }
 
@@ -325,7 +324,7 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
      */
     @Override
     public void toAccount() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_view_bookings_to_nav_account);
     }
 
@@ -335,7 +334,7 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
      */
     @Override
     public void toFeedback() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_view_bookings_to_nav_feedback);
     }
 
@@ -345,7 +344,7 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
      */
     @Override
     public void toHome() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_view_bookings_to_nav_home);
     }
 }

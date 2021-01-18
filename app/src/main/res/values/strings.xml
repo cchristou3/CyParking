@@ -108,13 +108,15 @@
     <!-- String related to viewing bookings -->
     <string name="booking_cancellation_confirmation">Are you sure you would like to cancel the booking?</string>
 
-    <!-- Strings related to the ParkingBookingFragment -->
+    <!-- Strings related to the BookingFragment -->
     <string name="please_choose_an_offer">Please choose an offer</string>
     <string name="selected_offer">Selected offer: </string>
     <string name="slot_already_booked">You have already booked this lot.</string>
     <string name="parse_error_msg">Oops something went wrong. Please restart the application.</string>
     <string name="date_error_msg">Please choose an appropriate date.</string>
     <string name="no_space_msg">Unfortunately, the lot is out of available spaces. Please try again later.</string>
+    <string name="no_lot_found_title">Couldn\'t load the parking lot\'s info</string>
+    <string name="no_lot_found_msg">You will now be navigated back to the map.</string>
 
     <!-- Strings related to when the user logs out, while being at a screen that requires authentication -->
     <string name="log_in">Log In</string>
@@ -160,5 +162,6 @@
     <!-- String related to test cases   -->
     <string name="any_error">Error</string>
     <string name="any">Any</string>
+    <string name="no_connection">No connection</string>
 
 </resources>

@@ -8,7 +8,6 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * Purpose: <p>Contains methods used to hash data</p>
- * TODO: If class is being used frequently, make singleton
  * as the call to MessageDigest#getInstance is rather expensive.
  *
  * @author Charalambos Christou

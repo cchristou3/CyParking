@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -90,7 +89,7 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
             ).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     Toast.makeText(requireContext(), getString(R.string.feedback_success), Toast.LENGTH_SHORT).show();
-                    goBack(requireActivity().findViewById(R.id.fragment_main_host_nv_nav_view));
+                    goBack(requireActivity());
                 } else {
                     Toast.makeText(requireContext(), getString(R.string.feedback_failed), Toast.LENGTH_SHORT).show();
                 }
@@ -110,7 +109,6 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
         mFeedbackViewModel.getFormState().observe(getViewLifecycleOwner(), feedbackFormState -> {
             getBinding().feedbackFragmentMbtnSendFeedback
                     .setEnabled(feedbackFormState.isDataValid());
-            // TODO: 09/01/2021 Check for email input
             // Show validity status for the feedback message
             if (feedbackFormState.getFeedbackMessageError() != null) {
                 feedbackTextArea.setError(getString(feedbackFormState.getFeedbackMessageError()));
@@ -242,7 +240,7 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
      */
     @Override
     public void toAuthenticator() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_feedback_to_nav_authenticator_fragment);
     }
 
@@ -252,7 +250,7 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
      */
     @Override
     public void toBookings() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_feedback_to_nav_view_bookings);
     }
 
@@ -262,7 +260,7 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
      */
     @Override
     public void toAccount() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_feedback_to_nav_account);
     }
 
@@ -281,7 +279,7 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
      */
     @Override
     public void toHome() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_feedback_to_nav_home);
     }
 }

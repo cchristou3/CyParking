@@ -28,7 +28,7 @@ task clean(type: Delete) {
 ext {
     // Sdk and tools
     // Support library and architecture components support minSdk 16 and above.
-    minSdkVersion = 16
+    minSdkVersion = 21
     targetSdkVersion = 28
     compileSdkVersion = 28
 

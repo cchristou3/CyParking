@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -217,15 +216,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
         // Initialize a firebase firestore observer to inform us about changes in the DB
         // The callback of the SnapshotListener gets triggered straight away when we attach it
 
-        // Solution to
-        // https://stackoverflow.com/questions/27978188/google-maps-v2-mapfragment-is-extremely-laggy-on-returning-from-the-backstack
-        // TODO: 15/01/2021 Find a better workaround
-        WeakReference<Dialog> dial = new WeakReference<>(new Dialog(requireContext()));
-        dial.get().show();
-        dial.get().dismiss();
-        dial.clear();
-        dial = null;
-        ///////////////////////////////////////////////////////////////
+        clearBackgroundMode();
 
         DatabaseObserver.createCollectionReferenceObserver(
                 mParkingMapViewModel.getParkingLots(), // Collection reference
@@ -244,7 +235,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
                                 Log.d(TAG, "LISTENING_TO_DATA_CHANGES: error: " + error.getLocalizedMessage());
                                 break;
                             }
-                            if (value == null) break; // TODO: Show feedback to user
+                            if (value == null || value.isEmpty()) break;
 
                             updateLocalDocuments(value.getDocumentChanges());
                             break;
@@ -287,6 +278,22 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
         getBinding().fragmentParkingMapImgbtnDirections.setOnClickListener(null);
         getBinding().fragmentParkingMapBtnBooking.setOnClickListener(null);
         mFragmentParkingMapBinding = null;
+    }
+
+    /**
+     * The method's solely purpose is to remove the bug that occurs
+     * when navigating back to the map.
+     * Bug: the map is extremely laggy.
+     */
+    private void clearBackgroundMode() {
+        // Solution to
+        // https://stackoverflow.com/questions/27978188/google-maps-v2-mapfragment-is-extremely-laggy-on-returning-from-the-backstack
+        // TODO: 15/01/2021 Find a better workaround
+        WeakReference<Dialog> dial = new WeakReference<>(new Dialog(requireContext()));
+        dial.get().show();
+        dial.get().dismiss();
+        dial.clear();
+        dial = null;
     }
 
     /**
@@ -524,7 +531,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
             // Navigate to the ParkingBookingFragment
             Log.d(TAG, "onViewCreated: sending over: " + mMarkerManager.getSelectedParkingLot());
             EventBus.getDefault().postSticky(mMarkerManager.getSelectedParkingLot());
-            Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+            getNavController(requireActivity())
                     .navigate(R.id.action_nav_parking_map_fragment_to_parking_booking_fragment);
         } else {
             Toast.makeText(requireContext(), "Oops something went wrong!", Toast.LENGTH_SHORT).show();
@@ -574,7 +581,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      */
     @Override
     public void toAuthenticator() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_parking_map_fragment_to_nav_authenticator_fragment);
     }
 
@@ -584,7 +591,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      */
     @Override
     public void toBookings() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_parking_map_fragment_to_nav_view_bookings);
     }
 
@@ -594,7 +601,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      */
     @Override
     public void toAccount() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_parking_map_fragment_to_nav_account);
     }
 
@@ -604,7 +611,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      */
     @Override
     public void toFeedback() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_parking_map_fragment_to_nav_feedback);
     }
 
@@ -614,7 +621,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      */
     @Override
     public void toHome() {
-        Navigation.findNavController(getActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
+        getNavController(requireActivity())
                 .navigate(R.id.action_nav_parking_map_fragment_to_nav_home);
     }
 

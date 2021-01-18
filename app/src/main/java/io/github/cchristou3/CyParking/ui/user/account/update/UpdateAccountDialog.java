@@ -45,7 +45,6 @@ import static io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog.getSty
 
 /**
  * Purpose: Allows the users to update one of their attributes.
- * TODO: Update user data on the database node as well if updating email/display name
  *
  * @author Charalambos Christou
  * @version 3.0 29/12/20

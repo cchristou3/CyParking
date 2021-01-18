@@ -23,7 +23,6 @@ import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -173,7 +172,7 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
      * then the user is re-authenticating.
      * Sets the appropriate EditText's text to the email.
      */
-    private void checkIfUserReAuthenticating() {
+    public void checkIfUserReAuthenticating() {
         if (getParentFragment() != null && getParentFragment().getArguments() != null) {
             String email = getParentFragment().getArguments().getString(getString(R.string.email_low));
             Log.d(TAG, "onViewCreated: " + email);
@@ -363,7 +362,7 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
             changeVisibilityOfLoadingBarTo(View.GONE); // hide the loading bar
             if (authResult.getError() != null) showLoginFailed(authResult.getError());
             if (authResult.getSuccess() != null) {
-                if (this.mIsReauthenticating) {// TODO: Add to view model and trigger state changes to update the UI
+                if (this.mIsReauthenticating) {
                     mAuthenticatorViewModel.reauthenticateUser(getBinding().fragmentHosteeAuthEtPassword.getText().toString())
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
@@ -458,8 +457,12 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
             }
             Toast.makeText(requireContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
             // Go to previous screen
-            Navigation.findNavController(getParentFragment().requireActivity().findViewById(R.id.fragment_main_host_nv_nav_view))
-                    .popBackStack();
+            try {
+                ((AuthenticatorFragment) getParentFragment())
+                        .goBack(getParentFragment().requireActivity());
+            } catch (ClassCastException | NullPointerException e) {
+                Log.d(TAG, "updateUiWithUser - error transitioning back: " + e);
+            }
         }
     }
 

@@ -1,14 +1,15 @@
 // The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
-import * as functions from 'firebase-functions';
+const functions = require('firebase-functions');
 
 // The Firebase Admin SDK to access Cloud Firestore.
-import * as admin from 'firebase-admin';
+const admin = require('firebase-admin');
 admin.initializeApp();
 
 // Import helper functions and constants.
-import { deleteDocs, logError, nearbyUser } from './helpers';
-import { PARKING_LOTS, FEEDBACK, EMAIL, BOOKINGS, BOOKING_USER_ID, OPERATOR_ID, USERS, EQUALS }
-    from './constants';
+const helpers = require('./helpers');
+const constants = require('./constants');
+
+// todo 17/01/21 https://firebase.google.com/docs/functions/organize-functions
 
 /**
  * When invoked, queries all parking lots from the database and filters them
@@ -26,20 +27,23 @@ exports.filterLocations = functions.https.onCall(async (data, context) => {
     const userLongitude = data.longitude;
     // Get all private parking into Cloud Firestore using the Firebase Admin SDK.
     var filteredReadResult = [];
-    await admin.firestore().collection(PARKING_LOTS)
+    await admin.firestore().collection(constants.PARKING_LOTS)
         .get()
         .then(
             (querySnapshot) => {
                 querySnapshot.forEach(function (doc) {
                     if (doc.exists) {
                         console.log(doc.id, " => ", doc.data());
-                        if (nearbyUser(doc.data(), userLatitude, userLongitude)) {
+                        if (helpers.nearbyUser(doc.data(), userLatitude, userLongitude)) {
                             filteredReadResult.push(doc.data());
                         }
                     }
                 });
             }
-        ).catch((e) => { throw new functions.https.HttpsError('internal', "Oops something went wrong: " + e) })
+        ).catch((e) => {
+            helpers.logError(e, 'filterLocations')
+            throw new functions.https.HttpsError('internal', "Internal server errr: " + e)
+        })
 
     console.log(filteredReadResult)
 
@@ -52,39 +56,73 @@ exports.filterLocations = functions.https.onCall(async (data, context) => {
  */
 exports.cleanupUser = functions.auth.user().onDelete(async (user) => {
     console.log(user.email + ' is about to get deleted')
+    // TODO: Put all in a batch
+
+    var batch = admin.firestore().batch();
+
     // Delete any feedback messages related to this user    
-    admin.firestore().collection(FEEDBACK)
-        .where(EMAIL, EQUALS, user.email).get()
-        .then((querySnapshot) => deleteDocs(querySnapshot))
-        .catch((error) => logError(error, FEEDBACK));
+    await admin.firestore().collection(constants.FEEDBACK)
+        .where(constants.EMAIL, constants.EQUALS, user.email).get()
+        .then((querySnapshot) => helpers.deleteDocs(querySnapshot, batch))
+        .catch((error) => helpers.logError(error, constants.FEEDBACK));
 
     // Delete any bookings that the user created
-    admin.firestore().collection(BOOKINGS)
-        .where(BOOKING_USER_ID, EQUALS, user.uid).get()
-        .then((querySnapshot) => deleteDocs(querySnapshot))
-        .catch((error) => logError(error, BOOKINGS + ' issuer'));
+    await admin.firestore().collection(constants.BOOKINGS)
+        .where(constants.BOOKING_USER_ID, constants.EQUALS, user.uid).get()
+        .then((querySnapshot) => helpers.deleteDocs(querySnapshot, batch))
+        .catch((error) => helpers.logError(error, constants.BOOKINGS + ' issuer'));
 
     // Delete any bookings that the user's lot was booked.
-    admin.firestore().collection(BOOKINGS)
-        .where(OPERATOR_ID, EQUALS, user.uid).get()
-        .then((querySnapshot) => deleteDocs(querySnapshot))
-        .catch((error) => logError(error, BOOKINGS + ' owner'));
-
+    await admin.firestore().collection(constants.BOOKINGS)
+        .where(constants.OPERATOR_ID, constants.EQUALS, user.uid).get()
+        .then((querySnapshot) => helpers.deleteDocs(querySnapshot, batch))
+        .catch((error) => helpers.logError(error, constants.BOOKINGS + ' owner'));
 
     // // Delete any parking lots related to this user
-    admin.firestore().collection(PARKING_LOTS).where(OPERATOR_ID, EQUALS, user.uid).get()
-        .then((querySnapshot) => deleteDocs(querySnapshot))
-        .catch((error) => logError(error, PARKING_LOTS));
+    await admin.firestore().collection(constants.PARKING_LOTS).where(constants.OPERATOR_ID, constants.EQUALS, user.uid).get()
+        .then((querySnapshot) => helpers.deleteDocs(querySnapshot, batch))
+        .catch((error) => helpers.logError(error, constants.PARKING_LOTS));
 
-    admin.firestore().collection(USERS).doc(user.uid).delete()
-        .then(function (writeResult) {
-            console.log('Result: ' + writeResult)
-        })
-        .catch((error) => logError(error, USER));
+    batch.delete(admin.firestore().collection(constants.USERS).doc(user.uid))
 
-    console.log(user.email + ' got deleted')
+    batch.commit().then((result) => {
+        console.log(user.email + ' got deleted from ' + result.toString())
+    })
     return;
 });
+
+/**
+ * Updates the email of the user in the database.
+ */
+exports.updateEmail = functions.https.onCall(async (data, context) => {
+    console.log('Data => ' + data)
+    console.log('Context => ' + context)
+    // Create a write batch
+    var batch = admin.firestore().batch();
+
+    // Update all feedback messages that have the given oldEmail
+    // with the newEmail
+    await admin.firestore().collection(constants.FEEDBACK)
+        .where(constants.EMAIL, constants.EQUALS, data.oldEmail)
+        .get()
+        .then((querySnapshot) => {
+            querySnapshot.docs.forEach((doc) => {
+                batch.update(doc.ref, { email: data.newEmail })
+            })
+        })
+
+    // Update the user's email from the USERS node
+    batch.update(
+        admin.firestore().collection(constants.USERS).doc(data.userId),
+        { email: data.newEmail }
+    )
+
+    // Commit the batch
+    batch.commit().then((result) => {
+        console.log('Email update successful! result: ' + result)
+    })
+    return;
+})
 
 /* TODO: Complete after administrator's front-end is done.
 exports.notifyAdminnistrator = functions.firestore

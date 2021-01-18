@@ -230,6 +230,8 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
         DatabaseObserver.createCollectionReferenceObserver(
                 mParkingMapViewModel.getParkingLots(), // Collection reference
                 (value, error) -> { // Event handler
+                    Log.d(TAG, "onStart: " + (mSnapshotState.getState() == SnapshotState.INITIAL_DATA_RETRIEVAL ?
+                            "INITIAL_DATA_RETRIEVAL" : "LISTENING_TO_DATA_CHANGES"));
                     switch (mSnapshotState.getState()) {
                         case SnapshotState.INITIAL_DATA_RETRIEVAL:
                             if (mUserCurrentLatLng == null) return;

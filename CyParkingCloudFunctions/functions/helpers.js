@@ -1,5 +1,5 @@
 
-import { MAXIMUM_DISTANCE_FROM_USER } from './constants';
+const MAXIMUM_DISTANCE_FROM_USER = require('./constants').MAXIMUM_DISTANCE_FROM_USER;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
@@ -8,12 +8,14 @@ import { MAXIMUM_DISTANCE_FROM_USER } from './constants';
  * 
  * @param {FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>} querySnapshot 
  * A `QuerySnapShot` that contains zero or more `QueryDocumentSnapshot` objects.
+ * @param {FirebaseFirestore.WriteBatch} batch 
  */
-const deleteDocs = (querySnapshot) => {
+const deleteDocs = (querySnapshot, batch) => {
     querySnapshot.docs.forEach((doc) => {
-        console.log("Delete message: " + JSON.stringify(doc.data()))
-        doc.ref.delete();
+        console.log("Delete document: " + JSON.stringify(doc.data()))
+        batch.delete(doc.ref)
     })
+    return batch;
 }
 module.exports.deleteDocs = deleteDocs;
 

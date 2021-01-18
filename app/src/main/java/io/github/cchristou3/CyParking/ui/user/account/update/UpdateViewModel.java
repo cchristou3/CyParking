@@ -96,7 +96,6 @@ public class UpdateViewModel extends ViewModel {
         switch (mDialogType) {
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
                 return mAccountRepository.updateDisplayName(updatedField, user);
-
             case UpdateAccountDialog.UPDATE_EMAIL:
                 return mAccountRepository.updateEmail(updatedField, user);
             case UpdateAccountDialog.UPDATE_PASSWORD:

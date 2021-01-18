@@ -227,8 +227,8 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
                 mOperatorViewModel.observeParkingLot(operatorId), // The Query
                 (value, error) -> { // The Event listener
                     if (error != null || value == null) return; // TODO: Handle error
-                    Log.d(TAG, "getParkingLotInfo: " + value.getDocuments().size());
-                    if (value.getDocuments().size() == 0) { // The operator did not register lot yet
+                    Log.d(TAG, "getParkingLotInfo: is empty? " + value.isEmpty());
+                    if (value.isEmpty()) { // The operator did not register lot yet
                         displayLotRegistrationLayout();
                         return;
                     }

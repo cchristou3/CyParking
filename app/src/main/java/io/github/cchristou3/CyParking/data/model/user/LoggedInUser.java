@@ -100,17 +100,31 @@ public class LoggedInUser implements Parcelable {
         return roles;
     }
 
+    /**
+     * Checks whether the instance is a {@link #USER} of role.
+     *
+     * @return True if the user is. Otherwise, false.
+     */
     @Exclude
     public boolean isUser() {
         return isRole(USER);
     }
 
-    // TODO: 17/01/2021 Add comments
+    /**
+     * Checks whether the instance is a {@link #OPERATOR} of role.
+     *
+     * @return True if the user is. Otherwise, false.
+     */
     @Exclude
     public boolean isOperator() {
         return isRole(OPERATOR);
     }
 
+    /**
+     * Checks whether the instance is the given role.
+     *
+     * @return True if the user is. Otherwise, false.
+     */
     @Exclude
     private boolean isRole(String role) {
         return (roles != null) && roles.contains(role);

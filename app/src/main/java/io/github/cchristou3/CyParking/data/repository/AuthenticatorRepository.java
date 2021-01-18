@@ -50,11 +50,17 @@ public class AuthenticatorRepository {
      *
      * @param credentials The user's credentials
      * @return A task to be handled by the view.
+     * @throws IllegalStateException if method gets invoked when there is no user
+     *                               currently signed in.
      */
     @NotNull
     public Task<AuthResult> reauthenticateUser(String credentials) {
-        return mDataSource.getCurrentUser().reauthenticateAndRetrieveData(EmailAuthProvider
-                .getCredential(mDataSource.getCurrentUser().getEmail(), credentials));
+        try {
+            return mDataSource.getCurrentUser().reauthenticateAndRetrieveData(EmailAuthProvider
+                    .getCredential(mDataSource.getCurrentUser().getEmail(), credentials));
+        } catch (NullPointerException exception) {
+            throw new IllegalStateException("The user must be signed in to perform re-authentication.");
+        }
     }
 
     /**

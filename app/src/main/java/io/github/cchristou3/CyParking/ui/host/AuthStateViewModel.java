@@ -43,6 +43,8 @@ public class AuthStateViewModel extends ViewModel {
     private final MutableLiveData<LoggedInUser> mUserState = new MutableLiveData<>(null);
     private final AuthenticatorRepository mAuthenticatorRepository;
 
+    // TODO: 18/01/2021 Add Loading bar state
+
     /**
      * Initialize the ViewModel's AuthenticatorRepository instance
      * with the given argument.

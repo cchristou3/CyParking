@@ -8,17 +8,17 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.functions.FirebaseFunctions;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 
-import static io.github.cchristou3.CyParking.data.repository.RepositoryData.FEEDBACK;
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USERS;
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USER_DISPLAY_NAME;
-import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USER_EMAIL;
 import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 
 /**
@@ -106,44 +106,13 @@ public class AccountRepository {
      * @param newEmail The new email of the user.
      */
     public void updateUserEmail(String userId, String oldEmail, String newEmail) {
-        updateEmailFromFeedbackNode(oldEmail, newEmail);
-        updateEmailFromUsersNode(userId, newEmail);
-    }
-
-    /**
-     * Updates all the feedback documents with the specified old email with
-     * the new email address.
-     *
-     * @param oldEmail The current email address of the user.
-     * @param newEmail The new email address of the user.
-     */
-    private void updateEmailFromFeedbackNode(String oldEmail, String newEmail) {
-        // Update the email from the FEEDBACK node
-        FirebaseFirestore.getInstance().collection(FEEDBACK)
-                .whereEqualTo(USER_EMAIL, oldEmail).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                // Iterate all documents (feedback messages) that contain the old email
-                for (DocumentSnapshot document :
-                        task.getResult().getDocuments()) {
-                    // Update with the new one.
-                    document.getReference().update(USER_EMAIL, newEmail);
-                }
-            }
-        });
-    }
-
-    /**
-     * Updates the user's document with
-     * the new email address.
-     *
-     * @param userId   The id of the user's document (also his id).
-     * @param newEmail The new email address of the user.
-     */
-    private void updateEmailFromUsersNode(String userId, String newEmail) {
-        // Update the email from the USERS node
-        FirebaseFirestore.getInstance().collection(USERS)
-                .document(userId)
-                .update(USER_EMAIL, newEmail);
+        FirebaseFunctions.getInstance() // TODO: 17/01/2021 Test 
+                .getHttpsCallable("updateEmail")
+                .call(new HashMap<String, String>() {{
+                    put("newEmail", newEmail);
+                    put("oldEmail", oldEmail);
+                    put("userId", userId);
+                }});
     }
 
     /**

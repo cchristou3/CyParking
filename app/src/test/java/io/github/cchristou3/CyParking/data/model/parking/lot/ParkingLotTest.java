@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.Random;
 
-import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
+import io.github.cchristou3.CyParking.data.model.parking.Parking;
 
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.Availability.isCapacityValid;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.areSlotOffersValid;
@@ -39,7 +39,7 @@ public class ParkingLotTest {
         parkingLot = new ParkingLot(new Parking.Coordinates(1, 2),
                 "11111111", "1@gmail.com", "name");
         // When
-        int output = parkingLot.getParkingID();
+        int output = parkingLot.getParkingId();
         // Then
         Assert.assertEquals(14111111, output);
     }

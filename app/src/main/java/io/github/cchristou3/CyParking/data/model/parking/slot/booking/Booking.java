@@ -1,27 +1,33 @@
 package io.github.cchristou3.CyParking.data.model.parking.slot.booking;
 
 import android.os.Parcel;
+import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.NotNull;
 
-import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
+import io.github.cchristou3.CyParking.data.model.parking.ParkingId;
 import io.github.cchristou3.CyParking.utilities.ShaUtility;
 
 /**
  * Purpose: <p>POJO to be used to transfer and receive data
  * via activities / fragments and HTTP requests. Holds needed
  * info to execute a "booking transaction" in ParkingBookingFragment.
- * This is a Subclass of Parking.</p>
+ * This is a Subclass of ParkingId - A booking
+ * contains the parkingId of the lot it is booked for.
+ * It also inherits its {@link ParkingId#generateUniqueId()} method
+ * that is used to generate the {@link DocumentReference#getId()}
+ * for the booking in the database.</p>
  *
  * @author Charalambos Christou
- * @version 3.0 07/11/20
+ * @version 4.0 20/01/21
  */
-public class Booking extends Parking {
+public class Booking extends ParkingId implements Parcelable {
 
     public static final Creator<Booking> CREATOR = new Creator<Booking>() {
         @Override
@@ -43,25 +49,23 @@ public class Booking extends Parking {
     // User that makes the booking attributes
     @SerializedName("userId")
     private String bookingUserId;
+    // Booking details
     @SerializedName("bookingDetails")
     private BookingDetails bookingDetails;
 
-    public Booking() {
-        super();
-    } /* no-argument constructor to be used for deserialization */
+    public Booking() { /* no-argument constructor to be used for deserialization */ }
 
     /**
      * Public Constructor.
      * Initialize all the attributes of the class with the given arguments.
      *
-     * @param coordinates   The lot's to be booked coordinates
-     * @param parkingID     The lot's id.
+     * @param parkingId     The lot's id.
      * @param operatorId    The operator's Id.
      * @param lotName       The lot's name.
      * @param bookingUserId The id the user that issued the booking.
      */
-    public Booking(Coordinates coordinates, int parkingID, String operatorId, String lotName, String bookingUserId, BookingDetails bookingDetails) {
-        super(coordinates, parkingID);
+    public Booking(int parkingId, String operatorId, String lotName, String bookingUserId, BookingDetails bookingDetails) {
+        this.parkingId = parkingId;
         this.operatorId = operatorId;
         this.lotName = lotName;
         this.bookingUserId = bookingUserId;
@@ -75,12 +79,12 @@ public class Booking extends Parking {
      *
      * @param in Contains the contents of the Booking instance.
      */
-    protected Booking(Parcel in) {
-        super(in);
+    protected Booking(@NotNull Parcel in) {
+        parkingId = in.readInt();
         operatorId = in.readString();
         lotName = in.readString();
         bookingUserId = in.readString();
-        bookingDetails = in.readParcelable(BookingDetails.class.getClassLoader());
+        bookingDetails = BookingDetails.CREATOR.createFromParcel(in);
     }
 
     /**
@@ -114,7 +118,7 @@ public class Booking extends Parking {
      */
     @Override
     public void writeToParcel(@NotNull Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
+        dest.writeInt(parkingId);
         dest.writeString(operatorId);
         dest.writeString(lotName);
         dest.writeString(bookingUserId);
@@ -137,7 +141,7 @@ public class Booking extends Parking {
 
     /**
      * Create a new string which consists of the following attributes:
-     * {@link #parkingID}, {@link #coordinates}, {@link #operatorId}, {@link #lotName}, {@link #bookingUserId},
+     * {@link #parkingId}, {@link #coordinates}, {@link #operatorId}, {@link #lotName}, {@link #bookingUserId},
      * {@link #bookingDetails}.
      * <p>
      * Not Included: {@link BookingDetails#completed}

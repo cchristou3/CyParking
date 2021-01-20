@@ -36,9 +36,9 @@ import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.manager.LocationManager;
+import io.github.cchristou3.CyParking.data.model.parking.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
-import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
 import io.github.cchristou3.CyParking.databinding.RegisterLotFragmentBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
@@ -295,7 +295,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
      * lot.
      */
     @NotNull
-    private ParkingLot buildParkingLotObject() {
+    private ParkingLot buildParkingLot() {
         // Instantiate the ParkingLot object
         // and return it
         // coordinates lotName operatorId operatorMobileNumber capacity capacityForDisabled availableSpacesForDisabled slotOfferList
@@ -430,7 +430,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     @Override
     public void onClick(View v) {
         // Create a ParkingLot object to hold all necessary info.
-        mRegisterLotViewModel.registerParkingLot(buildParkingLotObject())
+        mRegisterLotViewModel.registerParkingLot(buildParkingLot())
                 .addOnCompleteListener((Task<Void> task) -> {
                     if (task.getException() == null) {
                         // Display message to user.

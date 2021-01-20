@@ -2,6 +2,8 @@ package io.github.cchristou3.CyParking.data.model.parking.slot;
 
 import org.junit.Test;
 
+import io.github.cchristou3.CyParking.data.model.parking.Parking;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -16,24 +18,32 @@ public class ParkingTest {
     @Test
     public void Parking_initializesCorrectAttributes() {
         // When parking object gets initialized
-        Parking parking = new Parking(COORDS, ID);
+        Parking parking = new Parking(COORDS, ID) {
+            public String generateUniqueId() {
+                return null;
+            }
+        };
         // Then getters should return the same values
         assertTrue(
                 parking.getCoordinates().equals(COORDS)
-                        && parking.getParkingID() == ID
-                        && parking.getCoordinates().longitude == COORDS.longitude
-                        && parking.getCoordinates().latitude == COORDS.latitude
+                        && parking.getParkingId() == ID
+                        && parking.getCoordinates().getLongitude() == COORDS.getLongitude()
+                        && parking.getCoordinates().getLatitude() == COORDS.getLatitude()
         );
     }
 
     @Test
     public void toString_returnsExpectedString() {
         // When parking object gets initialized
-        Parking parking = new Parking(COORDS, ID);
+        Parking parking = new Parking(COORDS, ID) {
+            public String generateUniqueId() {
+                return null;
+            }
+        };
         // Then
         assertEquals("Id: " + ID + ", " + "coordinates: { "
-                + "latitude:" + COORDS.latitude
-                + ", longitude:" + COORDS.longitude
+                + "latitude:" + COORDS.getLatitude()
+                + ", longitude:" + COORDS.getLongitude()
                 + " }", parking.toString());
     }
 }

@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Exclude;
 import com.google.gson.annotations.SerializedName;
 
@@ -19,7 +20,7 @@ import java.util.Random;
 import java.util.regex.Pattern;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
+import io.github.cchristou3.CyParking.data.model.parking.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.data.repository.BookingRepository;
 import io.github.cchristou3.CyParking.utilities.ShaUtility;
@@ -36,12 +37,15 @@ import io.github.cchristou3.CyParking.utilities.ShaUtility;
  * <p><strong>Note:</strong></p>
  * A ParkingLot object stored inside the FirebaseFirestore database
  * is uniquely identified by its
- * {@link #coordinates}, its {@link #parkingID} and its {@link #lotName}.
+ * {@link #coordinates}, its {@link #parkingId} and its {@link #lotName}.
+ * The inherited method {@link Parking#generateUniqueId()} is implemented
+ * to generate the {@link DocumentReference#getId()} for the parking lot
+ * in the database.
  *
  * @author Charalambos Christou
- * @version 8.0 12/01/21
+ * @version 9.0 20/01/21
  */
-public class ParkingLot extends Parking {
+public class ParkingLot extends Parking implements Parcelable {
 
     public static final Creator<ParkingLot> CREATOR = new Creator<ParkingLot>() {
         @Override
@@ -80,14 +84,15 @@ public class ParkingLot extends Parking {
      * @param coordinates          The position of the lot.
      * @param operatorMobileNumber The lot's operator's phone number.
      * @param email                The lot's operator's email address.
+     * @throws NumberFormatException if cannot parse the mobile number to string.
+     * @throws NullPointerException  if the coordinates or the mobile number is null.
      */
     public ParkingLot(
             @NonNull Coordinates coordinates, @NonNull String operatorMobileNumber,
             @NonNull String email, @NonNull String lotName
-    ) {
-        super();
+    ) throws NumberFormatException, NullPointerException {
         this.setCoordinates(coordinates);
-        this.setParkingID(generateParkingId(coordinates, operatorMobileNumber));
+        this.setParkingId(generateParkingId(coordinates, operatorMobileNumber));
         this.operatorId = email;
         this.lotName = lotName;
         this.operatorMobileNumber = operatorMobileNumber;
@@ -103,7 +108,7 @@ public class ParkingLot extends Parking {
     /**
      * Public Constructor.
      * Initialize all the attributes of the class with the given arguments.
-     * Besides, the {@link #parkingID} is generated and set.
+     * Besides, the {@link #parkingId} is generated and set.
      *
      * @param coordinates          The position of the lot.
      * @param lotName              The lot's name.
@@ -113,13 +118,16 @@ public class ParkingLot extends Parking {
      * @param slotOfferList        The lot's offers.
      * @throws IllegalArgumentException If the capacity is invalid, or the available spaces are not
      *                                  in the bounds of the capacity's value.
+     * @throws NumberFormatException    if cannot parse the mobile number to string.
+     * @throws NullPointerException     if the coordinates or the mobile number is null.
+     * @see Availability#checkIfValid()
      */
     public ParkingLot(
             Coordinates coordinates, String lotName, String operatorId,
             String operatorMobileNumber, int capacity, List<SlotOffer> slotOfferList
     ) throws IllegalArgumentException {
         super(coordinates, 0);
-        this.setParkingID(generateParkingId(coordinates, operatorMobileNumber));
+        this.setParkingId(generateParkingId(coordinates, operatorMobileNumber));
         this.lotName = lotName;
         this.operatorId = operatorId;
         this.operatorMobileNumber = operatorMobileNumber;
@@ -134,8 +142,9 @@ public class ParkingLot extends Parking {
      *
      * @param in Contains the contents of the ParkingLot instance.
      */
-    protected ParkingLot(Parcel in) {
-        super(in);
+    protected ParkingLot(@NotNull Parcel in) {
+        parkingId = in.readInt();
+        coordinates = Coordinates.CREATOR.createFromParcel(in);
         lotName = in.readString();
         operatorId = in.readString();
         operatorMobileNumber = in.readString();
@@ -144,7 +153,7 @@ public class ParkingLot extends Parking {
         slotOfferList = new ArrayList<>();
         int size = in.readInt();
         for (int i = 0; i < size; i++) {
-            slotOfferList.add(in.readParcelable(SlotOffer.class.getClassLoader()));
+            slotOfferList.add(SlotOffer.CREATOR.createFromParcel(in));
         }
     }
 
@@ -198,7 +207,9 @@ public class ParkingLot extends Parking {
      */
     @Override
     public void writeToParcel(@NotNull Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
+        dest.writeInt(parkingId);
+        dest.writeParcelable(coordinates, flags);
+
         dest.writeString(lotName);
         dest.writeString(operatorId);
         dest.writeString(operatorMobileNumber);
@@ -238,7 +249,7 @@ public class ParkingLot extends Parking {
 
     /**
      * Create a new string which consists of the following attributes:
-     * {@link #coordinates}, {@link #parkingID} and {@link #lotName}
+     * {@link #coordinates}, {@link #parkingId} and {@link #lotName}
      * Then, hash the generated string and return it.
      * Used as the DocumentID for the Firestore database's PRIVATE_PARKING node.
      *
@@ -261,9 +272,11 @@ public class ParkingLot extends Parking {
      * @param lotCoordinates The lot's coordinates.
      * @param mobileNumber   The operator's mobile number.
      * @return The id of the parking lot.
+     * @throws NumberFormatException if cannot parse the mobile number to string.
+     * @throws NullPointerException  if any of the arguments is null.
      */
     private int generateParkingId(@NotNull final Coordinates lotCoordinates, @NotNull String mobileNumber)
-            throws ClassCastException, NumberFormatException, NullPointerException {
+            throws NumberFormatException, NullPointerException {
         double lat = lotCoordinates.getLatitude() * 1000000; // Get rid most of the decimal part
         double lng = lotCoordinates.getLongitude() * 1000000; // and cast it to an integer
         // E.g. 33.62356 * 1000000 -> (int)336235.6 -> 336235

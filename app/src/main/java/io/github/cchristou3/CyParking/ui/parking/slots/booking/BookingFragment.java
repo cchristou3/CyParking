@@ -225,7 +225,7 @@ public class BookingFragment extends Fragment implements Navigable {
      */
     private void initializeUi() {
         // Set their text to their corresponding value
-        final String parkingID = "ParkingID: " + mSelectedParking.getParkingID(); // Compose parking id text
+        final String parkingID = "ParkingId: " + mSelectedParking.getParkingId(); // Compose parking id text
         final String availability = mSelectedParking.getLotAvailability(requireContext()); // Compose lot availability text
         getBinding().fragmentParkingBookingTxtParkingName.setText(parkingID); // Set parking name
         getBinding().fragmentParkingBookingTxtParkingAvailability.setText(availability); // Set parking availability
@@ -238,7 +238,7 @@ public class BookingFragment extends Fragment implements Navigable {
 
         // Set up time pickers' listeners
         getBinding().fragmentParkingBookingBtnStartingTimeButton
-                .setOnClickListener(buildListenerForTimePicker());
+                .setOnClickListener(buildTimePickerListener());
 
         // Set up date picker listener
         getBinding().fragmentParkingBookingBtnDateButton.setOnClickListener(v -> {
@@ -324,7 +324,7 @@ public class BookingFragment extends Fragment implements Navigable {
             changeLoadingBarVisibilityTo(View.VISIBLE);// show loading bar
             // Otherwise, proceed with transaction and create a booking
             // Create a new Booking instance that will hold all data of the booking.
-            final Booking booking = buildBookingObject(user, pickedDateObject);
+            final Booking booking = buildBooking(user, pickedDateObject);
 
             mBookingViewModel.bookParkingLot(booking)
                     .addOnCompleteListener(task -> {
@@ -367,12 +367,11 @@ public class BookingFragment extends Fragment implements Navigable {
      */
     @NotNull
     @Contract("_, _ -> new")
-    private Booking buildBookingObject(@NotNull LoggedInUser user, Date pickedDate) {
+    private Booking buildBooking(@NotNull LoggedInUser user, Date pickedDate) {
         final String userID = user.getUserId();
         // coordinates parkingID operatorId lotName bookingUserId bookingDetails
         return new Booking(
-                mSelectedParking.getCoordinates(),
-                mSelectedParking.getParkingID(),
+                mSelectedParking.getParkingId(),
                 mSelectedParking.getOperatorId(),
                 mSelectedParking.getLotName(),
                 userID,
@@ -393,7 +392,7 @@ public class BookingFragment extends Fragment implements Navigable {
      */
     @NotNull
     @Contract(pure = true)
-    private View.OnClickListener buildListenerForTimePicker() {
+    private View.OnClickListener buildTimePickerListener() {
         return v -> {
             TimePickerDialog timePickerDialog = new TimePickerDialog(
                     requireContext(),

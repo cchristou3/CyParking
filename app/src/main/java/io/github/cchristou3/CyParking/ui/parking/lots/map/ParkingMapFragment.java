@@ -53,8 +53,9 @@ import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsF
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
-import io.github.cchristou3.CyParking.utilities.Utility;
-import io.github.cchristou3.CyParking.utilities.ViewUtility;
+
+import static io.github.cchristou3.CyParking.utilities.Utility.isNearbyUser;
+import static io.github.cchristou3.CyParking.utilities.ViewUtility.animateAvailabilityColorChanges;
 
 /**
  * Purpose: <p>View all nearby parking.
@@ -226,7 +227,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
                     switch (mSnapshotState.getState()) {
                         case SnapshotState.INITIAL_DATA_RETRIEVAL:
                             if (mUserCurrentLatLng == null) return;
-                            // Fetch initial data via HTTP request, the filtering will be done by a cloud function
+                            // Fetch initial data, the filtering will be done by a cloud function
                             fetchParkingLots(mUserCurrentLatLng);
                             mSnapshotState.setState(SnapshotState.LISTENING_TO_DATA_CHANGES);
                             break;
@@ -330,7 +331,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
             double receivedParkingLongitude = receivedParkingLot.getLongitude();
             // and check whether it is nearby the user.
             // If not, then move on to the next document that got changed
-            if (!Utility.isNearbyUser(mUserCurrentLatLng, receivedParkingLatitude, receivedParkingLongitude))
+            if (!isNearbyUser(mUserCurrentLatLng, receivedParkingLatitude, receivedParkingLongitude))
                 continue;
 
             switch (dc.getType()) {
@@ -360,7 +361,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
                                 if (mParkingMapViewModel.isInfoLayoutShown()) {
                                     mParkingMapViewModel.updateSelectedLotState(receivedParkingLot);
                                     int updatedAvailableSpaces = receivedParkingLot.getAvailableSpaces();
-                                    ViewUtility.animateAvailabilityColorChanges(
+                                    animateAvailabilityColorChanges(
                                             getBinding().fragmentParkingMapCvInfoLayout, // Parent card view
                                             getBinding().fragmentParkingMapTxtAvailability, // child
                                             updatedAvailableSpaces,
@@ -394,7 +395,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      * the view would be destroyed when the onRequestFinish listener will get
      * triggered. Thus, it will cause a NullPointerException when trying to access
      * the {@link FragmentParkingMapBinding#fragmentParkingMapClpbLoadingMarkers}.
-     * For this reason, the listener is wrapped in a try-catch block.</strong>
+     * For this reason, the listener is wrapped around a try-catch block.</strong>
      *
      * @param latLng The latest recorded latitude and longitude of the user.
      * @see #onDestroyView()

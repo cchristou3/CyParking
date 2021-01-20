@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.data.model.parking.slot;
+package io.github.cchristou3.CyParking.data.model.parking;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -11,77 +11,32 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Purpose: <p>POJO to be used to transfer and receive data
- * via activities / fragments and HTTP requests.
- * This is a Base class.</p>
+ * via activities / fragments and HTTP requests.</p>
+ * <p>This is a subclass of {@link ParkingId} - A parking has a ParkingId.</p>
+ * <p>This is the base class for all major Parking objects</p>
+ * <p>Its subclass is: {@link io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot}</p>
  *
  * @author Charalambos Christou
- * @version 3.0 07/11/20
+ * @version 4.0 20/01/21
  */
-public class Parking implements Parcelable {
+public abstract class Parking extends ParkingId {
 
-    public static final Creator<Parking> CREATOR = new Creator<Parking>() {
-        @Override
-        public Parking createFromParcel(Parcel in) {
-            return new Parking(in);
-        }
-
-        @Override
-        public Parking[] newArray(int size) {
-            return new Parking[size];
-        }
-    };
     @SerializedName("coordinates")
     protected Coordinates coordinates;
-    @SerializedName("parkingID")
-    protected int parkingID; // TODO: Migrate to String data type
 
-    public Parking() { /* no-argument constructor to be used by GSON */ }
+    public Parking() {/* no-argument constructor to be used by GSON */ }
 
     /**
      * Public Constructor.
      * Initialize all the attributes of the class with the given arguments.
      *
      * @param coordinates The lot's to be booked coordinates
-     * @param parkingID   The lot's id.
+     * @param parkingId   The lot's id.
      */
-    public Parking(Coordinates coordinates, int parkingID) {
+    public Parking(Coordinates coordinates, int parkingId) {
         this.coordinates = coordinates;
-        this.parkingID = parkingID;
+        this.parkingId = parkingId;
     }
-
-    /**
-     * Constructor to be used by the Parcelable interface
-     * to initialize the Parking instance with the specified
-     * {@link Parcel}.
-     *
-     * @param in Contains the contents of the Parking instance.
-     */
-    protected Parking(Parcel in) {
-        coordinates = new Coordinates(in);
-        parkingID = in.readInt();
-    }
-
-    /**
-     * Flatten this object in to a Parcel.
-     *
-     * @param dest  The Parcel in which the object should be written.
-     * @param flags Additional flags about how the object should be written.
-     *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
-     */
-    @Override
-    public void writeToParcel(@NotNull Parcel dest, int flags) {
-        coordinates.writeToParcel(dest, flags);
-        dest.writeInt(parkingID);
-    }
-
-    /**
-     * Non-implemented Parcelable method.
-     */
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
 
     /**
      * Access the {@link #coordinates} of the coordinate.
@@ -102,32 +57,6 @@ public class Parking implements Parcelable {
     }
 
     /**
-     * Access the {@link #parkingID} of the coordinate.
-     *
-     * @return The parkingID of the lot.
-     */
-    public int getParkingID() {
-        return parkingID;
-    }
-
-    /**
-     * Sets the value of {@link #parkingID} with the given argument.
-     *
-     * @param parkingID The new parkingID of the parking object.
-     */
-    public void setParkingID(int parkingID) {
-        this.parkingID = parkingID;
-    }
-
-    /**
-     * To be overridden by its subclasses
-     * Combines the class' attribute values to create a unique id for the object
-     */
-    public String generateUniqueId() {
-        return "";
-    }
-
-    /**
      * Returns a string representation of the object.
      *
      * @return a string representation of the object.
@@ -135,7 +64,7 @@ public class Parking implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        return "Id: " + parkingID + ", " + coordinates.toString();
+        return super.toString() + ", " + coordinates.toString();
     }
 
     /**
@@ -174,7 +103,11 @@ public class Parking implements Parcelable {
         }
 
         /**
-         * @see Parking#Parking(Parcel)
+         * Constructor to be used by the Parcelable interface
+         * to initialize the ParkingLot instance with the specified
+         * {@link Parcel}.
+         *
+         * @param in Contains the contents of the ParkingLot instance.
          */
         protected Coordinates(@NotNull Parcel in) {
             latitude = in.readDouble();
@@ -196,7 +129,7 @@ public class Parking implements Parcelable {
         }
 
         /**
-         * @see Parking#writeToParcel
+         * @see Parcelable#writeToParcel
          */
         @Override
         public void writeToParcel(Parcel dest, int flags) {
@@ -205,7 +138,7 @@ public class Parking implements Parcelable {
         }
 
         /**
-         * @see Parking#describeContents
+         * @see Parcelable#describeContents
          */
         @Override
         public int describeContents() {

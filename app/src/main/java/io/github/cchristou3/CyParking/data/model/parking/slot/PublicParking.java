@@ -1,12 +1,14 @@
 package io.github.cchristou3.CyParking.data.model.parking.slot;
 
+import io.github.cchristou3.CyParking.data.model.parking.Parking;
+
 /**
  * Purpose:<p> POJO to be used to transfer and receive data
  * via activities / fragments and HTTP requests.
  * This is a Subclass of Parking.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 29/10/20
+ * @version 3.0 20/01/21
  */
 public class PublicParking extends Parking {
 
@@ -21,5 +23,15 @@ public class PublicParking extends Parking {
      */
     public PublicParking(Coordinates coordinates, int parkingID) {
         super(coordinates, parkingID);
+    }
+
+
+    /**
+     * To be overridden by its subclasses
+     * It should combine the class' attribute values to create a unique id for the object.
+     */
+    @Override
+    public String generateUniqueId() {
+        return null;
     }
 }

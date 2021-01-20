@@ -15,8 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.data.interfaces.OperatorRepository;
+import io.github.cchristou3.CyParking.data.model.parking.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
 
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.PARKING_LOTS;
 import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment.TAG;

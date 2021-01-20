@@ -5,8 +5,8 @@ import org.junit.Test;
 
 import java.util.Date;
 
+import io.github.cchristou3.CyParking.data.model.parking.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
-import io.github.cchristou3.CyParking.data.model.parking.slot.Parking;
 
 /**
  * Unit tests for the {@link Booking} class.
@@ -30,12 +30,11 @@ public class BookingTest {
     @Test
     public void generateUniqueId_sameObjectsDifferentCompletedStatus_returnsSameIds() {
         // Given
-        Booking a = new Booking(COORDINATES, PARKING_ID, OPERATOR_ID,
+        Booking a = new Booking(PARKING_ID, OPERATOR_ID,
                 LOT_NAME, ISSUER_ID, bookingDetailsA); // Completed set false by default.
 
         bookingDetailsB.completed = true;
-        Booking b = new Booking(COORDINATES,
-                PARKING_ID, OPERATOR_ID, LOT_NAME, ISSUER_ID, bookingDetailsB);
+        Booking b = new Booking(PARKING_ID, OPERATOR_ID, LOT_NAME, ISSUER_ID, bookingDetailsB);
         // When
         boolean areSame = a.equals(b);
         // Then
@@ -45,11 +44,10 @@ public class BookingTest {
     @Test
     public void generateUniqueId_differentObjects_returnsDifferentIds() {
         // Given
-        Booking a = new Booking(COORDINATES, PARKING_ID, OPERATOR_ID,
+        Booking a = new Booking(PARKING_ID, OPERATOR_ID,
                 LOT_NAME, ISSUER_ID, bookingDetailsA); // Completed set false by default.
 
-        Booking b = new Booking(new Parking.Coordinates(9, 9),
-                999, "OPERATOR_ID", "LOT_NAME", "ISSUER_ID", bookingDetailsB);
+        Booking b = new Booking(999, "OPERATOR_ID", "LOT_NAME", "ISSUER_ID", bookingDetailsB);
         // When
         boolean areSame = a.equals(b);
         // Then

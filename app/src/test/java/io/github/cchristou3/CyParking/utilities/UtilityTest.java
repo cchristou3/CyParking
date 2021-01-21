@@ -13,9 +13,9 @@ import static io.github.cchristou3.CyParking.utilities.Utility.dateToString;
 import static io.github.cchristou3.CyParking.utilities.Utility.fromStringToDate;
 import static io.github.cchristou3.CyParking.utilities.Utility.getCurrentDate;
 import static io.github.cchristou3.CyParking.utilities.Utility.getDateOf;
+import static io.github.cchristou3.CyParking.utilities.Utility.getDistanceApart;
 import static io.github.cchristou3.CyParking.utilities.Utility.getTimeOf;
 import static io.github.cchristou3.CyParking.utilities.Utility.getVolume;
-import static io.github.cchristou3.CyParking.utilities.Utility.isNearbyUser;
 
 /**
  * Unit tests for the {@link Utility} class.
@@ -139,27 +139,26 @@ public class UtilityTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test
-    public void isNearbyUser_inSamePosition_returnsTrue() {
+    public void getDistanceApart_inSamePosition_returnsZero() {
         // Given
         LatLng latLng1 = new LatLng(1.00002D, 1.00002D);
-        double lat2 = 1.00002D;
-        double lng2 = 1.00002D;
+        LatLng latLng2 = new LatLng(1.00002D, 1.00002D);
+
         // When
-        boolean output = isNearbyUser(latLng1, lat2, lng2);
+        double output = getDistanceApart(latLng1, latLng2);
         // Then
-        Assert.assertTrue(output);
+        Assert.assertEquals(0.0D, output, 0.0D);
     }
 
     @Test
-    public void isNearbyUser_outOfRange_returnsFalse() {
+    public void getDistanceApart_outOfRange_returnsNoZero() {
         // Given
         LatLng latLng1 = new LatLng(2.00002D, 2.00002D);
-        double lat2 = 1.00002D;
-        double lng2 = 1.00002D;
+        LatLng latLng2 = new LatLng(1.00002D, 1.00002D);
         // When
-        boolean output = isNearbyUser(latLng1, lat2, lng2);
+        double output = getDistanceApart(latLng1, latLng2);
         // Then
-        Assert.assertFalse(output);
+        Assert.assertNotEquals(0.0D, output, 0.0);
     }
 
     ///////////////////////////////////////////////////////////////////////////

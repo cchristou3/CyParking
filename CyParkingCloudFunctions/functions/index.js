@@ -42,7 +42,7 @@ exports.filterLocations = functions.https.onCall(async (data, context) => {
             }
         ).catch((e) => {
             helpers.logError(e, 'filterLocations')
-            throw new functions.https.HttpsError('internal', "Internal server errr: " + e)
+            throw new functions.https.HttpsError('internal', "Internal server error: " + e)
         })
 
     console.log(filteredReadResult)
@@ -89,6 +89,41 @@ exports.cleanupUser = functions.auth.user().onDelete(async (user) => {
         console.log(user.email + ' got deleted from ' + result.toString())
     })
     return;
+});
+
+exports.getNearbyParkingLots = functions.https.onCall(async (data, context) => {
+    console.log('Data => ' + data)
+    console.log('Context => ' + context)
+    if (!data.latitude || !data.longitude) { // if at least one of the parameters is empty
+        // Throwing an HttpsError so that the client gets the error details.
+        throw new functions.https.HttpsError('invalid-argument', 'Missing one or both parameters: latitude, longitude');
+    }
+    const userLatitude = data.latitude;
+    const userLongitude = data.longitude;
+    // Get all private parking into Cloud Firestore using the Firebase Admin SDK.
+    var nearbyParkingLotDocIds = [];
+    await admin.firestore().collection(constants.PARKING_LOTS)
+        .get()
+        .then(
+            (querySnapshot) => {
+                querySnapshot.forEach(function (doc) {
+                    if (doc.exists) {
+                        console.log(doc.id, " => ", doc.data());
+                        if (helpers.nearbyUser(doc.data(), userLatitude, userLongitude)) {
+                            nearbyParkingLotDocIds.push(doc.id);
+                        }
+                    }
+                });
+            }
+        ).catch((e) => {
+            helpers.logError(e, 'getNearbyParkingLots')
+            throw new functions.https.HttpsError('internal', "Internal server error: " + e)
+        })
+
+    console.log(nearbyParkingLotDocIds) // Todo: Document function
+
+    // Send the filtered parking back to the user.
+    return JSON.stringify(nearbyParkingLotDocIds);
 });
 
 /**

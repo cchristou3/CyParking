@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapViewModel;
 
-import static io.github.cchristou3.CyParking.data.repository.RepositoryData.FILTER_LOCATIONS;
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.GET_NEARBY_PARKING_LOTS;
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.LATITUDE;
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.LONGITUDE;
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.PARKING_LOTS;
@@ -22,7 +22,7 @@ import static io.github.cchristou3.CyParking.data.repository.RepositoryData.PARK
  * to access the database's parking lots.
  *
  * @author Charalambos Christou
- * @version 1.0 13/01/21
+ * @version 2.0 21/01/21
  */
 public class ParkingMapRepository {
 
@@ -47,7 +47,7 @@ public class ParkingMapRepository {
      */
     public Task<HttpsCallableResult> fetchParkingLots(double userLatitude, double userLongitude) {
         return FirebaseFunctions.getInstance()
-                .getHttpsCallable(FILTER_LOCATIONS)
+                .getHttpsCallable(GET_NEARBY_PARKING_LOTS)
                 .call(new HashMap<String, Double>() {{ // The request's data.
                     put(LATITUDE, userLatitude);
                     put(LONGITUDE, userLongitude);

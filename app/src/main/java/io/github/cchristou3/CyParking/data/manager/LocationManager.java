@@ -68,7 +68,7 @@ public class LocationManager implements DefaultLifecycleObserver {
 
     // Constant variables
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 321;
-    private static final long INTERVAL_TIME = 5000L;
+    private static final long INTERVAL_TIME = 10000L;
     private static final String TAG = LocationManager.class.getName() + "UniqueTag";
 
     // Data members

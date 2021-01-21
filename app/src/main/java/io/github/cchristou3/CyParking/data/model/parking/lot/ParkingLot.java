@@ -5,10 +5,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.NotNull;
@@ -73,6 +76,7 @@ public class ParkingLot extends Parking implements Parcelable {
     /* no-argument constructor to be used for deserialization */
     public ParkingLot() {
         this.availability = new Availability();
+        this.coordinates = new Coordinates();
     }
 
     /**
@@ -196,6 +200,18 @@ public class ParkingLot extends Parking implements Parcelable {
      */
     public static boolean areSlotOffersValid(final List<SlotOffer> slotOfferList) {
         return slotOfferList != null && !slotOfferList.isEmpty();
+    }
+
+    /**
+     * Converts the {@link QueryDocumentSnapshot} of the given
+     * {@link DocumentChange} to a {@link ParkingLot} object.
+     *
+     * @param dc The {@link DocumentChange} to get the object from.
+     * @return The {@link QueryDocumentSnapshot}'s corresponding {@link ParkingLot} object.
+     */
+    @NotNull
+    public static ParkingLot toParkingLot(@NotNull DocumentChange dc) {
+        return dc.getDocument().toObject(ParkingLot.class);
     }
 
     /**
@@ -485,6 +501,23 @@ public class ParkingLot extends Parking implements Parcelable {
         this.slotOfferList = slotOfferList;
     }
 
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     * If they have the same {@link #parkingId} and {@link #coordinates},
+     * then they are the same.
+     *
+     * @param obj the reference object with which to compare.
+     * @return {@code true} if this object is the same as the obj
+     * argument; {@code false} otherwise.
+     * @see java.util.HashMap
+     */
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return (obj instanceof ParkingLot) // Same instance class
+                && ((ParkingLot) obj).parkingId == this.parkingId // Same Parking Id
+                && ((ParkingLot) obj).coordinates.equals(this.coordinates); // Same Coordinates
+    }
+
     public static final class Availability implements Parcelable {
         public static final Creator<Availability> CREATOR = new Creator<Availability>() {
             @Override
@@ -546,6 +579,7 @@ public class ParkingLot extends Parking implements Parcelable {
         public static boolean isCapacityValid(int capacity) {
             return capacity > 0;
         }
+
 
         /**
          * Checks whether the calling object has valid

@@ -4,10 +4,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
 
 /**
  * Purpose: <p>POJO to be used to transfer and receive data
@@ -88,6 +91,7 @@ public abstract class Parking extends ParkingId {
         @SerializedName("longitude")
         protected double longitude;
 
+
         public Coordinates() { /* no-argument constructor to be used for deserialization */ }
 
         /**
@@ -112,6 +116,21 @@ public abstract class Parking extends ParkingId {
         protected Coordinates(@NotNull Parcel in) {
             latitude = in.readDouble();
             longitude = in.readDouble();
+        }
+
+        /**
+         * Indicates whether some other object is "equal to" this one.
+         *
+         * @param obj the reference object with which to compare.
+         * @return {@code true} if this object is the same as the obj
+         * argument; {@code false} otherwise.
+         * @see HashMap
+         */
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return (obj instanceof Coordinates) // Same instance class
+                    && latitude == ((Coordinates) obj).latitude // Same latitude
+                    && longitude == ((Coordinates) obj).longitude; // Same longitude
         }
 
         /**

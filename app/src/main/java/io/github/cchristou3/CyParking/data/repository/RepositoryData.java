@@ -3,9 +3,11 @@ package io.github.cchristou3.CyParking.data.repository;
 /**
  * Purpose: Hold constants relevant to most repositories
  * in one location.
+ * <strong>Note:</strong> all fields are package-private so that
+ * only the repository classes can access them.
  *
  * @author Charalambos Christou
- * @version 1.0 11/01/21
+ * @version 2.0 21/01/21
  */
 class RepositoryData {
 
@@ -19,6 +21,8 @@ class RepositoryData {
 
     // Cloud functions
     static final String FILTER_LOCATIONS = "filterLocations";
+    static final String GET_NEARBY_PARKING_LOTS = "getNearbyParkingLots";
+
 
     // Database fields
     static final String BOOKING_USER_ID = "bookingUserId";

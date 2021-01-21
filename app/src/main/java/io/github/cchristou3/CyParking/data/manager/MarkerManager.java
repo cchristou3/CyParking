@@ -28,7 +28,7 @@ import io.github.cchristou3.CyParking.utilities.ViewUtility;
  * <p> - Retrieving the marker's corresponding {@link ParkingLot} object.
  *
  * @author Charalambos Christou
- * @version 2.0 02/1/21
+ * @version 3.0 21/01/21
  */
 public class MarkerManager {
 
@@ -80,18 +80,27 @@ public class MarkerManager {
 
     /**
      * Compares the given marker's coordinates with the specified
-     * latitude and longitude.
+     * {@link ParkingLot} instance.
      *
-     * @param markerOfParking  The marker to has its coordinates compared with the specified coordinates.
-     * @param parkingLatitude  The latitude of a parking.
-     * @param parkingLongitude The longitude of a parking.
+     * @param markerOfParking The marker to has its coordinates compared with the specified coordinates.
      * @return True if the coordinates match. Otherwise, false.
      */
-    public boolean areCoordinatesTheSame(Marker markerOfParking, double parkingLatitude, double parkingLongitude) {
+    public boolean areCoordinatesTheSame(Marker markerOfParking, @NotNull ParkingLot parkingLot) {
+        return areCoordinatesTheSame(markerOfParking, parkingLot.getLatitude(), parkingLot.getLongitude());
+    }
+
+    /**
+     * Compares the given marker's coordinates with the specified
+     * latitude and longitude.
+     *
+     * @param markerOfParking The marker to has its coordinates compared with the specified coordinates.
+     * @return True if the coordinates match. Otherwise, false.
+     */
+    private boolean areCoordinatesTheSame(Marker markerOfParking, double lat, double lng) {
         // Access the marker's latitude and longitude
         double markerLat = getParkingLotOf(markerOfParking).getLatitude();
         double markerLng = getParkingLotOf(markerOfParking).getLongitude();
-        return markerLat == parkingLatitude && markerLng == parkingLongitude;
+        return markerLat == lat && markerLng == lng;
     }
 
     /**
@@ -194,28 +203,27 @@ public class MarkerManager {
     }
 
     /**
-     * One of many overloaded versions of {@link #addMarker}.
      * Places a marker on the given GoogleMap instance on the specified
      * position, and associates it with the given {@link ParkingLot} object.
      * Called whenever a newly ADDED ParkingLot is received from the database.
+     * If the the parking lot already exists within {@link #mMarkerToValueMap}
+     * then the additional {@link ParkingLot} object is ignored.
      *
-     * @param mGoogleMap      A reference to the map.
-     * @param lot             The lot to be attached to the created marker.
-     * @param markerLatitude  The latitude of the marker.
-     * @param markerLongitude The longitude of the marker.
+     * @param mGoogleMap A reference to the map.
+     * @param lot        The lot to be attached to the created marker.
      * @see ParkingMapFragment#onStart()
      */
-    public void addMarker(@NotNull GoogleMap mGoogleMap, @NotNull ParkingLot lot, double markerLatitude, double markerLongitude) {
-        add(
+    public void addMarkerWithContents(@NotNull GoogleMap mGoogleMap, @NotNull ParkingLot lot) {
+        if (mMarkerToValueMap.containsValue(lot)) return; // check if it already exists
+        put(
                 mGoogleMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(markerLatitude, markerLongitude))
+                        .position(new LatLng(lot.getLatitude(), lot.getLongitude()))
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))),
-
-                lot);
+                lot
+        );
     }
 
     /**
-     * One of many overloaded versions of {@link #addMarker}.
      * Associates the given marker with the given {@link ParkingLot} object.
      * Called whenever a MODIFIED ParkingLot is received from the database.
      *
@@ -223,39 +231,8 @@ public class MarkerManager {
      * @param marker The marker to be associated with the given ParkingLot object.
      * @see ParkingMapFragment#onStart()
      */
-    public void addMarker(@NotNull ParkingLot lot, @NonNull Marker marker) {
-        add(marker, lot);
-    }
-
-    /**
-     * One of many overloaded versions of {@link #addMarker}.
-     * Places a marker on the given GoogleMap instance on the specified
-     * position, and associates it with the given {@link ParkingLot} object.
-     *
-     * @param mGoogleMap A reference to the map.
-     * @param lot        The lot to be attached to the created marker.
-     * @see #addAll(GoogleMap, ParkingLot[])
-     */
-    private void addMarker(@NotNull GoogleMap mGoogleMap, @NotNull ParkingLot lot) {
-        double parkingLatitude = lot.getLatitude();
-        double parkingLongitude = lot.getLongitude();
-        addMarker(mGoogleMap, lot, parkingLatitude, parkingLongitude);
-    }
-
-    /**
-     * Iterates the given array and for each ParkingLot instance,
-     * creates a marker, associates it with it and places it on the specified
-     * GoogleMap instance.
-     *
-     * @param map  A reference to the map.
-     * @param lots An array of {@link ParkingLot} instances.
-     */
-    public void addAll(GoogleMap map, @NotNull ParkingLot[] lots) {
-        // Traverse through the fetched objects and add them to the map.
-        for (ParkingLot parking : lots) {
-            // Get the coordinates of the parking
-            addMarker(map, parking);
-        }
+    public void replaceMarkerContents(@NotNull ParkingLot lot, @NonNull Marker marker) {
+        put(marker, lot);
     }
 
     /**
@@ -266,7 +243,7 @@ public class MarkerManager {
      * @param marker The marker to be associated with the given ParkingLot object.
      * @param lot    The lot to be attached to the given marker.
      */
-    private void add(Marker marker, ParkingLot lot) {
+    private void put(Marker marker, ParkingLot lot) {
         mMarkerToValueMap.put(marker, lot);
     }
 }

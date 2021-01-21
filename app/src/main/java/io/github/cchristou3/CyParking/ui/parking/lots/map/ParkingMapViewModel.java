@@ -3,12 +3,22 @@ package io.github.cchristou3.CyParking.ui.parking.lots.map;
 import android.util.Log;
 import android.view.View;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.functions.FirebaseFunctionsException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import io.github.cchristou3.CyParking.data.interfaces.HttpsCallHandler;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.repository.ParkingMapRepository;
 
@@ -21,15 +31,14 @@ import io.github.cchristou3.CyParking.data.repository.ParkingMapRepository;
  */
 public class ParkingMapViewModel extends ViewModel {
 
+    // Static constant
     private static final String TAG = ParkingMapViewModel.class.getName();
-
-
-    private final MutableLiveData<ParkingLot> mSelectedLotState =
-            new MutableLiveData<>(null);
-
-    private final MutableLiveData<Integer> mInfoLayoutState =
-            new MutableLiveData<>(View.GONE);
-
+    // States of the parking map ViewModel
+    private final MutableLiveData<List<DocumentChange>> mDocumentChangesState = new MutableLiveData<>();
+    private final MutableLiveData<Set<String>> mDocumentIdsOfNearbyLots = new MutableLiveData<>();
+    private final MutableLiveData<ParkingLot> mSelectedLotState = new MutableLiveData<>(null);
+    private final MutableLiveData<Integer> mInfoLayoutState = new MutableLiveData<>(View.GONE);
+    // Its repository
     private final ParkingMapRepository mParkingMapRepository;
 
     /**
@@ -40,6 +49,40 @@ public class ParkingMapViewModel extends ViewModel {
      */
     public ParkingMapViewModel(ParkingMapRepository parkingMapRepository) {
         this.mParkingMapRepository = parkingMapRepository;
+    }
+
+    /**
+     * Access the {@link #mDocumentChangesState}.
+     *
+     * @return A reference to {@link #mDocumentChangesState}.
+     */
+    public LiveData<List<DocumentChange>> getDocumentChangesState() {
+        return mDocumentChangesState;
+    }
+
+    /**
+     * Updates the value of {@link #mDocumentChangesState}
+     * with the given argument.
+     */
+    public void updateDocumentState(List<DocumentChange> documentChanges) {
+        mDocumentChangesState.setValue(documentChanges);
+    }
+
+    /**
+     * Updates the value of {@link #mDocumentIdsOfNearbyLots}
+     * with the given argument.
+     */
+    public void updateIdsState(String[] ids) {
+        mDocumentIdsOfNearbyLots.setValue(new HashSet<>(Arrays.asList(ids)));
+    }
+
+    /**
+     * Access the {@link #mDocumentIdsOfNearbyLots}.
+     *
+     * @return A reference to {@link #mDocumentIdsOfNearbyLots}.
+     */
+    public LiveData<Set<String>> getDocumentIdsOfNearbyLots() {
+        return mDocumentIdsOfNearbyLots;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -144,8 +187,9 @@ public class ParkingMapViewModel extends ViewModel {
      * @return The collection reference that contains all the parking lots
      * in the database.
      */
-    public CollectionReference getParkingLots() {
-        return mParkingMapRepository.getParkingLotsNode();
+    public Query getParkingLots(Set<String> ids) {
+        return mParkingMapRepository.getParkingLotsNode()
+                .whereIn(FieldPath.documentId(), new ArrayList<>(ids));
     }
 
     /**
@@ -158,9 +202,10 @@ public class ParkingMapViewModel extends ViewModel {
      * @param handler       The handler for the cloud function's HTTPS request.
      */
     public void fetchParkingLots(double userLatitude, double userLongitude,
-                                 ParkingMapFragment.HttpsCallHandler handler) {
+                                 HttpsCallHandler handler) {
         mParkingMapRepository.fetchParkingLots(userLatitude, userLongitude)
                 .addOnCompleteListener(task -> {
+                    handler.onComplete();
                     if (task.isSuccessful() && task.getResult().getData() != null) {
                         handler.onSuccess(task.getResult().getData().toString());
                     } else {

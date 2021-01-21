@@ -24,26 +24,26 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.StringReader;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.data.interfaces.HttpsCallHandler;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
 import io.github.cchristou3.CyParking.data.manager.LocationManager;
 import io.github.cchristou3.CyParking.data.manager.MarkerManager;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.pojo.SnapshotState;
 import io.github.cchristou3.CyParking.databinding.FragmentParkingMapBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
@@ -54,7 +54,8 @@ import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 
-import static io.github.cchristou3.CyParking.utilities.Utility.isNearbyUser;
+import static io.github.cchristou3.CyParking.utilities.Utility.getDistanceApart;
+import static io.github.cchristou3.CyParking.utilities.Utility.isEven;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.animateAvailabilityColorChanges;
 
 /**
@@ -74,7 +75,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.animateAvaila
  * </p>
  *
  * @author Charalambos Christou
- * @version 8.0 12/01/21
+ * @version 9.0 21/01/21
  */
 public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener, Navigable, LocationHandler {
@@ -83,18 +84,21 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
     public static final String TAG = ParkingMapFragment.class.getName() + "UniqueTag";
     private static final int ZOOM_LEVEL = 16;
     private static final String UNAVAILABLE = "Unavailable";
+    private static final double UPDATE_LOCATION_THRESHOLD = 100.0D;
 
     // Fragment's variables
     private ParkingMapViewModel mParkingMapViewModel;
     private AuthStateViewModel mAuthStateViewModel;
     private FragmentParkingMapBinding mFragmentParkingMapBinding;
     private MarkerManager mMarkerManager;
-    private SnapshotState mSnapshotState;
+    private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
 
     // Location related variables
     private LocationManager mLocationManager;
     private GoogleMap mGoogleMap;
     private LatLng mUserCurrentLatLng;
+    private LatLng mInitialUserLatLng;
+    private int locationUpdatesCounter = 0;
 
     /**
      * Initialises the fragment and its {@link MarkerManager} instance.
@@ -113,7 +117,11 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
             Log.e(TAG, "onCreateView: ", e); // TODO: Plan B
         }
         // Initialize MarkerManager and provide it with the icon to be used to display the user's location on the map.
-        mMarkerManager = new MarkerManager(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_user_location, null));
+        mMarkerManager = new MarkerManager(
+                ResourcesCompat.getDrawable(getResources(), R.drawable.ic_user_location, null)
+        );
+
+        initializeViewModels();
     }
 
     /**
@@ -128,8 +136,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mFragmentParkingMapBinding = FragmentParkingMapBinding.inflate(inflater);
-        return mFragmentParkingMapBinding.getRoot();
+        return (mFragmentParkingMapBinding = FragmentParkingMapBinding.inflate(inflater)).getRoot();
     }
 
     /**
@@ -143,64 +150,12 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initializeGoogleMaps();
-
-        // Initialize the fragment's snapshot state
-        mSnapshotState = new SnapshotState(SnapshotState.INITIAL_DATA_RETRIEVAL);
-        Log.d(TAG, "onViewCreated: " + mSnapshotState.getState());
-
-        initializeViewModelsWithObservers();
-
-        attachButtonListeners();
-
-        // Customise progress bar
-        getBinding().fragmentParkingMapClpbLoadingMarkers
-                .getIndeterminateDrawable().setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
-    }
-
-    /**
-     * Hooks up "directions" and "book" buttons with appropriate on click listeners.
-     */
-    private void attachButtonListeners() {
-        // Hook up the "directions" button with an on click listener
-        getBinding().fragmentParkingMapImgbtnDirections.setOnClickListener(v -> getDirections());
-
-        // Hook up the "book" button with an onClick listener
-        getBinding().fragmentParkingMapBtnBooking.setOnClickListener(v -> navigateToBookingScreen());
-    }
-
-    /**
-     * Initializes the fragment's ViewModels ({@link #mParkingMapViewModel},{@link #mAuthStateViewModel})
-     * and attaches observer to the info layout's state (whenever its state changes, the its visibility
-     * on the Ui is updated accordingly).
-     */
-    private void initializeViewModelsWithObservers() {
-        // Initialize the mParkingMapViewModel and the mAuthStateViewModel
-        mParkingMapViewModel = new ViewModelProvider(this, new ParkingMapViewModelFactory())
-                .get(ParkingMapViewModel.class);
-        mAuthStateViewModel = new ViewModelProvider(requireActivity())
-                .get(AuthStateViewModel.class);
-
-        // Attach observer to ParkingMapViewModel's info layout state
-        mParkingMapViewModel.getInfoLayoutState().observe(getViewLifecycleOwner(),
-                this::updateInfoLayoutVisibilityTo);
-        // Attach observer to ParkingMapViewModel's selected lot state
-        mParkingMapViewModel.getSelectedLotState().observe(getViewLifecycleOwner(), lot -> {
-            if (lot != null) {
-                showDetails(lot);
-                mMarkerManager.setSelectedParkingLot(lot);
-            }
-        });
-    }
-
-    /**
-     * Initializes the fragment's GoogleMaps Ui.
-     */
-    private void initializeGoogleMaps() {
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.fragment_parking_map_fcv_map);
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(this);
+        initializeGoogleMaps(); // Map
+        attachStateObservers(); // LiveData state objects
+        attachButtonListeners(); // Ui listeners
+        // The fetching lots initially
+        if (mParkingMapViewModel.getDocumentIdsOfNearbyLots().getValue() == null) {
+            fetchParkingLots(mUserCurrentLatLng); // HTTPS call
         }
     }
 
@@ -214,46 +169,15 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
         super.onStart();
         // Initialize the LocationManager
         mLocationManager = new LocationManager(requireContext(), this, this, false);
-        // Initialize a firebase firestore observer to inform us about changes in the DB
-        // The callback of the SnapshotListener gets triggered straight away when we attach it
-
         clearBackgroundMode();
-
-        DatabaseObserver.createCollectionReferenceObserver(
-                mParkingMapViewModel.getParkingLots(), // Collection reference
-                (value, error) -> { // Event handler
-                    Log.d(TAG, "onStart: " + (mSnapshotState.getState() == SnapshotState.INITIAL_DATA_RETRIEVAL ?
-                            "INITIAL_DATA_RETRIEVAL" : "LISTENING_TO_DATA_CHANGES"));
-                    switch (mSnapshotState.getState()) {
-                        case SnapshotState.INITIAL_DATA_RETRIEVAL:
-                            if (mUserCurrentLatLng == null) return;
-                            // Fetch initial data, the filtering will be done by a cloud function
-                            fetchParkingLots(mUserCurrentLatLng);
-                            mSnapshotState.setState(SnapshotState.LISTENING_TO_DATA_CHANGES);
-                            break;
-                        case SnapshotState.LISTENING_TO_DATA_CHANGES:
-                            if (error != null) {
-                                Log.d(TAG, "LISTENING_TO_DATA_CHANGES: error: " + error.getLocalizedMessage());
-                                break;
-                            }
-                            if (value == null || value.isEmpty()) break;
-
-                            updateLocalDocuments(value.getDocumentChanges());
-                            break;
-                    }
-                }
-        ).registerLifecycleObserver(getLifecycle());
     }
 
     /**
      * Called when the fragment is visible to the user and actively running.
-     * This is generally
      */
     @Override
     public void onResume() {
         super.onResume();
-        //getBinding().fragmentParkingMapFcvMap.clearFocus();
-        getBinding().fragmentParkingMapFcvMap.requestFocus();
     }
 
     /**
@@ -276,159 +200,10 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        mParkingMapViewModel.updateDocumentState(null); // Resetting its value, in case configuration changes occur.
         getBinding().fragmentParkingMapImgbtnDirections.setOnClickListener(null);
         getBinding().fragmentParkingMapBtnBooking.setOnClickListener(null);
         mFragmentParkingMapBinding = null;
-    }
-
-    /**
-     * The method's solely purpose is to remove the bug that occurs
-     * when navigating back to the map.
-     * Bug: the map is extremely laggy.
-     */
-    private void clearBackgroundMode() {
-        // Solution to
-        // https://stackoverflow.com/questions/27978188/google-maps-v2-mapfragment-is-extremely-laggy-on-returning-from-the-backstack
-        // TODO: 15/01/2021 Find a better workaround
-        WeakReference<Dialog> dial = new WeakReference<>(new Dialog(requireContext()));
-        dial.get().show();
-        dial.get().dismiss();
-        dial.clear();
-        dial = null;
-    }
-
-    /**
-     * Creates and launches a GoogleMaps intent.
-     * The user will be navigated to his GoogleMaps app
-     * and directions will be set for the given position.
-     */
-    private void getDirections() {
-        if (mMarkerManager.getSelectedParkingLot() == null) return;
-        // Access the coordinates of the selected marker
-        double selectedParkingLatitude = mMarkerManager.getSelectedMarkerLatitude();
-        double selectedParkingLongitude = mMarkerManager.getSelectedMarkerLongitude();
-        // Create Uri (query string) for a Google Maps Intent
-        // :q= indicates that we request for directions
-        // Launch Google Maps activity
-        startActivity(new Intent(Intent.ACTION_VIEW,
-                Uri.parse("google.navigation:q=" + selectedParkingLatitude
-                        + "," + selectedParkingLongitude)).setPackage("com.google.android.apps.maps"));
-    }
-
-    /**
-     * Iterates through the document changes (updated parking lot instances)
-     * list and updates its corresponding local document (parking lot instance)
-     * based on its type (e.g. {@link DocumentChange#getType()}).
-     *
-     * @param documentChanges The latest parking lot instances from the database.
-     */
-    private void updateLocalDocuments(@NotNull List<DocumentChange> documentChanges) {
-        // Traverse through all the document changes
-        for (DocumentChange dc : documentChanges) {
-            // Access the Parking's coordinates
-            final ParkingLot receivedParkingLot = dc.getDocument().toObject(ParkingLot.class);
-            double receivedParkingLatitude = receivedParkingLot.getLatitude();
-            double receivedParkingLongitude = receivedParkingLot.getLongitude();
-            // and check whether it is nearby the user.
-            // If not, then move on to the next document that got changed
-            if (!isNearbyUser(mUserCurrentLatLng, receivedParkingLatitude, receivedParkingLongitude))
-                continue;
-
-            switch (dc.getType()) {
-                case ADDED: // If the document was newly added
-                    // Add a marker to the parking's coordinates
-                    // Add to HashMap to keep track of each marker's corresponding ParkingLot object
-                    mMarkerManager.addMarker(mGoogleMap, receivedParkingLot, receivedParkingLatitude, receivedParkingLongitude);
-                    break;
-                default:
-                    // Either modified or removed
-                    // Traverse the markers
-                    for (Marker markerOfParking : mMarkerManager.getKeySets()) { // the key is of type Marker
-                        // Check whether the marker is associated with a ParkingLot object (marker -> null)
-                        if (!mMarkerManager.exists(markerOfParking)) return;
-
-                        // Check if the marker's lat & lng are the same with the same with the coordinates
-                        // of the private parking that got changed
-                        if (mMarkerManager.areCoordinatesTheSame(markerOfParking, receivedParkingLatitude, receivedParkingLongitude)) {
-                            // then update the private parking's content
-                            if (dc.getType() == DocumentChange.Type.MODIFIED) {
-                                // Keep track of the old value of the object's AvailableSpaces
-                                int oldAvailableSpaces = mMarkerManager
-                                        .getParkingLotOf(markerOfParking).getAvailableSpaces();
-                                // Replace the old lot with the new lot.
-                                mMarkerManager.addMarker(receivedParkingLot, markerOfParking);
-                                // Update the info layout's contents if it's showing
-                                if (mParkingMapViewModel.isInfoLayoutShown()) {
-                                    mParkingMapViewModel.updateSelectedLotState(receivedParkingLot);
-                                    int updatedAvailableSpaces = receivedParkingLot.getAvailableSpaces();
-                                    animateAvailabilityColorChanges(
-                                            getBinding().fragmentParkingMapCvInfoLayout, // Parent card view
-                                            getBinding().fragmentParkingMapTxtAvailability, // child
-                                            updatedAvailableSpaces,
-                                            oldAvailableSpaces
-                                    );
-                                }
-                            } else { // REMOVED
-                                mMarkerManager.removeMarker(markerOfParking);
-                                // If its info was showing, hide it and inform the user
-                                boolean wasVisibleBefore = mParkingMapViewModel.hideInfoLayoutWithStateCheck();
-                                if (wasVisibleBefore) {
-                                    Toast.makeText(getContext(), "Unfortunately, the parking got removed!", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                            break; // Closest loop break
-                        }
-                    }
-                    break; // Case break
-            }
-        }
-    }
-
-    /**
-     * Creates and sends an HTTP request to our Backend.
-     * Requests all the parking locations and for each, a Marker is placed
-     * on the map.
-     * When such a request occurs, a cloud function is executed, which filters
-     * the parking locations. Only the ones which are nearby the user are sent back
-     * too the client.
-     * <strong>Note: In case the user exits the fragment before the HTTPS response is returned,
-     * the view would be destroyed when the onRequestFinish listener will get
-     * triggered. Thus, it will cause a NullPointerException when trying to access
-     * the {@link FragmentParkingMapBinding#fragmentParkingMapClpbLoadingMarkers}.
-     * For this reason, the listener is wrapped around a try-catch block.</strong>
-     *
-     * @param latLng The latest recorded latitude and longitude of the user.
-     * @see #onDestroyView()
-     */
-    public void fetchParkingLots(@NotNull LatLng latLng) {
-        getBinding().fragmentParkingMapClpbLoadingMarkers.show(); // Show loading bar
-        mParkingMapViewModel.fetchParkingLots(latLng.latitude, latLng.longitude, new HttpsCallHandler() {
-            @Override
-            public void onSuccess(String rawJsonResponse) {
-                // Zoom in
-                Log.d(TAG, "Before parsing: " + rawJsonResponse);
-                mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
-                // Convert json object into an array of ParkingLot objects and add for each a marker to the map.
-                JsonReader reader = new JsonReader(new StringReader(rawJsonResponse));
-                reader.setLenient(true);
-                ParkingLot[] result = new Gson().fromJson(reader, ParkingLot[].class);
-                Log.d(TAG, "Parsed: " + Arrays.toString(result));
-                mMarkerManager.addAll(mGoogleMap, result);
-                try {
-                    if (getBinding().fragmentParkingMapClpbLoadingMarkers.isShown()) {
-                        getBinding().fragmentParkingMapClpbLoadingMarkers.hide();
-                    }
-                } catch (NullPointerException ignore) { /* view got destroyed */ }
-            }
-
-            @Override
-            public void onFailure(Exception exception) {
-                if (exception == null) return;
-                // Plan B: Reload map
-                Toast.makeText(requireContext(), "Unexpected error occurred!\n" + exception.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e(ParkingMapFragment.TAG, "Error of class " + exception.getClass() + ": " + exception.getMessage());
-            }
-        });
     }
 
     /**
@@ -470,6 +245,382 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
                 mMarkerManager.getParkingLotOf(marker)
         );
         return false;
+    }
+
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera.
+     * If Google Play services is not installed on the device, the user will be prompted to
+     * install it inside the SupportMapFragment. This method will only be triggered once the
+     * user has installed Google Play services and returned to the app.
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mGoogleMap = googleMap; // Save a reference of the GoogleMap instance
+        // Start listening to the user's location updates
+        mLocationManager.requestUserLocationUpdates(this);
+
+        // Add listeners to the markers + map
+        mGoogleMap.setOnMarkerClickListener(this);
+        mGoogleMap.setOnMapClickListener(this);
+    }
+
+    /**
+     * Callback invoked when the user's location is received.
+     *
+     * @param locationResult The result of the user's requested location.
+     * @see LocationManager#requestUserLocationUpdates(Fragment)
+     */
+    @Override
+    public void onLocationResult(LocationResult locationResult) {
+        if (locationResult == null) return;
+
+        locationUpdatesCounter++; // Increment the counter
+
+        // Access the user's new location.
+        final LatLng updatedLatLng = new LatLng(locationResult.getLastLocation().getLatitude(),
+                locationResult.getLastLocation().getLongitude());
+
+        // If null, assign it to the location received from the first update.
+        if (mInitialUserLatLng == null) mInitialUserLatLng = updatedLatLng;
+
+        if (isEven(locationUpdatesCounter)) { // Every 2 location updates (20 seconds)
+            // Calculate the distance between the user's initial position
+            // and the updated one.
+            double distanceApart = getDistanceApart(mUserCurrentLatLng, updatedLatLng);
+            if (distanceApart > UPDATE_LOCATION_THRESHOLD) { // 100 meters
+                // Fetch the ids of parking lots based on the user's new position.
+                mInitialUserLatLng = updatedLatLng;
+                fetchParkingLots(mInitialUserLatLng);
+            }
+        }
+
+        // Update the user's location with the received location
+        mUserCurrentLatLng = updatedLatLng;
+
+        mMarkerManager.setUserMarker(mGoogleMap, mUserCurrentLatLng);
+        // Smoothly moves the camera to the user's position
+        mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(mUserCurrentLatLng));
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link AuthenticatorFragment}.
+     */
+    @Override
+    public void toAuthenticator() {
+        getNavController(requireActivity())
+                .navigate(R.id.action_nav_parking_map_fragment_to_nav_authenticator_fragment);
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link ViewBookingsFragment}.
+     */
+    @Override
+    public void toBookings() {
+        getNavController(requireActivity())
+                .navigate(R.id.action_nav_parking_map_fragment_to_nav_view_bookings);
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link AccountFragment}.
+     */
+    @Override
+    public void toAccount() {
+        getNavController(requireActivity())
+                .navigate(R.id.action_nav_parking_map_fragment_to_nav_account);
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link FeedbackFragment}.
+     */
+    @Override
+    public void toFeedback() {
+        getNavController(requireActivity())
+                .navigate(R.id.action_nav_parking_map_fragment_to_nav_feedback);
+    }
+
+    /**
+     * Navigates from the current Fragment subclass to the
+     * {@link HomeFragment}.
+     */
+    @Override
+    public void toHome() {
+        getNavController(requireActivity())
+                .navigate(R.id.action_nav_parking_map_fragment_to_nav_home);
+    }
+
+
+    /**
+     * Initializes the fragment's GoogleMaps Ui.
+     */
+    private void initializeGoogleMaps() {
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.fragment_parking_map_fcv_map);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+    }
+
+
+    /**
+     * The method's solely purpose is to remove the bug that occurs
+     * when navigating back to the map.
+     * Bug: the map is extremely laggy.
+     */
+    private void clearBackgroundMode() {
+        // Solution to
+        // https://stackoverflow.com/questions/27978188/google-maps-v2-mapfragment-is-extremely-laggy-on-returning-from-the-backstack
+        // TODO: 15/01/2021 Find a better workaround
+        WeakReference<Dialog> dial = new WeakReference<>(new Dialog(requireContext()));
+        dial.get().show();
+        dial.get().dismiss();
+        dial.clear();
+    }
+
+    /**
+     * Creates and launches a GoogleMaps intent.
+     * The user will be navigated to his GoogleMaps app
+     * and directions will be set for the given position.
+     */
+    private void getDirections() {
+        if (mMarkerManager.getSelectedParkingLot() == null) return;
+        // Access the coordinates of the selected marker
+        double selectedParkingLatitude = mMarkerManager.getSelectedMarkerLatitude();
+        double selectedParkingLongitude = mMarkerManager.getSelectedMarkerLongitude();
+        // Create Uri (query string) for a Google Maps Intent
+        // :q= indicates that we request for directions
+        // Launch Google Maps activity
+        startActivity(new Intent(Intent.ACTION_VIEW,
+                Uri.parse("google.navigation:q=" + selectedParkingLatitude
+                        + "," + selectedParkingLongitude)).setPackage("com.google.android.apps.maps"));
+    }
+
+    /**
+     * Iterates through the document changes (updated parking lot instances)
+     * list and updates its corresponding local document (parking lot instance)
+     * based on its type (e.g. {@link DocumentChange.Type#MODIFIED}).
+     *
+     * @param documentChanges The latest parking lot instances from the database.
+     */
+    private void updateLocalDocuments(List<DocumentChange> documentChanges) {
+        if (documentChanges == null || documentChanges.isEmpty()) return;
+
+        // Traverse through all the document changes
+        for (DocumentChange dc : documentChanges) {
+            switch (dc.getType()) {
+                case ADDED: // If the document was newly added
+                    addLot(dc);
+                    break;
+                case REMOVED:
+                    removeLot(dc);
+                    break;
+                case MODIFIED:
+                    updateLot(dc);
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Adds a {@link Marker} to the map based on the coordinates of the
+     * {@link ParkingLot} object. It also, associates the Marker with the
+     * ParkingLot object via a {@link java.util.HashMap} to enable fast look up.
+     *
+     * @param dc The newly received DocumentChange, containing info about how
+     *           a parking lot object in the database got changed.
+     */
+    private void addLot(DocumentChange dc) {
+        // Add a marker to the parking's coordinates
+        // Add to HashMap to keep track of each marker's corresponding ParkingLot object
+        Log.d(TAG, "updateLocalDocuments: ADDED");
+        mMarkerManager.addMarkerWithContents(mGoogleMap, ParkingLot.toParkingLot(dc));
+    }
+
+    /**
+     * Update the Marker's ParkingLot object with the new one (can be looked up via its parkingId).
+     *
+     * @param dc The newly received DocumentChange, containing info about how
+     *           a parking lot object in the database got changed.
+     */
+    private void updateLot(DocumentChange dc) {
+        final ParkingLot receivedParkingLot = ParkingLot.toParkingLot(dc);
+        updateMarkerContents(receivedParkingLot, markerOfParking -> {
+            // Keep track of the old value of the object's AvailableSpaces
+            int oldAvailableSpaces = mMarkerManager
+                    .getParkingLotOf(markerOfParking).getAvailableSpaces();
+            // Replace the old lot with the new lot.
+            mMarkerManager.replaceMarkerContents(receivedParkingLot, markerOfParking);
+            // Update the info layout's contents if it's showing
+            if (mParkingMapViewModel.isInfoLayoutShown()) {
+                mParkingMapViewModel.updateSelectedLotState(receivedParkingLot);
+                int updatedAvailableSpaces = receivedParkingLot.getAvailableSpaces();
+                animateAvailabilityColorChanges(
+                        getBinding().fragmentParkingMapCvInfoLayout, // Parent card view
+                        getBinding().fragmentParkingMapTxtAvailability, // child
+                        updatedAvailableSpaces,
+                        oldAvailableSpaces
+                );
+            }
+        });
+    }
+
+    /**
+     * Remove the marker that is associated with the given parking lot object.
+     *
+     * @param dc The newly received DocumentChange, containing info about how
+     *           a parking lot object in the database got changed.
+     */
+    private void removeLot(DocumentChange dc) {
+        final ParkingLot receivedParkingLot = ParkingLot.toParkingLot(dc);
+        updateMarkerContents(receivedParkingLot, markerOfParking -> {
+            mMarkerManager.removeMarker(markerOfParking);
+            // If its info was showing, hide it and inform the user
+            boolean wasVisibleBefore = mParkingMapViewModel.hideInfoLayoutWithStateCheck();
+            if (wasVisibleBefore) {
+                Toast.makeText(getContext(), "Unfortunately, the parking got removed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * Traverse all markers currently on the map till you find the one that is linked
+     * to the given {@link ParkingLot} object. Then execute the given method.
+     *
+     * @param receivedParkingLot The Lot to be updated.
+     * @param updatable          The interface to update the lot once found.
+     */
+    private void updateMarkerContents(ParkingLot receivedParkingLot, MarkerUpdatable updatable) {
+        // Traverse the markers
+        for (Marker markerOfParking : mMarkerManager.getKeySets()) { // the key is of type Marker
+            // Check whether the marker is associated with a ParkingLot object (marker -> null)
+            //  and check whether the marker's Parking lot is not the same with the received one
+            if (!mMarkerManager.exists(markerOfParking)
+                    || !mMarkerManager.getParkingLotOf(markerOfParking).equals(receivedParkingLot))
+                continue;
+
+            // then update the private parking's content according to its DocumentChange.Type
+            updatable.update(markerOfParking);
+        }
+    }
+
+    /**
+     * Creates and sends an HTTPS request to our Backend.
+     * Requests all the parking locations and for each, a Marker is placed
+     * on the map.
+     * When such a request occurs, a cloud function is executed, which filters
+     * the parking locations. Only the ones which are nearby the user are sent back
+     * too the client.
+     * <strong>Note: In case the user exits the fragment before the HTTPS response is returned,
+     * the view would be destroyed when the onRequestFinish listener will get
+     * triggered. Thus, it will cause a NullPointerException when trying to access
+     * the {@link FragmentParkingMapBinding#fragmentParkingMapClpbLoadingMarkers}.
+     * For this reason, the listener is wrapped around a try-catch block.</strong>
+     *
+     * @param latLng The latest recorded latitude and longitude of the user.
+     * @see #onDestroyView()
+     */
+    public void fetchParkingLots(@NotNull LatLng latLng) {
+        getBinding().fragmentParkingMapClpbLoadingMarkers.show(); // Show loading bar
+        Log.d(TAG, "fetchParkingLots: Loading Bar ON");
+        mParkingMapViewModel.fetchParkingLots(latLng.latitude, latLng.longitude, new HttpsCallHandler() {
+            @Override
+            public void onSuccess(String rawJsonResponse) {
+                // Zoom in
+                Log.d(TAG, "Before parsing: " + rawJsonResponse);
+                mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
+                // Convert json object into an array of ParkingLot objects and add for each a marker to the map.
+                String[] result = new Gson().fromJson(rawJsonResponse, String[].class);
+                mParkingMapViewModel.updateIdsState(result);
+                Log.d(TAG, "Parsed: " + Arrays.toString(result));
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                if (exception == null) return;
+                // Plan B: Reload map
+                Toast.makeText(requireContext(), "Unexpected error occurred!\n" + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(ParkingMapFragment.TAG, "Error of class " + exception.getClass() + ": " + exception.getMessage());
+            }
+
+            @Override
+            public void onComplete() {
+                try {
+                    if (getBinding().fragmentParkingMapClpbLoadingMarkers.isShown()) {
+                        getBinding().fragmentParkingMapClpbLoadingMarkers.hide();
+                        Log.d(TAG, "fetchParkingLots: Loading Bar OFF");
+                    }
+                } catch (NullPointerException ignore) { /* view got destroyed */ }
+            }
+        });
+    }
+
+    /**
+     * Hooks up "directions" and "book" buttons with appropriate on click listeners.
+     */
+    private void attachButtonListeners() {
+        // Hook up the "directions" button with an on click listener
+        getBinding().fragmentParkingMapImgbtnDirections.setOnClickListener(v -> getDirections());
+
+        // Hook up the "book" button with an onClick listener
+        getBinding().fragmentParkingMapBtnBooking.setOnClickListener(v -> navigateToBookingScreen());
+    }
+
+    /**
+     * Initializes the fragment's ViewModels ({@link #mParkingMapViewModel},{@link #mAuthStateViewModel}).
+     */ // TODO: 21/01/2021 Modularise code of AuthStateViewModel initialization.
+    private void initializeViewModels() {
+        // Initialize the mParkingMapViewModel and the mAuthStateViewModel
+        mParkingMapViewModel = new ViewModelProvider(this, new ParkingMapViewModelFactory())
+                .get(ParkingMapViewModel.class);
+        mAuthStateViewModel = new ViewModelProvider(requireActivity())
+                .get(AuthStateViewModel.class);
+    }
+
+    /**
+     * Attaches observers to the info layout's state (whenever its state changes, the its visibility
+     * on the Ui is updated accordingly) and the state of the currently selected parking lot.
+     */
+    private void attachStateObservers() {
+        // Attach observer to ParkingMapViewModel's info layout state
+        mParkingMapViewModel.getInfoLayoutState()
+                .observe(getViewLifecycleOwner(), this::updateInfoLayoutVisibilityTo);
+        // Attach observer to ParkingMapViewModel's selected lot state
+        mParkingMapViewModel.getSelectedLotState().observe(getViewLifecycleOwner(), lot -> {
+            if (lot != null) {
+                showDetails(lot);
+                mMarkerManager.setSelectedParkingLot(lot);
+            }
+        });
+
+        // Attach observer to
+        mParkingMapViewModel.getDocumentChangesState().observe(getViewLifecycleOwner(),
+                this::updateLocalDocuments);
+
+        mParkingMapViewModel.getDocumentIdsOfNearbyLots().observe(getViewLifecycleOwner(), documentIds -> {
+            Log.d(TAG, "IdsState observer: " + mDatabaseObserver + " ids: " + documentIds);
+            // Get all the parking lots where their doc ids are in the documentIds list set
+            // then attach an observer to them
+            if (mDatabaseObserver == null) {
+                // Create a database observer
+                (mDatabaseObserver = DatabaseObserver
+                        .createQueryObserver( // Internally adds a snapshot listener
+                                mParkingMapViewModel.getParkingLots(documentIds), // Query reference
+                                (value, error) -> { // Event handler
+                                    mParkingMapViewModel.updateDocumentState(value.getDocumentChanges());
+                                }
+                        )).registerLifecycleObserver(getLifecycle());
+            } else {
+                // Update the query from the database
+                mDatabaseObserver.updateDatabaseReference(
+                        mParkingMapViewModel.getParkingLots(documentIds)
+                );
+            }
+        });
     }
 
     /**
@@ -531,7 +682,7 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
         if (mMarkerManager.getSelectedParkingLot() != null) {
             // Navigate to the ParkingBookingFragment
             Log.d(TAG, "onViewCreated: sending over: " + mMarkerManager.getSelectedParkingLot());
-            EventBus.getDefault().postSticky(mMarkerManager.getSelectedParkingLot());
+            EventBus.getDefault().postSticky(mMarkerManager.getSelectedParkingLot()); // TODO: 21/01/2021 Convert to bundle - getArguments
             getNavController(requireActivity())
                     .navigate(R.id.action_nav_parking_map_fragment_to_parking_booking_fragment);
         } else {
@@ -540,95 +691,19 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
     }
 
     /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera.
-     * If Google Play services is not installed on the device, the user will be prompted to
-     * install it inside the SupportMapFragment. This method will only be triggered once the
-     * user has installed Google Play services and returned to the app.
+     * Purpose: provide handler in the marker-lot look-up method
+     * {@link #updateMarkerContents(ParkingLot, MarkerUpdatable)}.
+     * The term update concerns both removals ({@link DocumentChange.Type#REMOVED})
+     * and modifications ({@link DocumentChange.Type#MODIFIED}).
      */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mGoogleMap = googleMap; // Save a reference of the GoogleMap instance
-        // Start listening to the user's location updates
-        Log.d(TAG, "onMapReady: ");
-        mLocationManager.requestUserLocationUpdates(this);
-
-        // Add listeners to the markers + map
-        mGoogleMap.setOnMarkerClickListener(this);
-        mGoogleMap.setOnMapClickListener(this);
-    }
-
-    /**
-     * Callback invoked when the user's location is received.
-     *
-     * @param locationResult The result of the user's requested location.
-     * @see LocationManager#requestUserLocationUpdates(Fragment)
-     */
-    @Override
-    public void onLocationResult(LocationResult locationResult) {
-        if (locationResult == null) return;
-        // Update the user's location with the received location
-        mUserCurrentLatLng = new LatLng(locationResult.getLastLocation().getLatitude(),
-                locationResult.getLastLocation().getLongitude());
-        mMarkerManager.setUserMarker(mGoogleMap, mUserCurrentLatLng);
-        // Smoothly moves the camera to the user's position
-        mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(mUserCurrentLatLng));
-    }
-
-    /**
-     * Navigates from the current Fragment subclass to the
-     * {@link AuthenticatorFragment}.
-     */
-    @Override
-    public void toAuthenticator() {
-        getNavController(requireActivity())
-                .navigate(R.id.action_nav_parking_map_fragment_to_nav_authenticator_fragment);
-    }
-
-    /**
-     * Navigates from the current Fragment subclass to the
-     * {@link ViewBookingsFragment}.
-     */
-    @Override
-    public void toBookings() {
-        getNavController(requireActivity())
-                .navigate(R.id.action_nav_parking_map_fragment_to_nav_view_bookings);
-    }
-
-    /**
-     * Navigates from the current Fragment subclass to the
-     * {@link AccountFragment}.
-     */
-    @Override
-    public void toAccount() {
-        getNavController(requireActivity())
-                .navigate(R.id.action_nav_parking_map_fragment_to_nav_account);
-    }
-
-    /**
-     * Navigates from the current Fragment subclass to the
-     * {@link FeedbackFragment}.
-     */
-    @Override
-    public void toFeedback() {
-        getNavController(requireActivity())
-                .navigate(R.id.action_nav_parking_map_fragment_to_nav_feedback);
-    }
-
-    /**
-     * Navigates from the current Fragment subclass to the
-     * {@link HomeFragment}.
-     */
-    @Override
-    public void toHome() {
-        getNavController(requireActivity())
-                .navigate(R.id.action_nav_parking_map_fragment_to_nav_home);
-    }
-
-    interface HttpsCallHandler {
-        void onSuccess(String rawJsonResponse);
-
-        void onFailure(Exception exception);
+    private interface MarkerUpdatable {
+        /**
+         * Performs an action on the given
+         * {@link Marker} and its linked
+         * {@link ParkingLot}.
+         *
+         * @param markerOfParking A {@link Marker} to be updated.
+         */
+        void update(Marker markerOfParking);
     }
 }

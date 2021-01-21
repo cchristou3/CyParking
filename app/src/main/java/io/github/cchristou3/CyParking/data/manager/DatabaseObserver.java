@@ -36,32 +36,32 @@ import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
  * whenever the {@link EventListener} receives an update or T's data is initially loaded.
  * <p>
  *
- * @param <K> type of {@link Query}, {@link com.google.firebase.firestore.DocumentReference}
+ * @param <T> type of {@link Query}, {@link com.google.firebase.firestore.DocumentReference}
  *            or {@link com.google.firebase.firestore.CollectionReference}.
- * @param <V> type of {@link com.google.firebase.firestore.QuerySnapshot}
+ * @param <S> type of {@link com.google.firebase.firestore.QuerySnapshot}
  *            or {@link com.google.firebase.firestore.DocumentSnapshot}.
  * @author Charalambos Christou
  * @version 1.0 25/12/20
  * <p>
  */
-public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver {
+public abstract class DatabaseObserver<T, S> implements DefaultLifecycleObserver {
 
+    private final EventListener<S> mEventListener;
     // Data members
-    private final K mDatabaseReference;
-    private final EventListener<V> mEventListener;
+    private T mDatabaseReference;
     private WeakReference<Lifecycle> mWeakLifecycle;
     private ListenerRegistration mListenerRegistration;
 
     /**
      * Public Constructor.
-     * Initializes the {@link EventListener} and the {@link K}
+     * Initializes the {@link EventListener} and the {@link T}
      * with the specified T and Listener objects.
      *
      * @param query         A data base query.
      * @param eventListener The callback that is used whenever the query's data changes
      *                      or is initially loaded.
      */
-    private DatabaseObserver(K query, EventListener<V> eventListener) {
+    private DatabaseObserver(T query, EventListener<S> eventListener) {
         this.mDatabaseReference = query;
         this.mEventListener = eventListener;
     }
@@ -89,10 +89,9 @@ public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver
         return new DatabaseObserver<DocumentReference, DocumentSnapshot>(documentReference,
                 eventListener) {
             @Override
-            public void addSnapshotListenerToDatabaseQuery() {
+            public void addSnapshotListenerToDatabaseReference(DocumentReference reference) {
                 setListenerRegistration(
-                        getDatabaseReference()
-                                .addSnapshotListener(getEventListener())
+                        reference.addSnapshotListener(getEventListener())
                 );
             }
         };
@@ -122,10 +121,9 @@ public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver
         return new DatabaseObserver<Query, QuerySnapshot>(query,
                 eventListener) {
             @Override
-            public void addSnapshotListenerToDatabaseQuery() {
+            public void addSnapshotListenerToDatabaseReference(Query reference) {
                 setListenerRegistration(
-                        getDatabaseReference()
-                                .addSnapshotListener(getEventListener())
+                        reference.addSnapshotListener(getEventListener())
                 );
             }
         };
@@ -154,10 +152,9 @@ public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver
         return new DatabaseObserver<CollectionReference, QuerySnapshot>(collectionReference,
                 eventListener) {
             @Override
-            public void addSnapshotListenerToDatabaseQuery() {
+            public void addSnapshotListenerToDatabaseReference(CollectionReference reference) {
                 setListenerRegistration(
-                        getDatabaseReference()
-                                .addSnapshotListener(getEventListener())
+                        getDatabaseReference().addSnapshotListener(getEventListener())
                 );
             }
         };
@@ -175,6 +172,7 @@ public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver
         this.mWeakLifecycle = new WeakReference<>(lifecycle);
         // Subscribe LifeCycleOwner to lifecycle changes
         mWeakLifecycle.get().addObserver(this);
+        updateDatabaseReference(this.mDatabaseReference);
     }
 
     /**
@@ -191,7 +189,7 @@ public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver
     /**
      * Removes the object's database reference's ({@link #mDatabaseReference}) listener.
      */
-    private void removeSnapshotListenerFromDatabaseQuery() {
+    public void removeSnapshotListenerFromDatabaseQuery() {
         if (mListenerRegistration != null) {
             Log.d(TAG, "SnapshotListener removed!");
             mListenerRegistration.remove();
@@ -213,7 +211,9 @@ public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver
      */
     @Override
     public void onResume(@NonNull LifecycleOwner owner) {
-        addSnapshotListenerToDatabaseQuery();
+        if (this.mListenerRegistration == null) {
+            addSnapshotListenerToDatabaseReference(this.mDatabaseReference);
+        }
     }
 
     /**
@@ -221,8 +221,8 @@ public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver
      * <p>
      * This method will be called before the {@link LifecycleOwner}'s {@code onPause} method
      * is called.
-     * Remove the {@link EventListener<V>} from the current
-     * {@link K} instance.
+     * Remove the {@link EventListener<S>} from the current
+     * {@link T} instance.
      *
      * @param owner the component, whose state was changed
      */
@@ -250,8 +250,29 @@ public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver
      *
      * @return A reference to the database query
      */
-    public K getDatabaseReference() {
+    public T getDatabaseReference() {
         return mDatabaseReference;
+    }
+
+    /**
+     * Remove the SnapShotListener (that is registered to retrieve
+     * updates of the current {@link #mDatabaseReference}).
+     * Update the value of {@link #mDatabaseReference}
+     * with the given argument.
+     * Set a new SnapShotListener to the newly
+     * updated {@link #mDatabaseReference}.
+     *
+     * @param reference an instance of {@link Query},
+     *                  {@link com.google.firebase.firestore.DocumentReference}
+     *                  or {@link com.google.firebase.firestore.CollectionReference}.
+     */
+    public void updateDatabaseReference(T reference) {
+        // Remove previous database listener
+        removeSnapshotListenerFromDatabaseQuery();
+        // Update the value of mDatabaseReference
+        mDatabaseReference = reference;
+        // Add a new database listener to the new reference
+        addSnapshotListenerToDatabaseReference(mDatabaseReference);
     }
 
     /**
@@ -259,7 +280,7 @@ public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver
      *
      * @return The {@link #mEventListener}.
      */
-    public EventListener<V> getEventListener() {
+    public EventListener<S> getEventListener() {
         return mEventListener;
     }
 
@@ -273,9 +294,9 @@ public abstract class DatabaseObserver<K, V> implements DefaultLifecycleObserver
     }
 
     /**
-     * Adds to the query of type K the Event listener of type V.
+     * Adds to the query of type {@link T} the Event listener of type {@link S}.
      * To be overridden by subclasses or when instantiating a
      * {@link DatabaseObserver}.
      */
-    public abstract void addSnapshotListenerToDatabaseQuery();
+    public abstract void addSnapshotListenerToDatabaseReference(T databaseReference);
 }

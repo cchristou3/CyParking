@@ -15,14 +15,23 @@ import java.util.Locale;
  * Purpose: <p>Contain all helper / utility methods which the application needs.</p>
  *
  * @author Charalambos Christou
- * @version 5.0 30/12/20
+ * @version 6.0 21/01/21
  */
 public class Utility {
 
     // Static Constants
-    private static final double MAXIMUM_METERS_FROM_USER = 1000.0D;
     private static final String DATE_PATTERN = "dd-MM-yyyy";
 
+    /**
+     * Checks whether the given number is an even number.
+     *
+     * @param number The number to be checked.
+     * @return True if the number has no remainder when divided by two.
+     * Otherwise, false.
+     */
+    public static boolean isEven(int number) {
+        return number % 2 == 0;
+    }
 
     /**
      * Creates a string representation of the date accumulated by the specified
@@ -121,30 +130,30 @@ public class Utility {
     }
 
     /**
-     * Checks whether the specified lat and lng are inside the user's range
+     * Calculates the distance between the two given {@link LatLng} objects.
      *
-     * @param userLatLng The lat and lng of the user
-     * @param parkingLat The Lat of the private parking
-     * @param parkingLng The Lng of the private parking
-     * @return True, if yes. Otherwise, false.
+     * @param latLng1 A {@link LatLng} object.
+     * @param latLng2 A {@link LatLng} object.
+     * @return The distance between the two given {@link LatLng} objects in meters.
      */
-    public static boolean isNearbyUser(@NotNull LatLng userLatLng, double parkingLat, double parkingLng) {
+    public static double getDistanceApart(@NotNull LatLng latLng1, @NotNull LatLng latLng2) {
         // Calculate the distance between the two points (User and current parking)
         // Reference: http://www.movable-type.co.uk/scripts/latlong.html
         final double R = 6371e3; // metres
-        double phi1 = userLatLng.latitude * Math.PI / 180; // φ, λ in radians
-        double phi2 = parkingLat * Math.PI / 180;
-        double deltaPhi = (parkingLat - userLatLng.latitude) * Math.PI / 180;
-        double deltaLambda = (parkingLng - userLatLng.longitude) * Math.PI / 180;
+        double phi1 = latLng1.latitude * Math.PI / 180; // φ, λ in radians
+        double phi2 = latLng2.latitude * Math.PI / 180;
+        double deltaPhi = (latLng2.latitude - latLng1.latitude) * Math.PI / 180;
+        double deltaLambda = (latLng2.longitude - latLng1.longitude) * Math.PI / 180;
 
         double a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
                 Math.cos(phi1) * Math.cos(phi2) *
                         Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double d = R * c; // d is the total distance in metres
+        double d; // d is the total distance in metres
+        d = R * c;
 
-        return (d <= MAXIMUM_METERS_FROM_USER);
+        return d;
     }
 
     /**

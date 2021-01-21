@@ -3,7 +3,6 @@ package io.github.cchristou3.CyParking.data.pojo;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment;
 import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsFragment;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
@@ -17,7 +16,7 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  * Purpose: Represent the state of a given fragment in terms of its
  * data.
  * <p>
- * Used by {@link ParkingMapFragment} and {@link ViewBookingsFragment}.
+ * Used by {@link ViewBookingsFragment}.
  * {@link #INITIAL_DATA_RETRIEVAL}: refers to the state when the fragment initially
  * loads its data via an API (aka 1st wave).
  * {@link #LISTENING_TO_DATA_CHANGES}: refers to the state when the fragment has already

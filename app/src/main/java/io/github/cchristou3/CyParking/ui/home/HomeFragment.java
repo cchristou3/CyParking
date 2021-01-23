@@ -27,7 +27,8 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
-import io.github.cchristou3.CyParking.data.manager.LocationManager;
+import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
+import io.github.cchristou3.CyParking.data.manager.location.SingleUpdateHelper;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentHomeBinding;
@@ -55,7 +56,7 @@ public class HomeFragment extends ViewBindingFragment<FragmentHomeBinding> imple
 
     // Fragment variables
     private static final String TAG = HomeFragment.class.getName();
-    private LocationManager mLocationManager;
+    private SingleUpdateHelper mLocationManager;
     private AuthStateViewModel mAuthStateViewModel;
     // Members related to the Operator
     private OperatorViewModel mOperatorViewModel;
@@ -90,8 +91,11 @@ public class HomeFragment extends ViewBindingFragment<FragmentHomeBinding> imple
         // Attach listener to "Parking Map" button
         getBinding().fragmentHomeBtnNavToMap.setOnClickListener(v -> {
             // Initialize the SingleLocationManager object
-            if (mLocationManager == null)
-                mLocationManager = new LocationManager(requireContext(), this, true);
+            if (mLocationManager == null) {
+                mLocationManager = LocationManager.createSingleUpdateHelper(requireContext(), this);
+            } else {
+                mLocationManager.prepareCallback();
+            }
             // Request for the user's latest known location
             Log.d(TAG, "requestUserLocationUpdates");
             mLocationManager.requestUserLocationUpdates(this);
@@ -126,7 +130,9 @@ public class HomeFragment extends ViewBindingFragment<FragmentHomeBinding> imple
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
-        mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
+        if (mLocationManager != null) {
+            mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
+        }
     }
 
     /**
@@ -150,7 +156,7 @@ public class HomeFragment extends ViewBindingFragment<FragmentHomeBinding> imple
                 getBinding().fragmentHomeBtnNavToMap
         );
 
-        //mLocationManager = null;
+        mLocationManager = null;
         super.onDestroyView();
     }
 
@@ -408,6 +414,8 @@ public class HomeFragment extends ViewBindingFragment<FragmentHomeBinding> imple
         if (locationResult != null) {
             // Access the user's latest location
             Location userLatestLocation = locationResult.getLastLocation();
+            Toast.makeText(requireContext(), userLatestLocation.toString(), Toast.LENGTH_SHORT).show();
+
             // Pass it to the ParkingMapFragment
             EventBus.getDefault().postSticky(new LatLng(userLatestLocation.getLatitude(), userLatestLocation.getLongitude()));
             // Navigate to the ParkingMapFragment

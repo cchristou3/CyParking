@@ -42,8 +42,9 @@ import io.github.cchristou3.CyParking.data.interfaces.HttpsCallHandler;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
-import io.github.cchristou3.CyParking.data.manager.LocationManager;
 import io.github.cchristou3.CyParking.data.manager.MarkerManager;
+import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
+import io.github.cchristou3.CyParking.data.manager.location.SubsequentUpdateHelper;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.databinding.FragmentParkingMapBinding;
 import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
@@ -57,7 +58,6 @@ import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 
 import static io.github.cchristou3.CyParking.utilities.Utility.getDistanceApart;
-import static io.github.cchristou3.CyParking.utilities.Utility.isEven;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.animateAvailabilityColorChanges;
 
 /**
@@ -109,11 +109,11 @@ public class ParkingMapFragment extends ViewBindingFragment<FragmentParkingMapBi
     private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
 
     // Location related variables
-    private LocationManager mLocationManager;
+    private SubsequentUpdateHelper mLocationManager;
     private GoogleMap mGoogleMap;
     private LatLng mUserCurrentLatLng;
     private LatLng mInitialUserLatLng;
-    private int locationUpdatesCounter = 0;
+    private int mLocationUpdatesCounter = 0;
 
     /**
      * Initialises the fragment and its {@link MarkerManager} instance.
@@ -184,7 +184,7 @@ public class ParkingMapFragment extends ViewBindingFragment<FragmentParkingMapBi
     public void onStart() {
         super.onStart();
         // Initialize the LocationManager
-        mLocationManager = new LocationManager(requireContext(), this, this, false);
+        mLocationManager = LocationManager.createSubsequentUpdateHelper(requireContext(), this, this);
         clearBackgroundMode();
     }
 
@@ -298,33 +298,62 @@ public class ParkingMapFragment extends ViewBindingFragment<FragmentParkingMapBi
     public void onLocationResult(LocationResult locationResult) {
         if (locationResult == null) return;
 
-        locationUpdatesCounter++; // Increment the counter
+        mLocationUpdatesCounter++; // Increment the counter
 
         // Access the user's new location.
-        final LatLng updatedLatLng = new LatLng(locationResult.getLastLocation().getLatitude(),
+        final LatLng updatedPosition = new LatLng(locationResult.getLastLocation().getLatitude(),
                 locationResult.getLastLocation().getLongitude());
 
         // If null, assign it to the location received from the first update.
-        if (mInitialUserLatLng == null) mInitialUserLatLng = updatedLatLng;
+        if (mInitialUserLatLng == null) mInitialUserLatLng = updatedPosition;
 
-        if (isEven(locationUpdatesCounter)) { // Every 2 location updates (20 seconds)
-            // Calculate the distance between the user's initial position
-            // and the updated one.
-            double distanceApart = getDistanceApart(mUserCurrentLatLng, updatedLatLng);
-            if (distanceApart > UPDATE_LOCATION_THRESHOLD) { // 100 meters
-                // Fetch the ids of parking lots based on the user's new position.
-                mInitialUserLatLng = updatedLatLng;
-                fetchParkingLots(mInitialUserLatLng);
-            }
-        }
+        checkIntervalForUpdates(updatedPosition);
 
         // Update the user's location with the received location
-        mUserCurrentLatLng = updatedLatLng;
+        mUserCurrentLatLng = updatedPosition;
 
         mMarkerManager.setUserMarker(mGoogleMap, mUserCurrentLatLng);
         // Smoothly moves the camera to the user's position
         mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(mUserCurrentLatLng));
     }
+
+    /**
+     * Every four intervals check the distance between the user's initial position
+     * and the new one. If the distance is over the threshold {@link #UPDATE_LOCATION_THRESHOLD}
+     * then re-fetch all the document Ids of the parking lots that are nearby the user
+     *
+     * @param updatedPosition The new position of the user.
+     */
+    private void checkIntervalForUpdates(LatLng updatedPosition) {
+        if (mLocationUpdatesCounter % 4 == 0) { // Every 4 location updates (20 seconds)
+            if (shouldFetchParkingDocs(mInitialUserLatLng, updatedPosition)) {
+                // Fetch the ids of parking lots based on the user's new position.
+                mInitialUserLatLng = updatedPosition;
+                fetchParkingLots(mInitialUserLatLng);
+            }
+        }
+    }
+
+    /**
+     * Checks whether it is time to re-fetch the document Ids of the
+     * nearby parking lots. This takes into consideration the user's
+     * initial position and the newly received one.
+     * Every time the user moves 100m away from his original position
+     * it returns true.
+     *
+     * @param initialPosition The user's current location.
+     * @param updatedPosition The
+     * @return True if the difference is over 100m. Otherwise, false.
+     * @see #UPDATE_LOCATION_THRESHOLD
+     */
+    private boolean shouldFetchParkingDocs(LatLng initialPosition, LatLng updatedPosition) {
+        // Calculate the distance between the user's initial position
+        // and the updated one.
+        return getDistanceApart(
+                initialPosition, updatedPosition
+        ) > UPDATE_LOCATION_THRESHOLD;  // 100 meters
+    }
+
 
     /**
      * Navigates from the current Fragment subclass to the

@@ -24,12 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
 
@@ -42,7 +37,8 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
-import io.github.cchristou3.CyParking.data.manager.LocationManager;
+import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
+import io.github.cchristou3.CyParking.data.manager.location.SingleUpdateHelper;
 import io.github.cchristou3.CyParking.data.model.parking.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
@@ -76,16 +72,8 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
     private List<SlotOffer> mSlotOfferList;
     private float mSelectedDuration;
     private float mSelectedPrice;
-    private LocationManager mLocationManager;
+    private SingleUpdateHelper mLocationManager;
     private SlotOfferAdapter mSlotOfferAdapter;
-
-    private static LocationRequest createLocationRequest() {
-        LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(200000);
-        mLocationRequest.setFastestInterval(300000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        return mLocationRequest;
-    }
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -153,7 +141,9 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
-        mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
+        if (mLocationManager != null) {
+            mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
+        }
     }
 
     /**
@@ -249,22 +239,15 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
         // Hook up a listener to the "get location" button
         getBinding().registerLotFragmentMbtnGetLocation.setOnClickListener(v -> {
             Toast.makeText(requireContext(), "Location retrieved!", Toast.LENGTH_SHORT).show();
-            if (mLocationManager == null)
-                mLocationManager = new LocationManager(requireContext(), this, true);
+            // Initialize the SingleLocationManager object
+            if (mLocationManager == null) {
+                mLocationManager = LocationManager.createSingleUpdateHelper(requireContext(), this);
+                Log.d(TAG, "QuickLocation initialized");
+            } else {
+                Log.d(TAG, "QuickLocation prepareCallback");
+                mLocationManager.prepareCallback();
+            }
             mLocationManager.requestUserLocationUpdates(this);
-
-            final LocationRequest request = createLocationRequest();
-            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                    .addLocationRequest(request);
-
-            SettingsClient settingsClient = LocationServices.getSettingsClient(this.getActivity());
-            Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(builder.build());
-
-            task.addOnSuccessListener(this.getActivity(), locationSettingsResponse -> {
-                Log.d(TAG, "onSuccess: " + locationSettingsResponse.toString());
-//                    startLocationService(client, request, new LocationCallback());
-//                    successListener.onSuccess(locationSettingsResponse);
-            });
         });
 
         setUpRecyclerViewWithAdapter();

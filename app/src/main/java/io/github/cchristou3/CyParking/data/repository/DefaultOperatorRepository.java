@@ -32,8 +32,9 @@ import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragm
  */
 public class DefaultOperatorRepository extends ParkingMapRepository implements OperatorRepository {
 
+    private static final String AVAILABILITY = "availability";
     private static final String OPERATOR_ID = "operatorId";
-    private final String AVAILABLE_SPACES = "availability.availableSpaces";
+    private final String AVAILABLE_SPACES = "availableSpaces";
 
     /**
      * Stores to the database's PRIVATE_PARKING node the specified object.
@@ -93,7 +94,7 @@ public class DefaultOperatorRepository extends ParkingMapRepository implements O
      */
     @Override
     public void incrementAvailableSpacesOf(@NotNull final DocumentReference lotReference) {
-        lotReference.update(AVAILABLE_SPACES, FieldValue.increment(1));
+        lotReference.update(AVAILABILITY + "." + AVAILABLE_SPACES, FieldValue.increment(1));
     }
 
     /**
@@ -103,7 +104,7 @@ public class DefaultOperatorRepository extends ParkingMapRepository implements O
      */
     @Override
     public void decrementAvailableSpacesOf(@NotNull final DocumentReference lotReference) {
-        lotReference.update(AVAILABLE_SPACES, FieldValue.increment(-1));
+        lotReference.update(AVAILABILITY + "." + AVAILABLE_SPACES, FieldValue.increment(-1));
     }
 
     /**

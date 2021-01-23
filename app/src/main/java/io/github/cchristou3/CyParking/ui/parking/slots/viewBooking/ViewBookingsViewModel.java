@@ -4,7 +4,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.firebase.firestore.Query;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -18,12 +19,14 @@ import io.github.cchristou3.CyParking.data.repository.BookingRepository;
  * Used when the users try to view their bookings.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 05/11/20
+ * @version 2.0 23/01/21
  */
 public class ViewBookingsViewModel extends ViewModel {
 
+    private static final String TAG = ViewBookingsViewModel.class.getName();
+
     // Data member
-    final private MutableLiveData<List<Booking>> mBookingList =
+    private final MutableLiveData<List<Booking>> mBookingList =
             new MutableLiveData<>();
 
     private final BookingRepository mBookingRepository;
@@ -43,9 +46,19 @@ public class ViewBookingsViewModel extends ViewModel {
      *
      * @return The state of the booking list.
      */
-    public LiveData<List<Booking>> getBookingList() {
+    public LiveData<List<Booking>> getBookingListState() {
         return mBookingList;
     }
+
+    /**
+     * Access the booking list's state
+     *
+     * @return The state of the booking list.
+     */
+    public List<Booking> getBookingList() {
+        return mBookingList.getValue();
+    }
+
 
     /**
      * Sets the value of {@link #mBookingList} to the given argument.
@@ -64,8 +77,8 @@ public class ViewBookingsViewModel extends ViewModel {
      * @return A query which returns all the bookings of the specified userId
      */
     @NotNull
-    public Query retrieveUserBookings(String userId) {
-        return this.mBookingRepository.retrieveUserBookings(userId);
+    public Task<QuerySnapshot> getUserBookings(String userId) {
+        return this.mBookingRepository.getUserBookings(userId).get();
     }
 
     /**

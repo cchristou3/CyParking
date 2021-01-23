@@ -19,9 +19,9 @@ import java.util.Random;
  * parking lot.
  *
  * @author Charalambos Christou
- * @version 3.0 02/01/21
+ * @version 4.0 23/01/21
  */
-public class SlotOffer implements Parcelable {
+public class SlotOffer implements Parcelable, Comparable<SlotOffer> {
 
     public static final Creator<SlotOffer> CREATOR = new Creator<SlotOffer>() {
         @Override
@@ -193,5 +193,22 @@ public class SlotOffer implements Parcelable {
     public boolean smallerOf(SlotOffer offer) {
         if (offer == null) return true;
         return this.getRatio() < offer.getRatio();
+    }
+
+    /**
+     * Compares this object with the specified object for order.  Returns a
+     * negative integer, zero, or a positive integer as this object is less
+     * than, equal to, or greater than the specified object.
+     *
+     * @param obj the object to be compared.
+     * @return a negative integer, zero, or a positive integer as this object
+     * is less than, equal to, or greater than the specified object.
+     */
+    @Override
+    public int compareTo(SlotOffer obj) {
+        return ((obj != null)
+                && obj.durationInHours == this.durationInHours
+                && obj.price == this.price
+        ) ? 0 : 1;
     }
 }

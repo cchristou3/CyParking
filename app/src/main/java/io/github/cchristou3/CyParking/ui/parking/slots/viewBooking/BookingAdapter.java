@@ -9,12 +9,15 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DateFormat;
-import java.util.List;
+import java.util.Date;
 import java.util.Locale;
 
 import io.github.cchristou3.CyParking.R;
@@ -25,17 +28,23 @@ import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
  * Used in {@link ViewBookingsFragment} to show the user's bookings.
  *
  * @author Charalambos Christou
- * @version 1.0 05/11/20
+ * @version 2.0 23/01/21
  */
-public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHolder> {
+public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingViewHolder> {
 
+    private static final String TAG = BookingAdapter.class.getName();
     private static final long DURATION = 500;
     private static View.OnClickListener mOnItemClickListener;
-    private final List<Booking> mBookings;
     private boolean mOnAttach = true;
 
-    public BookingAdapter(List<Booking> bookings) {
-        this.mBookings = bookings;
+    /**
+     * Constructor used to initialize the {@link ListAdapter}
+     * with a {@link DiffUtil.ItemCallback<Booking>} object.
+     *
+     * @param diffCallback
+     */
+    protected BookingAdapter(@NonNull DiffUtil.ItemCallback<Booking> diffCallback) {
+        super(diffCallback);
     }
 
     /**
@@ -60,10 +69,10 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
      */
     @NotNull
     @Override
-    public BookingAdapter.MyViewHolder onCreateViewHolder(@NotNull ViewGroup parent,
-                                                          int viewType) {
+    public BookingViewHolder onCreateViewHolder(@NotNull ViewGroup parent,
+                                                int viewType) {
         // create and return a new view
-        return new MyViewHolder(LayoutInflater.from(parent.getContext())
+        return new BookingViewHolder(LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.booking_item, parent, false));
     }
 
@@ -74,19 +83,17 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
      * @param position The position of the item inside the adapter.
      */
     @Override
-    public void onBindViewHolder(@NotNull MyViewHolder holder, int position) {
-        // - get element of the dataset at this position
+    public void onBindViewHolder(@NotNull BookingViewHolder holder, int position) {
+        setAnimation(holder.itemView, position); // Set animator
+
+        // - get element of the booking list at this position
+        final String offer = getOfferText(getItem(position).getBookingDetails().getSlotOffer().toString());
+        final String date = getDateText(getItem(position).getBookingDetails().getDateOfBooking());
+        final String time = getTimeText(getItem(position).getBookingDetails().getStartingTime());
+        final String status = getStatusText(getItem(position).isCompleted());
+        final String parkingName = getNameText(getItem(position).getLotName());
+
         // - replace the contents of the view with that element
-
-        setAnimation(holder.itemView, position);
-
-        final String offer = "Slot offer: " + mBookings.get(position).getBookingDetails().getSlotOffer().toString();
-        final CharSequence date = "Date: " + DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
-                .format(mBookings.get(position).getBookingDetails().getDateOfBooking());
-        final String time = "Start time: " + mBookings.get(position).getBookingDetails().getStartingTime();
-        final String status = "Status: " + (mBookings.get(position).isCompleted() ? "Completed" : "Pending");
-        final String parkingName = "Parking: " + mBookings.get(position).getLotName();
-
         holder.status.setText(status);
         holder.offer.setText(offer);
         holder.lotName.setText(parkingName);
@@ -94,15 +101,74 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
         holder.time.setText(time);
     }
 
+    // TODO: 22/01/2021 Replace with getString(...)
+
     /**
-     * Return the size of your dataset (invoked by the layout manager).
+     * Prepares the text of the offer TextView based
+     * on the given String.
      *
-     * @return The number of elements enlisted in the adapter.
+     * @param offer The String to be appended.
+     * @return A String with format `Slot offer: ` + given String.
      */
-    @Override
-    public int getItemCount() {
-        return mBookings.size();
+    @NotNull
+    @Contract(pure = true)
+    private String getOfferText(String offer) {
+        return "Slot offer: " + offer;
     }
+
+    /**
+     * Prepares the text of the date TextView based
+     * on the given String.
+     *
+     * @param date The String to be appended.
+     * @return A String with format `Date: ` + given String.
+     */
+    @NotNull
+    @Contract(pure = true)
+    private String getDateText(Date date) {
+        return "Date: " + DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
+                .format(date);
+    }
+
+    /**
+     * Prepares the text of the time TextView based
+     * on the given String.
+     *
+     * @param time The String to be appended.
+     * @return A String with format `Start time: ` + given String.
+     */
+    @NotNull
+    @Contract(pure = true)
+    private String getTimeText(String time) {
+        return "Start time: " + time;
+    }
+
+    /**
+     * Prepares the text of the status TextView based
+     * on the given String.
+     *
+     * @param status A boolean indicating the status of the booking.
+     * @return A String with format `status: ` + given String.
+     */
+    @NotNull
+    @Contract(pure = true)
+    private String getStatusText(boolean status) {
+        return "Status: " + (status ? "Completed" : "Pending");
+    }
+
+    /**
+     * Prepares the text of the time TextView based
+     * on the given String.
+     *
+     * @param name The String to be appended.
+     * @return A String with format `Parking: ` + given String.
+     */
+    @NotNull
+    @Contract(pure = true)
+    private String getNameText(String name) {
+        return "Parking: " + name;
+    }
+
 
     /**
      * Called by RecyclerView when it starts observing this Adapter.
@@ -150,8 +216,8 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
      * Complex data items may need more than one view per item, and
      * you provide access to all the views for a data item in a view holder
      */
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
+    public static class BookingViewHolder extends RecyclerView.ViewHolder {
+
         public TextView status;
         public TextView offer;
         public TextView lotName;
@@ -159,7 +225,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
         public TextView time;
         public ImageButton cancelButton;
 
-        public MyViewHolder(View view) {
+        public BookingViewHolder(View view) {
             super(view);
             status = view.findViewById(R.id.booking_placeholder_item_txt_status);
             offer = view.findViewById(R.id.booking_placeholder_item_txt_offer);
@@ -170,6 +236,5 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.MyViewHo
             cancelButton.setTag(this);
             cancelButton.setOnClickListener(mOnItemClickListener);
         }
-
     }
 }

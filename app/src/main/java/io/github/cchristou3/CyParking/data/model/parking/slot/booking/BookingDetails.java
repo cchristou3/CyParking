@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-import com.google.gson.annotations.SerializedName;
+import com.google.firebase.firestore.Exclude;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
  * @author Charalambos Christou
  * @version 31/12/2020
  */
-public class BookingDetails implements Parcelable {
+public class BookingDetails implements Parcelable, Comparable<BookingDetails> {
 
     public static final Creator<BookingDetails> CREATOR = new Creator<BookingDetails>() {
         @Override
@@ -34,14 +34,15 @@ public class BookingDetails implements Parcelable {
             return new BookingDetails[size];
         }
     };
-    @SerializedName("completed")
-    protected boolean completed;
+
+    public static final String DATE = "dateOfBooking";
+    public static final String STARTING_TIME = "startingTime";
+    public static final String SLOT_OFFER = "slotOffer";
+
+    private boolean completed;
     // Booking attributes
-    @SerializedName("dateOfBooking")
     private Date dateOfBooking;
-    @SerializedName("startingTime")
     private String startingTime;
-    @SerializedName("slotOffer")
     private SlotOffer slotOffer;
 
     public BookingDetails() { /* no-argument constructor to be used for deserialization */}
@@ -59,6 +60,23 @@ public class BookingDetails implements Parcelable {
         this.startingTime = startingTime;
         this.slotOffer = slotOffer;
         this.completed = getInitialBookingStatus();
+    }
+
+    /**
+     * Public Constructor.
+     * Initialize all the attributes of the class with the given arguments.
+     * Used for deep copy.
+     *
+     * @param dateOfBooking The date the booking will take place.
+     * @param startingTime  The starting time that the booking will take place.
+     * @param slotOffer     The selected offer for the this booking.
+     * @param completed     The status of the booking.
+     */
+    public BookingDetails(Date dateOfBooking, String startingTime, SlotOffer slotOffer, boolean completed) {
+        this.dateOfBooking = dateOfBooking;
+        this.startingTime = startingTime;
+        this.slotOffer = slotOffer;
+        this.completed = completed;
     }
 
     /**
@@ -108,12 +126,30 @@ public class BookingDetails implements Parcelable {
     }
 
     /**
+     * Sets the value of {@link #dateOfBooking} with the given argument.
+     *
+     * @param dateOfBooking The dateOfBooking of the booking.
+     */
+    public void setDateOfBooking(Date dateOfBooking) {
+        this.dateOfBooking = dateOfBooking;
+    }
+
+    /**
      * Access the {@link #startingTime} data member.
      *
      * @return The value of {@link #startingTime}.
      */
     public String getStartingTime() {
         return startingTime;
+    }
+
+    /**
+     * Sets the value of {@link #startingTime} with the given argument.
+     *
+     * @param startingTime The startingTime of the booking.
+     */
+    public void setStartingTime(String startingTime) {
+        this.startingTime = startingTime;
     }
 
     /**
@@ -126,6 +162,15 @@ public class BookingDetails implements Parcelable {
     }
 
     /**
+     * Sets the value of {@link #slotOffer} with the given argument.
+     *
+     * @param slotOffer The slotOffer of the booking.
+     */
+    public void setSlotOffer(SlotOffer slotOffer) {
+        this.slotOffer = slotOffer;
+    }
+
+    /**
      * Access the {@link #completed} data member.
      *
      * @return The value of {@link #completed}.
@@ -135,14 +180,23 @@ public class BookingDetails implements Parcelable {
     }
 
     /**
+     * Sets the value of {@link #completed} with the given argument.
+     *
+     * @param completed The completed of the booking.
+     */
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+
+    /**
      * Get the initial status of each booking.
      *
      * @return False, as to booking not completed yet.
      */
+    @Exclude
     public boolean getInitialBookingStatus() {
         return false;
     }
-
 
     /**
      * Returns a string representation of the object.
@@ -157,5 +211,23 @@ public class BookingDetails implements Parcelable {
         return "dateOfBooking: " + dateOfBooking
                 + ", startingTime: " + startingTime
                 + ", slotOffer: " + slotOffer;
+    }
+
+    /**
+     * Compares this object with the specified object for order.  Returns a
+     * negative integer, zero, or a positive integer as this object is less
+     * than, equal to, or greater than the specified object.
+     *
+     * @param obj the object to be compared.
+     * @return a negative integer, zero, or a positive integer as this object
+     * is less than, equal to, or greater than the specified object.
+     */
+    @Override
+    public int compareTo(BookingDetails obj) {
+        return ((obj != null)
+                && obj.completed == this.completed
+                && obj.dateOfBooking.compareTo(this.dateOfBooking) == 0 // Same dates
+                && obj.slotOffer.compareTo(this.slotOffer) == 0 // Same offers
+        ) ? 0 : 1;
     }
 }

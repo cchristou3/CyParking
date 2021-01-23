@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -62,7 +63,7 @@ import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
  *  This mode is set by the invocation of</p>
  *
  * @author Charalambos Christou
- * @version 2.0 22/12/20
+ * @version 3.0 23/01/21
  */
 public class LocationManager implements DefaultLifecycleObserver {
 
@@ -92,15 +93,17 @@ public class LocationManager implements DefaultLifecycleObserver {
      */
     public LocationManager(@NonNull final Context context, @NonNull final LocationHandler locationHandler, boolean isSingleRequest) {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+        Log.d(TAG, "LocationManager: ");
         mLocationHandler = locationHandler;
         this.mIsSingleRequest = isSingleRequest;
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
+                Log.d(TAG, "onLocationResult Of Manager: ");
+                mFusedLocationProviderClient.removeLocationUpdates(this); // Required
                 mLocationHandler.onLocationResult(locationResult);
             }
         };
-
     }
 
     /**
@@ -126,6 +129,7 @@ public class LocationManager implements DefaultLifecycleObserver {
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
+                Log.d(TAG, "onLocationResult Of Manager: ");
                 mLocationHandler.onLocationResult(locationResult);
             }
         };
@@ -145,10 +149,13 @@ public class LocationManager implements DefaultLifecycleObserver {
         // Check for location permissions
         if (ActivityCompat.checkSelfPermission(fragment.requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(fragment.requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Above if: ");
             if (Build.VERSION.SDK_INT >= 23) {// Marshmallow
+                Log.d(TAG, "Inside if: ");
                 fragment.requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
             }
         } else {
+            Log.d(TAG, "The else clause: ");
             // no need to ask for permission
             // Do something... fetch position
             requestLocation();
@@ -188,6 +195,7 @@ public class LocationManager implements DefaultLifecycleObserver {
      */
     @SuppressLint("MissingPermission")
     private void requestLocation() {
+        Log.d(TAG, "requestLocation: mIsSingleRequest ? " + mIsSingleRequest);
         mFusedLocationProviderClient.requestLocationUpdates(
                 (mIsSingleRequest) ?
                         new LocationRequest()
@@ -196,7 +204,14 @@ public class LocationManager implements DefaultLifecycleObserver {
                         :
                         new LocationRequest().setInterval(INTERVAL_TIME),
                 mLocationCallback,
-                Looper.getMainLooper());
+                Looper.getMainLooper())
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "requestLocation: Success: " + task.getResult());
+                    } else {
+                        Log.d(TAG, "requestLocation: Failed " + task.getException());
+                    }
+                });
     }
 
     /**

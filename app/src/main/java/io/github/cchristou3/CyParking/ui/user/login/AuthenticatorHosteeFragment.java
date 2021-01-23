@@ -23,6 +23,7 @@ import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentAuthenticatorHosteeBinding;
+import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModelFactory;
 import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
@@ -44,9 +46,9 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * Can be used for both logging in and signing up.</p>
  *
  * @author Charalambos Christou
- * @version 3.0 30/12/20
+ * @version 4.0 21/01/21
  */
-public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher {
+public class AuthenticatorHosteeFragment extends ViewBindingFragment<FragmentAuthenticatorHosteeBinding> implements TextWatcher {
 
     // Constant variables
     public static final String PAGE_TYPE_KEY = "PAGE_TYPE_KEY";
@@ -54,7 +56,6 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
     // Fragment variables
     private AuthenticatorViewModel mAuthenticatorViewModel;
     private AuthStateViewModel mAuthStateViewModel;
-    private FragmentAuthenticatorHosteeBinding mFragmentAuthenticatorHosteeBinding;
     private boolean mIsReauthenticating = false;
     private short mPageType;
 
@@ -96,13 +97,12 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
      * @param container          The parent view
      * @param savedInstanceState A bundle which contains info about previously stored data
      * @return The view of the fragment
+     * @see ViewBindingFragment#onCreateView(ViewBinding)
      */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mFragmentAuthenticatorHosteeBinding =
-                FragmentAuthenticatorHosteeBinding.inflate(inflater);
-        return mFragmentAuthenticatorHosteeBinding.getRoot();
+        return super.onCreateView(FragmentAuthenticatorHosteeBinding.inflate(inflater));
     }
 
     /**
@@ -148,22 +148,28 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
     /**
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment. Cleans up all listeners.
+     *
+     * @see ViewBindingFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         if (!mAuthenticatorViewModel.isUserSigningIn()) {
-            getBinding().fragmentHosteeAuthBtnDialogUserButton.setOnClickListener(null);
-            getBinding().fragmentHosteeAuthBtnDialogOperatorButton.setOnClickListener(null);
-            getBinding().fragmentHosteeAuthCbRoleUserCheckbox.setOnCheckedChangeListener(null);
-            getBinding().fragmentHosteeAuthCbRoleOperatorCheckbox.setOnCheckedChangeListener(null);
-            getBinding().fragmentHosteeAuthEtName.removeTextChangedListener(this);
+            super.removeOnClickListeners(
+                    getBinding().fragmentHosteeAuthBtnDialogUserButton,
+                    getBinding().fragmentHosteeAuthBtnDialogOperatorButton,
+                    getBinding().fragmentHosteeAuthCbRoleUserCheckbox,
+                    getBinding().fragmentHosteeAuthCbRoleOperatorCheckbox,
+                    getBinding().fragmentHosteeAuthEtName
+            );
         } else {
             getBinding().fragmentHosteeAuthEtPassword.setOnEditorActionListener(null);
         }
-        getBinding().fragmentHosteeAuthEtEmail.removeTextChangedListener(this);
-        getBinding().fragmentHosteeAuthEtPassword.removeTextChangedListener(this);
-        mFragmentAuthenticatorHosteeBinding = null;
+        super.removeTextWatchers(
+                this,
+                getBinding().fragmentHosteeAuthEtEmail,
+                getBinding().fragmentHosteeAuthEtPassword
+        );
+        super.onDestroyView();
     }
 
 
@@ -478,15 +484,6 @@ public class AuthenticatorHosteeFragment extends Fragment implements TextWatcher
                     errorString,
                     Toast.LENGTH_LONG).show();
         }
-    }
-
-    /**
-     * Access the {@link #mFragmentAuthenticatorHosteeBinding}.
-     *
-     * @return A reference to {@link #mFragmentAuthenticatorHosteeBinding}.
-     */
-    private FragmentAuthenticatorHosteeBinding getBinding() {
-        return mFragmentAuthenticatorHosteeBinding;
     }
 
     /**

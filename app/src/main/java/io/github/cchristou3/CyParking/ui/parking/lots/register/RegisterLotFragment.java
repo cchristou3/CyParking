@@ -4,6 +4,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +22,14 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewbinding.ViewBinding;
 
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
 
@@ -40,6 +47,7 @@ import io.github.cchristou3.CyParking.data.model.parking.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.databinding.RegisterLotFragmentBinding;
+import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
@@ -54,9 +62,9 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * <p>
  *
  * @author Charalambos Christou
- * @version 2.0 28/12/20
+ * @version 3.0 21/01/21
  */
-public class RegisterLotFragment extends Fragment implements Navigable, LocationHandler,
+public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragmentBinding> implements Navigable, LocationHandler,
         TextWatcher, View.OnClickListener {
 
     // Fragment's constants
@@ -68,20 +76,26 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     private List<SlotOffer> mSlotOfferList;
     private float mSelectedDuration;
     private float mSelectedPrice;
-    private RegisterLotFragmentBinding mRegisterLotFragmentBinding;
     private LocationManager mLocationManager;
     private SlotOfferAdapter mSlotOfferAdapter;
 
+    private static LocationRequest createLocationRequest() {
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(200000);
+        mLocationRequest.setFastestInterval(300000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        return mLocationRequest;
+    }
+
     /**
      * Called to have the fragment instantiate its user interface view.
+     *
+     * @see ViewBindingFragment#onCreateView(ViewBinding)
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        // Create an instance of the binding class for the fragment to use.
-        mRegisterLotFragmentBinding = RegisterLotFragmentBinding.inflate(getLayoutInflater());
-        // Return the root view from the onCreateView() method to make it the active view on the screen.
-        return mRegisterLotFragmentBinding.getRoot();
+        return super.onCreateView(RegisterLotFragmentBinding.inflate(inflater));
     }
 
     /**
@@ -145,25 +159,31 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     /**
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.
+     *
+     * @see ViewBindingFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         // Remove OnClickListeners
-        getBinding().registerLotFragmentBtnRegisterLot.setOnClickListener(null);
-        getBinding().registerLotFragmentBtnAdd.setOnClickListener(null);
-        getBinding().registerLotFragmentMbtnGetLocation.setOnClickListener(null);
+        super.removeOnClickListeners(
+                getBinding().registerLotFragmentBtnRegisterLot,
+                getBinding().registerLotFragmentBtnAdd,
+                getBinding().registerLotFragmentMbtnGetLocation
+        );
         SlotOfferAdapter.setOnItemClickListener(null);
         // Remove TextWatchers
-        getBinding().registerLotFragmentEtPhoneBody.removeTextChangedListener(this);
-        getBinding().registerLotFragmentEtLotName.removeTextChangedListener(this);
-        getBinding().registerLotFragmentEtCapacity.removeTextChangedListener(this);
-        getBinding().registerLotFragmentEtLocationLat.removeTextChangedListener(this);
-        getBinding().registerLotFragmentEtLocationLng.removeTextChangedListener(this);
+        super.removeTextWatchers(
+                getBinding().registerLotFragmentEtPhoneBody,
+                getBinding().registerLotFragmentEtLotName,
+                getBinding().registerLotFragmentEtCapacity,
+                getBinding().registerLotFragmentEtLocationLat,
+                getBinding().registerLotFragmentEtLocationLng
+        );
 
-        mRegisterLotFragmentBinding = null; // Ready to get garbage collected
+        getBinding().registerLotFragmentSDuration.setOnItemSelectedListener(null);
+        getBinding().registerLotFragmentSPrice.setOnItemSelectedListener(null);
+        super.onDestroyView();
     }
-
 
     /**
      * Attaches an observer to the form's state.
@@ -212,6 +232,8 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
      * Initializes the fragment's Ui contents and listeners.
      */
     private void initializeUi() {
+        if (mAuthStateViewModel.getUser() == null) return;
+
         // Initially the button is disabled
         getBinding().registerLotFragmentBtnRegisterLot.setEnabled(false);
 
@@ -230,6 +252,19 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
             if (mLocationManager == null)
                 mLocationManager = new LocationManager(requireContext(), this, true);
             mLocationManager.requestUserLocationUpdates(this);
+
+            final LocationRequest request = createLocationRequest();
+            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                    .addLocationRequest(request);
+
+            SettingsClient settingsClient = LocationServices.getSettingsClient(this.getActivity());
+            Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(builder.build());
+
+            task.addOnSuccessListener(this.getActivity(), locationSettingsResponse -> {
+                Log.d(TAG, "onSuccess: " + locationSettingsResponse.toString());
+//                    startLocationService(client, request, new LocationCallback());
+//                    successListener.onSuccess(locationSettingsResponse);
+            });
         });
 
         setUpRecyclerViewWithAdapter();
@@ -345,7 +380,6 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
         final String phoneNumber = getBinding().registerLotFragmentEtPhoneBody.getText() != null ?
                 getBinding().registerLotFragmentEtPhoneBody.getText().toString().replace(" ", "") : "";
 
-        int a = mSlotOfferList.size();
         mRegisterLotViewModel.lotRegistrationDataChanged(
                 phoneNumber,
                 lotCapacity,
@@ -414,15 +448,6 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
     }
 
     /**
-     * Getter for {@link #mRegisterLotFragmentBinding}
-     *
-     * @return A reference to the fragment's binding instance.
-     */
-    public RegisterLotFragmentBinding getBinding() {
-        return mRegisterLotFragmentBinding;
-    }
-
-    /**
      * Called when the "register" button has been clicked.
      *
      * @param v The view that was clicked.
@@ -469,6 +494,7 @@ public class RegisterLotFragment extends Fragment implements Navigable, Location
      */
     @Override
     public void onLocationResult(LocationResult locationResult) {
+        Log.d(TAG, "onLocationResult");
         if (locationResult != null) {
             // Access the latest location
             Location currentLocation = locationResult.getLastLocation();

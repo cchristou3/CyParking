@@ -1,5 +1,7 @@
 package io.github.cchristou3.CyParking.data.repository;
 
+import android.util.Log;
+
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -11,18 +13,21 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 
-import static io.github.cchristou3.CyParking.data.repository.RepositoryData.BOOKING;
-import static io.github.cchristou3.CyParking.data.repository.RepositoryData.BOOKING_USER_ID;
-import static io.github.cchristou3.CyParking.data.repository.RepositoryData.COMPLETED;
+import static io.github.cchristou3.CyParking.data.repository.RepositoryData.BOOKINGS;
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.PARKING_LOTS;
 
 /**
  * Purpose: <p>contain all methods to access the (cloud / local) database's booking node.</p>
  *
  * @author Charalambos Christou
- * @version 7.0 12/01/21
+ * @version 8.0 23/01/21
  */
 public class BookingRepository {
+
+    public static final String COMPLETED = "completed";
+    private static final String BOOKING_USER_ID = "bookingUserId";
+    private static final String BOOKING_DETAILS = "bookingDetails";
+    private static final String TAG = BookingRepository.class.getName();
 
     /**
      * Returns the bookings of the specified userId,
@@ -32,11 +37,13 @@ public class BookingRepository {
      * @return A query which returns all the bookings of the specified userId
      */
     @NotNull
-    public Query retrieveUserBookings(String userId) {
+    public Query getUserBookings(String userId) {
+        Log.d(TAG, "retrieveUserBookings: GET " + BOOKINGS
+                + " WHERE " + BOOKING_USER_ID + " == " + userId
+                + " AND " + BOOKING_DETAILS + "." + COMPLETED + " == " + true);
         return getBookingsNode()
                 .whereEqualTo(BOOKING_USER_ID, userId)
-                .orderBy(COMPLETED, Query.Direction.ASCENDING).limit(20); // Show pending bookings first
-        // TODO: Make a callable function - filter data (get only pending bookings) on the server and send to the client
+                .whereEqualTo(BOOKING_DETAILS + "." + COMPLETED, false);
     }
 
     /**
@@ -120,6 +127,6 @@ public class BookingRepository {
     @NotNull
     private CollectionReference getBookingsNode() {
         return FirebaseFirestore.getInstance()
-                .collection(BOOKING);
+                .collection(BOOKINGS);
     }
 }

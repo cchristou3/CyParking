@@ -12,8 +12,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -22,6 +22,7 @@ import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.model.user.Feedback;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FeedbackFragmentBinding;
+import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
@@ -36,23 +37,23 @@ import io.github.cchristou3.CyParking.utilities.ViewUtility;
  * </p>
  *
  * @author Charalambos Christou
- * @version 4.0 14/01/21
+ * @version 5.0 21/01/21
  */
-public class FeedbackFragment extends Fragment implements Navigable, TextWatcher {
+public class FeedbackFragment extends ViewBindingFragment<FeedbackFragmentBinding> implements Navigable, TextWatcher {
 
     // Fragment data members
     private FeedbackViewModel mFeedbackViewModel;
     private AuthStateViewModel mAuthStateViewModel;
-    private FeedbackFragmentBinding mFeedbackFragmentBinding;
 
     /**
      * Called to have the fragment instantiate its user interface view.
+     *
+     * @see ViewBindingFragment#onCreateView(ViewBinding)
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mFeedbackFragmentBinding = FeedbackFragmentBinding.inflate(inflater);
-        return mFeedbackFragmentBinding.getRoot();
+        return super.onCreateView(FeedbackFragmentBinding.inflate(inflater));
     }
 
     /**
@@ -136,25 +137,17 @@ public class FeedbackFragment extends Fragment implements Navigable, TextWatcher
     /**
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.
+     *
+     * @see ViewBindingFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         getBinding().feedbackFragmentMbtnSendFeedback.setOnClickListener(null);
         getBinding().feedbackFragmentEtFeedbackInput.removeTextChangedListener(this);
         if (mAuthStateViewModel.getUser() == null) {
             getBinding().feedbackFragmentEtEmailInput.removeTextChangedListener(this);
         }
-        mFeedbackFragmentBinding = null;
-    }
-
-    /**
-     * Access the {@link #mFeedbackFragmentBinding}.
-     *
-     * @return A reference to {@link #mFeedbackFragmentBinding}.
-     */
-    private FeedbackFragmentBinding getBinding() {
-        return mFeedbackFragmentBinding;
+        super.onDestroyView();
     }
 
     /**

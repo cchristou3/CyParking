@@ -8,26 +8,21 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewbinding.ViewBinding;
 
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
+import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
-import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
-import io.github.cchristou3.CyParking.data.pojo.SnapshotState;
 import io.github.cchristou3.CyParking.databinding.FragmentViewBookingsBinding;
+import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
@@ -35,7 +30,7 @@ import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 
-import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment.TAG;
+import static io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking.getListOf;
 
 /**
  * Purpose: <p>Shows pending / completed bookings of the user / operator?</p>
@@ -45,199 +40,154 @@ import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragm
  * </p>
  *
  * @author Charalambos Christou
- * @version 4.0 28/12/20
+ * @version 5.0 23/01/21
  */
-public class ViewBookingsFragment extends Fragment implements Navigable {
+public class ViewBookingsFragment extends ViewBindingFragment<FragmentViewBookingsBinding> implements Navigable {
 
     // Fragment variables
-    private ArrayList<Booking> mBookingList;
+    private static final String TAG = ViewBookingsFragment.class.getName() + "UniqueTag";
     private AuthStateViewModel mAuthStateViewModel;
-    private FragmentViewBookingsBinding mFragmentViewBookingsBinding;
     private BookingAdapter mBookingAdapter;
     private ViewBookingsViewModel mViewBookingsViewModel;
-    private SnapshotState mSnapshotState;
 
+    /**
+     * Initialize the fragment's ViewModels.
+     *
+     * @param savedInstanceState The previously stored bundle.
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Initialize the array-list
-        mBookingList = new ArrayList<>();
-        // Initialize the data retrieval state
-        mSnapshotState = new SnapshotState(SnapshotState.INITIAL_DATA_RETRIEVAL);
+        initializeViewModels();
     }
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     *
+     * @see ViewBindingFragment#onCreateView(ViewBinding)
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mFragmentViewBookingsBinding = FragmentViewBookingsBinding.inflate(inflater);
-        return mFragmentViewBookingsBinding.getRoot();
+        return super.onCreateView(FragmentViewBookingsBinding.inflate(inflater));
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // Initialize the mAuthStateViewModel
-        mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
+        setViewModelObservers();
+    }
 
+
+    /**
+     * Called when the view previously created by {@link #onCreateView} has
+     * been detached from the fragment.
+     *
+     * @see ViewBindingFragment#onDestroyView()
+     */
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mViewBookingsViewModel.updateBookingList(null);
+        BookingAdapter.setOnItemClickListener(null);
+    }
+
+    /**
+     * Attaches observers to the user's state and the booking list state.
+     */
+    private void setViewModelObservers() {
         // Attach an observer to the user's state.
         // If the user logs out while being in this screen, an alert is shown
         mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
+            Log.d(TAG, "User State: " + loggedInUser);
             if (loggedInUser == null) { // User has logged out
                 AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
                         R.string.logout_view_bookings_screen_msg);
+            } else {
+                // Get bookings from Firestore
+                String userId = loggedInUser.getUserId();
+                mViewBookingsViewModel.getUserBookings(userId)
+                        .addOnCompleteListener(task -> {
+                            Log.d(TAG, "On SnapShot Query: " + task.getResult().getQuery().toString());
+                            final Exception error = task.getException();
+                            final QuerySnapshot value = task.getResult();
+                            if (error != null || value == null) { // Check whether an error occurred
+                                Log.d(TAG, "New Snapshot error: " + error);
+                                // TODO: 22/01/2021 Show message 'Unfortunately, couldn't load your bookings...'
+                                return;
+                            }
+
+                            List<Booking> bookings = getListOf(value);
+                            Log.d(TAG, "New Snapshot success: " + bookings);
+                            // - Update the booking list state with the newly created booking list
+                            mViewBookingsViewModel.updateBookingList(bookings);
+                        });
             }
         });
 
-        // Initialize the fragment's ViewModel / LiveData
+        mViewBookingsViewModel.getBookingListState().observe(getViewLifecycleOwner(), bookings -> {
+            // The RecyclerView's adapter uses DiffUtil to update the list accordingly
+            Log.d(TAG, "BookingListState: ");
+            if (mBookingAdapter == null) {
+                initializeUi(bookings);
+            } else {
+                updateUi(bookings);
+            }
+        });
+
+    }
+
+    private void updateUi(List<Booking> bookings) {
+        if (bookings.isEmpty()) {
+            displayMessage();
+        } else {
+            mBookingAdapter.submitList(bookings);
+        }
+    }
+
+    /**
+     * Initializes the fragment's ViewModels.
+     */
+    private void initializeViewModels() {
+        mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
         mViewBookingsViewModel =
                 new ViewModelProvider(this, new ViewBookingsViewModelFactory())
                         .get(ViewBookingsViewModel.class);
     }
 
     /**
-     * Called when the Fragment is visible to the user.
-     * Retrieve all bookings that belong to this user and listen to changes.
-     * If no bookings were found, show a message to the user.
+     * Hides any list related Views and displays a message to the user.
+     * The message has to do about the user not having any bookings.
      */
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check whether the user is logged in
-        if (mAuthStateViewModel.getUser() != null) {
-            // Show placeholder layout and hide the filter buttons
-            getBinding().fragmentViewBookingsSflShimmerLayout.startShimmerAnimation();
-            DatabaseObserver.createQueryObserver(
-                    mViewBookingsViewModel // The Query
-                            .retrieveUserBookings(mAuthStateViewModel.getUser().getUserId()),
-                    (value, error) -> { // The event listener
-                        if (error != null) {
-                            Log.d(TAG, "onStart: " + error.getLocalizedMessage());
-                            return;
-                            // TODO: Inform user
-                        }
-                        if (value == null) return;
-
-                        if (!value.isEmpty()) {
-                            switch (mSnapshotState.getState()) {
-                                case SnapshotState.INITIAL_DATA_RETRIEVAL: { // Happens when we first attach the listener
-                                    Log.d(TAG, "INITIAL_DATA_RETRIEVAL: ");
-                                    // Fill the list with all the retrieved documents
-                                    InitializeBookingList(value);
-                                    // Hide the placeholder container and move on to the next state
-                                    getBinding().fragmentViewBookingsSflShimmerLayout.stopShimmerAnimation();
-                                    getBinding().fragmentViewBookingsSflShimmerLayout.setVisibility(View.GONE);
-                                    mSnapshotState.setState(SnapshotState.LISTENING_TO_DATA_CHANGES);
-                                    break;
-                                }
-                                case SnapshotState.LISTENING_TO_DATA_CHANGES: {
-                                    Log.d(TAG, "LISTENING_TO_DATA_CHANGES: ");
-                                    /* Amend the list's contents: More efficient.
-                                       Instead of creating a new list and re-adding all elements.
-                                       We simply add/update/remove the objects that got added/updated/removed */
-                                    updateBookingList(value);
-                                    break;
-                                }
-                                default:
-                                    throw new IllegalStateException("The state must be one of those:\n" +
-                                            "INITIAL_DATA_RETRIEVAL\n" +
-                                            "LISTENING_TO_DATA_CHANGES");
-                            }
-                        } else {
-                            // Display message to user
-                            getBinding().fragmentViewBookingsTxtNoBookings.setVisibility(View.VISIBLE);
-                            // Hide view's related to displaying
-                            getBinding().fragmentViewBookingsRvRecyclerview.setVisibility(View.GONE);
-                            getBinding().fragmentViewBookingsSflShimmerLayout.stopShimmerAnimation(); // Also, stop animating
-                            getBinding().fragmentViewBookingsSvScrollView.setVisibility(View.GONE);
-                        }
-                    }
-            ).registerLifecycleObserver(getLifecycle());
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // Stop animating, if still animating
-        if (getBinding().fragmentViewBookingsSflShimmerLayout.isAnimationStarted()) {
-            getBinding().fragmentViewBookingsSflShimmerLayout.stopShimmerAnimation();
-        }
-    }
-
-    /**
-     * Called when the view previously created by {@link #onCreateView} has
-     * been detached from the fragment.
-     */
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        BookingAdapter.setOnItemClickListener(null);
-        mFragmentViewBookingsBinding = null;
-    }
-
-    /**
-     * Access the {@link #mFragmentViewBookingsBinding}.
-     *
-     * @return A reference to {@link #mFragmentViewBookingsBinding}.
-     */
-    private FragmentViewBookingsBinding getBinding() {
-        return mFragmentViewBookingsBinding;
-    }
-
-    /**
-     * Syncs the local booking list of the user with the one on the server.
-     *
-     * @param bookingsOnServer The bookings list on the server
-     */
-    private void updateBookingList(@NotNull QuerySnapshot bookingsOnServer) {
-        for (DocumentChange dc : bookingsOnServer.getDocumentChanges()) {
-            switch (dc.getType()) {
-                case ADDED:
-                    Log.d(TAG, "onEvent: Added " + dc.getDocument().toObject(Booking.class));
-                    mBookingList.add(dc.getDocument()
-                            .toObject(Booking.class));
-                    // Inform the adapter to add the new item to the view
-                    mBookingAdapter.notifyItemInserted(mBookingList.size());
-                    break;
-                case MODIFIED:
-                    Log.d(TAG, "onEvent: Modified " + dc.getDocument().toObject(Booking.class));
-                    findAndUpdateBooking(mBookingList,
-                            dc.getDocument().toObject(Booking.class));
-                    break;
-                case REMOVED:
-                    Log.d(TAG, "onEvent: Removed " + dc.getDocument().toObject(Booking.class));
-                    int indexOfRemovedObject = mBookingList.indexOf(dc.getDocument().toObject(Booking.class));
-                    mBookingList.remove(dc.getDocument().
-                            toObject(Booking.class));
-                    // Inform the adapter to remove the item from the view
-                    mBookingAdapter.notifyItemRemoved(indexOfRemovedObject);
-                    break;
-            }
-        }
-        mViewBookingsViewModel.updateBookingList(mBookingList);
+    private void displayMessage() {
+        // Display message to user
+        getBinding().fragmentViewBookingsTxtNoBookings.setVisibility(View.VISIBLE);
+        // Hide view's related to displaying
+        getBinding().fragmentViewBookingsRvRecyclerview.setVisibility(View.GONE);
     }
 
     /**
      * Initializes the fragment's RecyclerView and its adapter instance.
-     * Also, initially loads the current QuerySnapshot's documents ({@link Booking})
-     * objects to the fragment's ViewModel.
-     *
-     * @param bookingsOnServer The bookings list on the server
      */
-    private void InitializeBookingList(@NotNull QuerySnapshot bookingsOnServer) {
-        for (DocumentSnapshot doc : bookingsOnServer.getDocuments()) {
-            mBookingList.add(doc.toObject(Booking.class));
-        }
-        // Set the retrieved data as the value of the LiveData
-        mViewBookingsViewModel.updateBookingList(mBookingList);
+    private void initializeUi(List<Booking> bookingList) {
+        // Create adapter - set up RecyclerView
+        setUpAdapter();
+        setUpRecyclerView();
+        // Set the RecyclerView's adapter
+        getBinding().fragmentViewBookingsRvRecyclerview.setAdapter(mBookingAdapter);
+        updateUi(bookingList);
 
-        // Set up RecyclerView
-        getBinding().fragmentViewBookingsRvRecyclerview
-                .setLayoutManager(new LinearLayoutManager(requireContext()));
-        getBinding().fragmentViewBookingsRvRecyclerview.setHasFixedSize(true);
+        Log.d(TAG, "initializeUi: Done");
+    }
 
+    /**
+     * Initialize the RecyclerView's adapter with the current booking list instance.
+     * Add an onClick listener for the adapter's items.
+     * Register the adapter a Data Observer to anticipate changes when items get deleted.
+     */
+    private void setUpAdapter() {
         // Create new adapter and pass the fetched data.
-        mBookingAdapter = new BookingAdapter(mBookingList);
+        mBookingAdapter = new BookingAdapter(new BookingsDiffCallback());
         // Pass an onItemClickListener to the adapter
         BookingAdapter.setOnItemClickListener(v ->
                 AlertBuilder.showAlert(requireContext(),
@@ -246,53 +196,31 @@ public class ViewBookingsFragment extends Fragment implements Navigable {
                         android.R.string.yes,
                         android.R.string.cancel,
                         (dialog, which) -> {
+                            // Access the item's ViewHolder Object
                             RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
-                            int position = viewHolder.getAdapterPosition();
-                            final String bookingToBeCancelledId = mBookingList.get(position).generateUniqueId();
+                            int position = viewHolder.getAdapterPosition(); // get its position
+                            final String bookingToBeCancelledId =
+                                    mViewBookingsViewModel.getBookingList().get(position).generateUniqueId();
+                            // Remove specific booking from the database.
                             mViewBookingsViewModel.cancelParkingBooking(bookingToBeCancelledId);
+                            // Remove booking from the booking list state
+                            List<Booking> newBookings = Booking.cloneList(mViewBookingsViewModel.getBookingList());
+                            newBookings.remove(position);
+                            mViewBookingsViewModel.updateBookingList(newBookings);
                         },
                         null));
-
-        mBookingAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-                Log.d(TAG, "onItemRangeMoved: ");
-                if (fromPosition >= 2) {
-                    // Scroll to the beginning of the list
-                    getBinding().fragmentViewBookingsRvRecyclerview
-                            .smoothScrollToPosition(0);
-                }
-            }
-        });
-
-        // Set the recyclerview's adapter
-        getBinding().fragmentViewBookingsRvRecyclerview.setAdapter(mBookingAdapter);
     }
 
     /**
-     * Searches the list for the specified Booking and updates it accordingly
-     *
-     * @param bookingArrayList List of all the bookings of the current logged in user.
-     * @param booking          The booking which got changed.
+     * Set up RecyclerView with a LayoutManager and set its
+     * {@link RecyclerView#hasFixedSize()} flag to true (for optimisations).
      */
-    public void findAndUpdateBooking(@NotNull ArrayList<Booking> bookingArrayList, Booking booking) {
-        // Traverse the booking list, searching for an object
-        for (int i = 0; i < bookingArrayList.size(); i++) {
-            // If there was a matching
-            if (bookingArrayList.get(i).generateUniqueId()
-                    .equals(booking.generateUniqueId())) {
-                // If it was changed from "Pending" to "Completed", move it at the end of the list
-                if (!bookingArrayList.get(i).isCompleted() && booking.isCompleted()) {
-                    // Remove item and notify the adapter
-                    bookingArrayList.remove(i);
-                    mBookingAdapter.notifyItemRemoved(i);
-                    // Add the item at the end of the list and notify the adapter
-                    bookingArrayList.add(bookingArrayList.size() - 1, booking);
-                    mBookingAdapter.notifyItemInserted(bookingArrayList.size() - 1);
-                }
-                return; // stop iterating
-            }
-        }
+    private void setUpRecyclerView() {
+        LinearLayoutManager manager = new LinearLayoutManager(requireContext());
+        manager.setOrientation(RecyclerView.VERTICAL);
+        getBinding().fragmentViewBookingsRvRecyclerview
+                .setLayoutManager(manager);
+        getBinding().fragmentViewBookingsRvRecyclerview.setHasFixedSize(true);
     }
 
     /**

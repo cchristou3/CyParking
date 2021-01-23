@@ -4,12 +4,16 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.google.firebase.firestore.DocumentReference;
-import com.google.gson.annotations.SerializedName;
+import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.github.cchristou3.CyParking.data.model.parking.ParkingId;
 import io.github.cchristou3.CyParking.utilities.ShaUtility;
@@ -25,9 +29,9 @@ import io.github.cchristou3.CyParking.utilities.ShaUtility;
  * for the booking in the database.</p>
  *
  * @author Charalambos Christou
- * @version 4.0 20/01/21
+ * @version 5.0 23/01/21
  */
-public class Booking extends ParkingId implements Parcelable {
+public class Booking extends ParkingId implements Parcelable, Comparable<Booking> {
 
     public static final Creator<Booking> CREATOR = new Creator<Booking>() {
         @Override
@@ -40,17 +44,13 @@ public class Booking extends ParkingId implements Parcelable {
             return new Booking[size];
         }
     };
-
+    public static final String LOT_NAME = "lotName";
     // Operator attributes
-    @SerializedName("operatorId")
     private String operatorId;
-    @SerializedName("parkingName")
     private String lotName;
     // User that makes the booking attributes
-    @SerializedName("userId")
     private String bookingUserId;
     // Booking details
-    @SerializedName("bookingDetails")
     private BookingDetails bookingDetails;
 
     public Booking() { /* no-argument constructor to be used for deserialization */ }
@@ -88,17 +88,50 @@ public class Booking extends ParkingId implements Parcelable {
     }
 
     /**
-     * Compares the given object with the current object.
-     * The {@link #generateUniqueId()} method is used
-     * to produce the id of each object.
+     * Copy constructor for <u>deep copying</u> {@link Booking} objects.
      *
-     * @param obj The object to be compared with.
-     * @return True, if both objects generate the same id. Otherwise, false.
+     * @param booking The {@link Booking} to have its 'contents' copied.
      */
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        if (!(obj instanceof Booking)) return false;
-        return this.generateUniqueId().equals(((Booking) obj).generateUniqueId());
+    public Booking(@NotNull Booking booking) {
+        // Deep copying the object
+        setBookingDetails(
+                new BookingDetails(
+                        booking.getBookingDetails().getDateOfBooking(),
+                        booking.getBookingDetails().getStartingTime(),
+                        booking.getBookingDetails().getSlotOffer(),
+                        booking.isCompleted()
+                )
+        );
+        // Trim returns a new String - new reference
+        setLotName(booking.getLotName().trim());
+        setBookingUserId(booking.getBookingUserId().trim());
+        setOperatorId(booking.getOperatorId().trim());
+        setParkingId(booking.parkingId);
+    }
+
+    /**
+     * Create a new list (new reference), containing all the elements of the given list.
+     *
+     * @param list A simple list object.
+     * @return A fresh list containing all the elements of the given list.
+     */
+    @NotNull
+    @Contract("_ -> new")
+    public static List<Booking> cloneList(List<Booking> list) {
+        return new ArrayList<>(list);
+    }
+
+    /**
+     * - Create an empty list to store the bookings.
+     * - Convert each document into a booking object and add it to the list.
+     * - Return the list.
+     *
+     * @param value The {@link QuerySnapshot} object containing all the user's bookings.
+     * @return A {@link List} of {@link Booking} objects.
+     */
+    @NotNull
+    public static List<Booking> getListOf(@NotNull QuerySnapshot value) {
+        return value.toObjects(Booking.class);
     }
 
     /**
@@ -166,12 +199,13 @@ public class Booking extends ParkingId implements Parcelable {
     }
 
     /**
-     * Access the {@link BookingDetails#completed} data member.
+     * Access the {@link BookingDetails#isCompleted()} data member.
      *
-     * @return The value of {@link BookingDetails#completed}.
+     * @return The value of {@link BookingDetails#isCompleted()}.
      */
+    @Exclude
     public boolean isCompleted() {
-        return bookingDetails.completed;
+        return bookingDetails.isCompleted();
     }
 
     /**
@@ -244,5 +278,25 @@ public class Booking extends ParkingId implements Parcelable {
      */
     public void setBookingDetails(BookingDetails bookingDetails) {
         this.bookingDetails = bookingDetails;
+    }
+
+    /**
+     * Compares this object with the specified object for order.  Returns a
+     * negative integer, zero, or a positive integer as this object is less
+     * than, equal to, or greater than the specified object.
+     *
+     * @param obj the object to be compared.
+     * @return a negative integer, zero, or a positive integer as this object
+     * is less than, equal to, or greater than the specified object.
+     */
+    @Override
+    public int compareTo(Booking obj) {
+        return (obj != null
+                && obj.parkingId == this.parkingId
+                && obj.bookingUserId.equals(this.bookingUserId)
+                && obj.operatorId.equals(this.operatorId)
+                && obj.lotName.equals(this.lotName)
+                && obj.bookingDetails.compareTo(this.bookingDetails) == 0
+        ) ? 0 : 1;
     }
 }

@@ -20,12 +20,22 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
+import java.util.HashMap;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
+import io.github.cchristou3.CyParking.data.manager.ConnectivityHelper;
+import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 
 /**
@@ -53,6 +63,7 @@ public class MainHostActivity extends AppCompatActivity {
     private Menu mDrawerMenu;
     private DrawerLayout mDrawerLayout;
     private AuthStateViewModel mAuthStateViewModel;
+    private ConnectivityHelper mConnectivityHelper;
 
     /**
      * Initialises the activity.
@@ -66,6 +77,38 @@ public class MainHostActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         FirebaseApp.initializeApp(this.getApplicationContext());
         setContentView(R.layout.fragment_main_host);
+        // TODO: 20/01/2021 Remove  new DefaultOperatorRepository().addDummyParkingData();
+
+        FirebaseFunctions.getInstance().getHttpsCallable("getNearbyParkingLots")
+                .call(new HashMap<String, Double>() {{ // The request's data.
+                    put("latitude", 34.9214672);
+                    put("longitude", 33.6227833);
+                }}).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Log.d(TAG, "onComplete: " + task.getResult().getData());
+                Log.d(TAG, "onComplete: " +
+                        Arrays.asList(new Gson().fromJson(task.getResult().getData().toString(), String[].class)));
+
+                FirebaseFirestore.getInstance()
+                        .collection("parking_lots")
+                        .whereIn(FieldPath.documentId(),
+                                Arrays.asList(new Gson().fromJson(task.getResult().getData().toString(), String[].class))
+                        ).get().addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        for (DocumentSnapshot shot :
+                                task1.getResult().getDocuments()) {
+                            Log.d(TAG, "onCreate: lot: " + shot.toObject(ParkingLot.class));
+                        }
+                    }
+                });
+            } else {
+                Log.d(TAG, "onComplete: " + task.getException());
+            }
+        });
+
+
+        mConnectivityHelper = new ConnectivityHelper(getApplicationContext());
+        mConnectivityHelper.registerNetworkCallback();
 
         // Set up ActionBar
         Toolbar toolbar = findViewById(R.id.fragment_main_host_tb_toolbar);
@@ -91,6 +134,12 @@ public class MainHostActivity extends AppCompatActivity {
         mAuthStateViewModel.getUserState().observe(this, this::updateDrawer);
 
         mAuthStateViewModel.getUserInfo(this, FirebaseAuth.getInstance().getCurrentUser());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mConnectivityHelper.unregisterNetworkCallback();
     }
 
     /**

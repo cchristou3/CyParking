@@ -9,9 +9,9 @@ import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +20,7 @@ import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentAccountBinding;
+import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.user.account.update.UpdateAccountDialog;
@@ -29,24 +30,24 @@ import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorHosteeFragment;
  * Purpose: <p>Going to get replaced with another Navigation option</p>
  *
  * @author Charalambos Christou
- * @version 3.0 28/12/20
+ * @version 4.0 21/01/21
  */
-public class AccountFragment extends Fragment implements Navigable {
+public class AccountFragment extends ViewBindingFragment<FragmentAccountBinding> implements Navigable {
 
     // Fragment's data members
     private final String TAG = AccountFragment.this.getClass().getName();
     private AuthStateViewModel mAuthStateViewModel;
-    private FragmentAccountBinding mFragmentAccountBinding;
 
     /**
      * Called to have the fragment instantiate its user interface view.
+     *
+     * @see ViewBindingFragment#onCreateView(ViewBinding)
      */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        mFragmentAccountBinding = FragmentAccountBinding.inflate(inflater);
-        return mFragmentAccountBinding.getRoot();
+        return super.onCreateView(FragmentAccountBinding.inflate(inflater));
     }
 
     /**
@@ -68,11 +69,18 @@ public class AccountFragment extends Fragment implements Navigable {
     /**
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.
+     *
+     * @see ViewBindingFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {
+        super.removeOnClickListeners(
+                getBinding().fragmentAccountBtnToAuth,
+                getBinding().fragmentAccountMbtnUpdateName,
+                getBinding().fragmentAccountMbtnUpdateEmail,
+                getBinding().fragmentAccountMbtnUpdatePassword
+        );
         super.onDestroyView();
-        mFragmentAccountBinding = null;
     }
 
     /**
@@ -165,15 +173,6 @@ public class AccountFragment extends Fragment implements Navigable {
                 dialog.show(fm, TAG);
             }
         };
-    }
-
-    /**
-     * Access the {@link #mFragmentAccountBinding}.
-     *
-     * @return A reference to {@link #mFragmentAccountBinding}.
-     */
-    private FragmentAccountBinding getBinding() {
-        return mFragmentAccountBinding;
     }
 
     /**

@@ -35,13 +35,13 @@ public class ViewBookingsViewModelTest extends InstantTaskRuler {
     @Before
     public void setUp() {
         BookingRepository mockRepository = Mockito.mock(BookingRepository.class);
-        when(mockRepository.retrieveUserBookings("mockId")).thenReturn(Mockito.mock(Query.class));
+        when(mockRepository.getUserBookings("mockId")).thenReturn(Mockito.mock(Query.class));
         viewBookingsViewModel = new ViewBookingsViewModel(mockRepository);
     }
 
     @Test
     public void getBookingList_returnsNonNull() {
-        assertThat(viewBookingsViewModel.getBookingList(), is(not(nullValue())));
+        assertThat(viewBookingsViewModel.getBookingListState(), is(not(nullValue())));
     }
 
     @Test
@@ -51,8 +51,8 @@ public class ViewBookingsViewModelTest extends InstantTaskRuler {
         // When the booking list got updated
         viewBookingsViewModel.updateBookingList(bookings);
         // Then the LiveData's value should update
-        assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingList()), is(not(nullValue())));
-        assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingList()), is(bookings));
+        assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingListState()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingListState()), is(bookings));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class ViewBookingsViewModelTest extends InstantTaskRuler {
         // When the booking list got updated to null
         viewBookingsViewModel.updateBookingList(null);
         // Then the LiveData's value should update
-        assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingList()), is(nullValue()));
+        assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingListState()), is(nullValue()));
     }
 
     @Test
@@ -70,13 +70,13 @@ public class ViewBookingsViewModelTest extends InstantTaskRuler {
         // When the booking list got updated to null
         viewBookingsViewModel.updateBookingList(bookings);
         // Then the LiveData's value should update
-        assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingList()), is(not(nullValue())));
-        assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingList()), is(bookings));
+        assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingListState()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingListState()), is(bookings));
     }
 
 
     @Test
     public void retrieveUserBookings_returnsNonNull() {
-        assertThat(viewBookingsViewModel.retrieveUserBookings("mockId"), is(not(nullValue())));
+        assertThat(viewBookingsViewModel.getUserBookings("mockId"), is(not(nullValue())));
     }
 }

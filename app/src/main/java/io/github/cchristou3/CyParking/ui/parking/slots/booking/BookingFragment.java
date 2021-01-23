@@ -12,8 +12,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewbinding.ViewBinding;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -36,6 +36,7 @@ import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.BookingDetails;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentParkingBookingBinding;
+import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
@@ -46,8 +47,6 @@ import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.ui.widgets.TimePickerDialog;
 import io.github.cchristou3.CyParking.utilities.Utility;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
-
-import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment.TAG;
 
 /**
  * Purpose: <p>View parking details,
@@ -66,14 +65,14 @@ import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragm
  * -> if not valid show error to getBinding().fragmentParkingBookingTxtDate
  *
  * @author Charalambos Christou
- * @version 5.0 30/12/20
+ * @version 6.0 21/01/21
  */
-public class BookingFragment extends Fragment implements Navigable {
+public class BookingFragment extends ViewBindingFragment<FragmentParkingBookingBinding> implements Navigable {
 
     // Fragment variables
+    private static final String TAG = BookingFragment.class.getName() + "UniqueTag";
     private AuthStateViewModel mAuthStateViewModel;
     private BookingViewModel mBookingViewModel;
-    private FragmentParkingBookingBinding mFragmentParkingBookingBinding;
     private ParkingLot mSelectedParking;
 
     /**
@@ -98,14 +97,12 @@ public class BookingFragment extends Fragment implements Navigable {
      * @param container          The parent view
      * @param savedInstanceState A bundle which contains info about previously stored data
      * @return The view of the fragment
+     * @see ViewBindingFragment#onCreateView(ViewBinding)
      */
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Create an instance of the binding class for the fragment to use.
-        mFragmentParkingBookingBinding = FragmentParkingBookingBinding.inflate(getLayoutInflater());
-        // Return the root view from the onCreateView() method to make it the active view on the screen.
-        return mFragmentParkingBookingBinding.getRoot();
+        return super.onCreateView(FragmentParkingBookingBinding.inflate(inflater));
     }
 
     /**
@@ -173,14 +170,17 @@ public class BookingFragment extends Fragment implements Navigable {
     /**
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.
+     *
+     * @see ViewBindingFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {
+        super.removeOnClickListeners(
+                getBinding().fragmentParkingBookingBtnStartingTimeButton,
+                getBinding().fragmentParkingBookingBtnDateButton,
+                getBinding().fragmentParkingBtnBookingButton
+        );
         super.onDestroyView();
-        getBinding().fragmentParkingBookingBtnStartingTimeButton.setOnClickListener(null);
-        getBinding().fragmentParkingBookingBtnDateButton.setOnClickListener(null);
-        getBinding().fragmentParkingBtnBookingButton.setOnClickListener(null);
-        mFragmentParkingBookingBinding = null; // Ready to get CGed
     }
 
     /**
@@ -201,10 +201,10 @@ public class BookingFragment extends Fragment implements Navigable {
      */
     private void setViewModelObservers() {
         // Set up LiveData's Observers
-        mBookingViewModel
-                .getPickedDate().observe(getViewLifecycleOwner(), getBinding().fragmentParkingBookingTxtDate::setText);
-        mBookingViewModel
-                .getPickedStartingTime().observe(getViewLifecycleOwner(), getBinding().fragmentParkingBookingTxtStartingTime::setText);
+        mBookingViewModel.getPickedDate()
+                .observe(getViewLifecycleOwner(), getBinding().fragmentParkingBookingTxtDate::setText);
+        mBookingViewModel.getPickedStartingTime()
+                .observe(getViewLifecycleOwner(), getBinding().fragmentParkingBookingTxtStartingTime::setText);
 
         // Observe the users Auth state
         mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
@@ -251,7 +251,11 @@ public class BookingFragment extends Fragment implements Navigable {
             // The dialog's date will be set to the current date.
             new DatePickerDialog(requireContext(),
                     (viewObject, selectedYear, selectedMonth, selectedDayOfMonth) ->
-                            mBookingViewModel.updatePickedDate(selectedYear, selectedMonth, selectedDayOfMonth),
+                            mBookingViewModel.updatePickedDate(
+                                    selectedYear,
+                                    selectedMonth + 1, // As the Georgian Calendar's months starts from 0
+                                    selectedDayOfMonth
+                            ),
                     // The date to show when the user is prompt the date picker - current date
                     currentYear, currentMonth, currentDay)
                     .show();
@@ -317,6 +321,8 @@ public class BookingFragment extends Fragment implements Navigable {
             return; // Terminate the method
         }
         // Access the current date and compare it with the inputted one.
+        Log.d(TAG, "today: " + Utility.getCurrentDate());
+        Log.d(TAG, "picked date: " + pickedDateObject);
         if (pickedDateObject.compareTo(Utility.getCurrentDate()) >= 0) {// Date is larger or equal than today's date)
             final LoggedInUser user = mAuthStateViewModel.getUserState().getValue();
             if (user == null) return; // If not logged in, exit the method
@@ -400,15 +406,6 @@ public class BookingFragment extends Fragment implements Navigable {
             );
             timePickerDialog.show();
         };
-    }
-
-    /**
-     * Access the {@link #mFragmentParkingBookingBinding}.
-     *
-     * @return A reference to {@link #mFragmentParkingBookingBinding}.
-     */
-    private FragmentParkingBookingBinding getBinding() {
-        return mFragmentParkingBookingBinding;
     }
 
     /**

@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewbinding.ViewBinding;
 
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
@@ -30,12 +31,11 @@ import io.github.cchristou3.CyParking.data.manager.LocationManager;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentHomeBinding;
+import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModelFactory;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
-
-import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 
 /**
  * Purpose: <p>Show to the user all available action options</p>
@@ -49,14 +49,14 @@ import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
  * </p>
  *
  * @author Charalambos Christou
- * @version 7.0 12/01/21
+ * @version 8.0 21/01/21
  */
-public class HomeFragment extends Fragment implements Navigable, LocationHandler {
+public class HomeFragment extends ViewBindingFragment<FragmentHomeBinding> implements Navigable, LocationHandler {
 
     // Fragment variables
+    private static final String TAG = HomeFragment.class.getName();
     private LocationManager mLocationManager;
     private AuthStateViewModel mAuthStateViewModel;
-    private FragmentHomeBinding mFragmentHomeBinding;
     // Members related to the Operator
     private OperatorViewModel mOperatorViewModel;
     private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
@@ -68,11 +68,11 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      * @param container          The parent view
      * @param savedInstanceState A bundle which contains info about previously stored data
      * @return The view of the fragment
+     * @see ViewBindingFragment#onCreateView(ViewBinding)
      */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        mFragmentHomeBinding = FragmentHomeBinding.inflate(inflater);
-        return mFragmentHomeBinding.getRoot();
+        return super.onCreateView(FragmentHomeBinding.inflate(inflater));
     }
 
     /**
@@ -93,6 +93,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
             if (mLocationManager == null)
                 mLocationManager = new LocationManager(requireContext(), this, true);
             // Request for the user's latest known location
+            Log.d(TAG, "requestUserLocationUpdates");
             mLocationManager.requestUserLocationUpdates(this);
         });
 
@@ -136,11 +137,21 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      * <em>regardless</em> of whether {@link #onCreateView} returned a
      * non-null view.  Internally it is called after the view's state has
      * been saved but before it has been removed from its parent.
+     *
+     * @see ViewBindingFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {
+        super.removeOnClickListeners(
+                getBinding().fragmentHomeMbtnRegisterParkingLot,
+                getBinding().fragmentHomeMbtnRegisterParkingLot,
+                getBinding().fragmentHomeBtnIncrement,
+                getBinding().fragmentHomeBtnDecrement,
+                getBinding().fragmentHomeBtnNavToMap
+        );
+
+        //mLocationManager = null;
         super.onDestroyView();
-        mFragmentHomeBinding = null;
     }
 
     /**
@@ -195,6 +206,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      * Initializes both the Ui and the database logic related to the operator.
      */
     private void initializeOperator() {
+        // TODO: 19/01/2021 Encapsulate all operator logic to a fragment and simply inflate it
         // Set up the Ui for the operator
         getBinding().fragmentHomeCvLotInfo.setVisibility(View.VISIBLE);
         // Initialize the OperatorViewModel
@@ -295,11 +307,20 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      * @param registerLotVisibility The new visibility of register lot layout.
      */
     private void checkVisibilityOfAppropriateLayout(int lotInfoVisibility, int registerLotVisibility) {
-        if (getBinding().fragmentHomeClShowLotInfo.getVisibility() != lotInfoVisibility) {
-            getBinding().fragmentHomeClShowLotInfo.setVisibility(lotInfoVisibility); // showLotInfo
-        }
-        if (getBinding().fragmentHomeClRegisterLotInfo.getVisibility() != registerLotVisibility) {
-            getBinding().fragmentHomeClRegisterLotInfo.setVisibility(registerLotVisibility); // registerLotInfo
+        updateVisibilityOf(getBinding().fragmentHomeClShowLotInfo, lotInfoVisibility); // showLotInfo
+        updateVisibilityOf(getBinding().fragmentHomeClRegisterLotInfo, registerLotVisibility); // registerLotInfo
+    }
+
+    /**
+     * Updates the visibility status of the given view with the
+     * specified visibility.
+     *
+     * @param view       The view to has its visibility updated.
+     * @param visibility The new visibility of the given view.
+     */
+    private void updateVisibilityOf(@NonNull View view, int visibility) {
+        if (view.getVisibility() != visibility) {
+            view.setVisibility(visibility); // showLotInfo
         }
     }
 
@@ -326,15 +347,6 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
                 mOperatorViewModel.decrementPersonCount(ref);
             }
         });
-    }
-
-    /**
-     * Access the {@link #mFragmentHomeBinding}.
-     *
-     * @return A reference to {@link #mFragmentHomeBinding}.
-     */
-    private FragmentHomeBinding getBinding() {
-        return mFragmentHomeBinding;
     }
 
     /**
@@ -392,6 +404,7 @@ public class HomeFragment extends Fragment implements Navigable, LocationHandler
      */
     @Override
     public void onLocationResult(LocationResult locationResult) {
+        Log.d(TAG, "onLocationResult");
         if (locationResult != null) {
             // Access the user's latest location
             Location userLatestLocation = locationResult.getLastLocation();

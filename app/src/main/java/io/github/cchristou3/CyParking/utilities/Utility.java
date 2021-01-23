@@ -64,7 +64,7 @@ public class Utility {
      */
     static void checkIfFieldsValid(int year, int month, int day) throws IllegalArgumentException {
         if (year <= 0 // Year check
-                || month > 12 || month <= 0 // Month check
+                || month >= 12 || month < 0 // Month check
                 || day > 31 || day <= 0) // Day check
             throw new IllegalArgumentException("Month must be in 1..12 (inclusive) and"
                     + " Day must be 1..31 range (inclusive)");

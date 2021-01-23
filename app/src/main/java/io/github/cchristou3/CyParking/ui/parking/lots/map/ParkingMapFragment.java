@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewbinding.ViewBinding;
 
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -45,6 +46,7 @@ import io.github.cchristou3.CyParking.data.manager.LocationManager;
 import io.github.cchristou3.CyParking.data.manager.MarkerManager;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.databinding.FragmentParkingMapBinding;
+import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
@@ -75,9 +77,23 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.animateAvaila
  * </p>
  *
  * @author Charalambos Christou
- * @version 9.0 21/01/21
+ * @version 10.0 21/01/21
+ * <p>
+ * New changes:
+ * <p><b>On server</b>: via a cloud function retrieve the document ids of all
+ * the Parking Lots that are nearby the user and send it to the client.
+ * <b>On Client</b>: query the parking lots with the specified document ids
+ * (retrieved from the server side) and listen for changes.</p>
+ * <p>The client is fetching the ids only when entering the fragment. Navigating
+ * back to this fragment will not result into re-fetching the ids. The ids, are stored
+ * locally via the ViewModel which are in that case retrieved.</p>
+ * <p>Also added a couple more state LiveData to its ViewModel,
+ * to enable a smooth workflow between
+ * fetching lot's document ids <-> listening for updates on the specified lots
+ * <-> update the Ui.</p>
+ * </p>
  */
-public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
+public class ParkingMapFragment extends ViewBindingFragment<FragmentParkingMapBinding> implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener, Navigable, LocationHandler {
 
     // Constant variables
@@ -89,7 +105,6 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
     // Fragment's variables
     private ParkingMapViewModel mParkingMapViewModel;
     private AuthStateViewModel mAuthStateViewModel;
-    private FragmentParkingMapBinding mFragmentParkingMapBinding;
     private MarkerManager mMarkerManager;
     private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
 
@@ -130,13 +145,14 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      * @param savedInstanceState A bundle which contains info about previously stored data
      * @param inflater           The object which will inflate (create) our layout
      * @param container          ViewGroup container
+     * @see ViewBindingFragment#onCreateView(ViewBinding)
      */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return (mFragmentParkingMapBinding = FragmentParkingMapBinding.inflate(inflater)).getRoot();
+        return super.onCreateView(FragmentParkingMapBinding.inflate(inflater));
     }
 
     /**
@@ -196,14 +212,20 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
     /**
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.
+     *
+     * @see ViewBindingFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         mParkingMapViewModel.updateDocumentState(null); // Resetting its value, in case configuration changes occur.
-        getBinding().fragmentParkingMapImgbtnDirections.setOnClickListener(null);
-        getBinding().fragmentParkingMapBtnBooking.setOnClickListener(null);
-        mFragmentParkingMapBinding = null;
+        // Remove listeners for the map
+        mGoogleMap.setOnMarkerClickListener(null);
+        mGoogleMap.setOnMapClickListener(null);
+        removeOnClickListeners(
+                getBinding().fragmentParkingMapImgbtnDirections,
+                getBinding().fragmentParkingMapBtnBooking
+        );
+        super.onDestroyView();
     }
 
     /**
@@ -654,15 +676,6 @@ public class ParkingMapFragment extends Fragment implements OnMapReadyCallback, 
      */
     private void updateInfoLayoutVisibilityTo(final int visibility) {
         getBinding().fragmentParkingMapCvInfoLayout.setVisibility(visibility);
-    }
-
-    /**
-     * Access the {@link #mFragmentParkingMapBinding}.
-     *
-     * @return A reference to {@link #mFragmentParkingMapBinding}.
-     */
-    private FragmentParkingMapBinding getBinding() {
-        return mFragmentParkingMapBinding;
     }
 
     /**

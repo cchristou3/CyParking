@@ -13,7 +13,7 @@ class RepositoryData {
 
     // Firebase Firestore paths (nodes)
     static final String PARKING_LOTS = "parking_lots";
-    static final String BOOKING = "bookings";
+    static final String BOOKINGS = "bookings";
     static final String FEEDBACK = "feedback";
     static final String USERS = "users";
 
@@ -25,8 +25,6 @@ class RepositoryData {
 
 
     // Database fields
-    static final String BOOKING_USER_ID = "bookingUserId";
-    static final String COMPLETED = "completed";
     static final String USER_EMAIL = "email";
     static final String USER_DISPLAY_NAME = "displayName";
     static final String LATITUDE = "latitude";

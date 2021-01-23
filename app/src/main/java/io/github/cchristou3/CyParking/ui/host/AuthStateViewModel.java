@@ -37,6 +37,7 @@ import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
  * @author Charalambos Christou
  * @version 2.0 12/01/21
  */
+// TODO: 19/01/2021 Rename to global state ViewModel
 public class AuthStateViewModel extends ViewModel {
 
     // Initially set to null
@@ -44,6 +45,8 @@ public class AuthStateViewModel extends ViewModel {
     private final AuthenticatorRepository mAuthenticatorRepository;
 
     // TODO: 18/01/2021 Add Loading bar state
+    // TODO: 19/01/2021 Add connectivity state
+    // TODO: 19/01/2021 Add no connection layout state
 
     /**
      * Initialize the ViewModel's AuthenticatorRepository instance

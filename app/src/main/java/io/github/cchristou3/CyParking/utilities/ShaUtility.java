@@ -2,7 +2,7 @@ package io.github.cchristou3.CyParking.utilities;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -16,7 +16,6 @@ import java.security.NoSuchAlgorithmException;
 public class ShaUtility {
 
     private static final String SHA256 = "SHA-256";
-    private static final String UTF_8 = "UTF-8";
 
     /**
      * Hashes the specified input using a hashing algorithm
@@ -27,10 +26,10 @@ public class ShaUtility {
     @NotNull
     public static String digest(@NotNull String input) {
         try {
-            byte[] bytesOfInput = input.getBytes(UTF_8);
+            byte[] bytesOfInput = input.getBytes(StandardCharsets.UTF_8);
             byte[] result = MessageDigest.getInstance(SHA256).digest(bytesOfInput);
             return bytesToHex(result);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException | NullPointerException e) {
+        } catch (NoSuchAlgorithmException | NullPointerException e) {
             return input;
         }
     }

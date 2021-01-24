@@ -7,9 +7,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
@@ -20,23 +20,20 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
  * their current Slot Offers.
  *
  * @author Charalambos Christou
- * @version 1.0 14/12/20
+ * @version 2.0 24/01/21
  */
-public class SlotOfferAdapter extends RecyclerView.Adapter<SlotOfferAdapter.SlotOfferViewHolder> {
+public class SlotOfferAdapter extends ListAdapter<SlotOffer, SlotOfferAdapter.SlotOfferViewHolder> {
 
     private static View.OnClickListener mOnItemClickListener;
-    // Data members
-    private final List<SlotOffer> mOfferList;
 
     /**
-     * Public Constructor. Initializes the {@link #mOfferList}
-     * with the given argument.
+     * Constructor used to initialize the {@link ListAdapter}
+     * with a {@link DiffUtil.ItemCallback<SlotOffer>} object.
      *
-     * @param offerList A reference of the list that holds all the {@link SlotOffer}s
-     *                  of a parking lot.
+     * @param diffCallback The callback to be used to compare the items of both lists.
      */
-    public SlotOfferAdapter(List<SlotOffer> offerList) {
-        this.mOfferList = offerList;
+    protected SlotOfferAdapter(@NonNull DiffUtil.ItemCallback<SlotOffer> diffCallback) {
+        super(diffCallback);
     }
 
     /**
@@ -78,45 +75,13 @@ public class SlotOfferAdapter extends RecyclerView.Adapter<SlotOfferAdapter.Slot
     @Override
     public void onBindViewHolder(@NonNull SlotOfferViewHolder holder, int position) {
         // - get element of the offerList at this position
-        final SlotOffer slotOfferInThisPosition = mOfferList.get(position);
+        final SlotOffer slotOfferInThisPosition = getItem(position);
         // - replace the contents of the view with that element
         final String duration = Float.toString(slotOfferInThisPosition.getDuration());
         holder.mDuration.setText(duration);
         final String price = Float.toString(slotOfferInThisPosition.getPrice());
         holder.mPrice.setText(price);
 
-    }
-
-    /**
-     * Returns the total number of items in the data set held by the adapter.
-     *
-     * @return The total number of items in this adapter.
-     */
-    @Override
-    public int getItemCount() {
-        return mOfferList.size();
-    }
-
-    /**
-     * Removes the item in the specified position
-     * and notifies the adapter.
-     *
-     * @param position The index of the item within the list.
-     */
-    public void remove(int position) {
-        mOfferList.remove(position);
-        notifyItemRemoved(position);
-    }
-
-    /**
-     * Adds the given {@link SlotOffer} instance to the list
-     * and notifies the adapter.
-     *
-     * @param slotOffer A {@link SlotOffer} instance to be added to the list.
-     */
-    public void insert(SlotOffer slotOffer) {
-        mOfferList.add(slotOffer);
-        notifyItemInserted(mOfferList.size());
     }
 
     /**

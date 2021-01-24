@@ -26,6 +26,10 @@ import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
  * {@link #onResume(LifecycleOwner)} and in {@link #onPause(LifecycleOwner)}
  * respectively.
  * Besides, as a lifecycle observer, it handles it own cleanup in {@link #onStop(LifecycleOwner)}.
+ * <p>
+ * <b>Note:</b> it can only be constructed via
+ * {@link LocationManager#createSubsequentUpdateHelper(Context, Fragment, LocationHandler)}.
+ * </p>
  *
  * @author Charalambos Christou
  * @version 1.0 23/01/21

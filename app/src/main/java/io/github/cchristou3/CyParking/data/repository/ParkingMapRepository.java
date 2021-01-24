@@ -33,7 +33,7 @@ public class ParkingMapRepository {
      * @return The {@link CollectionReference} reference to be observed.
      */
     @NotNull
-    public CollectionReference getParkingLotsNode() {
+    public CollectionReference getParkingLots() {
         return FirebaseFirestore.getInstance().collection(PARKING_LOTS);
     }
 

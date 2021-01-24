@@ -21,6 +21,10 @@ import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
  * has been triggered, any further calls to {@link #requestUserLocationUpdates(Fragment)}
  * will be ignored. To avoid this `neglecting` behaviour simply call {@link #prepareCallback()}
  * on each subsequent call to {@link #requestUserLocationUpdates(Fragment)}.</p>
+ * <p>
+ * <b>Note:</b> it can only be constructed via
+ * {@link LocationManager#createSingleUpdateHelper(Context, LocationHandler)}.
+ * </p>
  *
  * @author Charalambos Christou
  * @version 1.0 23/01/21
@@ -58,6 +62,14 @@ public class SingleUpdateHelper extends LocationManager {
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
+    /**
+     * Implement the {@link LocationCallback#onLocationResult(LocationResult)}
+     * based on the class' {@link #mLocationHandler}. Once the callback method
+     * has been called, the class unregisters itself from location updates
+     * via {@link #removeLocationUpdates()}.
+     *
+     * @return An instance of {@link LocationCallback}.
+     */
     @NonNull
     private LocationCallback getLocationCallback() {
         return new LocationCallback() {
@@ -70,6 +82,11 @@ public class SingleUpdateHelper extends LocationManager {
         };
     }
 
+    /**
+     * Sets the value of the parent's {@link LocationCallback}
+     * to the value returned by this subclass implementation of
+     * {@link #getLocationCallback()}.
+     */
     public void prepareCallback() {
         setLocationCallback(getLocationCallback());
     }

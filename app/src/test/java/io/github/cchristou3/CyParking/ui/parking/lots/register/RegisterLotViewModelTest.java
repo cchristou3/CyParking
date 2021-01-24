@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -136,5 +137,21 @@ public class RegisterLotViewModelTest extends InstantTaskRuler {
         RegisterLotFormState latestForm = getOrAwaitValue(registerLotViewModel.getRegisterLotFormState());
         assertThat(latestForm.isDataValid(), is(false));
         assertThat(latestForm.getSlotOfferError(), is(not(nullValue())));
+    }
+
+    @Test
+    public void updateSlotOfferList_setsNewValue() throws InterruptedException {
+        // Given a new list got received
+        List<SlotOffer> offers = new ArrayList<>();
+        SlotOffer slotOffer = SlotOffer.getRandomInstance(new Random());
+        offers.add(slotOffer);
+        // When the updateSlotOfferList is called
+        registerLotViewModel.updateSlotOfferList(offers);
+        // Then both getSlotOfferListState and
+        // getSlotOfferList should return the expected values
+        assertThat(getOrAwaitValue(registerLotViewModel.getSlotOfferListState()),
+                is(offers));
+        assertThat(registerLotViewModel.getSlotOfferList().get(0),
+                is(slotOffer));
     }
 }

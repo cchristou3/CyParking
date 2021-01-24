@@ -64,9 +64,8 @@ public class OperatorViewModel extends ViewModel {
      * @return A query that retrieves the operator's parking lot from the database.
      */
     public Query observeParkingLot(@NonNull String operatorId) {
-        //noinspection ConstantConditions
         if (operatorId == null || operatorId.length() == 0) throw new IllegalArgumentException();
-        return mDefaultOperatorRepository.observeParkingLot(operatorId);
+        return mDefaultOperatorRepository.getParkingLot(operatorId);
     }
 
     /**

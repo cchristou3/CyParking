@@ -54,7 +54,7 @@ public class BookingRepository {
      * @return The {@link DocumentReference} reference to be observed.
      */
     @NotNull
-    public DocumentReference observeParkingLot(@NotNull ParkingLot selectedParking) {
+    public DocumentReference getParkingLot(@NotNull ParkingLot selectedParking) {
         return FirebaseFirestore.getInstance().collection(PARKING_LOTS)
                 .document(selectedParking.generateUniqueId());
         // TODO: 13/01/2021 Avoid method duplication

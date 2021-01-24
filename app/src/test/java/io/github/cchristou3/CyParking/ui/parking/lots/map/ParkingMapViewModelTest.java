@@ -5,11 +5,17 @@ import android.view.View;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.repository.ParkingMapRepository;
@@ -20,6 +26,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -35,7 +42,7 @@ public class ParkingMapViewModelTest extends InstantTaskRuler {
     public void setUp() {
         ParkingMapRepository mockRepo = Mockito.mock(ParkingMapRepository.class);
         CollectionReference mockRef = Mockito.mock(CollectionReference.class);
-        when(mockRepo.getParkingLotsNode()).thenReturn(mockRef);
+        when(mockRepo.getParkingLots()).thenReturn(mockRef);
         parkingMapViewModel = new ParkingMapViewModel(mockRepo);
     }
 
@@ -110,4 +117,44 @@ public class ParkingMapViewModelTest extends InstantTaskRuler {
     public void getParkingLots_nullSet_throwsException() {
         parkingMapViewModel.getParkingLots(null);
     }
+
+    @Test
+    public void updateDocumentState_setsNewValue() throws InterruptedException {
+        // Given the View got new DocumentChange instances
+        int amount = 3;
+        DocumentChange documentChange = Mockito.mock(DocumentChange.class);
+        List<DocumentChange> changes = new ArrayList<>();
+        for (int i = 0; i < amount; i++) {
+            changes.add(documentChange);
+        }
+        // when the view updates the livedata via updateDocumentState
+        parkingMapViewModel.updateDocumentState(changes);
+        // Then calling getDocumentChangesState should return the same value
+        assertThat(getOrAwaitValue(parkingMapViewModel.getDocumentChangesState()),
+                is(changes));
+        for (int i = 0; i < amount; i++) {
+            assertThat(getOrAwaitValue(parkingMapViewModel.getDocumentChangesState())
+                            .get(i),
+                    is(documentChange));
+        }
+    }
+
+    @Test
+    public void updateIdsState_setsNewValue() throws InterruptedException {
+        // Given the fragment received new document ids
+        int amount = 3;
+        String[] ids = new String[amount];
+        Arrays.asList("1", "2", "3").toArray(ids);
+        // When the the owner calls updateIdsState
+        parkingMapViewModel.updateIdsState(ids);
+        // Then calling getDocumentIdsOfNearbyLots should return the same value but as a HashSet
+        assertThat(getOrAwaitValue(parkingMapViewModel.getDocumentIdsOfNearbyLots()),
+                is(new HashSet<>(Arrays.asList(ids))));
+        for (int i = 1; i <= amount; i++) {
+            assertTrue(getOrAwaitValue(parkingMapViewModel.getDocumentIdsOfNearbyLots())
+                    .contains(Integer.toString(i)));
+        }
+    }
+
+
 }

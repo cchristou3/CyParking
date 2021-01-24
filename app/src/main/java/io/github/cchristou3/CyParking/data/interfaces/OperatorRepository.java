@@ -38,7 +38,7 @@ public interface OperatorRepository {
      * @return A query that returns the parking lot of the operator with the specified id.
      */
     @NotNull
-    Query observeParkingLot(String operatorId);
+    Query getParkingLot(String operatorId);
 
     /**
      * Increases the the number of available spaces of the current lot reference.

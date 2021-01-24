@@ -1,14 +1,17 @@
 package io.github.cchristou3.CyParking.utilities;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -21,6 +24,52 @@ public class Utility {
 
     // Static Constants
     private static final String DATE_PATTERN = "dd-MM-yyyy";
+
+    /**
+     * Checks whether the given list contains the given element
+     * via the use of {@link Comparable#compareTo(Object)}.
+     *
+     * @param aList A list containing elements of type {@link T}.
+     * @param elem  The element to look for
+     * @param <T>   any type
+     * @return True, if an element was found in the list with the same contents
+     * of the given element. Otherwise, false.
+     */
+    public static <T extends Comparable<T>> boolean contains(@NotNull List<T> aList, T elem) {
+        for (T e : aList)
+            if (e.compareTo(elem) == 0)
+                return true;
+        return false;
+    }
+
+    /**
+     * Create a new list (new reference),
+     * containing all the elements of the given list.
+     *
+     * @param list A simple list object.
+     * @param <T>  any type
+     * @return A fresh list containing all the elements
+     * (of type {@link T}) of the given list.
+     */
+    @NotNull
+    @Contract("_ -> new")
+    public static <T> List<T> cloneList(List<T> list) {
+        return new ArrayList<>(list);
+    }
+
+    /**
+     * Create a list of that contains items of type {@link T}
+     * based on the given {@link QuerySnapshot} object.
+     *
+     * @param value  The {@link QuerySnapshot} object containing all the user's bookings.
+     * @param tClass the class of {@link T}
+     * @param <T>    any type
+     * @return A {@link List} of {@link T} objects.
+     */
+    @NotNull
+    public static <T> List<T> getListOf(@NotNull QuerySnapshot value, Class<T> tClass) {
+        return value.toObjects(tClass);
+    }
 
     /**
      * Checks whether the given number is an even number.

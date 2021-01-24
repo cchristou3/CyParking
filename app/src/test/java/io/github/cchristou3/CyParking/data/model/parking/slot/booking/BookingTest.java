@@ -33,7 +33,7 @@ public class BookingTest {
         Booking a = new Booking(PARKING_ID, OPERATOR_ID,
                 LOT_NAME, ISSUER_ID, bookingDetailsA); // Completed set false by default.
 
-        bookingDetailsB.completed = true;
+        bookingDetailsB.setCompleted(true);
         Booking b = new Booking(PARKING_ID, OPERATOR_ID, LOT_NAME, ISSUER_ID, bookingDetailsB);
         // When
         boolean areSame = a.equals(b);

@@ -114,7 +114,7 @@ public class BookingViewModel extends ViewModel {
      * @return A reference of the specified lot in the database.
      */
     public DocumentReference observeParkingLotToBeBooked(ParkingLot selectedLot) {
-        return mBookingRepository.observeParkingLot(selectedLot);
+        return mBookingRepository.getParkingLot(selectedLot);
     }
 
     /**

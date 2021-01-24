@@ -188,7 +188,7 @@ public class ParkingMapViewModel extends ViewModel {
      * in the database.
      */
     public Query getParkingLots(Set<String> ids) {
-        return mParkingMapRepository.getParkingLotsNode()
+        return mParkingMapRepository.getParkingLots()
                 .whereIn(FieldPath.documentId(), new ArrayList<>(ids));
     }
 

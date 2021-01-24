@@ -30,7 +30,8 @@ import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 
-import static io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking.getListOf;
+import static io.github.cchristou3.CyParking.utilities.Utility.cloneList;
+import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
 
 /**
  * Purpose: <p>Shows pending / completed bookings of the user / operator?</p>
@@ -117,7 +118,7 @@ public class ViewBookingsFragment extends ViewBindingFragment<FragmentViewBookin
                                 return;
                             }
 
-                            List<Booking> bookings = getListOf(value);
+                            List<Booking> bookings = getListOf(value, Booking.class);
                             Log.d(TAG, "New Snapshot success: " + bookings);
                             // - Update the booking list state with the newly created booking list
                             mViewBookingsViewModel.updateBookingList(bookings);
@@ -204,7 +205,7 @@ public class ViewBookingsFragment extends ViewBindingFragment<FragmentViewBookin
                             // Remove specific booking from the database.
                             mViewBookingsViewModel.cancelParkingBooking(bookingToBeCancelledId);
                             // Remove booking from the booking list state
-                            List<Booking> newBookings = Booking.cloneList(mViewBookingsViewModel.getBookingList());
+                            List<Booking> newBookings = cloneList(mViewBookingsViewModel.getBookingList());
                             newBookings.remove(position);
                             mViewBookingsViewModel.updateBookingList(newBookings);
                         },

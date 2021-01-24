@@ -10,13 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -50,6 +50,8 @@ import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
+import static io.github.cchristou3.CyParking.utilities.Utility.cloneList;
+import static io.github.cchristou3.CyParking.utilities.ViewUtility.disableParentScrollingInterferenceOf;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf;
 
 /**
@@ -58,10 +60,10 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * <p>
  *
  * @author Charalambos Christou
- * @version 3.0 21/01/21
+ * @version 4.0 24/01/21
  */
-public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragmentBinding> implements Navigable, LocationHandler,
-        TextWatcher, View.OnClickListener {
+public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragmentBinding>
+        implements Navigable, LocationHandler, TextWatcher, View.OnClickListener {
 
     // Fragment's constants
     public static final String TAG = RegisterLotFragment.class.getName() + "UniqueTag";
@@ -69,11 +71,24 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
     // Fragment's members
     private RegisterLotViewModel mRegisterLotViewModel;
     private AuthStateViewModel mAuthStateViewModel;
-    private List<SlotOffer> mSlotOfferList;
     private float mSelectedDuration;
     private float mSelectedPrice;
     private SingleUpdateHelper mLocationManager;
     private SlotOfferAdapter mSlotOfferAdapter;
+    private int slotOfferCounter;
+
+    /**
+     * Called to do initial creation of a fragment.
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     *                           a previous saved state, this is the state.
+     */
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initializeViewModels();
+        slotOfferCounter = 0;
+    }
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -101,34 +116,8 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        // Initialize the fragment's ViewModel instance
-        mRegisterLotViewModel = new ViewModelProvider(this,
-                new RegisterLotViewModelFactory()).get(RegisterLotViewModel.class);
-
-        mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
-
-        addObserverToAuthState();
-
-        // Initialize the slot offer container
-        mSlotOfferList = new ArrayList<>();
-
+        addObserversToStates();
         initializeUi();
-        addObserverToForm();
-    }
-
-    /**
-     * Observer the user's auth state.
-     * When the user logs out, he is prompted to either return to previous
-     * screen or log in.
-     */
-    private void addObserverToAuthState() {
-        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
-            if (loggedInUser == null) { // User has logged out
-                AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
-                        R.string.logout_register_lot_screen_msg);
-            }
-        });
     }
 
     /**
@@ -175,6 +164,70 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
         super.onDestroyView();
     }
 
+
+    /**
+     * Add observers to the user's state, the registration form
+     * and the slot offer list.
+     */
+    private void addObserversToStates() {
+        addObserverToAuthState();
+        addObserverToSlotOfferList();
+        addObserverToForm();
+    }
+
+    /**
+     * Initialize the fragment's {@link #mAuthStateViewModel}
+     * and {@link #mRegisterLotViewModel} instances.
+     */
+    private void initializeViewModels() {
+        // Initialize the fragment's ViewModel instance
+        mRegisterLotViewModel = new ViewModelProvider(this,
+                new RegisterLotViewModelFactory()).get(RegisterLotViewModel.class);
+
+        mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
+    }
+
+    /**
+     * Observes the slot offer list's state.
+     * Whenever, an updated version of the list is received
+     * - the {@link #mSlotOfferAdapter}'s items are updated
+     * - the fragment scrolls down to its bottom
+     * - the {@link #mRegisterLotViewModel}'s livedata objects get updated
+     * - a Toast message is shown to the user
+     */
+    private void addObserverToSlotOfferList() {
+        mRegisterLotViewModel.getSlotOfferListState().observe(getViewLifecycleOwner(), slotOffers -> {
+            mSlotOfferAdapter.submitList(slotOffers); // Inform the adapter
+            Log.d(TAG, "addObserverToSlotOfferList: " + slotOffers);
+            // Scroll down-wards to the "register" button
+            ViewUtility.scrollTo(getBinding().registerLotFragmentBtnRegisterLot);
+            // Update the ViewModel's state
+            triggerViewModelUpdate();
+            String message = "Item removed!";
+            if (slotOffers.size() > slotOfferCounter) { // If the size got increased since last update
+                // then an item was added. Otherwise, an item got removed.
+                message = "Item added!";
+            }
+            slotOfferCounter = slotOffers.size();
+            // Display a message to the user
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    /**
+     * Observer the user's auth state.
+     * When the user logs out, he is prompted to either return to previous
+     * screen or log in.
+     */
+    private void addObserverToAuthState() {
+        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
+            if (loggedInUser == null) { // User has logged out
+                AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
+                        R.string.logout_register_lot_screen_msg);
+            }
+        });
+    }
+
     /**
      * Attaches an observer to the form's state.
      * Whenever, the state of the form changes, the
@@ -210,12 +263,35 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
             }
             // Update the view's related to the lot's slot offers
             if (registerLotFormState.getSlotOfferError() != null) {
+                // Show the warning
                 getBinding().registerLotFragmentTxtSlotOfferWarning.setVisibility(View.VISIBLE);
                 getBinding().registerLotFragmentTxtSlotOfferWarning.setText(getString(registerLotFormState.getSlotOfferError()));
+                // Connect the disclaimer's top with the warning's bottom
+                adjustLayoutConstraints(getBinding().registerLotFragmentTxtSlotOfferWarning.getId());
             } else {
+                // Hide the warning
                 getBinding().registerLotFragmentTxtSlotOfferWarning.setVisibility(View.GONE);
+                // Connect the warning's top with the RecyclerView's bottom
+                adjustLayoutConstraints(getBinding().registerLotFragmentRvPriceList.getId());
             }
         });
+    }
+
+    /**
+     * Connects the view's (of id {@link R.id#register_lot_fragment_txt_disclaimer})
+     * top with the bottom of the view with the given id.
+     *
+     * @param viewId The id of the view to has its bottom connected to the disclaimer's top.
+     */
+    private void adjustLayoutConstraints(int viewId) {
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(getBinding().registerLotFragmentClList);
+        constraintSet.connect(
+                R.id.register_lot_fragment_txt_disclaimer, // Connect the disclaimer's top
+                ConstraintSet.TOP,
+                viewId, // with this view's bottom
+                ConstraintSet.BOTTOM);
+        constraintSet.applyTo(getBinding().registerLotFragmentClList);
     }
 
     /**
@@ -236,36 +312,14 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
         setUpSpinner(getBinding().registerLotFragmentSDuration, this::setSelectedDuration, 1.0f);
         setUpSpinner(getBinding().registerLotFragmentSPrice, this::setSelectedPrice, 0.5f);
 
-        // Hook up a listener to the "get location" button
-        getBinding().registerLotFragmentMbtnGetLocation.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Location retrieved!", Toast.LENGTH_SHORT).show();
-            // Initialize the SingleLocationManager object
-            if (mLocationManager == null) {
-                mLocationManager = LocationManager.createSingleUpdateHelper(requireContext(), this);
-                Log.d(TAG, "QuickLocation initialized");
-            } else {
-                Log.d(TAG, "QuickLocation prepareCallback");
-                mLocationManager.prepareCallback();
-            }
-            mLocationManager.requestUserLocationUpdates(this);
-        });
+        prepareGetLocationButton();
+
+        prepareAddButton();
 
         setUpRecyclerViewWithAdapter();
 
         // Hook up a listener to the "Register" button
-        final Button registerButton = getBinding().registerLotFragmentBtnRegisterLot;
-        registerButton.setOnClickListener(this);
-
-        // Hook up a listener to the "add" button
-        getBinding().registerLotFragmentBtnAdd.setOnClickListener(v -> {
-            // Add to the adapter's list
-            mSlotOfferAdapter.insert(new SlotOffer(mSelectedDuration, mSelectedPrice));
-            Toast.makeText(requireContext(), "Item added!", Toast.LENGTH_SHORT).show();
-            // Scrolls down-wards to the "register" button
-            ViewUtility.scrollTo(registerButton);
-            // Update the ViewModel's state
-            triggerViewModelUpdate();
-        });
+        getBinding().registerLotFragmentBtnRegisterLot.setOnClickListener(this);
 
         // Attach a textWatcher to the UI's EditTexts
         getBinding().registerLotFragmentEtPhoneBody.addTextChangedListener(this);
@@ -273,6 +327,58 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
         getBinding().registerLotFragmentEtCapacity.addTextChangedListener(this);
         getBinding().registerLotFragmentEtLocationLat.addTextChangedListener(this);
         getBinding().registerLotFragmentEtLocationLng.addTextChangedListener(this);
+    }
+
+    /**
+     * Attaches an {@link android.view.View.OnClickListener} to the
+     * 'add' button.
+     * onClick:
+     */
+    private void prepareAddButton() {
+        // Hook up a listener to the "add" button
+        getBinding().registerLotFragmentBtnAdd.setOnClickListener(v -> {
+            // Add to the adapter's list
+            List<SlotOffer> newSlotOfferList = mRegisterLotViewModel.getSlotOfferList();
+            if (newSlotOfferList == null) {
+                newSlotOfferList = new ArrayList<>();
+            } else {
+                newSlotOfferList = cloneList(newSlotOfferList);
+            }
+            SlotOffer newSlotOffer = new SlotOffer(mSelectedDuration, mSelectedPrice);
+
+            if (Utility.contains(newSlotOfferList, newSlotOffer)) {
+                Toast.makeText(requireContext(), "This offer already exists on the list.", Toast.LENGTH_SHORT).show();
+                // TODO: 24/01/2021 Animate color to that item
+                return;
+            }
+            newSlotOfferList.add(newSlotOffer);
+            mRegisterLotViewModel.updateSlotOfferList(newSlotOfferList);
+        });
+    }
+
+    /**
+     * Attaches an {@link android.view.View.OnClickListener} to the
+     * 'get location' button.
+     * onClick: initializes the {@link #mLocationManager} if not already
+     * initialized and requests the user's location.
+     *
+     * @see SingleUpdateHelper#prepareCallback()
+     */
+    private void prepareGetLocationButton() {
+        // Hook up a listener to the "get location" button
+        getBinding().registerLotFragmentMbtnGetLocation.setOnClickListener(v -> {
+            Toast.makeText(requireContext(), "Location retrieved!", Toast.LENGTH_SHORT).show();
+            // Initialize the SingleLocationManager object
+            if (mLocationManager == null) {
+                mLocationManager = LocationManager.createSingleUpdateHelper(requireContext(), this);
+                Log.d(TAG, "SingleUpdateHelper initialized");
+            } else {
+                Log.d(TAG, "SingleUpdateHelper prepareCallback");
+                mLocationManager.prepareCallback();
+            }
+            mLocationManager.requestUserLocationUpdates(this);
+        });
+
     }
 
     /**
@@ -286,23 +392,24 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         // Set up the RecyclerView's adapter
-        mSlotOfferAdapter = new SlotOfferAdapter(mSlotOfferList);
+        mSlotOfferAdapter = new SlotOfferAdapter(new SlotOffersDiffCallback());
         SlotOfferAdapter.setOnItemClickListener(v -> {
             // Access the item's position
             RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
             int position = viewHolder.getAdapterPosition();
-            // Remove it from the list and notify the adapter
-            if (position >= 0) {
-                mSlotOfferAdapter.remove(position);
+            // Remove it from the list and  update the slot offer list state
+            if (!mRegisterLotViewModel.getSlotOfferList().isEmpty()) {
+                List<SlotOffer> newSlotOfferList = cloneList(mRegisterLotViewModel.getSlotOfferList());
+                newSlotOfferList.remove(position);
+                mRegisterLotViewModel.updateSlotOfferList(newSlotOfferList);
             }
-            triggerViewModelUpdate();
         });
         // Bind recyclerView with its adapter
         recyclerView.setAdapter(mSlotOfferAdapter);
 
         // If recyclerView is inside a ScrollView then there is an issue while scrolling recyclerView’s inner contents.
         // So, when touching the recyclerView forbid the ScrollView from intercepting touch events.
-        ViewUtility.disableParentScrollingInterferenceOf(recyclerView);
+        disableParentScrollingInterferenceOf(recyclerView);
     }
 
     /**
@@ -316,7 +423,6 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
     private ParkingLot buildParkingLot() {
         // Instantiate the ParkingLot object
         // and return it
-        // coordinates lotName operatorId operatorMobileNumber capacity capacityForDisabled availableSpacesForDisabled slotOfferList
         return new ParkingLot(
                 new Parking.Coordinates(
                         fromViewTextToDouble(getBinding().registerLotFragmentEtLocationLat),
@@ -326,7 +432,7 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
                 mAuthStateViewModel.getUser().getUserId(), // operatorId
                 getBinding().registerLotFragmentEtPhoneBody.getNonSpacedText(), // operatorMobileNumber
                 Integer.parseInt(getBinding().registerLotFragmentEtCapacity.getText().toString()), // capacity
-                mSlotOfferList // slotOfferList
+                mRegisterLotViewModel.getSlotOfferList() // slotOfferList
         );
     }
 
@@ -368,7 +474,7 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
                 lotCapacity,
                 getBinding().registerLotFragmentEtLotName.getText().toString(),
                 lotLatLng,
-                mSlotOfferList
+                mRegisterLotViewModel.getSlotOfferList()
         );
     }
 

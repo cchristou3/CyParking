@@ -7,13 +7,8 @@ import androidx.annotation.NonNull;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Exclude;
-import com.google.firebase.firestore.QuerySnapshot;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import io.github.cchristou3.CyParking.data.model.parking.ParkingId;
 import io.github.cchristou3.CyParking.utilities.ShaUtility;
@@ -107,31 +102,6 @@ public class Booking extends ParkingId implements Parcelable, Comparable<Booking
         setBookingUserId(booking.getBookingUserId().trim());
         setOperatorId(booking.getOperatorId().trim());
         setParkingId(booking.parkingId);
-    }
-
-    /**
-     * Create a new list (new reference), containing all the elements of the given list.
-     *
-     * @param list A simple list object.
-     * @return A fresh list containing all the elements of the given list.
-     */
-    @NotNull
-    @Contract("_ -> new")
-    public static List<Booking> cloneList(List<Booking> list) {
-        return new ArrayList<>(list);
-    }
-
-    /**
-     * - Create an empty list to store the bookings.
-     * - Convert each document into a booking object and add it to the list.
-     * - Return the list.
-     *
-     * @param value The {@link QuerySnapshot} object containing all the user's bookings.
-     * @return A {@link List} of {@link Booking} objects.
-     */
-    @NotNull
-    public static List<Booking> getListOf(@NotNull QuerySnapshot value) {
-        return value.toObjects(Booking.class);
     }
 
     /**

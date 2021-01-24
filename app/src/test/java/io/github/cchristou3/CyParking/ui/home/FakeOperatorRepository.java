@@ -36,7 +36,7 @@ public class FakeOperatorRepository implements OperatorRepository {
 
     @NotNull
     @Override
-    public Query observeParkingLot(String operatorId) {
+    public Query getParkingLot(String operatorId) {
         return Mockito.mock(Query.class);
     }
 

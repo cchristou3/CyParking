@@ -51,7 +51,7 @@ public class DefaultOperatorRepository extends ParkingMapRepository implements O
     @Override
     public Task<Void> registerParkingLot(@NotNull ParkingLot parkingLotToBeStored) {
         // Add the info to the database
-        return getParkingLotsNode()
+        return getParkingLots()
                 .document(parkingLotToBeStored.generateUniqueId())
                 .get()
                 .continueWithTask(task -> {
@@ -82,8 +82,8 @@ public class DefaultOperatorRepository extends ParkingMapRepository implements O
      */
     @Override
     @NotNull
-    public Query observeParkingLot(String operatorId) {
-        return getParkingLotsNode()
+    public Query getParkingLot(String operatorId) {
+        return getParkingLots()
                 .whereEqualTo(OPERATOR_ID, operatorId).limit(1L);
     }
 

@@ -41,7 +41,7 @@ public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingV
      * Constructor used to initialize the {@link ListAdapter}
      * with a {@link DiffUtil.ItemCallback<Booking>} object.
      *
-     * @param diffCallback
+     * @param diffCallback The callback to be used to compare the items of both lists.
      */
     protected BookingAdapter(@NonNull DiffUtil.ItemCallback<Booking> diffCallback) {
         super(diffCallback);

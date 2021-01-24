@@ -27,7 +27,7 @@ import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.i
  * their parking lot onto the system.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 15/12/20
+ * @version 2.0 24/01/21
  */
 public class RegisterLotViewModel extends ViewModel {
 
@@ -76,7 +76,7 @@ public class RegisterLotViewModel extends ViewModel {
         this.mLotCapacity.setValue(lotCapacity);
         this.mLotName.setValue(lotName);
         this.mLotLatLng.setValue(lotLatLng);
-        this.mSlotOfferList.setValue(slotOfferList);
+        //this.mSlotOfferList.setValue(slotOfferList);
 
         // Validate the input and set the RegisterLotFormState accordingly
         if (!isValidPhoneNumber(operatorMobileNumber)) {
@@ -116,5 +116,33 @@ public class RegisterLotViewModel extends ViewModel {
      */
     public LiveData<RegisterLotFormState> getRegisterLotFormState() {
         return mRegisterLotFormState;
+    }
+
+    /**
+     * Getter of the {@link RegisterLotViewModel#mSlotOfferList}.
+     *
+     * @return the LiveData instance of it, to limit any direct changes to it outside of the ViewModel.
+     */
+    public LiveData<List<SlotOffer>> getSlotOfferListState() {
+        return mSlotOfferList;
+    }
+
+    /**
+     * Returns the value of {@link #mSlotOfferList}.
+     *
+     * @return a reference to the value of {@link #mSlotOfferList}.
+     */
+    public List<SlotOffer> getSlotOfferList() {
+        return mSlotOfferList.getValue();
+    }
+
+    /**
+     * Updates the value of {@link #mSlotOfferList}
+     * with the given argument.
+     *
+     * @param slotOffers the new value of {@link #mSlotOfferList}.
+     */
+    public void updateSlotOfferList(List<SlotOffer> slotOffers) {
+        mSlotOfferList.setValue(slotOffers);
     }
 }

@@ -239,6 +239,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/register_lot_fragment_cv_lot_info">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/register_lot_fragment_cl_list"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:padding="20dp">
@@ -325,7 +326,7 @@
                         android:textColor="@color/red"
                         android:textSize="20sp"
                         android:visibility="gone"
-                        app:layout_constraintBottom_toTopOf="@+id/textView3"
+                        app:layout_constraintBottom_toTopOf="@+id/register_lot_fragment_txt_disclaimer"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
@@ -336,15 +337,13 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="15dp"
                         android:paddingStart="30dp"
-                        android:paddingLeft="30dp"
                         android:paddingEnd="20dp"
-                        android:paddingRight="20dp"
                         app:layout_constraintEnd_toEndOf="@+id/register_lot_fragment_txt_lot_pricing"
                         app:layout_constraintStart_toStartOf="@+id/register_lot_fragment_txt_lot_pricing"
                         app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
 
                     <TextView
-                        android:id="@+id/textView3"
+                        android:id="@+id/register_lot_fragment_txt_disclaimer"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="15dp"
@@ -364,7 +363,7 @@
                         android:textStyle="italic"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+                        app:layout_constraintTop_toBottomOf="@+id/register_lot_fragment_txt_disclaimer" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

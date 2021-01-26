@@ -25,7 +25,7 @@ import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
  * default method {@link #getNavController(FragmentActivity)}.
  *
  * @author Charalambos Christou
- * @version 4.0 18/01/21
+ * @version 5.0 25/01/21
  */
 public interface Navigable {
 
@@ -96,13 +96,16 @@ public interface Navigable {
      * {@link NavController} instance of the application.
      *
      * @param activity The parent {@link FragmentActivity}.
-     * @return The NavController associated with the NavigationView
-     * of id NAV_VIEW_ID.
-     * @see MainHostActivity#NAV_VIEW_ID
+     * @return The NavController associated with the
+     * {@link MainHostActivity}'s NavigationView.
+     * @see MainHostActivity#getNavigationView()
      * @see MainHostActivity#setApplicationNavController()
      */
     default NavController getNavController(@NotNull FragmentActivity activity) {
-        return Navigation.findNavController(
-                activity.findViewById(MainHostActivity.NAV_VIEW_ID));
+        if (activity instanceof MainHostActivity) {
+            return Navigation.findNavController(
+                    ((MainHostActivity) activity).getNavigationView());
+        }
+        return null; // Should never happen
     }
 }

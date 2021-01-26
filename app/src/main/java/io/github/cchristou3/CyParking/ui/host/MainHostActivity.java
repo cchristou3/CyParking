@@ -1,15 +1,17 @@
 package io.github.cchristou3.CyParking.ui.host;
 
+import android.animation.ObjectAnimator;
+import android.net.ConnectivityManager;
+import android.net.Network;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -20,23 +22,18 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldPath;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.functions.FirebaseFunctions;
-import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.HashMap;
-
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.data.interfaces.ConnectionHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.manager.ConnectivityHelper;
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.databinding.ActivityMainHostBinding;
+
+import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVisibilityTo;
 
 /**
  * <p>Main host activity of the Application.
@@ -44,26 +41,26 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
  * of all fragments which it is the host of.</p>
  *
  * @author Charalambos Christou
- * @version 5.0 25/12/20
+ * @version 6.0 25/01/21
  */
-public class MainHostActivity extends AppCompatActivity {
+public class MainHostActivity extends AppCompatActivity implements ConnectionHandler {
 
     // Activity constants
     public static final String TAG = MainHostActivity.class.getName() + "UniqueTag";
+    // Drawer constants
     private static final int HOME = R.id.nav_home;
     private static final int VIEW_BOOKINGS = R.id.nav_view_bookings;
     private static final int MY_ACCOUNT = R.id.nav_account;
     private static final int FEEDBACK = R.id.nav_feedback;
     private static final int TO_SETTINGS = R.id.action_settings;
+    // Action bar constants
     private static final int SIGN_OUT = R.id.action_sign_out;
     private static final int SIGN_IN = R.id.action_sign_in;
-    public static int NAV_VIEW_ID = R.id.fragment_main_host_nv_nav_view;
     // Activity variables
     private Menu mActionBarMenu;
-    private Menu mDrawerMenu;
-    private DrawerLayout mDrawerLayout;
     private AuthStateViewModel mAuthStateViewModel;
     private ConnectivityHelper mConnectivityHelper;
+    private ActivityMainHostBinding mBinding;
 
     /**
      * Initialises the activity.
@@ -75,71 +72,92 @@ public class MainHostActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FirebaseApp.initializeApp(this.getApplicationContext());
-        setContentView(R.layout.fragment_main_host);
-        // TODO: 20/01/2021 Remove  new DefaultOperatorRepository().addDummyParkingData();
+        FirebaseApp.initializeApp(this.getApplicationContext()); // Initialize Firebase
+        mBinding = ActivityMainHostBinding.inflate(getLayoutInflater()); // Inflate activity's View Binding
+        setContentView(mBinding.getRoot());
 
-        FirebaseFunctions.getInstance().getHttpsCallable("getNearbyParkingLots")
-                .call(new HashMap<String, Double>() {{ // The request's data.
-                    put("latitude", 34.9214672);
-                    put("longitude", 33.6227833);
-                }}).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Log.d(TAG, "onComplete: " + task.getResult().getData());
-                Log.d(TAG, "onComplete: " +
-                        Arrays.asList(new Gson().fromJson(task.getResult().getData().toString(), String[].class)));
-
-                FirebaseFirestore.getInstance()
-                        .collection("parking_lots")
-                        .whereIn(FieldPath.documentId(),
-                                Arrays.asList(new Gson().fromJson(task.getResult().getData().toString(), String[].class))
-                        ).get().addOnCompleteListener(task1 -> {
-                    if (task1.isSuccessful()) {
-                        for (DocumentSnapshot shot :
-                                task1.getResult().getDocuments()) {
-                            Log.d(TAG, "onCreate: lot: " + shot.toObject(ParkingLot.class));
-                        }
-                    }
-                });
-            } else {
-                Log.d(TAG, "onComplete: " + task.getException());
-            }
-        });
-
-
-        mConnectivityHelper = new ConnectivityHelper(getApplicationContext());
-        mConnectivityHelper.registerNetworkCallback();
-
-        // Set up ActionBar
-        Toolbar toolbar = findViewById(R.id.fragment_main_host_tb_toolbar);
-        setSupportActionBar(toolbar);
-
-        // Set up drawer
-        mDrawerLayout = findViewById(R.id.fragment_main_host_dl_drawer_layout);
-        NavigationView navigationView = findViewById(NAV_VIEW_ID);
-
-        mDrawerMenu = navigationView.getMenu();
-        // Attach listeners to the drawer's items
-        final int numOfDrawerItems = mDrawerMenu.size();
-        for (int i = 0; i < numOfDrawerItems; i++) {
-            mDrawerMenu.getItem(i).setOnMenuItemClickListener(this::onMenuItemClick);
-        }
-
-        setApplicationNavController();
+        setUpNavigation(); // Set up drawer and action bar
 
         // Initialize the activity's ViewModel instance
         mAuthStateViewModel = new ViewModelProvider(this, new AuthStateViewModelFactory())
                 .get(AuthStateViewModel.class);
 
-        mAuthStateViewModel.getUserState().observe(this, this::updateDrawer);
+        // Instantiate the connection helper
+        mConnectivityHelper = new ConnectivityHelper(
+                getApplicationContext(), this); // Handle connection callbacks
+        mConnectivityHelper.registerNetworkCallback(); // Listen to connection state changes
 
+        // Set initial connection state.
+        mAuthStateViewModel.setInitialConnectionState(mConnectivityHelper);
+
+        addObserversToStates(); // Attach observers to the global states
+
+        // Acquire the user's info if already logged in
         mAuthStateViewModel.getUserInfo(this, FirebaseAuth.getInstance().getCurrentUser());
     }
 
+    /**
+     * Set up the activity's action bar and drawer menus.
+     * Also, set up the application's {@link NavController}.
+     */
+    private void setUpNavigation() {
+        // Set up ActionBar //
+        setSupportActionBar(mBinding.activityMainHostTbToolbar);
+
+        // Set up drawer //
+        // Attach listeners to the drawer's items
+        final int numOfDrawerItems = getDrawerMenu().size();
+        for (int i = 0; i < numOfDrawerItems; i++) {
+            getDrawerMenu().getItem(i).setOnMenuItemClickListener(this::onMenuItemClick);
+        }
+        // Set Up global NavController //
+        setApplicationNavController();
+    }
+
+    /**
+     * Add observers to the device's connection state,
+     * the `no internet connection warning`'s visiblity state,
+     * and the user's state.
+     */
+    private void addObserversToStates() {
+        mAuthStateViewModel.getConnectionState().observe(this, isConnected -> {
+            mAuthStateViewModel
+                    .updateNoConnectionWarningState(
+                            isConnected ? View.GONE : View.VISIBLE
+                    );
+        });
+
+        mAuthStateViewModel.getNoConnectionWarningState().observe(
+                this,
+                this::changeNoConnectionWarningVisibilityTo); // callback
+
+        mAuthStateViewModel.getUserState().observe(this, this::updateDrawer);
+    }
+
+    /**
+     * Clean up the activity's resources.
+     * Unregister network callback.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mConnectivityHelper.unregisterNetworkCallback();
+    }
+
+    /**
+     * Updates the visibility of {@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}.
+     *
+     * @param visibility The new visibility of {@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}.
+     */
+    private void changeNoConnectionWarningVisibilityTo(int visibility) {
+        switch (visibility) {
+            case View.GONE:
+                hideNoConnectionWarning();
+                break;
+            case View.VISIBLE:
+                showNoConnectionWarning();
+                break;
+        }
     }
 
     /**
@@ -214,7 +232,7 @@ public class MainHostActivity extends AppCompatActivity {
 
     /**
      * Binds the {@link NavController} instance with the
-     * NavigationView of id {@link #NAV_VIEW_ID}.
+     * {@link ActivityMainHostBinding#activityMainHostNvNavView} NavigationView.
      * All fragments of the application can access the
      * same instance of the NavController via the
      * NavigationView.
@@ -222,9 +240,9 @@ public class MainHostActivity extends AppCompatActivity {
      * @see Navigable#getNavController(FragmentActivity)
      */
     public void setApplicationNavController() {
-        // Set up the NavController, bind it with the specified view (NAV_HOST_ID)
-        // The fragments can access the same controller by passing in the same view (NAV_HOST_ID)
-        Navigation.setViewNavController(findViewById(NAV_VIEW_ID),
+        // Set up the NavController, bind it with the specified NavigationView
+        // The fragments can access the same controller by passing in the same NavigationView
+        Navigation.setViewNavController(getNavigationView(),
                 NavHostFragment.findNavController(getActiveFragment()));
     }
 
@@ -244,19 +262,17 @@ public class MainHostActivity extends AppCompatActivity {
             if (isOperator && !isUser) { // Is an operator but not a user
             } else if (isUser && !isOperator) { // Is a user but not an operator
                 // Show bookings in drawer
-                mDrawerMenu.findItem(R.id.nav_view_bookings).setVisible(true);
+                getDrawerMenu().findItem(R.id.nav_view_bookings).setVisible(true);
             } else { // Is both
                 // Show bookings in drawer
-                mDrawerMenu.findItem(R.id.nav_view_bookings).setVisible(true);
+                getDrawerMenu().findItem(R.id.nav_view_bookings).setVisible(true);
             }
-
-
         } else {
             // TODO: Update drawer to only show non-loggedIn-specific actions
             // View Map
             // User cannot book -> thus cannot see their bookings
             // Remove Bookings from drawer
-            mDrawerMenu.findItem(R.id.nav_view_bookings).setVisible(false);
+            getDrawerMenu().findItem(R.id.nav_view_bookings).setVisible(false);
         }
     }
 
@@ -306,7 +322,7 @@ public class MainHostActivity extends AppCompatActivity {
                 getActiveNavigableFragment().toFeedback();
                 break;
         }
-        mDrawerLayout.close();
+        mBinding.activityMainHostDlDrawerLayout.close();
         return false;
     }
 
@@ -339,5 +355,81 @@ public class MainHostActivity extends AppCompatActivity {
     private Fragment getActiveFragment() {
         return getSupportFragmentManager().getFragments().get(0) // Access the NavHostFragment
                 .getChildFragmentManager().getFragments().get(0); // Get a reference to the visible fragment
+    }
+
+    /**
+     * Access the activity's {@link NavigationView} instance.
+     *
+     * @return A reference to the the activity's {@link NavigationView} instance.
+     */
+    public NavigationView getNavigationView() {
+        return mBinding.activityMainHostNvNavView;
+    }
+
+    /**
+     * Access the activity's Drawer {@link Menu} instance.
+     *
+     * @return A reference to the the activity's Drawer {@link Menu} instance.
+     */
+    public Menu getDrawerMenu() {
+        return mBinding.activityMainHostNvNavView.getMenu();
+    }
+
+    /**
+     * Triggered whenever the
+     * {@link ConnectivityManager.NetworkCallback} invokes
+     * either {@link ConnectivityManager.NetworkCallback#onAvailable(Network)}
+     * or {@link ConnectivityManager.NetworkCallback#onLost(Network)}.
+     *
+     * @param isConnected The state of the Internet connection.
+     * @see io.github.cchristou3.CyParking.data.manager.ConnectivityHelper#onLost(Network)
+     * @see io.github.cchristou3.CyParking.data.manager.ConnectivityHelper#onAvailable(Network)
+     */
+    @Override
+    public void onConnectionStateChanged(boolean isConnected) {
+        runOnUiThread(() -> {
+            mAuthStateViewModel.updateConnectionState(isConnected);
+        });
+    }
+
+    /**
+     * Show 'No Connection Warning' ({@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}).
+     */
+    private void showNoConnectionWarning() {
+        updateViewVisibilityTo(mBinding.activityMainHostTxtNoConnectionWarning, View.VISIBLE);
+        animateNoConnectionWarning(100, 0);
+    }
+
+    /**
+     * Hide 'No Connection Warning' ({@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}).
+     */
+    private void hideNoConnectionWarning() {
+        animateNoConnectionWarning(0, 100)
+                .addUpdateListener(animation -> {
+                    if (!animation.isRunning() && animation.isStarted()) { // animation finished
+                        updateViewVisibilityTo(mBinding.activityMainHostTxtNoConnectionWarning, View.GONE);
+                    }
+                });
+    }
+
+    /**
+     * Animate the {@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}
+     * starting form the `from`  Y position till the `to` Y position.
+     *
+     * @param from The starting Y of the view.
+     * @param to   The final Y of the view after the animation.
+     * @return The {@link ObjectAnimator} instance.
+     */
+    @NotNull
+    private ObjectAnimator animateNoConnectionWarning(float from, float to) {
+        mBinding.activityMainHostTxtNoConnectionWarning.setTranslationY(from);
+        ObjectAnimator animation = ObjectAnimator
+                .ofFloat(
+                        mBinding.activityMainHostTxtNoConnectionWarning,
+                        "translationY",
+                        to);
+        animation.setDuration(1500);
+        animation.start();
+        return animation;
     }
 }

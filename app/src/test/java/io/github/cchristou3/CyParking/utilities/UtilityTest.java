@@ -232,8 +232,8 @@ public class UtilityTest {
     @Test
     public void getDateOf_validParameters_returnsExpectedString() {
         // Given
-        int[] years = {2001, 2020, 1950}, months = {1, 12, 4}, days = {1, 5, 8};
-        String[] expectedDates = {"Mon Jan 01 00:00:00 EET 2001", "Sat Dec 05 00:00:00 EET 2020", "Sat Apr 08 00:00:00 EET 1950"};
+        int[] years = {2001, 2020, 1950}, months = {1, 11, 4}, days = {1, 5, 8};
+        String[] expectedDates = {"Mon Jan 01 00:00:00 EET 2001", "Thu Nov 05 00:00:00 EET 2020", "Sat Apr 08 00:00:00 EET 1950"};
 
         // When
         for (int i = 0; i < 3; i++) {
@@ -280,9 +280,9 @@ public class UtilityTest {
     }
 
     @Test(expected = IllegalArgumentException.class) // Then
-    public void getDateOf_zeroMonth_throwsException() {
+    public void getDateOf_negativeMonth_throwsException() {
         // Given
-        int year = 10, month = 0, day = 20;
+        int year = 10, month = -1, day = 20;
 
         // When
         Date output = getDateOf(year, month, day);
@@ -354,7 +354,7 @@ public class UtilityTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void checkIfFieldsValid_smallerMonth_throwsException() {
-        checkIfFieldsValid(1, 0, 3);
+        checkIfFieldsValid(1, -1, 3);
     }
 
     @Test(expected = IllegalArgumentException.class)

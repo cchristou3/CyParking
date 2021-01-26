@@ -38,6 +38,7 @@ import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
 
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.hideKeyboard;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf;
+import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVisibilityTo;
 
 /**
  * <p>A simple {@link Fragment} subclass.
@@ -46,7 +47,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * Can be used for both logging in and signing up.</p>
  *
  * @author Charalambos Christou
- * @version 4.0 21/01/21
+ * @version 5.0 25/01/21
  */
 public class AuthenticatorHosteeFragment extends ViewBindingFragment<FragmentAuthenticatorHosteeBinding> implements TextWatcher {
 
@@ -306,8 +307,7 @@ public class AuthenticatorHosteeFragment extends ViewBindingFragment<FragmentAut
      * Show or hide the loading bar based on the specified visibility.
      */
     private void changeVisibilityOfLoadingBarTo(int visibility) {
-        if (getBinding().fragmentHosteeAuthPbLoading.getVisibility() != visibility)
-            getBinding().fragmentHosteeAuthPbLoading.setVisibility(visibility);
+        updateViewVisibilityTo(getBinding().fragmentHosteeAuthPbLoading, visibility);
     }
 
     /**

@@ -59,6 +59,7 @@ import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
 
 import static io.github.cchristou3.CyParking.utilities.Utility.getDistanceApart;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.animateAvailabilityColorChanges;
+import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVisibilityTo;
 
 /**
  * Purpose: <p>View all nearby parking.
@@ -704,7 +705,7 @@ public class ParkingMapFragment extends ViewBindingFragment<FragmentParkingMapBi
      * @param visibility The state of the visibility (E.g. View.Gone / View.VISIBLE / View.INVISIBLE)
      */
     private void updateInfoLayoutVisibilityTo(final int visibility) {
-        getBinding().fragmentParkingMapCvInfoLayout.setVisibility(visibility);
+        updateViewVisibilityTo(getBinding().fragmentParkingMapCvInfoLayout, visibility);
     }
 
     /**

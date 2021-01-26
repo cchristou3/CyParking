@@ -2,8 +2,6 @@ package io.github.cchristou3.CyParking.ui.parking.slots.viewBooking;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.google.firebase.firestore.Query;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +19,6 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link ViewBookingsViewModel} class.
@@ -35,7 +32,6 @@ public class ViewBookingsViewModelTest extends InstantTaskRuler {
     @Before
     public void setUp() {
         BookingRepository mockRepository = Mockito.mock(BookingRepository.class);
-        when(mockRepository.getUserBookings("mockId")).thenReturn(Mockito.mock(Query.class));
         viewBookingsViewModel = new ViewBookingsViewModel(mockRepository);
     }
 
@@ -72,11 +68,5 @@ public class ViewBookingsViewModelTest extends InstantTaskRuler {
         // Then the LiveData's value should update
         assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingListState()), is(not(nullValue())));
         assertThat(getOrAwaitValue(viewBookingsViewModel.getBookingListState()), is(bookings));
-    }
-
-
-    @Test
-    public void retrieveUserBookings_returnsNonNull() {
-        assertThat(viewBookingsViewModel.getUserBookings("mockId"), is(not(nullValue())));
     }
 }

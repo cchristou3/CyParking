@@ -151,15 +151,12 @@ public class ParkingMapViewModel extends ViewModel {
 
     /**
      * Updates the state of the {@link #mInfoLayoutState}
-     * to the specified state. If the current state of {@link #mInfoLayoutState}
-     * is the same with the specified attribute then it gets ignored.
+     * to the specified state.
      *
      * @param visibilityState The new value of {@link #mInfoLayoutState}.
      */
     private void updateInfoLayoutStateTo(int visibilityState) {
-        if (mInfoLayoutState.getValue() != visibilityState) {
-            mInfoLayoutState.setValue(visibilityState);
-        }
+        mInfoLayoutState.setValue(visibilityState);
     }
 
     /**

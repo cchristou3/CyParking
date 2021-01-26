@@ -36,7 +36,7 @@ public class BookingTest {
         bookingDetailsB.setCompleted(true);
         Booking b = new Booking(PARKING_ID, OPERATOR_ID, LOT_NAME, ISSUER_ID, bookingDetailsB);
         // When
-        boolean areSame = a.equals(b);
+        boolean areSame = a.generateUniqueId().equals(b.generateUniqueId());
         // Then
         Assert.assertTrue(areSame);
     }

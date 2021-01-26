@@ -14,4 +14,5 @@
     <color name="description">#1a1a1a</color>
     <color name="chef">#777</color>
     <color name="timestamp">#777</color>
+    <color name="dark_grey">#181818</color>
 </resources>

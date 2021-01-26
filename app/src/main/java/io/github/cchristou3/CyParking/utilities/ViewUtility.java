@@ -30,7 +30,7 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
  * related to the View.</p>
  *
  * @author Charalambos Christou
- * @version 5.0 16/01/21
+ * @version 6.0 25/01/21
  */
 public class ViewUtility {
 
@@ -198,5 +198,20 @@ public class ViewUtility {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmap;
+    }
+
+    /**
+     * Changes the visibility of the given view with the specified visibility.
+     * If the view already is in that visibility, then it is ignored.
+     *
+     * @param visibility The state of the visibility (E.g. View.Gone / View.VISIBLE / View.INVISIBLE).
+     * @return true, if the given View's visibility got updated. Otherwise false.
+     */
+    public static boolean updateViewVisibilityTo(@NotNull View view, int visibility) {
+        if (view.getVisibility() != visibility) {
+            view.setVisibility(visibility);
+            return true;
+        }
+        return false;
     }
 }

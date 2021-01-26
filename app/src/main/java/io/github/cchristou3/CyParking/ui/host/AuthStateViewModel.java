@@ -5,6 +5,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -14,6 +15,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.List;
 
+import io.github.cchristou3.CyParking.data.manager.ConnectivityHelper;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
@@ -35,7 +37,7 @@ import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
  * </p>
  *
  * @author Charalambos Christou
- * @version 2.0 12/01/21
+ * @version 3.0 26/01/21
  */
 // TODO: 19/01/2021 Rename to global state ViewModel
 public class AuthStateViewModel extends ViewModel {
@@ -43,10 +45,12 @@ public class AuthStateViewModel extends ViewModel {
     // Initially set to null
     private final MutableLiveData<LoggedInUser> mUserState = new MutableLiveData<>(null);
     private final AuthenticatorRepository mAuthenticatorRepository;
-
     // TODO: 18/01/2021 Add Loading bar state
-    // TODO: 19/01/2021 Add connectivity state
-    // TODO: 19/01/2021 Add no connection layout state
+
+    // TODO: 19/01/2021 Add connectivity state - Done - needs testing
+    private final MutableLiveData<Boolean> mConnectionState = new MutableLiveData<>();
+    // TODO: 19/01/2021 Add no connection layout state - Done - needs testing
+    private final MutableLiveData<Integer> mNoConnectionWarningState = new MutableLiveData<>();
 
     /**
      * Initialize the ViewModel's AuthenticatorRepository instance
@@ -57,6 +61,59 @@ public class AuthStateViewModel extends ViewModel {
     public AuthStateViewModel(AuthenticatorRepository authenticatorRepository) {
         this.mAuthenticatorRepository = authenticatorRepository;
     }
+
+    /**
+     * Return the {@link #mNoConnectionWarningState} as a {@link LiveData} instance.
+     *
+     * @return A {@link LiveData} reference of {@link #mNoConnectionWarningState}.
+     */
+    public LiveData<Integer> getNoConnectionWarningState() {
+        return mNoConnectionWarningState;
+    }
+
+    /**
+     * Assign the value of {@link #mNoConnectionWarningState}
+     * the given argument.
+     *
+     * @param visibility the new value of {@link #mNoConnectionWarningState}.
+     */
+    public void updateNoConnectionWarningState(int visibility) {
+        mNoConnectionWarningState.setValue(visibility);
+    }
+
+    /**
+     * Assign the value of {@link #mConnectionState}
+     * the given argument.
+     *
+     * @param isConnected the new value of {@link #mConnectionState}.
+     */
+    public void updateConnectionState(boolean isConnected) {
+        Log.d(TAG, "updateConnectionState: " + isConnected);
+        this.mConnectionState.setValue(isConnected);
+    }
+
+    /**
+     * Sets the initial value of {@link #mConnectionState}
+     * based on the current connection state provided by
+     * {@link ConnectivityHelper#isConnected()}.
+     *
+     * @param connectivityHelper The helper to provide the current connection state
+     *                           of the device.
+     */
+    public void setInitialConnectionState(@NonNull ConnectivityHelper connectivityHelper) {
+        updateConnectionState(connectivityHelper.isConnected());
+    }
+
+    /**
+     * Return the {@link #mConnectionState} as a {@link LiveData} instance.
+     *
+     * @return A {@link LiveData} reference of {@link #mConnectionState}.
+     */
+    public LiveData<Boolean> getConnectionState() {
+        return this.mConnectionState;
+    }
+
+    // TODO: 26/01/2021 Test all above methods.
 
     /**
      * Access the {@link #mAuthenticatorRepository}.
@@ -103,6 +160,7 @@ public class AuthStateViewModel extends ViewModel {
      * @param context The context of the screen.
      */
     public void getUserInfo(@NonNull Context context, @Nullable FirebaseUser user) {
+        if (user == null) return; // If not logged in, then terminate method.
         mAuthenticatorRepository.getUserInfo(context, user, new AuthenticatorRepository.UserDataHandler() {
             @Override
             public void onLocalData(List<String> roles) {

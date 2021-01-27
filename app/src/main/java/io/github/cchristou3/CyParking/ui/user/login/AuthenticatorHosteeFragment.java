@@ -32,8 +32,8 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentAuthenticatorHosteeBinding;
 import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModelFactory;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModelFactory;
 import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
 
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.hideKeyboard;
@@ -56,7 +56,7 @@ public class AuthenticatorHosteeFragment extends ViewBindingFragment<FragmentAut
     private final String TAG = AuthenticatorHosteeFragment.this.getClass().getName() + "UniqueTag";
     // Fragment variables
     private AuthenticatorViewModel mAuthenticatorViewModel;
-    private AuthStateViewModel mAuthStateViewModel;
+    private GlobalStateViewModel mGlobalStateViewModel;
     private boolean mIsReauthenticating = false;
     private short mPageType;
 
@@ -116,14 +116,14 @@ public class AuthenticatorHosteeFragment extends ViewBindingFragment<FragmentAut
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // Initialize the AuthStateViewModel instance (key for communicating with MainHostActivity)
-        mAuthStateViewModel = new ViewModelProvider(requireActivity(), new AuthStateViewModelFactory())
-                .get(AuthStateViewModel.class);
+        // Initialize the GlobalStateViewModel instance (key for communicating with MainHostActivity)
+        mGlobalStateViewModel = new ViewModelProvider(requireActivity(), new GlobalStateViewModelFactory())
+                .get(GlobalStateViewModel.class);
 
         // By passing the parent (AuthenticationFragment)'s ViewModelStoreOwner
         // Both tabs share the same LoginViewModel instance
         mAuthenticatorViewModel = new ViewModelProvider(requireParentFragment(), new AuthenticatorViewModelFactory(
-                mAuthStateViewModel.getAuthenticatorRepository() // Both ViewModels use the same instance of AuthenticatorRepository
+                mGlobalStateViewModel.getAuthenticatorRepository() // Both ViewModels use the same instance of AuthenticatorRepository
         ))
                 .get(AuthenticatorViewModel.class);
 
@@ -454,7 +454,7 @@ public class AuthenticatorHosteeFragment extends ViewBindingFragment<FragmentAut
         if (this.isResumed()) {
 
             // Update the UserState - trigger observer update in MainHostActivity to update the drawer
-            mAuthStateViewModel.updateAuthState(model);
+            mGlobalStateViewModel.updateAuthState(model);
 
             // Display a message to the user
             String welcome = getString(R.string.welcome) + model.getDisplayName();

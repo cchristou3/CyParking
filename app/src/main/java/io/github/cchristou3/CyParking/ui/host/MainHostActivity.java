@@ -58,7 +58,7 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
     private static final int SIGN_IN = R.id.action_sign_in;
     // Activity variables
     private Menu mActionBarMenu;
-    private AuthStateViewModel mAuthStateViewModel;
+    private GlobalStateViewModel mGlobalStateViewModel;
     private ConnectivityHelper mConnectivityHelper;
     private ActivityMainHostBinding mBinding;
 
@@ -79,8 +79,8 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
         setUpNavigation(); // Set up drawer and action bar
 
         // Initialize the activity's ViewModel instance
-        mAuthStateViewModel = new ViewModelProvider(this, new AuthStateViewModelFactory())
-                .get(AuthStateViewModel.class);
+        mGlobalStateViewModel = new ViewModelProvider(this, new GlobalStateViewModelFactory())
+                .get(GlobalStateViewModel.class);
 
         // Instantiate the connection helper
         mConnectivityHelper = new ConnectivityHelper(
@@ -88,12 +88,25 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
         mConnectivityHelper.registerNetworkCallback(); // Listen to connection state changes
 
         // Set initial connection state.
-        mAuthStateViewModel.setInitialConnectionState(mConnectivityHelper);
+        mGlobalStateViewModel.setInitialConnectionState(mConnectivityHelper);
 
         addObserversToStates(); // Attach observers to the global states
 
         // Acquire the user's info if already logged in
-        mAuthStateViewModel.getUserInfo(this, FirebaseAuth.getInstance().getCurrentUser());
+        mGlobalStateViewModel.getUserInfo(this, FirebaseAuth.getInstance().getCurrentUser());
+    }
+
+    /**
+     * Shows or hides the loading bar based on the given flag.
+     *
+     * @param shouldShowLoadingBar Indicates whether to show or hide the loading bar.
+     */
+    private void updateLoadingBarVisibility(boolean shouldShowLoadingBar) {
+        if (shouldShowLoadingBar) {
+            mBinding.activityMainHostClpbProgressBar.show();
+        } else {
+            mBinding.activityMainHostClpbProgressBar.hide();
+        }
     }
 
     /**
@@ -120,18 +133,24 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
      * and the user's state.
      */
     private void addObserversToStates() {
-        mAuthStateViewModel.getConnectionState().observe(this, isConnected -> {
-            mAuthStateViewModel
+        // Internet Connection state //
+        mGlobalStateViewModel.getConnectionState().observe(this, isConnected -> {
+            mGlobalStateViewModel
                     .updateNoConnectionWarningState(
                             isConnected ? View.GONE : View.VISIBLE
                     );
         });
 
-        mAuthStateViewModel.getNoConnectionWarningState().observe(
+        // Internet Connection Warning state //
+        mGlobalStateViewModel.getNoConnectionWarningState().observe(
                 this,
                 this::changeNoConnectionWarningVisibilityTo); // callback
 
-        mAuthStateViewModel.getUserState().observe(this, this::updateDrawer);
+        // User state //
+        mGlobalStateViewModel.getUserState().observe(this, this::updateDrawer);
+
+        // Loading Bar state //
+        mGlobalStateViewModel.getLoadingBarState().observe(this, this::updateLoadingBarVisibility);
     }
 
     /**
@@ -186,7 +205,7 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
      */
     @Override
     public boolean onPrepareOptionsMenu(@NotNull Menu menu) {
-        updateActionBar(mAuthStateViewModel.getUserState().getValue());
+        updateActionBar(mGlobalStateViewModel.getUserState().getValue());
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -211,7 +230,7 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
                 Toast.makeText(this, "Settings!", Toast.LENGTH_SHORT).show();
                 break;
             case SIGN_OUT:
-                mAuthStateViewModel.signOut();
+                mGlobalStateViewModel.signOut();
                 // Display a message to the user
                 Toast.makeText(this, "You have been logged out!", Toast.LENGTH_SHORT).show();
                 break;
@@ -388,7 +407,7 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
     @Override
     public void onConnectionStateChanged(boolean isConnected) {
         runOnUiThread(() -> {
-            mAuthStateViewModel.updateConnectionState(isConnected);
+            mGlobalStateViewModel.updateConnectionState(isConnected);
         });
     }
 

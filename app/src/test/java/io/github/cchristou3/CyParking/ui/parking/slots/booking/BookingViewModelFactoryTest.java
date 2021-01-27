@@ -2,7 +2,7 @@ package io.github.cchristou3.CyParking.ui.parking.slots.booking;
 
 import org.junit.Test;
 
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModel;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -15,7 +15,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class BookingViewModelFactoryTest {
     @Test(expected = IllegalArgumentException.class)
     public void create_wrongClass_throwsException() {
-        new BookingViewModelFactory().create(AuthStateViewModel.class);
+        new BookingViewModelFactory().create(GlobalStateViewModel.class);
     }
 
     public void create_correctClass_returnsNonNull() {

@@ -22,44 +22,44 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for the {@link AuthStateViewModel} class.
+ * Unit tests for the {@link GlobalStateViewModel} class.
  */
 @RunWith(AndroidJUnit4.class)
-public class AuthStateViewModelTest extends InstantTaskRuler {
+public class GlobalStateViewModelTest extends InstantTaskRuler {
 
     // Subject under test
-    private AuthStateViewModel authStateViewModel;
+    private GlobalStateViewModel globalStateViewModel;
 
     @Before
     public void setUp() {
         AuthenticatorRepository mockRepository = Mockito.mock(AuthenticatorRepository.class);
-        authStateViewModel = new AuthStateViewModel(mockRepository);
+        globalStateViewModel = new GlobalStateViewModel(mockRepository);
     }
 
     @Test
     public void getUserState_returnsNonNull() {
-        assertThat(authStateViewModel.getUserState(), not(nullValue()));
+        assertThat(globalStateViewModel.getUserState(), not(nullValue()));
     }
 
     @Test
     public void getUser_returnsNullInitially() {
-        assertThat(authStateViewModel.getUser(), nullValue());
+        assertThat(globalStateViewModel.getUser(), nullValue());
     }
 
     @Test
     public void updateAuthState_setsNewValue() throws InterruptedException {
         // When the state is updated
-        authStateViewModel.updateAuthState(Mockito.mock(LoggedInUser.class));
+        globalStateViewModel.updateAuthState(Mockito.mock(LoggedInUser.class));
         // Then the state's value is no longer null
-        assertThat(getOrAwaitValue(authStateViewModel.getUserState()), not(nullValue()));
+        assertThat(getOrAwaitValue(globalStateViewModel.getUserState()), not(nullValue()));
     }
 
     @Test
     public void signOut_setsUserStateToNull() throws InterruptedException {
         // When the user pressed the log out button
-        authStateViewModel.signOut();
+        globalStateViewModel.signOut();
         // Then
-        assertThat(getOrAwaitValue(authStateViewModel.getUserState()), nullValue());
+        assertThat(getOrAwaitValue(globalStateViewModel.getUserState()), nullValue());
     }
 
     @Test
@@ -67,9 +67,9 @@ public class AuthStateViewModelTest extends InstantTaskRuler {
         // Given the connection warning state got changed
         int visibility = View.VISIBLE;
         // When updateNoConnectionWarningState gets called
-        authStateViewModel.updateNoConnectionWarningState(visibility);
+        globalStateViewModel.updateNoConnectionWarningState(visibility);
         // Then calling getNoConnectionWarningState should return the same value
-        assertThat(getOrAwaitValue(authStateViewModel.getNoConnectionWarningState()), is(visibility));
+        assertThat(getOrAwaitValue(globalStateViewModel.getNoConnectionWarningState()), is(visibility));
     }
 
     @Test
@@ -77,9 +77,9 @@ public class AuthStateViewModelTest extends InstantTaskRuler {
         // Given the connection state got changed
         boolean isConnected = true;
         // When updateConnectionState gets called
-        authStateViewModel.updateConnectionState(isConnected);
+        globalStateViewModel.updateConnectionState(isConnected);
         // Then calling getConnectionState should return the same value
-        assertThat(getOrAwaitValue(authStateViewModel.getConnectionState()), is(isConnected));
+        assertThat(getOrAwaitValue(globalStateViewModel.getConnectionState()), is(isConnected));
     }
 
     @Test
@@ -88,9 +88,26 @@ public class AuthStateViewModelTest extends InstantTaskRuler {
         ConnectivityHelper helper = Mockito.mock(ConnectivityHelper.class);
         when(helper.isConnected()).thenReturn(true);
         // When setInitialConnectionState gets called
-        authStateViewModel.setInitialConnectionState(helper);
+        globalStateViewModel.setInitialConnectionState(helper);
         // Then calling getConnectionState should return the same value
-        assertThat(getOrAwaitValue(authStateViewModel.getConnectionState()), is(helper.isConnected()));
+        assertThat(getOrAwaitValue(globalStateViewModel.getConnectionState()), is(helper.isConnected()));
     }
 
+    @Test
+    public void showLoadingBar_setsValueToTrue() throws InterruptedException {
+        // When showLoadingBar gets invoked
+        globalStateViewModel.showLoadingBar();
+        // Then its value should be set to true
+        assertThat(getOrAwaitValue(globalStateViewModel.getLoadingBarState()), is(true));
+        assertThat(globalStateViewModel.isLoadingBarShowing(), is(true));
+    }
+
+    @Test
+    public void hideLoadingBar_setsValueToFalse() throws InterruptedException {
+        // When showLoadingBar gets invoked
+        globalStateViewModel.hideLoadingBar();
+        // Then its value should be set to true
+        assertThat(getOrAwaitValue(globalStateViewModel.getLoadingBarState()), is(false));
+        assertThat(globalStateViewModel.isLoadingBarShowing(), is(false));
+    }
 }

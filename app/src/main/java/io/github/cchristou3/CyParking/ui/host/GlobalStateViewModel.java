@@ -39,17 +39,18 @@ import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
  * @author Charalambos Christou
  * @version 3.0 26/01/21
  */
-// TODO: 19/01/2021 Rename to global state ViewModel
-public class AuthStateViewModel extends ViewModel {
+public class GlobalStateViewModel extends ViewModel {
 
-    // Initially set to null
-    private final MutableLiveData<LoggedInUser> mUserState = new MutableLiveData<>(null);
+    // ViewModel's API
     private final AuthenticatorRepository mAuthenticatorRepository;
-    // TODO: 18/01/2021 Add Loading bar state
 
-    // TODO: 19/01/2021 Add connectivity state - Done - needs testing
+    // User state - initially set to null
+    private final MutableLiveData<LoggedInUser> mUserState = new MutableLiveData<>(null);
+    // Loading bar state
+    private final MutableLiveData<Boolean> mLoadingBarState = new MutableLiveData<>();
+    // connectivity state
     private final MutableLiveData<Boolean> mConnectionState = new MutableLiveData<>();
-    // TODO: 19/01/2021 Add no connection layout state - Done - needs testing
+    // no connection layout state
     private final MutableLiveData<Integer> mNoConnectionWarningState = new MutableLiveData<>();
 
     /**
@@ -58,8 +59,53 @@ public class AuthStateViewModel extends ViewModel {
      *
      * @param authenticatorRepository An AuthenticatorRepository instance.
      */
-    public AuthStateViewModel(AuthenticatorRepository authenticatorRepository) {
+    public GlobalStateViewModel(AuthenticatorRepository authenticatorRepository) {
         this.mAuthenticatorRepository = authenticatorRepository;
+    }
+
+    /**
+     * Return the {@link #mLoadingBarState} as a {@link LiveData} instance.
+     *
+     * @return A {@link LiveData} reference of {@link #mLoadingBarState}.
+     */
+    public LiveData<Boolean> getLoadingBarState() {
+        return this.mLoadingBarState;
+    }
+
+    /**
+     * Updates the value of {@link #mLoadingBarState} to
+     * true (to start displaying).
+     */
+    public void showLoadingBar() {
+        updateLoadingBarState(true);
+    }
+
+    /**
+     * Updates the value of {@link #mLoadingBarState} to
+     * false (to hide itself).
+     */
+    public void hideLoadingBar() {
+        updateLoadingBarState(false);
+    }
+
+    /**
+     * Checks whether the state of {@link #mLoadingBarState}
+     * is set to true.
+     *
+     * @return The value of {@link #mLoadingBarState}.
+     */
+    public boolean isLoadingBarShowing() {
+        return this.mLoadingBarState.getValue();
+    }
+
+    /**
+     * Assign the value of {@link #mLoadingBarState}
+     * the given argument.
+     *
+     * @param shouldShowLoadingBar the new value of {@link #mLoadingBarState}.
+     */
+    private void updateLoadingBarState(boolean shouldShowLoadingBar) {
+        this.mLoadingBarState.setValue(shouldShowLoadingBar);
     }
 
     /**
@@ -112,8 +158,6 @@ public class AuthStateViewModel extends ViewModel {
     public LiveData<Boolean> getConnectionState() {
         return this.mConnectionState;
     }
-
-    // TODO: 26/01/2021 Test all above methods.
 
     /**
      * Access the {@link #mAuthenticatorRepository}.

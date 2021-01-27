@@ -49,7 +49,7 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.databinding.FragmentParkingMapBinding;
 import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.parking.slots.booking.BookingFragment;
 import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsFragment;
@@ -74,11 +74,11 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVis
  * via the {@link EventBus}</p> class.
  * <p>
  * In terms of Authentication, this is achieved by communicating with the hosting
- * activity {@link MainHostActivity} via the {@link AuthStateViewModel}.
+ * activity {@link MainHostActivity} via the {@link GlobalStateViewModel}.
  * </p>
  *
  * @author Charalambos Christou
- * @version 10.0 21/01/21
+ * @version 11.0 27/01/21
  * <p>
  * New changes:
  * <p><b>On server</b>: via a cloud function retrieve the document ids of all
@@ -105,7 +105,7 @@ public class ParkingMapFragment extends ViewBindingFragment<FragmentParkingMapBi
 
     // Fragment's variables
     private ParkingMapViewModel mParkingMapViewModel;
-    private AuthStateViewModel mAuthStateViewModel;
+    private GlobalStateViewModel mGlobalStateViewModel;
     private MarkerManager mMarkerManager;
     private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
 
@@ -561,6 +561,18 @@ public class ParkingMapFragment extends ViewBindingFragment<FragmentParkingMapBi
     }
 
     /**
+     * Called when the Fragment is no longer resumed.
+     * If the loading bar was shown, then hide it.
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mGlobalStateViewModel.isLoadingBarShowing()) {
+            mGlobalStateViewModel.hideLoadingBar();
+        }
+    }
+
+    /**
      * Creates and sends an HTTPS request to our Backend.
      * Requests all the parking locations and for each, a Marker is placed
      * on the map.
@@ -577,7 +589,7 @@ public class ParkingMapFragment extends ViewBindingFragment<FragmentParkingMapBi
      * @see #onDestroyView()
      */
     public void fetchParkingLots(@NotNull LatLng latLng) {
-        getBinding().fragmentParkingMapClpbLoadingMarkers.show(); // Show loading bar
+        mGlobalStateViewModel.showLoadingBar();
         Log.d(TAG, "fetchParkingLots: Loading Bar ON");
         mParkingMapViewModel.fetchParkingLots(latLng.latitude, latLng.longitude, new HttpsCallHandler() {
             @Override
@@ -601,12 +613,7 @@ public class ParkingMapFragment extends ViewBindingFragment<FragmentParkingMapBi
 
             @Override
             public void onComplete() {
-                try {
-                    if (getBinding().fragmentParkingMapClpbLoadingMarkers.isShown()) {
-                        getBinding().fragmentParkingMapClpbLoadingMarkers.hide();
-                        Log.d(TAG, "fetchParkingLots: Loading Bar OFF");
-                    }
-                } catch (NullPointerException ignore) { /* view got destroyed */ }
+                mGlobalStateViewModel.hideLoadingBar();
             }
         });
     }
@@ -623,14 +630,14 @@ public class ParkingMapFragment extends ViewBindingFragment<FragmentParkingMapBi
     }
 
     /**
-     * Initializes the fragment's ViewModels ({@link #mParkingMapViewModel},{@link #mAuthStateViewModel}).
-     */ // TODO: 21/01/2021 Modularise code of AuthStateViewModel initialization.
+     * Initializes the fragment's ViewModels ({@link #mParkingMapViewModel},{@link #mGlobalStateViewModel}).
+     */ // TODO: 21/01/2021 Modularise code of GlobalStateViewModel initialization.
     private void initializeViewModels() {
-        // Initialize the mParkingMapViewModel and the mAuthStateViewModel
+        // Initialize the mParkingMapViewModel and the mGlobalStateViewModel
         mParkingMapViewModel = new ViewModelProvider(this, new ParkingMapViewModelFactory())
                 .get(ParkingMapViewModel.class);
-        mAuthStateViewModel = new ViewModelProvider(requireActivity())
-                .get(AuthStateViewModel.class);
+        mGlobalStateViewModel = new ViewModelProvider(requireActivity())
+                .get(GlobalStateViewModel.class);
     }
 
     /**
@@ -716,8 +723,7 @@ public class ParkingMapFragment extends ViewBindingFragment<FragmentParkingMapBi
      */
     private void navigateToBookingScreen() {
         // If the user is not logged in, display a Toast msg
-        Log.d(TAG, "navigateToBookingScreen: " + mAuthStateViewModel.getUser().getRoles());
-        if (mAuthStateViewModel.getUser() == null || !mAuthStateViewModel.getUser().isUser()) {
+        if (mGlobalStateViewModel.getUser() == null || !mGlobalStateViewModel.getUser().isUser()) {
             // TODO: 16/01/2021 Replace string with getString(R.string...)
             Toast.makeText(requireContext(), "You need to be logged as a 'User' in to book a parking slot!", Toast.LENGTH_SHORT).show();
             return;

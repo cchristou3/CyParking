@@ -22,7 +22,7 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentAccountBinding;
 import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.user.account.update.UpdateAccountDialog;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorHosteeFragment;
 
@@ -36,7 +36,7 @@ public class AccountFragment extends ViewBindingFragment<FragmentAccountBinding>
 
     // Fragment's data members
     private final String TAG = AccountFragment.this.getClass().getName();
-    private AuthStateViewModel mAuthStateViewModel;
+    private GlobalStateViewModel mGlobalStateViewModel;
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -59,11 +59,11 @@ public class AccountFragment extends ViewBindingFragment<FragmentAccountBinding>
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // Initialize AuthStateViewModel of the fragment
-        mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
+        // Initialize GlobalStateViewModel of the fragment
+        mGlobalStateViewModel = new ViewModelProvider(requireActivity()).get(GlobalStateViewModel.class);
 
         // Add observer to the user's state
-        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), this::updateUi);
+        mGlobalStateViewModel.getUserState().observe(getViewLifecycleOwner(), this::updateUi);
     }
 
     /**
@@ -113,8 +113,8 @@ public class AccountFragment extends ViewBindingFragment<FragmentAccountBinding>
                 UpdateAccountDialog.UPDATE_PASSWORD);
 
         // Display the user's name and email
-        getBinding().fragmentAccountMtvDisplayName.setText(mAuthStateViewModel.getUser().getDisplayName());
-        getBinding().fragmentAccountMtvEmail.setText(mAuthStateViewModel.getUser().getEmail());
+        getBinding().fragmentAccountMtvDisplayName.setText(mGlobalStateViewModel.getUser().getDisplayName());
+        getBinding().fragmentAccountMtvEmail.setText(mGlobalStateViewModel.getUser().getEmail());
     }
 
     /**
@@ -154,7 +154,7 @@ public class AccountFragment extends ViewBindingFragment<FragmentAccountBinding>
         return v -> {
             FragmentManager fm = isAdded() ? getParentFragmentManager() : null;
             if (fm != null) {
-                if (mAuthStateViewModel.getUser() == null) {
+                if (mGlobalStateViewModel.getUser() == null) {
                     AlertBuilder.promptUserToLogIn(requireContext(),
                             requireActivity(),
                             this, // Access the parent's Navigable interface implementation
@@ -186,9 +186,9 @@ public class AccountFragment extends ViewBindingFragment<FragmentAccountBinding>
     @Override
     public void toAuthenticator() {
         Bundle emailBundle = null;
-        if (mAuthStateViewModel.getUser() != null) {
+        if (mGlobalStateViewModel.getUser() != null) {
             emailBundle = new Bundle();
-            emailBundle.putString(getString(R.string.email_low), mAuthStateViewModel.getUser().getEmail());
+            emailBundle.putString(getString(R.string.email_low), mGlobalStateViewModel.getUser().getEmail());
         }
         getNavController(requireActivity())
                 .navigate(R.id.action_nav_account_to_nav_authenticator_fragment, emailBundle);

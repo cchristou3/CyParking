@@ -18,18 +18,6 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:context=".ui.parking.lots.map.ParkingMapFragment" />
 
-    <androidx.core.widget.ContentLoadingProgressBar
-        android:id="@+id/fragment_parking_map_clpb_loadingMarkers"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/fragment_parking_map_fcv_map"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/fragment_parking_map_fcv_map" />
-
     <androidx.cardview.widget.CardView
         android:id="@+id/fragment_parking_map_cv_info_layout"
         style="@style/CardView.Light"

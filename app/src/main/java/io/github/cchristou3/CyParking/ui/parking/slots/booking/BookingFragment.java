@@ -38,7 +38,7 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentParkingBookingBinding;
 import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsFragment;
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
@@ -54,7 +54,7 @@ import io.github.cchristou3.CyParking.utilities.ViewUtility;
  * <p>
  * <p>
  * In terms of Authentication, this is achieved by communicating with the hosting
- * activity {@link MainHostActivity} via the {@link AuthStateViewModel}.
+ * activity {@link MainHostActivity} via the {@link GlobalStateViewModel}.
  * </p>
  * <p>
  * TODO: - choose a payment method
@@ -65,13 +65,13 @@ import io.github.cchristou3.CyParking.utilities.ViewUtility;
  * -> if not valid show error to getBinding().fragmentParkingBookingTxtDate
  *
  * @author Charalambos Christou
- * @version 6.0 21/01/21
+ * @version 7.0 27/01/21
  */
 public class BookingFragment extends ViewBindingFragment<FragmentParkingBookingBinding> implements Navigable {
 
     // Fragment variables
     private static final String TAG = BookingFragment.class.getName() + "UniqueTag";
-    private AuthStateViewModel mAuthStateViewModel;
+    private GlobalStateViewModel mGlobalStateViewModel;
     private BookingViewModel mBookingViewModel;
     private ParkingLot mSelectedParking;
 
@@ -184,13 +184,13 @@ public class BookingFragment extends ViewBindingFragment<FragmentParkingBookingB
     }
 
     /**
-     * Initializes both {@link #mAuthStateViewModel} and {@link #mBookingViewModel}
+     * Initializes both {@link #mGlobalStateViewModel} and {@link #mBookingViewModel}
      * ViewModels of the fragment.
      */
     private void initializeViewModels() {
         // Instantiate the fragment's ViewModels
-        mAuthStateViewModel = new ViewModelProvider(requireActivity())  // Access the same instance as its hosting activity
-                .get(AuthStateViewModel.class);
+        mGlobalStateViewModel = new ViewModelProvider(requireActivity())  // Access the same instance as its hosting activity
+                .get(GlobalStateViewModel.class);
         mBookingViewModel = new ViewModelProvider(this,
                 new BookingViewModelFactory()).get(BookingViewModel.class);
     }
@@ -207,7 +207,7 @@ public class BookingFragment extends ViewBindingFragment<FragmentParkingBookingB
                 .observe(getViewLifecycleOwner(), getBinding().fragmentParkingBookingTxtStartingTime::setText);
 
         // Observe the users Auth state
-        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
+        mGlobalStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
             // If the user logged out, prompt to either log in or to return to previous screen.
             if (loggedInUser == null) {
                 AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
@@ -324,17 +324,17 @@ public class BookingFragment extends ViewBindingFragment<FragmentParkingBookingB
         Log.d(TAG, "today: " + Utility.getCurrentDate());
         Log.d(TAG, "picked date: " + pickedDateObject);
         if (pickedDateObject.compareTo(Utility.getCurrentDate()) >= 0) {// Date is larger or equal than today's date)
-            final LoggedInUser user = mAuthStateViewModel.getUserState().getValue();
+            final LoggedInUser user = mGlobalStateViewModel.getUserState().getValue();
             if (user == null) return; // If not logged in, exit the method
-            // .
-            changeLoadingBarVisibilityTo(View.VISIBLE);// show loading bar
+
+            mGlobalStateViewModel.showLoadingBar(); // show loading bar
             // Otherwise, proceed with transaction and create a booking
             // Create a new Booking instance that will hold all data of the booking.
             final Booking booking = buildBooking(user, pickedDateObject);
 
             mBookingViewModel.bookParkingLot(booking)
                     .addOnCompleteListener(task -> {
-                        changeLoadingBarVisibilityTo(View.GONE);// hide loading bar
+                        mGlobalStateViewModel.hideLoadingBar(); // hide loading bar
                         // Inform the user booking was successful and offer a temporary UNDO option
                         if (task.isSuccessful() && task.getException() == null) {
                             // TODO: Generate QR Code
@@ -352,15 +352,6 @@ public class BookingFragment extends ViewBindingFragment<FragmentParkingBookingB
         } else {
             Toast.makeText(requireContext(), getString(R.string.date_error_msg), Toast.LENGTH_SHORT).show();
         }
-    }
-
-    /**
-     * Changes the visibility of the loading bar to the specified value.
-     *
-     * @param visibility The new visibility status of the loading bar.
-     */
-    private void changeLoadingBarVisibilityTo(int visibility) {
-        getBinding().fragmentParkingClpbLoadingBar.setVisibility(visibility);
     }
 
     /**

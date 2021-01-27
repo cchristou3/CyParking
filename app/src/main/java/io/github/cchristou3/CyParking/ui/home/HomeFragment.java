@@ -33,8 +33,8 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentHomeBinding;
 import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModelFactory;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModelFactory;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 
@@ -46,7 +46,7 @@ import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
  * Otherwise, if the user has a lot, then display critical info about it.
  * <p>
  * In terms of Authentication, this is achieved by communicating with the hosting
- * activity {@link MainHostActivity} via the {@link AuthStateViewModel}.
+ * activity {@link MainHostActivity} via the {@link GlobalStateViewModel}.
  * </p>
  *
  * @author Charalambos Christou
@@ -57,7 +57,7 @@ public class HomeFragment extends ViewBindingFragment<FragmentHomeBinding> imple
     // Fragment variables
     private static final String TAG = HomeFragment.class.getName();
     private SingleUpdateHelper mLocationManager;
-    private AuthStateViewModel mAuthStateViewModel;
+    private GlobalStateViewModel mGlobalStateViewModel;
     // Members related to the Operator
     private OperatorViewModel mOperatorViewModel;
     private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
@@ -86,7 +86,7 @@ public class HomeFragment extends ViewBindingFragment<FragmentHomeBinding> imple
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initializeAuthStateViewModelWithObserver();
+        initializeGlobalStateViewModelWithObserver();
 
         // Attach listener to "Parking Map" button
         getBinding().fragmentHomeBtnNavToMap.setOnClickListener(v -> {
@@ -161,17 +161,17 @@ public class HomeFragment extends ViewBindingFragment<FragmentHomeBinding> imple
     }
 
     /**
-     * Initialize the AuthStateViewModel with ViewModelStoreOwner
+     * Initialize the GlobalStateViewModel with ViewModelStoreOwner
      * the hosting activity {@link MainHostActivity} and
      * adds an observer to the user's auth state.
      */
-    private void initializeAuthStateViewModelWithObserver() {
-        // Initialize the its AuthStateViewModel
-        mAuthStateViewModel = new ViewModelProvider(requireActivity(), new AuthStateViewModelFactory())
-                .get(AuthStateViewModel.class);
+    private void initializeGlobalStateViewModelWithObserver() {
+        // Initialize the its GlobalStateViewModel
+        mGlobalStateViewModel = new ViewModelProvider(requireActivity(), new GlobalStateViewModelFactory())
+                .get(GlobalStateViewModel.class);
 
         // NOTE: Observer gets invoked once the state changes or when it has been initialized
-        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), this::updateUi);
+        mGlobalStateViewModel.getUserState().observe(getViewLifecycleOwner(), this::updateUi);
     }
 
     /**
@@ -222,9 +222,9 @@ public class HomeFragment extends ViewBindingFragment<FragmentHomeBinding> imple
         mOperatorViewModel.getParkingLotState().observe(getViewLifecycleOwner(),
                 this::updateLotContents); // Display the parking lot's contents
 
-        if (mAuthStateViewModel.getUser() == null) return;
+        if (mGlobalStateViewModel.getUser() == null) return;
 
-        String operatorId = mAuthStateViewModel.getUser().getUserId();
+        String operatorId = mGlobalStateViewModel.getUser().getUserId();
         // Get the operator's lot info from the database.
         getParkingLotInfo(operatorId);
     }

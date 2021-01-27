@@ -45,7 +45,7 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.databinding.RegisterLotFragmentBinding;
 import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
@@ -70,7 +70,7 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
 
     // Fragment's members
     private RegisterLotViewModel mRegisterLotViewModel;
-    private AuthStateViewModel mAuthStateViewModel;
+    private GlobalStateViewModel mGlobalStateViewModel;
     private float mSelectedDuration;
     private float mSelectedPrice;
     private SingleUpdateHelper mLocationManager;
@@ -170,13 +170,13 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
      * and the slot offer list.
      */
     private void addObserversToStates() {
-        addObserverToAuthState();
+        addObserverToGlobalState();
         addObserverToSlotOfferList();
         addObserverToForm();
     }
 
     /**
-     * Initialize the fragment's {@link #mAuthStateViewModel}
+     * Initialize the fragment's {@link #mGlobalStateViewModel}
      * and {@link #mRegisterLotViewModel} instances.
      */
     private void initializeViewModels() {
@@ -184,7 +184,7 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
         mRegisterLotViewModel = new ViewModelProvider(this,
                 new RegisterLotViewModelFactory()).get(RegisterLotViewModel.class);
 
-        mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
+        mGlobalStateViewModel = new ViewModelProvider(requireActivity()).get(GlobalStateViewModel.class);
     }
 
     /**
@@ -219,8 +219,8 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
      * When the user logs out, he is prompted to either return to previous
      * screen or log in.
      */
-    private void addObserverToAuthState() {
-        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
+    private void addObserverToGlobalState() {
+        mGlobalStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
             if (loggedInUser == null) { // User has logged out
                 AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
                         R.string.logout_register_lot_screen_msg);
@@ -298,14 +298,14 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
      * Initializes the fragment's Ui contents and listeners.
      */
     private void initializeUi() {
-        if (mAuthStateViewModel.getUser() == null) return;
+        if (mGlobalStateViewModel.getUser() == null) return;
 
         // Initially the button is disabled
         getBinding().registerLotFragmentBtnRegisterLot.setEnabled(false);
 
         // Set the user's current email
         getBinding().registerLotFragmentTxtEmail.setText(
-                mAuthStateViewModel.getUser().getEmail()
+                mGlobalStateViewModel.getUser().getEmail()
         );
 
         // Set up both spinners
@@ -429,7 +429,7 @@ public class RegisterLotFragment extends ViewBindingFragment<RegisterLotFragment
                         fromViewTextToDouble(getBinding().registerLotFragmentEtLocationLng)
                 ),  // coordinates
                 getBinding().registerLotFragmentEtLotName.getText().toString(), // lotName
-                mAuthStateViewModel.getUser().getUserId(), // operatorId
+                mGlobalStateViewModel.getUser().getUserId(), // operatorId
                 getBinding().registerLotFragmentEtPhoneBody.getNonSpacedText(), // operatorMobileNumber
                 Integer.parseInt(getBinding().registerLotFragmentEtCapacity.getText().toString()), // capacity
                 mRegisterLotViewModel.getSlotOfferList() // slotOfferList

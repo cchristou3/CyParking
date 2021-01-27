@@ -20,6 +20,7 @@ import java.util.List;
 
 import io.github.cchristou3.CyParking.data.manager.SharedPreferencesManager;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModel;
 
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USERS;
 import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
@@ -131,7 +132,7 @@ public class AuthenticatorRepository {
      * @param user    The current FirebaseUser instance provided either by
      *                {@link FirebaseAuth#getCurrentUser()} or {@link AuthResult#getUser()}.
      * @param handler The handler of the user's data both.
-     * @see io.github.cchristou3.CyParking.ui.host.AuthStateViewModel#getUserInfo(Context, FirebaseUser)
+     * @see GlobalStateViewModel#getUserInfo(Context, FirebaseUser)
      * @see io.github.cchristou3.CyParking.ui.user.login.AuthenticatorViewModel#login(Context, String, String)
      */
     public void getUserInfo(@NonNull Context context, @Nullable FirebaseUser user, @NonNull UserDataHandler handler) {

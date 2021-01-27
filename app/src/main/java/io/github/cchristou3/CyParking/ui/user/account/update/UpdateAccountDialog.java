@@ -34,11 +34,12 @@ import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.databinding.DialogAccountUpdateBinding;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsFragment;
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment;
+import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
 import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
 import static io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog.getStyleConfiguration;
@@ -47,7 +48,7 @@ import static io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog.getSty
  * Purpose: Allows the users to update one of their attributes.
  *
  * @author Charalambos Christou
- * @version 3.0 29/12/20
+ * @version 4.0 27/01/21
  */
 public class UpdateAccountDialog extends DialogFragment implements View.OnClickListener, TextWatcher,
         Navigable {
@@ -60,6 +61,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
 
     // Fragment's variables
     private UpdateViewModel mUpdateViewModel;
+    private GlobalStateViewModel mGlobalStateViewModel;
     private DialogAccountUpdateBinding mDialogAccountUpdateBinding;
 
     /**
@@ -122,6 +124,10 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         mUpdateViewModel.updateDialogTitle(dialogTitle);
         mUpdateViewModel.updateActionFieldTitle(actionFieldTitle);
         mUpdateViewModel.setDialogType(action);
+
+        // Instantiate the GlobalStateViewModel to access the user's state
+        mGlobalStateViewModel = new ViewModelProvider(requireActivity())
+                .get(GlobalStateViewModel.class);
     }
 
     /**
@@ -226,6 +232,18 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
     }
 
     /**
+     * Updates the visibility of {@link DialogAccountUpdateBinding#dialogAccountUpdateClpbLoadingBar}
+     * to the given argument.
+     *
+     * @param visibility The new visibility of the loading bar.
+     */
+    public void updateVisibilityOfLoadingBarTo(int visibility) {
+        ViewUtility.updateViewVisibilityTo(
+                getBinding().dialogAccountUpdateClpbLoadingBar, visibility
+        );
+    }
+
+    /**
      * Sets the input type of the specified TextInputEditText
      * based on the specified numeric value (dialog type).
      *
@@ -253,22 +271,24 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      */
     @Override
     public void onClick(View v) {
-        changeLoadingBarVisibilityTo(View.VISIBLE);
-
-        // Instantiate the AuthStateViewModel to access the user's state
-        AuthStateViewModel authStateViewModel = new ViewModelProvider(requireActivity())
-                .get(AuthStateViewModel.class);
-
         // Access the field's info
         final String updatedField = getBinding().dialogAccountUpdateEtInput.getText().toString();
+        if (mUpdateViewModel.getDialogType() == UPDATE_DISPLAY_NAME
+                && updatedField.equals(mGlobalStateViewModel.getUser().getDisplayName())) {
+            Toast.makeText(requireContext(), "Must not be the same as the previous one.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        updateVisibilityOfLoadingBarTo(View.VISIBLE);
+
         // Update it and save a reference to its returning Task object
         Task<Void> updateTask = mUpdateViewModel.updateAccountField(
-                authStateViewModel.getUser(),
+                mGlobalStateViewModel.getUser(),
                 updatedField);
 
         if (updateTask != null) {
             updateTask.addOnCompleteListener(task -> {
-                changeLoadingBarVisibilityTo(View.GONE);
+                updateVisibilityOfLoadingBarTo(View.GONE);
 
                 if (task.getException() != null) {
                     Log.d(TAG, "onClick: " + task.getException());
@@ -282,38 +302,32 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
                     final String toastMsg = actionItem + " got updated.";
                     // And display it to the user
                     Toast.makeText(getParentFragment().requireContext(), toastMsg, Toast.LENGTH_SHORT).show();
-                    updateUserState(authStateViewModel, updatedField); // Update the user's state attribute
+                    updateUserState(mGlobalStateViewModel, updatedField); // Update the user's state attribute
                     // Hide the dialog
                     dismiss();
                 }
             });
         } else {
-            getBinding().dialogAccountUpdateClpbLoadingBar.setVisibility(View.GONE);
+            updateVisibilityOfLoadingBarTo(View.GONE);
         }
     }
 
-    private void updateUserState(final AuthStateViewModel authStateViewModel, String updatedField) {
+    private void updateUserState(final GlobalStateViewModel globalStateViewModel, String updatedField) {
         switch (mUpdateViewModel.getDialogType()) {
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
                 // Update the user's state's display name
-                authStateViewModel.updateAuthState(
-                        authStateViewModel.getUser().setDisplayName(updatedField)
+                globalStateViewModel.updateAuthState(
+                        globalStateViewModel.getUser().setDisplayName(updatedField)
                 );
                 break;
             case UpdateAccountDialog.UPDATE_EMAIL:
                 // Update the user's state's email
-                authStateViewModel.updateAuthState(
-                        authStateViewModel.getUser().setEmail(updatedField)
+                globalStateViewModel.updateAuthState(
+                        globalStateViewModel.getUser().setEmail(updatedField)
                 );
                 break;
             case UpdateAccountDialog.UPDATE_PASSWORD: /* Do nothing */
                 break;
-        }
-    }
-
-    private void changeLoadingBarVisibilityTo(int visibility) {
-        if (getBinding().dialogAccountUpdateClpbLoadingBar.getVisibility() != visibility) {
-            getBinding().dialogAccountUpdateClpbLoadingBar.setVisibility(visibility);
         }
     }
 

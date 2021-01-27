@@ -7,13 +7,13 @@ import androidx.lifecycle.ViewModelProvider;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 
 /**
- * Purpose: <p>ViewModel provider factory to instantiate AuthStateViewModel.
- * Required given AuthStateViewModel has a non-empty constructor</p>
+ * Purpose: <p>ViewModel provider factory to instantiate GlobalStateViewModel.
+ * Required given GlobalStateViewModel has a non-empty constructor</p>
  *
  * @author Charalambos Christou
  * @version 1.0 24/12/20
  */
-public class AuthStateViewModelFactory implements ViewModelProvider.Factory {
+public class GlobalStateViewModelFactory implements ViewModelProvider.Factory {
 
     /**
      * Creates a new instance of the given {@code Class}.
@@ -26,8 +26,8 @@ public class AuthStateViewModelFactory implements ViewModelProvider.Factory {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        if (modelClass.isAssignableFrom(AuthStateViewModel.class)) {
-            return (T) new AuthStateViewModel(new AuthenticatorRepository());
+        if (modelClass.isAssignableFrom(GlobalStateViewModel.class)) {
+            return (T) new GlobalStateViewModel(new AuthenticatorRepository());
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

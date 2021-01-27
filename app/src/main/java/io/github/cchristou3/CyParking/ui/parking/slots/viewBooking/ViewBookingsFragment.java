@@ -24,7 +24,7 @@ import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.databinding.FragmentViewBookingsBinding;
 import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment;
@@ -37,7 +37,7 @@ import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
  * Purpose: <p>Shows pending / completed bookings of the user / operator?</p>
  * <p>
  * In terms of Authentication, this is achieved by communicating with the hosting
- * activity {@link MainHostActivity} via the {@link AuthStateViewModel}.
+ * activity {@link MainHostActivity} via the {@link GlobalStateViewModel}.
  * </p>
  *
  * @author Charalambos Christou
@@ -47,7 +47,7 @@ public class ViewBookingsFragment extends ViewBindingFragment<FragmentViewBookin
 
     // Fragment variables
     private static final String TAG = ViewBookingsFragment.class.getName() + "UniqueTag";
-    private AuthStateViewModel mAuthStateViewModel;
+    private GlobalStateViewModel mGlobalStateViewModel;
     private BookingAdapter mBookingAdapter;
     private ViewBookingsViewModel mViewBookingsViewModel;
 
@@ -99,7 +99,7 @@ public class ViewBookingsFragment extends ViewBindingFragment<FragmentViewBookin
     private void setViewModelObservers() {
         // Attach an observer to the user's state.
         // If the user logs out while being in this screen, an alert is shown
-        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
+        mGlobalStateViewModel.getUserState().observe(getViewLifecycleOwner(), loggedInUser -> {
             Log.d(TAG, "User State: " + loggedInUser);
             if (loggedInUser == null) { // User has logged out
                 AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
@@ -150,7 +150,7 @@ public class ViewBookingsFragment extends ViewBindingFragment<FragmentViewBookin
      * Initializes the fragment's ViewModels.
      */
     private void initializeViewModels() {
-        mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
+        mGlobalStateViewModel = new ViewModelProvider(requireActivity()).get(GlobalStateViewModel.class);
         mViewBookingsViewModel =
                 new ViewModelProvider(this, new ViewBookingsViewModelFactory())
                         .get(ViewBookingsViewModel.class);

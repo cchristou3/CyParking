@@ -24,7 +24,7 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FeedbackFragmentBinding;
 import io.github.cchristou3.CyParking.ui.ViewBindingFragment;
 import io.github.cchristou3.CyParking.ui.home.HomeFragment;
-import io.github.cchristou3.CyParking.ui.host.AuthStateViewModel;
+import io.github.cchristou3.CyParking.ui.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
@@ -33,7 +33,7 @@ import io.github.cchristou3.CyParking.utilities.ViewUtility;
  * Purpose: <p>Allow the user to send feedback to the development team. </p>
  * <p>
  * In terms of Authentication, this is achieved by communicating with the hosting
- * activity {@link MainHostActivity} via the {@link AuthStateViewModel}.
+ * activity {@link MainHostActivity} via the {@link GlobalStateViewModel}.
  * </p>
  *
  * @author Charalambos Christou
@@ -43,7 +43,7 @@ public class FeedbackFragment extends ViewBindingFragment<FeedbackFragmentBindin
 
     // Fragment data members
     private FeedbackViewModel mFeedbackViewModel;
-    private AuthStateViewModel mAuthStateViewModel;
+    private GlobalStateViewModel mGlobalStateViewModel;
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -67,13 +67,13 @@ public class FeedbackFragment extends ViewBindingFragment<FeedbackFragmentBindin
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // Initialize mFeedbackViewModel and mAuthStateViewModel
+        // Initialize mFeedbackViewModel and mGlobalStateViewModel
         mFeedbackViewModel = new ViewModelProvider(this,
                 new FeedbackViewModelFactory()).get(FeedbackViewModel.class);
-        mAuthStateViewModel = new ViewModelProvider(requireActivity()).get(AuthStateViewModel.class);
+        mGlobalStateViewModel = new ViewModelProvider(requireActivity()).get(GlobalStateViewModel.class);
 
         // Update the UI based on the user's logged in status
-        mAuthStateViewModel.getUserState().observe(getViewLifecycleOwner(), this::updateUI);
+        mGlobalStateViewModel.getUserState().observe(getViewLifecycleOwner(), this::updateUI);
 
 
         // Hook up the send feedback button with an onClickListener and disable it initially
@@ -82,8 +82,8 @@ public class FeedbackFragment extends ViewBindingFragment<FeedbackFragmentBindin
             // Store message to Firestore and (TODO) send notification to administrator via cloud function
             mFeedbackViewModel.sendFeedback(
                     new Feedback(
-                            ((mAuthStateViewModel.getUser() != null) ? // If logged in
-                                    mAuthStateViewModel.getUser().getEmail() // its email
+                            ((mGlobalStateViewModel.getUser() != null) ? // If logged in
+                                    mGlobalStateViewModel.getUser().getEmail() // its email
                                     : mFeedbackViewModel.getEmail()), // Otherwise, inputted email
                             mFeedbackViewModel.getFeedback()
                     )
@@ -119,7 +119,7 @@ public class FeedbackFragment extends ViewBindingFragment<FeedbackFragmentBindin
                     feedbackTextArea.setError(null, null);
                 }
             }
-            if (mAuthStateViewModel.getUser() == null) {
+            if (mGlobalStateViewModel.getUser() == null) {
                 // Update Email error
                 if (feedbackFormState.getEmailError() != null) {
                     getBinding().feedbackFragmentEtEmailInput
@@ -144,7 +144,7 @@ public class FeedbackFragment extends ViewBindingFragment<FeedbackFragmentBindin
     public void onDestroyView() {
         getBinding().feedbackFragmentMbtnSendFeedback.setOnClickListener(null);
         getBinding().feedbackFragmentEtFeedbackInput.removeTextChangedListener(this);
-        if (mAuthStateViewModel.getUser() == null) {
+        if (mGlobalStateViewModel.getUser() == null) {
             getBinding().feedbackFragmentEtEmailInput.removeTextChangedListener(this);
         }
         super.onDestroyView();
@@ -220,9 +220,9 @@ public class FeedbackFragment extends ViewBindingFragment<FeedbackFragmentBindin
     public void afterTextChanged(@NotNull Editable textFromFeedbackArea) {
         // Access the user's email if logged in. Otherwise, use the email
         // that the user entered.
-        final LoggedInUser user = mAuthStateViewModel.getUser();
+        final LoggedInUser user = mGlobalStateViewModel.getUser();
         final String email = (user != null)
-                ? mAuthStateViewModel.getUser().getEmail()
+                ? mGlobalStateViewModel.getUser().getEmail()
                 : getBinding().feedbackFragmentEtEmailInput.getText().toString();
         mFeedbackViewModel.formDataChanged(user, textFromFeedbackArea.toString(), email);
     }

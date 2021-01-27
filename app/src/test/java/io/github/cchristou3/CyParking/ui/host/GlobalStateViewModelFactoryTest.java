@@ -13,12 +13,12 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
- * Unit tests for the {@link AuthStateViewModelFactory} class.
+ * Unit tests for the {@link GlobalStateViewModelFactory} class.
  */
-public class AuthStateViewModelFactoryTest {
+public class GlobalStateViewModelFactoryTest {
     @Test(expected = IllegalArgumentException.class)
     public void create_wrongClass_throwsException() {
-        new AuthStateViewModelFactory().create(BookingViewModel.class);
+        new GlobalStateViewModelFactory().create(BookingViewModel.class);
     }
 
     /**
@@ -28,6 +28,6 @@ public class AuthStateViewModelFactoryTest {
      */
     @Test(expected = ExceptionInInitializerError.class)
     public void create_correctClass_returnsNonNull() {
-        assertThat(new AuthStateViewModelFactory().create(AuthStateViewModel.class), is(not(nullValue())));
+        assertThat(new GlobalStateViewModelFactory().create(GlobalStateViewModel.class), is(not(nullValue())));
     }
 }

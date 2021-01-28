@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.parking.slots.viewBooking.ViewBookingsFragment">
+    tools:context=".ui.views.parking.slots.viewBooking.ViewBookingsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/fragment_view_bookings_rv_recyclerview"

@@ -9,11 +9,12 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 
 /**
- * Purpose: provide the {@link io.github.cchristou3.CyParking.ui.home.OperatorViewModel}
+ * Purpose: provide the {@link io.github.cchristou3.CyParking.ui.views.home.OperatorViewModel}
  * functionality related to the operator's tasks.
  *
  * @author Charalambos Christou
  * @version 12/01/2021
+ * @see io.github.cchristou3.CyParking.data.repository.DefaultOperatorRepository
  */
 public interface OperatorRepository {
 

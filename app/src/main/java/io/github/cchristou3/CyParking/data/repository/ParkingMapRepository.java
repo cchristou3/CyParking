@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
-import io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapViewModel;
+import io.github.cchristou3.CyParking.ui.views.parking.lots.map.ParkingMapViewModel;
 
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.GET_NEARBY_PARKING_LOTS;
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.LATITUDE;

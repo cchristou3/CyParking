@@ -19,12 +19,12 @@ import io.github.cchristou3.CyParking.data.model.parking.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.PARKING_LOTS;
-import static io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment.TAG;
+import static io.github.cchristou3.CyParking.ui.views.parking.lots.map.ParkingMapFragment.TAG;
 
 /**
  * Purpose: contain operator-related methods.
  * The concrete implementation of {@link OperatorRepository}.
- * Used by {@link io.github.cchristou3.CyParking.ui.home.OperatorViewModel}
+ * Used by {@link io.github.cchristou3.CyParking.ui.views.home.OperatorViewModel}
  * for operator-role users.
  *
  * @author Charalambos Christou

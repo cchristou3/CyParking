@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * Purpose: Encapsulate attributes related to feedback.
  * <p>POJO to be used to transfer and receive data
  * * via activities / fragments and HTTP requests.
- * Referenced in {@link io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment}.
+ * Referenced in {@link io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment}.
  *
  * @author Charalambos Christou
  * @version 1.0 30/12/20

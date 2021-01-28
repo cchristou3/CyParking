@@ -5,11 +5,11 @@ import android.net.Network;
 
 /**
  * Purpose: allow the View to handle changes to the device's Internet Connection.
- * It is used by {@link io.github.cchristou3.CyParking.ui.host.MainHostActivity}.
+ * It is used by {@link io.github.cchristou3.CyParking.ui.views.host.MainHostActivity}.
  *
  * @author Charalambos Christou
  * @version 1.0 25/01/21
- * @see io.github.cchristou3.CyParking.ui.host.MainHostActivity#onConnectionStateChanged(boolean).
+ * @see io.github.cchristou3.CyParking.ui.views.host.MainHostActivity#onConnectionStateChanged(boolean).
  * @see io.github.cchristou3.CyParking.data.manager.ConnectivityHelper
  */
 public interface ConnectionHandler {

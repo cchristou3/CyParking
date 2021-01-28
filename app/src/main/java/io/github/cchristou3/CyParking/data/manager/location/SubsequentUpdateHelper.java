@@ -54,7 +54,7 @@ public class SubsequentUpdateHelper extends LocationManager implements DefaultLi
      * @param fragment        The fragment requesting location updates.
      * @param locationHandler The callback method to be invoked when location updates are received.
      */
-    /* package-private */ SubsequentUpdateHelper(
+    /*package-private*/ SubsequentUpdateHelper(
             @NonNull Context context, @NonNull Fragment fragment, @NonNull LocationHandler locationHandler
     ) {
         super(context);

@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.ui.parking.lots.map.ParkingMapFragment;
+import io.github.cchristou3.CyParking.ui.views.parking.lots.map.ParkingMapFragment;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
 /**

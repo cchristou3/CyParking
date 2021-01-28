@@ -41,7 +41,7 @@ public class SingleUpdateHelper extends LocationManager {
      * @param context         The context of the parent's {@link FusedLocationProviderClient}.
      * @param locationHandler The callback method to be invoked when location updates are received.
      */
-    /* package-private */ SingleUpdateHelper(@NonNull Context context, @NonNull LocationHandler locationHandler) {
+    /*package-private*/ SingleUpdateHelper(@NonNull Context context, @NonNull LocationHandler locationHandler) {
         super(context);
         mLocationHandler = locationHandler;
         prepareCallback();

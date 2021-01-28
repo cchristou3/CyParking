@@ -59,7 +59,7 @@ public abstract class LocationManager {
      *
      * @param context The context of the {@link #mFusedLocationProviderClient} to use.
      */
-    /* package-private */ LocationManager(@NonNull final Context context) {
+    /*package-private*/ LocationManager(@NonNull final Context context) {
         Log.d(TAG, "LocationManager initialized");
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
     }
@@ -101,7 +101,6 @@ public abstract class LocationManager {
      *
      * @param fragment The fragment that requests the location-based permissions.
      */
-    /* package-private */
     public void requestUserLocationUpdates(@NonNull Fragment fragment) {
         // Check for location permissions
         if (ActivityCompat.checkSelfPermission(fragment.requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -162,7 +161,7 @@ public abstract class LocationManager {
      *
      * @param locationCallback The new value of {@link #mLocationCallback}
      */
-    /* package-private */ void setLocationCallback(LocationCallback locationCallback) {
+    /*package-private*/ void setLocationCallback(LocationCallback locationCallback) {
         this.mLocationCallback = locationCallback;
     }
 
@@ -170,7 +169,7 @@ public abstract class LocationManager {
      * Unregisters the {@link #mFusedLocationProviderClient} from future
      * location updates.
      */
-    /* package-private */ void removeLocationUpdates() {
+    /*package-private*/ void removeLocationUpdates() {
         mFusedLocationProviderClient.removeLocationUpdates(this.mLocationCallback);
         Log.d(TAG, "Callback removed!");
     }

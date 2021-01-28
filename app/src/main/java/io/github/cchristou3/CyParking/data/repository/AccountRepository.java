@@ -19,7 +19,7 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USERS;
 import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USER_DISPLAY_NAME;
-import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
+import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
 
 /**
  * Purpose: <p>Class that offers to the user the following services:

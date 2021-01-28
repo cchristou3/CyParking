@@ -3,8 +3,8 @@ package io.github.cchristou3.CyParking.data.interfaces;
 import androidx.fragment.app.Fragment;
 
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
-import io.github.cchristou3.CyParking.ui.home.HomeFragment;
-import io.github.cchristou3.CyParking.ui.parking.lots.register.RegisterLotFragment;
+import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
+import io.github.cchristou3.CyParking.ui.views.parking.lots.register.RegisterLotFragment;
 
 /**
  * Purpose:

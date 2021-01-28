@@ -7,9 +7,9 @@ import androidx.navigation.Navigation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import io.github.cchristou3.CyParking.ui.home.HomeFragment;
-import io.github.cchristou3.CyParking.ui.host.MainHostActivity;
-import io.github.cchristou3.CyParking.ui.user.account.AccountFragment;
+import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
+import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
+import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 
 /**
  * Purpose: Provide a Navigation API to be implemented by all the
@@ -53,13 +53,13 @@ public interface Navigable {
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.user.login.AuthenticatorFragment}.
+     * {@link io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment}.
      */
     void toAuthenticator();
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.parking.slots.viewBooking.ViewBookingsFragment}.
+     * {@link io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking.ViewBookingsFragment}.
      */
     void toBookings();
 
@@ -71,7 +71,7 @@ public interface Navigable {
 
     /**
      * Navigates from the current Fragment subclass to the
-     * {@link io.github.cchristou3.CyParking.ui.user.feedback.FeedbackFragment}.
+     * {@link io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment}.
      */
     void toFeedback();
 

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.parking.lots.register.RegisterLotFragment">
+    tools:context=".ui.views.parking.lots.register.RegisterLotFragment">
 
     <ScrollView
         android:id="@+id/register_lot_fragment_sv_scroll_view"

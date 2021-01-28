@@ -18,6 +18,7 @@ import android.widget.TextView;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.fragment.app.FragmentActivity;
 
 import org.jetbrains.annotations.Contract;
@@ -30,13 +31,13 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
  * related to the View.</p>
  *
  * @author Charalambos Christou
- * @version 6.0 25/01/21
+ * @version 7.0 28/01/21
  */
 public class ViewUtility {
 
     /**
      * Updates the specified Checkboxes' error status with the given error.
-     * Used in {@link io.github.cchristou3.CyParking.ui.user.login.AuthenticatorHosteeFragment}.
+     * Used in {@link io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorHosteeFragment}.
      * The "[Data type]..." syntax is useful when more roles are going to be added.
      * Assuming the user did not pick any of the roles, it will iterate through all
      * the given checkboxes to set their error messages.
@@ -213,5 +214,19 @@ public class ViewUtility {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Show or hide the given {@link ContentLoadingProgressBar} instance
+     * based on the given flag.
+     *
+     * @param shouldShowLoadingBar Indicates whether to display or hide the loading bar.
+     */
+    public static void updateVisibilityOfLoadingBarTo(ContentLoadingProgressBar loadingBar, boolean shouldShowLoadingBar) {
+        if (shouldShowLoadingBar) {
+            loadingBar.show();
+        } else {
+            loadingBar.hide();
+        }
     }
 }

@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 
-import static io.github.cchristou3.CyParking.ui.host.MainHostActivity.TAG;
+import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
 
 /**
  * Purpose: Offer a Lifecycle-aware component that handles

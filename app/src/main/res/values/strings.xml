@@ -163,5 +163,6 @@
     <string name="any_error">Error</string>
     <string name="any">Any</string>
     <string name="no_connection">No connection</string>
+    <string name="password_helper">You should also include special characters (!, @, %, etc.) to make it difficult to be guessed</string>
 
 </resources>

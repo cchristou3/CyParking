@@ -21,6 +21,9 @@ import androidx.cardview.widget.CardView;
 import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.android.material.textfield.TextInputLayout;
+
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,9 +58,7 @@ public class ViewUtility {
         } else {
             for (CheckBox checkbox :
                     checkBoxes) {
-                if (checkbox.getError() != null) {
-                    checkbox.setError(null, null);
-                }
+                checkbox.setError(null, null);
             }
         }
     }
@@ -76,9 +77,25 @@ public class ViewUtility {
             viewToBeUpdated.setError(context.getString(error));
             return true;
         } else {
-            if (viewToBeUpdated.getError() != null) {
-                viewToBeUpdated.setError(null, null);
-            }
+            viewToBeUpdated.setError(null, null);
+            return false;
+        }
+    }
+
+    /**
+     * Updates the specified TextInputLayout's error status with the given error.
+     *
+     * @param context         The context of the caller.
+     * @param viewToBeUpdated A TextInputLayout instance.
+     * @param error           The id of the error associated with the specified View object.
+     * @return True if the error was non-null. Otherwise, false.
+     */
+    public static boolean updateErrorOf(Context context, TextInputLayout viewToBeUpdated, @Nullable Integer error) {
+        if (error != null) {
+            viewToBeUpdated.setError(context.getString(error));
+            return true;
+        } else {
+            viewToBeUpdated.setError(null);
             return false;
         }
     }
@@ -223,6 +240,20 @@ public class ViewUtility {
      * @param shouldShowLoadingBar Indicates whether to display or hide the loading bar.
      */
     public static void updateVisibilityOfLoadingBarTo(ContentLoadingProgressBar loadingBar, boolean shouldShowLoadingBar) {
+        if (shouldShowLoadingBar) {
+            loadingBar.show();
+        } else {
+            loadingBar.hide();
+        }
+    }
+
+    /**
+     * Show or hide the given {@link CircularProgressIndicator} instance
+     * based on the given flag.
+     *
+     * @param shouldShowLoadingBar Indicates whether to display or hide the loading bar.
+     */
+    public static void updateVisibilityOfLoadingBarTo(CircularProgressIndicator loadingBar, boolean shouldShowLoadingBar) {
         if (shouldShowLoadingBar) {
             loadingBar.show();
         } else {

@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="CustomDialog" parent="@style/Theme.AppCompat.Light.Dialog">
-        <item name="android:windowNoTitle">false</item>
-        <item name="android:windowIsFloating">true</item>
+    <!-- Styles for the  Login screen "CyParking" text -->
+    <style name="TextAppearance.CyParking.Title" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="CustomDialogDark" parent="@style/ThemeOverlay.AppCompat.Dark">
+    <!-- Styles for the CircularProgressIndicator -->
+    <style name="Widget.CyParking.CircularProgressIndicator" parent="Widget.MaterialComponents.CircularProgressIndicator">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.CircularProgressIndicator</item>
+        <item name="trackThickness">13dp</item>
+        <item name="indicatorSize">125dp</item>
+
+    </style>
+
+    <style name="ThemeOverlay.App.CircularProgressIndicator" parent="">
+        <item name="colorPrimary">@color/design_default_color_primary</item>
+    </style>
+
+    <!--  TODO: Update   -->
+    <!-- Styles for the CustomDialog-->
+    <style name="CustomDialog" parent="@style/Theme.MaterialComponents.DayNight">
         <item name="android:windowNoTitle">false</item>
         <item name="android:windowIsFloating">true</item>
     </style>

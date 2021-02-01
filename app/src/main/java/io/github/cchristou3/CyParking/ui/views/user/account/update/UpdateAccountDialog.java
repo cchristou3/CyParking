@@ -41,7 +41,6 @@ import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 
 import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
-import static io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog.getStyleConfiguration;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateVisibilityOfLoadingBarTo;
 
 /**
@@ -79,7 +78,8 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         args.putShort(DIALOG_ACTION_KEY, action);
         dialog.setArguments(args); // Pass in the bundle
         // Set the dialog's style
-        dialog.setStyle(DialogFragment.STYLE_NORMAL, getStyleConfiguration(nightModeFlags));
+        // TODO: 01/02/2021 Update Themes
+        //dialog.setStyle(DialogFragment.STYLE_NORMAL, getStyleConfiguration(nightModeFlags));
         return dialog;
     }
 

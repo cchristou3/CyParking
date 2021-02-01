@@ -36,7 +36,6 @@ import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
 
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.hideKeyboard;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf;
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVisibilityTo;
 
 /**
  * <p>A simple {@link Fragment} subclass.
@@ -284,7 +283,7 @@ public class AuthenticatorHosteeFragment extends CommonFragment<FragmentAuthenti
      * Registers the user.
      */
     private void register() {
-        changeVisibilityOfLoadingBarTo(View.VISIBLE);
+        getGlobalStateViewModel().showLoadingBar();
         hideKeyboard(requireActivity(), requireView());
         mAuthenticatorViewModel.register(
                 getBinding().fragmentHosteeAuthEtEmail.getText().toString(),
@@ -296,18 +295,14 @@ public class AuthenticatorHosteeFragment extends CommonFragment<FragmentAuthenti
     }
 
     /**
-     * Show or hide the loading bar based on the specified visibility.
-     */
-    private void changeVisibilityOfLoadingBarTo(int visibility) {
-        updateViewVisibilityTo(getBinding().fragmentHosteeAuthPbLoading, visibility);
-    }
-
-    /**
      * Prepares the Ui for a user log in attempt.
      * Hides the role area and attaches appropriate listeners.
      */
     private void updateUiForLoggingIn() {
         // Set up the UI and listeners for logging in
+        // Hide the password hint
+        getBinding().fragmentHosteeAuthTilPassword.setHelperText(null);
+
         // Hide unnecessary UI elements, related to registration
         hideUnrelatedFields();
         // Pressing the "enter" on the keyboard will automatically trigger the login method
@@ -336,7 +331,7 @@ public class AuthenticatorHosteeFragment extends CommonFragment<FragmentAuthenti
      * @param requiredContext The context of the fragment.
      */
     private void login(Context requiredContext) {
-        changeVisibilityOfLoadingBarTo(View.VISIBLE);
+        getGlobalStateViewModel().showLoadingBar();
         hideKeyboard(requireActivity(), requireView());
         mAuthenticatorViewModel.login(requiredContext,
                 getBinding().fragmentHosteeAuthEtEmail.getText().toString(),
@@ -357,7 +352,7 @@ public class AuthenticatorHosteeFragment extends CommonFragment<FragmentAuthenti
             // onCreateView till onResume). Thus, as the observer is set on the onViewCreated callback it
             // will trigger immediately with the user's data.
             if (authResult == null || !this.isResumed()) return;
-            changeVisibilityOfLoadingBarTo(View.GONE); // hide the loading bar
+            getGlobalStateViewModel().hideLoadingBar();
             if (authResult.getError() != null) showLoginFailed(authResult.getError());
             if (authResult.getSuccess() != null) {
                 if (this.mIsReauthenticating) {
@@ -389,9 +384,9 @@ public class AuthenticatorHosteeFragment extends CommonFragment<FragmentAuthenti
 
             // If there is an error, show it for the specific UI field.
             // If there was an error before, and it got resolved then hide the error.
-            updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthEtEmail, formState.getEmailError());
-            updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthEtName, formState.getNameError());
-            updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthEtPassword, formState.getPasswordError());
+            updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilEmail, formState.getEmailError());
+            updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilName, formState.getNameError());
+            updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilPassword, formState.getPasswordError());
 
             if (!mAuthenticatorViewModel.isUserSigningIn()) {// User signs up
                 updateErrorOf(requireContext(), formState.getRoleError(),
@@ -432,7 +427,7 @@ public class AuthenticatorHosteeFragment extends CommonFragment<FragmentAuthenti
      */
     private void hideUnrelatedFields() {
         getBinding().fragmentHosteeAuthClRoleSection.setVisibility(View.GONE);
-        getBinding().fragmentHosteeAuthEtName.setVisibility(View.GONE);
+        getBinding().fragmentHosteeAuthTilName.setVisibility(View.GONE);
     }
 
     /**

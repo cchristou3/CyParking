@@ -103,7 +103,7 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
      * @param shouldShowLoadingBar Indicates whether to show or hide the loading bar.
      */
     private void updateLoadingBarVisibility(boolean shouldShowLoadingBar) {
-        updateVisibilityOfLoadingBarTo(mBinding.activityMainHostClpbProgressBar, shouldShowLoadingBar);
+        updateVisibilityOfLoadingBarTo(mBinding.activityMainHostCpiProgressBar, shouldShowLoadingBar);
     }
 
     /**

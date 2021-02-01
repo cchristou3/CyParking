@@ -34,7 +34,8 @@ public class DescriptionDialog extends DialogFragment {
         descriptionDialog.setDescription(description);
         descriptionDialog.setTitle(title);
         descriptionDialog.mNightModeFlags = nightModeFlags;
-        descriptionDialog.setStyle(DialogFragment.STYLE_NORMAL, getStyleConfiguration(nightModeFlags));
+        // TODO: 01/02/2021 Update Themes
+        //descriptionDialog.setStyle(DialogFragment.STYLE_NORMAL, getStyleConfiguration(nightModeFlags));
         return descriptionDialog;
     }
 
@@ -42,10 +43,10 @@ public class DescriptionDialog extends DialogFragment {
      * Returns a style based on the current Night mode configs.
      *
      * @param nightModeFlags Indicates the device's settings on Night mode (On/Off/???)
-     * @return
+     * @return TODO: Update
      */
     public static int getStyleConfiguration(int nightModeFlags) {
-        if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) return R.style.CustomDialogDark;
+        //if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) return R.style.CustomDialogDark;
 
         return R.style.CustomDialog; // UI_MODE_NIGHT_NO or UI_MODE_NIGHT_UNDEFINED
     }

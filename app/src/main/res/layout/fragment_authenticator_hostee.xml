@@ -14,54 +14,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:id="@+id/linearLayout"
+        <include
+            android:id="@+id/fragment_hostee_auth_logo"
+            layout="@layout/logo_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="35dp"
-            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_gravity="center_horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/logo"
-                app:tint="?android:attr/textColorPrimary" />
-
-            <TextView
-                style="@style/TextAppearance.CyParking.Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/app_name" />
-
-        </LinearLayout>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_hostee_auth_til_email"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="60dp"
             android:layout_marginEnd="24dp"
+            android:layout_marginTop="60dp"
             android:hint="@string/prompt_email"
-            android:selectAllOnFocus="true"
             app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+            app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_logo">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/fragment_hostee_auth_et_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:selectAllOnFocus="true" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -72,7 +54,6 @@
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
             android:hint="@string/name_surname"
-            android:selectAllOnFocus="true"
             app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -83,7 +64,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:selectAllOnFocus="true" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -94,8 +76,6 @@
             android:layout_marginEnd="24dp"
             android:hint="@string/prompt_password"
             android:imeActionLabel="@string/action_sign_in_short"
-            android:imeOptions="actionDone"
-            android:selectAllOnFocus="true"
             app:endIconMode="password_toggle"
             app:errorEnabled="true"
             app:helperText="@string/password_helper"
@@ -108,7 +88,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:maxLines="1" />
+                android:imeOptions="actionDone"
+                android:maxLines="1"
+                android:selectAllOnFocus="true" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout

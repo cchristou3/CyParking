@@ -1,6 +1,5 @@
 package io.github.cchristou3.CyParking.ui.views.user.account;
 
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +27,7 @@ import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorHosteeFra
  * Purpose: <p>Allow logged in users to change their private data.</p>
  *
  * @author Charalambos Christou
- * @version 5.0 28/01/21
+ * @version 6.0 02/02/21
  */
 public class AccountFragment extends CommonFragment<FragmentAccountBinding> implements Navigable {
 
@@ -158,13 +157,7 @@ public class AccountFragment extends CommonFragment<FragmentAccountBinding> impl
                     return;
                 }
 
-                // Access the device's night mode configurations
-                int nightModeFlags = this.requireContext()
-                        .getResources()
-                        .getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-                UpdateAccountDialog dialog = UpdateAccountDialog.newInstance(
-                        nightModeFlags,
-                        action);
+                UpdateAccountDialog dialog = UpdateAccountDialog.newInstance(action);
                 dialog.setTargetFragment(this, 1);
                 dialog.show(fm, TAG);
             }

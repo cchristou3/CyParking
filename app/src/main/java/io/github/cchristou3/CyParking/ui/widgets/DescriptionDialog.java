@@ -35,6 +35,7 @@ public class DescriptionDialog extends DialogFragment {
         descriptionDialog.setTitle(title);
         descriptionDialog.mNightModeFlags = nightModeFlags;
         // TODO: 01/02/2021 Update Themes
+        descriptionDialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.Widget_CyParking_Dialog);
         //descriptionDialog.setStyle(DialogFragment.STYLE_NORMAL, getStyleConfiguration(nightModeFlags));
         return descriptionDialog;
     }
@@ -48,7 +49,7 @@ public class DescriptionDialog extends DialogFragment {
     public static int getStyleConfiguration(int nightModeFlags) {
         //if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) return R.style.CustomDialogDark;
 
-        return R.style.CustomDialog; // UI_MODE_NIGHT_NO or UI_MODE_NIGHT_UNDEFINED
+        return R.style.Theme_MaterialComponents_Light_Dialog; // UI_MODE_NIGHT_NO or UI_MODE_NIGHT_UNDEFINED
     }
 
     /**

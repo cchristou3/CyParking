@@ -6,13 +6,27 @@
     android:layout_height="match_parent"
     tools:context=".ui.views.user.account.AccountFragment">
 
-    <com.google.android.material.circularreveal.cardview.CircularRevealCardView
+    <include
+        android:id="@+id/include"
+        layout="@layout/logo_layout"
+        android:layout_marginTop="35dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/materialCardView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="10dp"
+        app:cardElevation="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fragment_account_cl_not_logged_in"
@@ -63,6 +77,7 @@
                 android:id="@+id/fragment_account_mtv_display_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:textSize="25sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -73,6 +88,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
+                android:gravity="center"
                 android:textSize="25sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -111,6 +127,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </com.google.android.material.circularreveal.cardview.CircularRevealCardView>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

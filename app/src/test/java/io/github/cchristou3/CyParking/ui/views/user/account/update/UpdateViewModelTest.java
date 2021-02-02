@@ -144,40 +144,6 @@ public class UpdateViewModelTest extends InstantTaskRuler {
     }
 
     @Test
-    public void updateDialogTitle_setsNewValue() throws InterruptedException {
-        // Given the title got updated
-        String title = "update";
-        updateViewModel.updateDialogTitle(title);
-        // Then the LivaData's value should get updated
-        assertThat(getOrAwaitValue(updateViewModel.getDialogTitle()), is(title));
-    }
-
-    @Test
-    public void updateDialogTitle_null_setsNullValue() throws InterruptedException {
-        // Given the title got updated
-        updateViewModel.updateDialogTitle(null);
-        // Then the LivaData's value should get updated
-        assertThat(getOrAwaitValue(updateViewModel.getDialogTitle()), is(nullValue()));
-    }
-
-    @Test
-    public void updateActionFieldTitle_setsNewValue() throws InterruptedException {
-        // Given the title got updated
-        String title = "update";
-        updateViewModel.updateActionFieldTitle(title);
-        // Then the LivaData's value should get updated
-        assertThat(getOrAwaitValue(updateViewModel.getActionFieldTitle()), is(title));
-    }
-
-    @Test
-    public void updateActionFieldTitle_null_setsNullValue() throws InterruptedException {
-        // Given the title got updated
-        updateViewModel.updateActionFieldTitle(null);
-        // Then the LivaData's value should get updated
-        assertThat(getOrAwaitValue(updateViewModel.getActionFieldTitle()), is(nullValue()));
-    }
-
-    @Test
     public void getActionFieldInput_returnsPreviouslySetValue() {
         // Given the input got updated
         String attribute = "SomeAttribute";

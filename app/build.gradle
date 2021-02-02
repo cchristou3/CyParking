@@ -42,7 +42,7 @@ android {
 
 dependencies {
 
-    api 'com.google.android.material:material:1.3.0-rc01'
+    api 'com.google.android.material:material:' + materialDesignVersion
 
     implementation 'androidx.appcompat:appcompat:' + appcompatVersion
     implementation 'com.google.android.material:material:' + materialVersion

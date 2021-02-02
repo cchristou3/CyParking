@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
@@ -47,7 +47,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateVisibil
  * Purpose: Allows the users to update one of their attributes.
  *
  * @author Charalambos Christou
- * @version 5.0 28/01/21
+ * @version 6.0 02/02/21
  */
 public class UpdateAccountDialog extends DialogFragment implements View.OnClickListener, TextWatcher,
         Navigable {
@@ -67,19 +67,18 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param nightModeFlags Configurations for the system's theme.
-     * @param action         The kind of action to be performed in dialog.
+     * @param action The kind of action to be performed in dialog.
      * @return A new instance of fragment DescriptionDialog.
      */
     @NotNull
-    public static UpdateAccountDialog newInstance(int nightModeFlags, short action) {
+    public static UpdateAccountDialog newInstance(short action) {
         UpdateAccountDialog dialog = new UpdateAccountDialog(); // Instantiate an UpdateAccountDialog object
         Bundle args = new Bundle(); // Create a bundle store key information about the dialog
         args.putShort(DIALOG_ACTION_KEY, action);
         dialog.setArguments(args); // Pass in the bundle
         // Set the dialog's style
+        dialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.Widget_CyParking_Dialog);
         // TODO: 01/02/2021 Update Themes
-        //dialog.setStyle(DialogFragment.STYLE_NORMAL, getStyleConfiguration(nightModeFlags));
         return dialog;
     }
 
@@ -108,7 +107,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         if (getArguments() == null) return;
         final short action = getArguments().getShort(DIALOG_ACTION_KEY);
         initializeViewModel(action);
-        initializeUi();
+        initializeUi(action);
         addObserverToViewModel();
     }
 
@@ -142,35 +141,37 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      * @param action The action to be performed by this instance of the dialog.
      */
     private void initializeViewModel(short action) {
-        String actionFieldTitle, dialogTitle;
-        // Set value of the dialog's title, and the TextView that is above the input
-        // to its corresponding text based on the dialog's action type.
-        switch (action) {
-            case UPDATE_DISPLAY_NAME:
-                actionFieldTitle = getString(R.string.prompt_name);
-                dialogTitle = getString(R.string.updating_name);
-                break;
-            case UPDATE_EMAIL:
-                actionFieldTitle = getString(R.string.prompt_email);
-                dialogTitle = getString(R.string.updating_email);
-                break;
-            case UPDATE_PASSWORD:
-                actionFieldTitle = getString(R.string.prompt_password);
-                dialogTitle = getString(R.string.updating_password);
-                break;
-            default:
-                throw new IllegalArgumentException("Not a valid action.");
-        }
         // Initialize the UpdateViewModel of the fragment and set its initial values.
         mUpdateViewModel = new ViewModelProvider(this,
                 new UpdateViewModelFactory()).get(UpdateViewModel.class);
-        mUpdateViewModel.updateDialogTitle(dialogTitle);
-        mUpdateViewModel.updateActionFieldTitle(actionFieldTitle);
         mUpdateViewModel.setDialogType(action);
 
         // Instantiate the GlobalStateViewModel to access the user's state
         mGlobalStateViewModel = new ViewModelProvider(requireActivity())
                 .get(GlobalStateViewModel.class);
+    }
+
+    /**
+     * Returns the appropriate String id based on the given action.
+     *
+     * @param action        The action to be performed by the current instance of the fragment.
+     * @param resIdName     The id of the string about the user's display name.
+     * @param resIdEmail    The id of the string about the user's email.
+     * @param resIdPassword The id of the string about the user's password.
+     * @return The appropriate String based on the given action.
+     */
+    @NonNull
+    private String getDialogAttribute(short action, int resIdName, int resIdEmail, int resIdPassword) {
+        switch (action) {
+            case UPDATE_DISPLAY_NAME:
+                return getString(resIdName);
+            case UPDATE_EMAIL:
+                return getString(resIdEmail);
+            case UPDATE_PASSWORD:
+                return getString(resIdPassword);
+            default:
+                throw new IllegalArgumentException("Not a valid action.");
+        }
     }
 
     /**
@@ -183,11 +184,11 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
             getBinding().dialogAccountUpdateMbtnUpdate.setEnabled(updateFormState.isDataValid());
             if (updateFormState.getError() != null) {
                 // Show error hint
-                getBinding().dialogAccountUpdateEtInput.setError(getString(updateFormState.getError()));
+                getBinding().dialogAccountUpdateTilInput.setError(getString(updateFormState.getError()));
             } else {
                 // Remove error hint if it displays
-                if (getBinding().dialogAccountUpdateEtInput.getError() != null) {
-                    getBinding().dialogAccountUpdateEtInput.setError(null, null);
+                if (getBinding().dialogAccountUpdateTilInput.getError() != null) {
+                    getBinding().dialogAccountUpdateTilInput.setError(null);
                 }
             }
         });
@@ -198,31 +199,38 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
 
     /**
      * Initialize the Ui's contents and its listeners.
+     *
+     * @param action The action to be performed by the current instance of the fragment.
      */
-    private void initializeUi() {
-        // Initialize the dialog's title and body
-        requireDialog().setTitle(mUpdateViewModel.getDialogTitle().getValue());
+    private void initializeUi(short action) {
+        // Set the dialog's title
+        requireDialog().setTitle(getDialogAttribute(action, R.string.updating_name,
+                R.string.updating_email,
+                R.string.updating_password));
 
+        // Set the text of the textview above the edittext
         getBinding().dialogAccountUpdateMtvFieldTitle
-                .setText(mUpdateViewModel.getActionFieldTitle().getValue());
+                .setText(getDialogAttribute(action, R.string.update_name_text,
+                        R.string.update_email_text,
+                        R.string.update_password_text));
 
         // Attach listeners to both buttons
-        getBinding().dialogAccountUpdateMbtnDismiss.setOnClickListener(v -> dismiss());
-        getBinding().dialogAccountUpdateMbtnUpdate.setOnClickListener(this);
-        getBinding().dialogAccountUpdateMbtnUpdate.setEnabled(false); // disable it
+        attachButtonListeners();
 
         // Initialize the UI's content
         final short dialogAction = mUpdateViewModel.getDialogType();
-        setInputTypeTo(dialogAction, getBinding().dialogAccountUpdateEtInput);
+        setInputTypeTo(dialogAction);
         // Display the saved value
         getBinding().dialogAccountUpdateEtInput.setText(mUpdateViewModel.getActionFieldInput());
 
-        final String hint = getString(
-                ((dialogAction == UPDATE_DISPLAY_NAME) ? R.string.hint_name
-                        : (dialogAction == UPDATE_EMAIL) ? R.string.hint_email
-                        : R.string.hint_password)
-        );
-        getBinding().dialogAccountUpdateEtInput.setHint(hint);
+        final String hint = getDialogAttribute(dialogAction,
+                R.string.prompt_name,
+                R.string.prompt_email,
+                R.string.prompt_password);
+
+        getBinding().dialogAccountUpdateTilInput.setHintEnabled(true);
+        getBinding().dialogAccountUpdateTilInput.setHint(hint);
+
         getBinding().dialogAccountUpdateEtInput.addTextChangedListener(this);
         // Pressing the "enter" on the keyboard will automatically trigger the login method
         getBinding().dialogAccountUpdateEtInput.setOnEditorActionListener((v, actionId, event) -> {
@@ -233,6 +241,15 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
             }
             return false;
         });
+    }
+
+    /**
+     * Hook up all buttons with appropriate on click listeners.
+     */
+    private void attachButtonListeners() {
+        getBinding().dialogAccountUpdateMbtnDismiss.setOnClickListener(v -> dismiss());
+        getBinding().dialogAccountUpdateMbtnUpdate.setOnClickListener(this);
+        getBinding().dialogAccountUpdateMbtnUpdate.setEnabled(false); // disable it
     }
 
     /**
@@ -248,16 +265,18 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      * Sets the input type of the specified TextInputEditText
      * based on the specified numeric value (dialog type).
      *
-     * @param action           The type of the dialog
-     * @param actionFieldInput A UI element of type TextInputEditText
+     * @param action The type of the dialog
      */
-    private void setInputTypeTo(@NotNull Short action, EditText actionFieldInput) {
+    private void setInputTypeTo(@NotNull Short action) {
         switch (action) {
             case UpdateAccountDialog.UPDATE_PASSWORD:
-                actionFieldInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                // Hide the password
+                getBinding().dialogAccountUpdateEtInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                // Display the 'show/hide password' icon
+                getBinding().dialogAccountUpdateTilInput.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
                 break;
             case UPDATE_EMAIL:
-                actionFieldInput.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+                getBinding().dialogAccountUpdateEtInput.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
                 break;
             case UPDATE_DISPLAY_NAME: // nothing
                 break;

@@ -22,7 +22,7 @@
 
     <!--  TODO: Update   -->
     <!-- Styles for the CustomDialog-->
-    <style name="CustomDialog" parent="@style/Theme.MaterialComponents.DayNight">
+    <style name="Widget.CyParking.Dialog" parent="">
         <item name="android:windowNoTitle">false</item>
         <item name="android:windowIsFloating">true</item>
     </style>

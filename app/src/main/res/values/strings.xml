@@ -141,9 +141,9 @@
     <string name="update_name">Update Name</string>
     <string name="update_email">Update Email</string>
     <string name="update_password">Update Password</string>
-    <string name="hint_name">Enter new name…</string>
-    <string name="hint_email">Enter new email…</string>
-    <string name="hint_password">Enter new password…</string>
+    <string name="update_name_text">Enter new name below:</string>
+    <string name="update_email_text">Enter new email below:</string>
+    <string name="update_password_text">Enter new password below:</string>
     <string name="not_logged_in_account_1">At the moment you are not logged in. Log in to your account or create a new one by clicking the button below</string>
     <string name="not_logged_in_account_2">At the moment you are not logged in. Please log in and try again.</string>
     <string name="click_here">Click here</string>

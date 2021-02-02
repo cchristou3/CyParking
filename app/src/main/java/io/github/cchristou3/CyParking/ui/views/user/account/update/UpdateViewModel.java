@@ -20,14 +20,12 @@ import static io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorVi
  * Used when the users try to update their information.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 29/12/20
+ * @version 3.0 02/02/21
  */
 public class UpdateViewModel extends LoadingBarViewModel {
 
-    final private MutableLiveData<String> mDialogTitle = new MutableLiveData<>();
-    final private MutableLiveData<String> mActionFieldTitle = new MutableLiveData<>();
-    final private MutableLiveData<String> mActionFieldInput = new MutableLiveData<>("");
     final private MutableLiveData<UpdateFormState> mUpdateFormState = new MutableLiveData<>();
+    final private MutableLiveData<String> mActionFieldInput = new MutableLiveData<>("");
 
     final private AccountRepository mAccountRepository;
     private short mDialogType = UpdateAccountDialog.UPDATE_DISPLAY_NAME; // By default
@@ -115,44 +113,6 @@ public class UpdateViewModel extends LoadingBarViewModel {
             return getUpdateFormState().getValue().isDataValid();
         else
             return false;
-    }
-
-    /**
-     * Access the {@link #mDialogTitle} of the ViewModel.
-     *
-     * @return A reference to {@link #mDialogTitle}.
-     */
-    public LiveData<String> getDialogTitle() {
-        return mDialogTitle;
-    }
-
-    /**
-     * Updates the value of {@link #mDialogTitle}
-     * with the given argument.
-     *
-     * @param title The new value of {@link #mDialogTitle}.
-     */
-    public void updateDialogTitle(String title) {
-        mDialogTitle.setValue(title);
-    }
-
-    /**
-     * Access the {@link #mActionFieldTitle} of the ViewModel.
-     *
-     * @return A reference to {@link #mActionFieldTitle}.
-     */
-    public LiveData<String> getActionFieldTitle() {
-        return mActionFieldTitle;
-    }
-
-    /**
-     * Updates the value of {@link #mDialogTitle}
-     * with the given argument.
-     *
-     * @param title The new value of {@link #mDialogTitle}.
-     */
-    public void updateActionFieldTitle(String title) {
-        mActionFieldTitle.setValue(title);
     }
 
     /**

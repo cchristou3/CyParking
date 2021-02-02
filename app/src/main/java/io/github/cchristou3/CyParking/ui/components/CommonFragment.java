@@ -71,7 +71,6 @@ public class CommonFragment<T extends ViewBinding> extends Fragment {
      * Called to have the fragment instantiate its user interface view.
      */
     public View onCreateView(T mViewBinding) {
-
         // Return the root view from the onCreateView() method to make it the active view on the screen.
         return setBinding(mViewBinding).getRoot();
     }
@@ -80,6 +79,15 @@ public class CommonFragment<T extends ViewBinding> extends Fragment {
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.  The next time the fragment needs
      * to be displayed, a new view will be created.
+     * Note: Always unset listeners before calling the subclass' onDestroyView
+     * method. E.g.
+     * <pre>
+     *     {@literal @}Override
+     *      public void onDestroyView() {
+     *         getBinding().someButton.setOnClickListener(null);
+     *         super.onDestroyView();
+     *     }
+     * </pre>
      */
     @Override
     public void onDestroyView() {

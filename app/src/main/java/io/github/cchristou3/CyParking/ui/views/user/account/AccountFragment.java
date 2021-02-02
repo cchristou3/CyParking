@@ -21,6 +21,7 @@ import io.github.cchristou3.CyParking.databinding.FragmentAccountBinding;
 import io.github.cchristou3.CyParking.ui.components.CommonFragment;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.user.account.update.UpdateAccountDialog;
+import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorHosteeFragment;
 
 /**
@@ -33,6 +34,7 @@ public class AccountFragment extends CommonFragment<FragmentAccountBinding> impl
 
     // Fragment's data members
     private final String TAG = AccountFragment.this.getClass().getName();
+    private boolean signUpWasClicked = false;
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -68,7 +70,8 @@ public class AccountFragment extends CommonFragment<FragmentAccountBinding> impl
     @Override
     public void onDestroyView() {
         super.removeOnClickListeners(
-                getBinding().fragmentAccountBtnToAuth,
+                getBinding().fragmentAccountMbLogIn,
+                getBinding().fragmentAccountMbSignUp,
                 getBinding().fragmentAccountMbtnUpdateName,
                 getBinding().fragmentAccountMbtnUpdateEmail,
                 getBinding().fragmentAccountMbtnUpdatePassword
@@ -85,7 +88,14 @@ public class AccountFragment extends CommonFragment<FragmentAccountBinding> impl
         // Show layout for a non-logged in user
         getBinding().fragmentAccountClNotLoggedIn.setVisibility(View.VISIBLE);
         // Attach listener to the "click me" button
-        getBinding().fragmentAccountBtnToAuth.setOnClickListener(v -> toAuthenticator());
+        getBinding().fragmentAccountMbLogIn.setOnClickListener(v -> {
+            signUpWasClicked = false;
+            toAuthenticator();
+        });
+        getBinding().fragmentAccountMbSignUp.setOnClickListener(v -> {
+            signUpWasClicked = true;
+            toAuthenticator();
+        });
     }
 
     /**
@@ -169,18 +179,23 @@ public class AccountFragment extends CommonFragment<FragmentAccountBinding> impl
      * {@link io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment}.
      * If the user is logged in, his email is passed on when navigating to the
      * authenticator fragment. The email is then set to the email text field.
+     * If the user, pressed the "sign up" button, he will be navigated directly,
+     * to the sign up tab.
      *
      * @see AuthenticatorHosteeFragment#checkIfUserReAuthenticating()
      */
     @Override
     public void toAuthenticator() {
-        Bundle emailBundle = null;
+        Bundle bundle = null;
         if (getGlobalStateViewModel().getUser() != null) {
-            emailBundle = new Bundle();
-            emailBundle.putString(getString(R.string.email_low), getGlobalStateViewModel().getUser().getEmail());
+            bundle = new Bundle();
+            bundle.putString(getString(R.string.email_low), getGlobalStateViewModel().getUser().getEmail());
+        } else if (signUpWasClicked) {
+            bundle = new Bundle();
+            bundle.putBoolean(AuthenticatorFragment.SIGN_UP_KEY, true);
         }
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_account_to_nav_authenticator_fragment, emailBundle);
+                .navigate(R.id.action_nav_account_to_nav_authenticator_fragment, bundle);
     }
 
     /**

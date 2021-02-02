@@ -7,7 +7,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,6 +28,8 @@ import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
+import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf;
+
 /**
  * Purpose: <p>Allow the user to send feedback to the development team. </p>
  * <p>
@@ -37,7 +38,7 @@ import io.github.cchristou3.CyParking.utilities.ViewUtility;
  * </p>
  *
  * @author Charalambos Christou
- * @version 6.0 28/01/21
+ * @version 7.0 02/02/21
  */
 public class FeedbackFragment extends CommonFragment<FeedbackFragmentBinding> implements Navigable, TextWatcher {
 
@@ -66,14 +67,45 @@ public class FeedbackFragment extends CommonFragment<FeedbackFragmentBinding> im
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // Initialize mFeedbackViewModel and mGlobalStateViewModel
-        mFeedbackViewModel = new ViewModelProvider(this,
-                new FeedbackViewModelFactory()).get(FeedbackViewModel.class);
+        initializeViewModel();
 
-        // Update the UI based on the user's logged in status
-        observeUserState(this::updateUI);
+        initializeUi();
 
+        addObserversToStates();
+    }
 
+    /**
+     * Called when the view previously created by {@link #onCreateView} has
+     * been detached from the fragment.
+     *
+     * @see CommonFragment#onDestroyView()
+     */
+    @Override
+    public void onDestroyView() {
+        getBinding().feedbackFragmentMbtnSendFeedback.setOnClickListener(null);
+        getBinding().feedbackFragmentEtFeedbackInput.removeTextChangedListener(this);
+        if (getUser() == null) {
+            getBinding().feedbackFragmentEtEmailInput.removeTextChangedListener(this);
+        }
+        super.onDestroyView();
+    }
+
+    /**
+     * Initialize the Ui's listeners and set up the text area for the user.
+     */
+    private void initializeUi() {
+        setUpButton(); // "Send feedback" button
+        // If feedbackTextArea is inside a ScrollView then there is an issue while scrolling TextArea’s inner contents.
+        // So, when touching the feedbackTextArea forbid the ScrollView from intercepting touch events.
+        ViewUtility.disableParentScrollingInterferenceOf(getBinding().feedbackFragmentEtFeedbackInput);
+        getBinding().feedbackFragmentEtFeedbackInput.addTextChangedListener(this);
+    }
+
+    /**
+     * Initially disable the button and hook it up with an on click listener.
+     * onClick: Stores the message to the remote database.
+     */
+    private void setUpButton() {
         // Hook up the send feedback button with an onClickListener and disable it initially
         getBinding().feedbackFragmentMbtnSendFeedback.setEnabled(false);
         getBinding().feedbackFragmentMbtnSendFeedback.setOnClickListener(v -> {
@@ -94,58 +126,33 @@ public class FeedbackFragment extends CommonFragment<FeedbackFragmentBinding> im
                 }
             });
         });
+    }
 
-        // Get a reference to the feedback TextView of the UI
-        final EditText feedbackTextArea = getBinding().feedbackFragmentEtFeedbackInput;
-
-        // If feedbackTextArea is inside a ScrollView then there is an issue while scrolling TextArea’s inner contents.
-        // So, when touching the feedbackTextArea forbid the ScrollView from intercepting touch events.
-        ViewUtility.disableParentScrollingInterferenceOf(feedbackTextArea);
-
-        feedbackTextArea.addTextChangedListener(this);
-
+    /**
+     * Attach observer to the user's state and the feedback form's state.
+     */
+    private void addObserversToStates() {
+        // Update the UI based on the user's logged in status
+        observeUserState(this::updateUI);
         // Add an observer to the form to wait for changes
         mFeedbackViewModel.getFormState().observe(getViewLifecycleOwner(), feedbackFormState -> {
             getBinding().feedbackFragmentMbtnSendFeedback
                     .setEnabled(feedbackFormState.isDataValid());
             // Show validity status for the feedback message
-            if (feedbackFormState.getFeedbackMessageError() != null) {
-                feedbackTextArea.setError(getString(feedbackFormState.getFeedbackMessageError()));
-            } else {
-                // Hide error if it shows
-                if (feedbackTextArea.getError() != null) {
-                    feedbackTextArea.setError(null, null);
-                }
-            }
+            updateErrorOf(requireContext(), getBinding().feedbackFragmentTilFeedbackInput, feedbackFormState.getFeedbackMessageError());
             if (getUser() == null) {
                 // Update Email error
-                if (feedbackFormState.getEmailError() != null) {
-                    getBinding().feedbackFragmentEtEmailInput
-                            .setError(getString(feedbackFormState.getEmailError()));
-                } else {
-                    // Hide error if it shows
-                    if (getBinding().feedbackFragmentEtEmailInput.getError() != null) {
-                        getBinding().feedbackFragmentEtEmailInput.setError(null, null);
-                    }
-                }
+                updateErrorOf(requireContext(), getBinding().feedbackFragmentTilEmailInput, feedbackFormState.getEmailError());
             }
         });
     }
 
     /**
-     * Called when the view previously created by {@link #onCreateView} has
-     * been detached from the fragment.
-     *
-     * @see CommonFragment#onDestroyView()
+     * Initialize the fragment's {@link #mFeedbackViewModel}.
      */
-    @Override
-    public void onDestroyView() {
-        getBinding().feedbackFragmentMbtnSendFeedback.setOnClickListener(null);
-        getBinding().feedbackFragmentEtFeedbackInput.removeTextChangedListener(this);
-        if (getUser() == null) {
-            getBinding().feedbackFragmentEtEmailInput.removeTextChangedListener(this);
-        }
-        super.onDestroyView();
+    private void initializeViewModel() {
+        mFeedbackViewModel = new ViewModelProvider(this,
+                new FeedbackViewModelFactory()).get(FeedbackViewModel.class);
     }
 
     /**
@@ -169,12 +176,13 @@ public class FeedbackFragment extends CommonFragment<FeedbackFragmentBinding> im
         getBinding().feedbackFragmentTxtNameTitle.setVisibility(View.GONE);
         getBinding().feedbackFragmentTxtNameBody.setVisibility(View.GONE);
 
-        // Hide the TextView related to the email
+        // Hide the TextView related to the email - shows user's email when logged in
         getBinding().feedbackFragmentTxtEmailBody.setVisibility(View.GONE);
 
         // Show the edit text related to the email and add a listener
         getBinding().feedbackFragmentEtEmailInput.setVisibility(View.VISIBLE);
         getBinding().feedbackFragmentEtEmailInput.addTextChangedListener(this);
+        getBinding().feedbackFragmentTxtEmailTitle.setVisibility(View.GONE);
     }
 
     /**

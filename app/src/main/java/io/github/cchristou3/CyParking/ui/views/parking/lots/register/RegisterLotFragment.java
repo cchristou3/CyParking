@@ -236,15 +236,15 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
 
             // Update the view's related to the lot's info
             if (updateErrorOf(requireContext(),
-                    getBinding().registerLotFragmentEtPhoneBody, registerLotFormState.getMobileNumberError())) {
+                    getBinding().registerLotFragmentTilPhoneBody, registerLotFormState.getMobileNumberError())) {
                 return;
             }
             if (updateErrorOf(requireContext(),
-                    getBinding().registerLotFragmentEtLotName, registerLotFormState.getLotNameError())) {
+                    getBinding().registerLotFragmentTilLotName, registerLotFormState.getLotNameError())) {
                 return;
             }
             if (updateErrorOf(requireContext(),
-                    getBinding().registerLotFragmentEtCapacity, registerLotFormState.getLotCapacityError())) {
+                    getBinding().registerLotFragmentTilCapacity, registerLotFormState.getLotCapacityError())) {
                 return;
             }
             // Update the view's related to the lot's location

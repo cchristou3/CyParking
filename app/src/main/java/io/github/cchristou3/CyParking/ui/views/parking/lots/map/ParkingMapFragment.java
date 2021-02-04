@@ -93,8 +93,18 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVis
  * fetching lot's document ids <-> listening for updates on the specified lots
  * <-> update the Ui.</p>
  * </p>
+ * <p>
+ * Pending use cases:
+ *     <ul>
+ *         <li>No nearby lots where found. What to do?</li>
+ *         <li>No connection initially. What to do?</li>
+ *         <li>No connection initially, then it got restored. What to do?</li>
+ *         <li>Loaded doc Ids, then connection got lost, then its got restored. What to do?</li>
+ *     </ul>
+ * </p>
  */
-public class ParkingMapFragment extends CommonFragment<FragmentParkingMapBinding> implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
+public class ParkingMapFragment extends CommonFragment<FragmentParkingMapBinding>
+        implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener, Navigable, LocationHandler {
 
     // Constant variables
@@ -167,7 +177,12 @@ public class ParkingMapFragment extends CommonFragment<FragmentParkingMapBinding
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initializeGoogleMaps(); // Map
-        attachStateObservers(); // LiveData state objects
+        try {
+            attachStateObservers(); // LiveData state objects
+        } catch (IllegalArgumentException e) {
+            return;
+            // TODO: 03/02/2021 Inform user there were no nearby lots.
+        }
         attachButtonListeners(); // Ui listeners
         // The fetching lots initially
         if (mParkingMapViewModel.getDocumentIdsOfNearbyLots().getValue() == null) {
@@ -636,7 +651,7 @@ public class ParkingMapFragment extends CommonFragment<FragmentParkingMapBinding
      * Attaches observers to the info layout's state (whenever its state changes, the its visibility
      * on the Ui is updated accordingly) and the state of the currently selected parking lot.
      */
-    private void attachStateObservers() {
+    private void attachStateObservers() throws IllegalArgumentException {
         // Attach observer to ParkingMapViewModel's info layout state
         mParkingMapViewModel.getInfoLayoutState()
                 .observe(getViewLifecycleOwner(), this::updateInfoLayoutVisibilityTo);

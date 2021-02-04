@@ -32,7 +32,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/fragment_parking_booking_cv_parking_availability"
         style="@style/CardView.Dark"
         android:layout_width="wrap_content"
@@ -51,7 +51,7 @@
             android:text="Available spaces"
             android:textSize="25sp" />
 
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
         android:id="@+id/fragment_parking_booking_txt_date"

@@ -60,9 +60,9 @@
     <string name="no_parking_lots_text">No parking lots registered yet</string>
 
     <!-- Strings related to the registering a parking lot -->
-    <string name="enter_mobile_number">Enter mobile number…</string>
-    <string name="enter_capacity">Enter capacity…</string>
-    <string name="enter_parking_lot_name">Enter parking lot name…</string>
+    <string name="hint_mobile_number">Mobile number</string>
+    <string name="hint_capacity">Capacity</string>
+    <string name="hint_parking_lot_name">Lot name</string>
     <string name="lot_name">Lot Name: </string>
     <string name="parking_lot_info">Parking Lot Info</string>
     <string name="mobile_phone">Mobile phone: </string>
@@ -70,9 +70,9 @@
     <string name="capacity">Capacity: </string>
     <string name="get_location_text">Or get location via GPS</string>
     <string name="get_location">Get location</string>
-    <string name="enter_longitude">Enter longitude…</string>
+    <string name="hint_longitude">Longitude</string>
     <string name="longitude">Longitude:</string>
-    <string name="enter_latitude">Enter latitude…</string>
+    <string name="hint_latitude">Latitude</string>
     <string name="latitude">Latitude:</string>
     <string name="location">Location:</string>
     <string name="duration">Duration</string>
@@ -164,5 +164,11 @@
     <string name="any">Any</string>
     <string name="no_connection">No connection</string>
     <string name="password_helper">You should also include special characters (!, @, %, etc.) to make it difficult to be guessed</string>
+    <string name="status">Status</string>
+    <string name="offer">Offer</string>
+    <string name="parking_name">Parking name</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="swipe_left_to_use_options">Swipe left to use options</string>
 
 </resources>

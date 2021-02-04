@@ -11,7 +11,7 @@ import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
  * Used by {@link BookingAdapter} to handle updates on its items.
  *
  * @author Charalambos Christou
- * @version 1.0 23/01/21
+ * @version 2.0 04/02/21
  * @see androidx.recyclerview.widget.DiffUtil.ItemCallback
  */
 public class BookingsDiffCallback extends DiffUtil.ItemCallback<Booking> {
@@ -32,7 +32,7 @@ public class BookingsDiffCallback extends DiffUtil.ItemCallback<Booking> {
      */
     @Override
     public boolean areItemsTheSame(@NonNull Booking oldItem, @NonNull Booking newItem) {
-        return oldItem.getParkingId() == newItem.getParkingId();
+        return oldItem.equals(newItem);
     }
 
     /**

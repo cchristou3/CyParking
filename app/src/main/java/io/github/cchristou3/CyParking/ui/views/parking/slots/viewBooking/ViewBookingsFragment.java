@@ -5,10 +5,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
@@ -44,7 +46,7 @@ import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
  * </p>
  *
  * @author Charalambos Christou
- * @version 6.0 28/01/21
+ * @version 7.0 03/02/21
  */
 public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBinding>
         implements Navigable, CommonFragment.UserStateUiHandler {
@@ -76,6 +78,9 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
         return super.onCreateView(FragmentViewBookingsBinding.inflate(inflater));
     }
 
+    /**
+     * Called once, the view has been created.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -92,7 +97,6 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mViewBookingsViewModel.updateBookingList(null);
         BookingAdapter.setOnItemClickListener(null);
     }
 
@@ -115,11 +119,16 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
         });
     }
 
-
-    private void updateUi(@NotNull List<Booking> bookings) {
-        if (bookings.isEmpty()) {
+    /**
+     * Update the Ui based on the given list of bookings.
+     *
+     * @param bookings A list of bookings.
+     */
+    private void updateUi(List<Booking> bookings) {
+        if (bookings == null || bookings.isEmpty()) {
             displayMessage();
         } else {
+            Log.d(TAG, "updateUi: " + bookings.size());
             mBookingAdapter.submitList(bookings);
         }
     }
@@ -131,6 +140,29 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
         mViewBookingsViewModel =
                 new ViewModelProvider(this, new ViewBookingsViewModelFactory())
                         .get(ViewBookingsViewModel.class);
+    }
+
+    /**
+     * Returns an instance of {@link ItemTouchHelper}.
+     * onSwipeLeft: Remove the item from the list and the database
+     * and notify the adapter.
+     *
+     * @return An instance of {@link ItemTouchHelper}.
+     */
+    @NotNull
+    private ItemTouchHelper getItemTouchHelper() {
+        return new ItemTouchHelper(new BookingTouchHelper(
+                itemPosition -> {
+                    // Access the current list - with a new reference
+                    List<Booking> newBookings = cloneList(mViewBookingsViewModel.getBookingList());
+                    // Remove the booking fro the list and store its id in a variable
+                    String bookingToBeCancelledId = newBookings.remove((int) itemPosition).generateUniqueId();
+                    // Remove specific booking from the database.
+                    mViewBookingsViewModel.cancelParkingBooking(bookingToBeCancelledId);
+                    // Update the adapter's list
+                    mViewBookingsViewModel.updateBookingList(newBookings);
+                }, getResources()
+        ));
     }
 
     /**
@@ -154,39 +186,19 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
         // Set the RecyclerView's adapter
         getBinding().fragmentViewBookingsRvRecyclerview.setAdapter(mBookingAdapter);
         updateUi(bookingList);
-
-        Log.d(TAG, "initializeUi: Done");
     }
 
     /**
-     * Initialize the RecyclerView's adapter with the current booking list instance.
-     * Add an onClick listener for the adapter's items.
-     * Register the adapter a Data Observer to anticipate changes when items get deleted.
+     * Initialize the RecyclerView's {@link androidx.recyclerview.widget.ListAdapter}.
+     * Add an onClick listener to the adapter's items.
+     * onClick: TODO: Navigate to a screen to view the booking details and its QR code
+     * using shared element as animation.
      */
     private void setUpAdapter() {
-        // Create new adapter and pass the fetched data.
-        mBookingAdapter = new BookingAdapter(new BookingsDiffCallback());
-        // Pass an onItemClickListener to the adapter
+        mBookingAdapter = new BookingAdapter(new BookingsDiffCallback(), getItemTouchHelper());
         BookingAdapter.setOnItemClickListener(v ->
-                AlertBuilder.showAlert(requireContext(),
-                        android.R.string.dialog_alert_title,
-                        R.string.booking_cancellation_confirmation,
-                        android.R.string.yes,
-                        android.R.string.cancel,
-                        (dialog, which) -> {
-                            // Access the item's ViewHolder Object
-                            RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
-                            int position = viewHolder.getAdapterPosition(); // get its position
-                            final String bookingToBeCancelledId =
-                                    mViewBookingsViewModel.getBookingList().get(position).generateUniqueId();
-                            // Remove specific booking from the database.
-                            mViewBookingsViewModel.cancelParkingBooking(bookingToBeCancelledId);
-                            // Remove booking from the booking list state
-                            List<Booking> newBookings = cloneList(mViewBookingsViewModel.getBookingList());
-                            newBookings.remove(position);
-                            mViewBookingsViewModel.updateBookingList(newBookings);
-                        },
-                        null));
+                Toast.makeText(requireContext(), "TODO: Navigate to booking details screen!", Toast.LENGTH_SHORT).show()
+        );
     }
 
     /**
@@ -254,6 +266,13 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
                 .navigate(R.id.action_nav_view_bookings_to_nav_home);
     }
 
+    /**
+     * Invoked whenever the value of {@link GlobalStateViewModel#getUserState()}
+     * gets changed.
+     * <strong>Note: if its value has not been set, then it won't get triggered.</strong>
+     *
+     * @param loggedInUser The new value of {@link GlobalStateViewModel#getUserState()}.
+     */
     @Override
     public void onUserStateChanged(@Nullable LoggedInUser loggedInUser) {
         Log.d(TAG, "User State: " + loggedInUser);

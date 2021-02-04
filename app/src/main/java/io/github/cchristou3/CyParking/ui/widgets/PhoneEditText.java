@@ -16,9 +16,9 @@ import org.jetbrains.annotations.NotNull;
  * as such as 99 99 99 99.
  *
  * @author Charalambos Christou
- * @version 2.0 17/01/21
+ * @version 3.0 03/02/21
  */
-public final class PhoneEditText extends androidx.appcompat.widget.AppCompatEditText implements TextWatcher {
+public final class PhoneEditText extends com.google.android.material.textfield.TextInputEditText implements TextWatcher {
 
     private int mLatestEditableLength = 0;
 

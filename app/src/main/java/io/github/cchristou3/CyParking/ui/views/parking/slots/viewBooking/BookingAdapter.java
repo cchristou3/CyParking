@@ -5,11 +5,11 @@ import android.animation.ObjectAnimator;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,23 +28,30 @@ import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
  * Used in {@link ViewBookingsFragment} to show the user's bookings.
  *
  * @author Charalambos Christou
- * @version 2.0 23/01/21
+ * @version 3.0 03/02/21
  */
 public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingViewHolder> {
 
     private static final String TAG = BookingAdapter.class.getName();
     private static final long DURATION = 500;
     private static View.OnClickListener mOnItemClickListener;
+    private final ItemTouchHelper mItemTouchHelper;
+    private final RecyclerView.OnScrollListener mOnScrollListener;
     private boolean mOnAttach = true;
 
     /**
      * Constructor used to initialize the {@link ListAdapter}
      * with a {@link DiffUtil.ItemCallback<Booking>} object.
      *
-     * @param diffCallback The callback to be used to compare the items of both lists.
+     * @param diffCallback    The callback to be used to compare the items of both lists.
+     * @param itemTouchHelper Enables, swipe events
      */
-    protected BookingAdapter(@NonNull DiffUtil.ItemCallback<Booking> diffCallback) {
+    protected BookingAdapter(
+            @NonNull DiffUtil.ItemCallback<Booking> diffCallback, @NonNull ItemTouchHelper itemTouchHelper
+    ) {
         super(diffCallback);
+        mOnScrollListener = getOnScrollChangedListener();
+        mItemTouchHelper = itemTouchHelper;
     }
 
     /**
@@ -55,6 +62,23 @@ public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingV
      */
     public static void setOnItemClickListener(View.OnClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
+    }
+
+    /**
+     * Returns a new instance of {@link RecyclerView.OnScrollListener}.
+     *
+     * @return An instance of {@link RecyclerView.OnScrollListener}.
+     */
+    @NotNull
+    @Contract(value = " -> new", pure = true)
+    private RecyclerView.OnScrollListener getOnScrollChangedListener() {
+        return new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                mOnAttach = false;
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        };
     }
 
     /**
@@ -87,33 +111,19 @@ public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingV
         setAnimation(holder.itemView, position); // Set animator
 
         // - get element of the booking list at this position
-        final String offer = getOfferText(getItem(position).getBookingDetails().getSlotOffer().toString());
+        final String offer = getItem(position).getBookingDetails().getSlotOffer().toString();
         final String date = getDateText(getItem(position).getBookingDetails().getDateOfBooking());
-        final String time = getTimeText(getItem(position).getBookingDetails().getStartingTime());
+        final String time = getItem(position).getBookingDetails().getStartingTime();
         final String status = getStatusText(getItem(position).isCompleted());
-        final String parkingName = getNameText(getItem(position).getLotName());
+        final String parkingName = getItem(position).getLotName();
 
         // - replace the contents of the view with that element
         holder.status.setText(status);
+
         holder.offer.setText(offer);
         holder.lotName.setText(parkingName);
         holder.date.setText(date);
         holder.time.setText(time);
-    }
-
-    // TODO: 22/01/2021 Replace with getString(...)
-
-    /**
-     * Prepares the text of the offer TextView based
-     * on the given String.
-     *
-     * @param offer The String to be appended.
-     * @return A String with format `Slot offer: ` + given String.
-     */
-    @NotNull
-    @Contract(pure = true)
-    private String getOfferText(String offer) {
-        return "Slot offer: " + offer;
     }
 
     /**
@@ -126,21 +136,8 @@ public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingV
     @NotNull
     @Contract(pure = true)
     private String getDateText(Date date) {
-        return "Date: " + DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
+        return DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
                 .format(date);
-    }
-
-    /**
-     * Prepares the text of the time TextView based
-     * on the given String.
-     *
-     * @param time The String to be appended.
-     * @return A String with format `Start time: ` + given String.
-     */
-    @NotNull
-    @Contract(pure = true)
-    private String getTimeText(String time) {
-        return "Start time: " + time;
     }
 
     /**
@@ -153,40 +150,40 @@ public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingV
     @NotNull
     @Contract(pure = true)
     private String getStatusText(boolean status) {
-        return "Status: " + (status ? "Completed" : "Pending");
-    }
-
-    /**
-     * Prepares the text of the time TextView based
-     * on the given String.
-     *
-     * @param name The String to be appended.
-     * @return A String with format `Parking: ` + given String.
-     */
-    @NotNull
-    @Contract(pure = true)
-    private String getNameText(String name) {
-        return "Parking: " + name;
+        return (status ? "Completed" : "Pending");
     }
 
 
     /**
      * Called by RecyclerView when it starts observing this Adapter.
+     * Attaches the {@link #mItemTouchHelper} to the recycler view
+     * and also adds the {@link #mOnScrollListener}.
      *
      * @param recyclerView The RecyclerView instance which started observing this adapter.
      */
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
 
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                mOnAttach = false;
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-        });
-
+        recyclerView.addOnScrollListener(mOnScrollListener);
+        // Attach the item touch helper to the recycler view
+        mItemTouchHelper.attachToRecyclerView(recyclerView);
         super.onAttachedToRecyclerView(recyclerView);
+    }
+
+    /**
+     * Called by RecyclerView when it stops observing this Adapter.
+     * Detaches the {@link #mItemTouchHelper} to the recycler view.
+     * Also, remove the recycler view's {@link #mOnScrollListener}.
+     *
+     * @param recyclerView The RecyclerView instance which stopped observing this adapter.
+     * @see #onAttachedToRecyclerView(RecyclerView)
+     */
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        // Detach the item touch helper to the recycler view
+        mItemTouchHelper.attachToRecyclerView(null);
+        recyclerView.removeOnScrollListener(mOnScrollListener);
     }
 
     /**
@@ -223,18 +220,20 @@ public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingV
         public TextView lotName;
         public TextView date;
         public TextView time;
-        public ImageButton cancelButton;
 
         public BookingViewHolder(View view) {
             super(view);
-            status = view.findViewById(R.id.booking_placeholder_item_txt_status);
-            offer = view.findViewById(R.id.booking_placeholder_item_txt_offer);
-            lotName = view.findViewById(R.id.booking_placeholder_item_txt_parking_name);
-            date = view.findViewById(R.id.booking_placeholder_item_txt_date);
-            time = view.findViewById(R.id.booking_placeholder_item_txt_time);
-            cancelButton = view.findViewById(R.id.booking_placeholder_item_btn_cancel);
-            cancelButton.setTag(this);
-            cancelButton.setOnClickListener(mOnItemClickListener);
+
+            // Hook up the item with an on click listener
+            // TODO: 04/02/2021 Implement booking details screen
+            //itemView.setOnClickListener(mOnItemClickListener);
+            //itemView.setTag(this);
+
+            status = view.findViewById(R.id.booking_item_txt_status);
+            offer = view.findViewById(R.id.booking_item_txt_offer);
+            lotName = view.findViewById(R.id.booking_item_txt_parking_name);
+            date = view.findViewById(R.id.booking_item_txt_date);
+            time = view.findViewById(R.id.booking_item_txt_time);
         }
     }
 }

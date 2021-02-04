@@ -1,13 +1,14 @@
 package io.github.cchristou3.CyParking.ui.views.host;
 
-import android.animation.ObjectAnimator;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.transition.Slide;
+import androidx.transition.Transition;
+import androidx.transition.TransitionManager;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
@@ -33,7 +37,6 @@ import io.github.cchristou3.CyParking.data.manager.ConnectivityHelper;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.ActivityMainHostBinding;
 
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVisibilityTo;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateVisibilityOfLoadingBarTo;
 
 /**
@@ -42,7 +45,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateVisibil
  * of all fragments which it is the host of.</p>
  *
  * @author Charalambos Christou
- * @version 6.0 25/01/21
+ * @version 7.0 03/02/21
  */
 public class MainHostActivity extends AppCompatActivity implements ConnectionHandler {
 
@@ -168,10 +171,12 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
     private void changeNoConnectionWarningVisibilityTo(int visibility) {
         switch (visibility) {
             case View.GONE:
-                hideNoConnectionWarning();
+                toggle(false);
+                //hideNoConnectionWarning();
                 break;
             case View.VISIBLE:
-                showNoConnectionWarning();
+                toggle(true);
+                //showNoConnectionWarning();
                 break;
         }
     }
@@ -260,6 +265,35 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
         // The fragments can access the same controller by passing in the same NavigationView
         Navigation.setViewNavController(getNavigationView(),
                 NavHostFragment.findNavController(getActiveFragment()));
+    }
+
+    /**
+     * Animate the {@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}
+     * upwards or downwards based on the given flag.
+     *
+     * @param show Whether to the show (slide up) or hide (slide down) the above view.
+     */
+    private void toggle(boolean show) {
+        // Get a reference to:
+        // The view we want to animate and
+        // its parent ViewGroup
+        View warning = mBinding.activityMainHostTxtNoConnectionWarning;
+        ViewGroup parent = mBinding.activityMainHostClLayout;
+
+        // BOTTOM indicates that we want to push the view to the bottom of its container,
+        // without changing its size.
+        Transition transition = new Slide(Gravity.BOTTOM);
+        transition.setDuration(1600);
+        // Add the id of the target view that this Transition is interested in
+        transition.addTarget(warning.getId()); // In this case it is our "No connection" warning View
+
+        // The TransitionManager starts the animation and
+        // handles updating the scene between the frames
+        TransitionManager.beginDelayedTransition(parent, transition);
+
+        // If visibility set to VISIBLE, it will slide up
+        // Otherwise, it will slide down.
+        warning.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -406,46 +440,5 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
         runOnUiThread(() -> {
             mGlobalStateViewModel.updateConnectionState(isConnected);
         });
-    }
-
-    /**
-     * Show 'No Connection Warning' ({@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}).
-     */
-    private void showNoConnectionWarning() {
-        updateViewVisibilityTo(mBinding.activityMainHostTxtNoConnectionWarning, View.VISIBLE);
-        animateNoConnectionWarning(100, 0);
-    }
-
-    /**
-     * Hide 'No Connection Warning' ({@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}).
-     */
-    private void hideNoConnectionWarning() {
-        animateNoConnectionWarning(0, 100)
-                .addUpdateListener(animation -> {
-                    if (!animation.isRunning() && animation.isStarted()) { // animation finished
-                        updateViewVisibilityTo(mBinding.activityMainHostTxtNoConnectionWarning, View.GONE);
-                    }
-                });
-    }
-
-    /**
-     * Animate the {@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}
-     * starting form the `from`  Y position till the `to` Y position.
-     *
-     * @param from The starting Y of the view.
-     * @param to   The final Y of the view after the animation.
-     * @return The {@link ObjectAnimator} instance.
-     */
-    @NotNull
-    private ObjectAnimator animateNoConnectionWarning(float from, float to) {
-        mBinding.activityMainHostTxtNoConnectionWarning.setTranslationY(from);
-        ObjectAnimator animation = ObjectAnimator
-                .ofFloat(
-                        mBinding.activityMainHostTxtNoConnectionWarning,
-                        "translationY",
-                        to);
-        animation.setDuration(1500);
-        animation.start();
-        return animation;
     }
 }

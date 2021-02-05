@@ -102,6 +102,12 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVis
  *         <li>Loaded doc Ids, then connection got lost, then its got restored. What to do?</li>
  *     </ul>
  * </p>
+ * <p>
+ *     TODO: Additional functionality
+ *     <ul>
+ *         <li>Cache the ids in an appropriate time</li>
+ *     </ul>
+ * </p>
  */
 public class ParkingMapFragment extends CommonFragment<FragmentParkingMapBinding>
         implements OnMapReadyCallback, GoogleMap.OnMapClickListener,

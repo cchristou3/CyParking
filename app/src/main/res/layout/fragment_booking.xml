@@ -6,122 +6,139 @@
     android:layout_height="match_parent"
     tools:context=".ui.views.parking.slots.booking.BookingFragment">
 
-    <Space
-        android:id="@+id/fragment_parking_booking_s_space_one"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        app:layout_constraintEnd_toStartOf="@+id/fragment_parking_booking_btn_date_button" />
-
-    <Space
-        android:id="@+id/fragment_parking_booking_s_space_two"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/fragment_parking_booking_btn_date_button" />
-
-    <TextView
-        android:id="@+id/fragment_parking_booking_txt_parking_name"
-        android:layout_width="wrap_content"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/materialCardView2"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
-        android:layout_marginLeft="30dp"
         android:layout_marginTop="20dp"
-        android:padding="10dp"
-        android:text="Normal parking name"
-        android:textSize="25sp"
+        android:layout_marginEnd="@dimen/dim_button_right_margin"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/fragment_parking_booking_cv_parking_availability"
-        style="@style/CardView.Dark"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        app:cardCornerRadius="15dp"
-        app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_txt_parking_name"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_txt_parking_name">
-
-        <TextView
-            android:id="@+id/fragment_parking_booking_txt_parking_availability"
-            style="@style/ThemeOverlay.AppCompat.Dark"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout2"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="10dp"
-            android:text="Available spaces"
-            android:textSize="25sp" />
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <Space
+                android:id="@+id/fragment_parking_booking_s_space_one"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/fragment_parking_booking_btn_date_button"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/fragment_parking_booking_txt_parking_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="10dp"
+                android:text="Normal parking name"
+                android:textSize="25sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/fragment_parking_booking_cv_parking_availability"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                app:cardCornerRadius="15dp"
+                app:cardElevation="0dp"
+                app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_txt_parking_name"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_txt_parking_name">
+
+                <TextView
+                    android:id="@+id/fragment_parking_booking_txt_parking_availability"
+                    style="@style/ThemeOverlay.AppCompat.Dark"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:text="Available spaces"
+                    android:textSize="25sp" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/fragment_parking_booking_txt_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="Date"
+                android:textSize="25sp"
+                app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_cv_parking_availability"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_cv_parking_availability" />
+
+            <Button
+                android:id="@+id/fragment_parking_booking_btn_date_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="choose date"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="@+id/fragment_parking_booking_txt_date"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/fragment_parking_booking_txt_date" />
+
+            <TextView
+                android:id="@+id/fragment_parking_booking_txt_starting_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="start time"
+                android:textSize="25sp"
+                app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_txt_date"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_txt_date" />
+
+            <Button
+                android:id="@+id/fragment_parking_booking_btn_starting_time_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="start time"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="@+id/fragment_parking_booking_txt_starting_time"
+                app:layout_constraintEnd_toEndOf="@+id/fragment_parking_booking_btn_date_button"
+                app:layout_constraintStart_toEndOf="@+id/fragment_parking_booking_s_space_one"
+                app:layout_constraintTop_toTopOf="@+id/fragment_parking_booking_txt_starting_time" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
-
-    <TextView
-        android:id="@+id/fragment_parking_booking_txt_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="Date"
-        android:textSize="25sp"
-        app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_cv_parking_availability"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_cv_parking_availability" />
-
-    <Button
-        android:id="@+id/fragment_parking_booking_btn_date_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="@dimen/dim_button_right_margin"
-        android:padding="10dp"
-        android:text="choose date"
-        android:textSize="15sp"
-        app:layout_constraintBottom_toBottomOf="@+id/fragment_parking_booking_txt_date"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/fragment_parking_booking_txt_date" />
-
-    <TextView
-        android:id="@+id/fragment_parking_booking_txt_starting_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="start time"
-        android:textSize="25sp"
-        app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_txt_date"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_txt_date" />
-
-    <Button
-        android:id="@+id/fragment_parking_booking_btn_starting_time_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="start time"
-        android:textSize="15sp"
-        app:layout_constraintBottom_toBottomOf="@+id/fragment_parking_booking_txt_starting_time"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_parking_booking_btn_date_button"
-        app:layout_constraintStart_toEndOf="@+id/fragment_parking_booking_s_space_one"
-        app:layout_constraintTop_toTopOf="@+id/fragment_parking_booking_txt_starting_time" />
 
     <TextView
         android:id="@+id/fragment_parking_booking_txt_slot_offer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="25dp"
         android:gravity="start"
         android:maxLines="2"
-        android:padding="10dp"
+        android:padding="8dp"
         android:text="@string/please_choose_an_offer"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_parking_booking_btn_starting_time_button"
-        app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_txt_starting_time"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_txt_starting_time" />
+        android:textSize="23sp"
+        app:layout_constraintEnd_toEndOf="@+id/materialCardView2"
+        app:layout_constraintStart_toStartOf="@+id/materialCardView2"
+        app:layout_constraintTop_toBottomOf="@+id/materialCardView2" />
 
     <Spinner
         android:id="@+id/fragment_parking_booking_s_slot_offer"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:spinnerMode="dropdown"
         android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_parking_booking_btn_starting_time_button"
+        app:layout_constraintEnd_toEndOf="@+id/fragment_parking_booking_txt_slot_offer"
         app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_txt_slot_offer"
         app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_txt_slot_offer" />
 
@@ -137,7 +154,7 @@
         app:layout_constraintBottom_toTopOf="@+id/fragment_parking_btn_booking_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_txt_slot_offer" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_s_slot_offer" />
 
     <Button
         android:id="@+id/fragment_parking_btn_booking_button"
@@ -146,7 +163,7 @@
         android:layout_margin="20dp"
         android:text="BOOK"
         android:textSize="25sp"
-        app:layout_constraintBottom_toBottomOf="@+id/fragment_parking_booking_s_space_one"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

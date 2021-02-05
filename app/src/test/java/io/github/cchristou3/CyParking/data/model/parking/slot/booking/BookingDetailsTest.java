@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class BookingDetailsTest {
 
     private static final Date DATE = new Date();
-    private static final String TIME = "12 : 30";
+    private static final BookingDetails.Time TIME = new BookingDetails.Time(12, 30);
     private static final SlotOffer OFFER = SlotOffer.getRandomInstance(new Random());
     protected static boolean COMPLETED = true;
 
@@ -52,4 +52,33 @@ public class BookingDetailsTest {
                 + ", slotOffer: " + OFFER);
 
     }
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    // checkIfFieldsValid(int, int) - START
+    ///////////////////////////////////////////////////////////////////////////
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkIfFieldsValid_greaterHour_throwsException() {
+        BookingDetails.Time.checkIfFieldsValid(24, 1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkIfFieldsValid_smallerHour_throwsException() {
+        BookingDetails.Time.checkIfFieldsValid(-1, 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkIfFieldsValid_greaterMinute_throwsException() {
+        BookingDetails.Time.checkIfFieldsValid(1, 60);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkIfFieldsValid_smallerMinute_throwsException() {
+        BookingDetails.Time.checkIfFieldsValid(1, -1);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // checkIfFieldsValid(int, int) - END
+    ///////////////////////////////////////////////////////////////////////////
 }

@@ -18,15 +18,12 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:context=".ui.views.parking.lots.map.ParkingMapFragment" />
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/fragment_parking_map_cv_info_layout"
-        style="@style/CardView.Light"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="7dp"
-        android:layout_marginRight="7dp"
         android:layout_marginBottom="7dp"
-        android:background="@color/white"
         android:paddingStart="10dp"
         android:paddingLeft="10dp"
         android:paddingEnd="10dp"
@@ -56,43 +53,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/fragment_parking_map_cv_name"
-                    style="@style/CardView.Light"
+
+                <TextView
+                    android:id="@+id/fragment_parking_map_txt_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    app:cardCornerRadius="@dimen/text_view_in_card_view_radius"
-                    app:layout_constraintBottom_toBottomOf="@+id/activity_parking_map_fg_google_map">
+                    android:maxLength="25"
+                    android:paddingStart="@dimen/text_view_in_card_view_padding"
+                    android:paddingLeft="@dimen/text_view_in_card_view_padding"
+                    android:paddingEnd="@dimen/text_view_in_card_view_padding"
+                    android:paddingRight="@dimen/text_view_in_card_view_padding"
+                    android:text="12222121212121121211"
+                    android:textColor="@color/black"
+                    android:textSize="20sp" />
 
-                    <TextView
-                        android:id="@+id/fragment_parking_map_txt_name"
-                        style="@style/ThemeOverlay.AppCompat.Light"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:maxLength="25"
-                        android:paddingStart="@dimen/text_view_in_card_view_padding"
-                        android:paddingLeft="@dimen/text_view_in_card_view_padding"
-                        android:paddingEnd="@dimen/text_view_in_card_view_padding"
-                        android:paddingRight="@dimen/text_view_in_card_view_padding"
-                        android:text="12222121212121121211"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
 
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:id="@+id/fragment_parking_map_cv_availability"
-                    style="@style/CardView.Light"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     app:cardCornerRadius="@dimen/text_view_in_card_view_radius"
-                    app:layout_constraintBottom_toBottomOf="@+id/activity_parking_map_fg_google_map">
+                    app:cardElevation="0dp">
 
                     <TextView
                         android:id="@+id/fragment_parking_map_txt_availability"
-                        style="@style/ThemeOverlay.AppCompat.Light"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:maxLength="25"
@@ -104,33 +89,22 @@
                         android:textColor="@color/black"
                         android:textSize="20sp" />
 
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/fragment_parking_map_cv_offer"
-                    style="@style/CardView.Light"
+                <TextView
+                    android:id="@+id/fragment_parking_map_txt_offer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"
-                    app:cardCornerRadius="@dimen/text_view_in_card_view_radius"
-                    app:layout_constraintBottom_toBottomOf="@+id/activity_parking_map_fg_google_map">
-
-                    <TextView
-                        android:id="@+id/fragment_parking_map_txt_offer"
-                        style="@style/ThemeOverlay.AppCompat.Light"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:maxLength="35"
-                        android:paddingStart="@dimen/text_view_in_card_view_padding"
-                        android:paddingLeft="@dimen/text_view_in_card_view_padding"
-                        android:paddingEnd="@dimen/text_view_in_card_view_padding"
-                        android:paddingRight="@dimen/text_view_in_card_view_padding"
-                        android:text="12221212121zzzzzzzz121123123"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </androidx.cardview.widget.CardView>
+                    android:maxLength="35"
+                    android:paddingStart="@dimen/text_view_in_card_view_padding"
+                    android:paddingLeft="@dimen/text_view_in_card_view_padding"
+                    android:paddingEnd="@dimen/text_view_in_card_view_padding"
+                    android:paddingRight="@dimen/text_view_in_card_view_padding"
+                    android:text="12221212121zzzzzzzz121123123"
+                    android:textColor="@color/black"
+                    android:textSize="20sp" />
 
             </LinearLayout>
 
@@ -150,15 +124,13 @@
                 android:id="@+id/fragment_parking_map_btn_booking"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="2dp"
-                android:layout_marginRight="2dp"
+                android:layout_marginEnd="3dp"
                 android:text="@string/book"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </androidx.cardview.widget.CardView>
-
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,6 +22,7 @@ import java.util.Locale;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.data.model.parking.slot.booking.BookingDetails;
 
 /**
  * Purpose: <p> Handles how each item of the RecyclerView will look like. </p>
@@ -111,27 +112,28 @@ public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingV
         setAnimation(holder.itemView, position); // Set animator
 
         // - get element of the booking list at this position
-        final String offer = getItem(position).getBookingDetails().getSlotOffer().toString();
-        final String date = getDateText(getItem(position).getBookingDetails().getDateOfBooking());
-        final String time = getItem(position).getBookingDetails().getStartingTime();
-        final String status = getStatusText(getItem(position).isCompleted());
-        final String parkingName = getItem(position).getLotName();
+        final Booking booking = getItem(position);
+
+        final String offer = booking.getBookingDetails().getSlotOffer().toString();
+        final String date = getDateText(booking.getBookingDetails().getDateOfBooking());
+        final BookingDetails.Time time = booking.getBookingDetails().getStartingTime();
+        final String status = getStatusText(booking.isCompleted());
+        final String parkingName = booking.getLotName();
 
         // - replace the contents of the view with that element
         holder.status.setText(status);
-
         holder.offer.setText(offer);
         holder.lotName.setText(parkingName);
         holder.date.setText(date);
-        holder.time.setText(time);
+        holder.time.setText(time.toString());
     }
 
     /**
      * Prepares the text of the date TextView based
      * on the given String.
      *
-     * @param date The String to be appended.
-     * @return A String with format `Date: ` + given String.
+     * @param date The date to be represented in String.
+     * @return A String representation of the given date..
      */
     @NotNull
     @Contract(pure = true)

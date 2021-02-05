@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Styles for the toolbar -->
+    <style name="Widget.Shrine.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">?attr/colorAccent</item>
+        <item name="android:theme">@style/Theme.CyParking</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="titleTextAppearance">@style/TextAppearance.CyParking.Toolbar</item>
+    </style>
+
+    <style name="TextAppearance.CyParking.Toolbar" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textSize">16sp</item>
+    </style>
+
     <!-- Styles for the  Login screen "CyParking" text -->
     <style name="TextAppearance.CyParking.Title" parent="TextAppearance.MaterialComponents.Headline4">
         <item name="textAllCaps">true</item>
@@ -19,6 +31,22 @@
     <style name="ThemeOverlay.App.CircularProgressIndicator" parent="">
         <item name="colorPrimary">@color/design_default_color_primary</item>
     </style>
+
+    <!-- Styles for the TextInputLayouts in Login, Register lot, Feedback screens  -->
+    <style name="Widget.CyParking.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="hintTextAppearance">@style/TextAppearance.CyParking.TextInputLayout.HintText
+        </item>
+        <item name="hintTextColor">@color/purple_700</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="boxStrokeColor">@color/textInputOutlineColor</item>
+        <item name="errorEnabled">true</item>
+
+    </style>
+
+    <style name="TextAppearance.CyParking.TextInputLayout.HintText" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="android:textColor">@color/textColorPrimary</item>
+    </style>
+
 
     <!--  TODO: Update   -->
     <!-- Styles for the CustomDialog-->

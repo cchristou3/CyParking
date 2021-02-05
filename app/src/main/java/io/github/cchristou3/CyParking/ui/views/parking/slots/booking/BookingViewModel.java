@@ -12,10 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.data.model.parking.slot.booking.BookingDetails;
 import io.github.cchristou3.CyParking.data.repository.BookingRepository;
-import io.github.cchristou3.CyParking.utilities.Utility;
-
-import static io.github.cchristou3.CyParking.utilities.Utility.getTimeOf;
+import io.github.cchristou3.CyParking.utilities.DateTimeUtility;
 
 /**
  * <p>A ViewModel implementation, adopted to the {@link BookingFragment} fragment.
@@ -28,9 +27,9 @@ public class BookingViewModel extends ViewModel {
 
     // Data members
     private final MutableLiveData<String> mPickedDate =
-            new MutableLiveData<>(Utility.dateToString(Utility.getCurrentDate()));
-    private final MutableLiveData<String> mPickedStartingTime =
-            new MutableLiveData<>(Utility.getCurrentTime());
+            new MutableLiveData<>(DateTimeUtility.dateToString(DateTimeUtility.getCurrentDate()));
+    private final MutableLiveData<BookingDetails.Time> mPickedStartingTime =
+            new MutableLiveData<>(BookingDetails.Time.getCurrentTime());
     private final MutableLiveData<SlotOffer> mPickedSlotOffer =
             new MutableLiveData<>();
 
@@ -64,7 +63,7 @@ public class BookingViewModel extends ViewModel {
      * @param minutes The selected minutes.
      */
     public void updateStartingTime(int hours, int minutes) {
-        mPickedStartingTime.setValue(getTimeOf(hours, minutes));
+        mPickedStartingTime.setValue(new BookingDetails.Time(hours, minutes));
     }
 
     /**
@@ -76,33 +75,33 @@ public class BookingViewModel extends ViewModel {
      * @param selectedDay   The selected Day.
      */
     public void updatePickedDate(int selectedYear, int selectedMonth, int selectedDay) {
-        mPickedDate.setValue(Utility.dateToString(selectedYear, selectedMonth, selectedDay));
+        mPickedDate.setValue(DateTimeUtility.dateToString(selectedYear, selectedMonth, selectedDay));
     }
 
     /**
      * Getters for all its LiveData members
      */
-    public String getPickedDateValue() {
+    public String getPickedDate() {
         return mPickedDate.getValue();
     }
 
-    public String getPickedStartingTimeValue() {
+    public BookingDetails.Time getPickedStartingTime() {
         return mPickedStartingTime.getValue();
     }
 
-    public SlotOffer getPickedSlotOfferValue() {
+    public SlotOffer getPickedSlotOffer() {
         return mPickedSlotOffer.getValue();
     }
 
-    public LiveData<String> getPickedDate() {
+    public LiveData<String> getPickedDateState() {
         return mPickedDate;
     }
 
-    public LiveData<String> getPickedStartingTime() {
+    public MutableLiveData<BookingDetails.Time> getPickedStartingTimeState() {
         return mPickedStartingTime;
     }
 
-    public LiveData<SlotOffer> getPickedSlotOffer() {
+    public LiveData<SlotOffer> getPickedSlotOfferState() {
         return mPickedSlotOffer;
     }
 
@@ -137,4 +136,5 @@ public class BookingViewModel extends ViewModel {
         // Delete the booking info to the database
         mBookingRepository.cancelParkingBooking(idOfBookingToBeCancelled);
     }
+
 }

@@ -51,10 +51,10 @@
                     android:id="@+id/register_lot_fragment_til_phone_body"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    style="@style/Widget.CyParking.TextInputLayout"
                     android:layout_marginTop="10dp"
                     android:hint="@string/hint_mobile_number"
                     android:importantForAutofill="no"
-                    app:errorEnabled="true"
                     app:layout_constraintEnd_toEndOf="@+id/register_lot_fragment_txt_basic_title"
                     app:layout_constraintStart_toStartOf="@+id/register_lot_fragment_txt_basic_title"
                     app:layout_constraintTop_toBottomOf="@+id/register_lot_fragment_txt_email">
@@ -104,7 +104,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:hint="@string/hint_parking_lot_name"
-                    app:errorEnabled="true"
+                    style="@style/Widget.CyParking.TextInputLayout"
                     app:layout_constraintEnd_toEndOf="@+id/register_lot_fragment_txt_lot_title"
                     app:layout_constraintStart_toStartOf="@+id/register_lot_fragment_txt_lot_title"
                     app:layout_constraintTop_toBottomOf="@+id/register_lot_fragment_txt_lot_title">
@@ -120,11 +120,11 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/register_lot_fragment_til_capacity"
                     android:layout_width="0dp"
+                    style="@style/Widget.CyParking.TextInputLayout"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:hint="@string/hint_capacity"
                     android:importantForAutofill="no"
-                    app:errorEnabled="true"
                     app:layout_constraintEnd_toEndOf="@+id/register_lot_fragment_til_lot_name"
                     app:layout_constraintStart_toStartOf="@+id/register_lot_fragment_txt_lot_title"
                     app:layout_constraintTop_toBottomOf="@+id/register_lot_fragment_til_lot_name">
@@ -152,6 +152,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
+                    style="@style/Widget.CyParking.TextInputLayout"
                     android:hint="@string/hint_latitude"
                     android:importantForAutofill="no"
                     app:layout_constraintEnd_toEndOf="@+id/register_lot_fragment_til_capacity"
@@ -171,13 +172,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
+                    style="@style/Widget.CyParking.TextInputLayout"
                     android:hint="@string/hint_longitude"
                     android:importantForAutofill="no"
                     app:layout_constraintEnd_toEndOf="@+id/register_lot_fragment_til_location_lat"
                     app:layout_constraintStart_toStartOf="@+id/register_lot_fragment_til_location_lat"
                     app:layout_constraintTop_toBottomOf="@+id/register_lot_fragment_til_location_lat">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/register_lot_fragment_et_location_lng"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

@@ -96,7 +96,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/email"
                     android:visibility="visible"
-                    app:errorEnabled="true"
+                    style="@style/Widget.CyParking.TextInputLayout"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/feedback_fragment_txt_name_body"
                     app:layout_constraintTop_toBottomOf="@+id/feedback_fragment_txt_email_title">
@@ -133,13 +133,12 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/feedback_fragment_til_feedback_input"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.CyParking.TextInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:hint="@string/required"
-            app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/feedback_fragment_txt_feedback_title">

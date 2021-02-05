@@ -9,9 +9,10 @@ import org.junit.runner.RunWith;
 import java.util.Random;
 
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.data.model.parking.slot.booking.BookingDetails;
 import io.github.cchristou3.CyParking.data.repository.BookingRepository;
 import io.github.cchristou3.CyParking.ui.InstantTaskRuler;
-import io.github.cchristou3.CyParking.utilities.Utility;
+import io.github.cchristou3.CyParking.utilities.DateTimeUtility;
 
 import static io.github.cchristou3.CyParking.ui.LiveDataTestUtil.getOrAwaitValue;
 import static org.hamcrest.CoreMatchers.is;
@@ -36,12 +37,12 @@ public class BookingViewModelTest extends InstantTaskRuler {
 
     @Test
     public void getPickedDate_initially_returnsNonNull() throws InterruptedException {
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedDate()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(bookingViewModel.getPickedDateState()), is(not(nullValue())));
     }
 
     @Test
     public void getPickedStartingTime_initially_returnsNonNull() throws InterruptedException {
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedStartingTime()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(bookingViewModel.getPickedStartingTimeState()), is(not(nullValue())));
     }
 
     @Test
@@ -49,32 +50,35 @@ public class BookingViewModelTest extends InstantTaskRuler {
         // Given the slot offer gets updated
         bookingViewModel.updateSlotOffer(slotOffer);
         // Then it should update the livedata's value
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedSlotOffer()), is(not(nullValue())));
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedSlotOffer()), is(slotOffer));
-        assertThat(bookingViewModel.getPickedSlotOfferValue(), is(slotOffer));
+        assertThat(getOrAwaitValue(bookingViewModel.getPickedSlotOfferState()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(bookingViewModel.getPickedSlotOfferState()), is(slotOffer));
+        assertThat(bookingViewModel.getPickedSlotOffer(), is(slotOffer));
     }
 
     @Test
     public void updatePickedDate_setsNewValue() throws InterruptedException {
         // Given the date gets updated
         bookingViewModel.updatePickedDate(1, 1, 1);
-        String output = Utility.dateToString(1, 1, 1);
+        String output = DateTimeUtility.dateToString(1, 1, 1);
         // Then it should update the livedata's value
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedDate()), is(not(nullValue())));
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedDate()), is(output));
-        assertThat(bookingViewModel.getPickedDateValue(), is(output));
+        assertThat(getOrAwaitValue(bookingViewModel.getPickedDateState()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(bookingViewModel.getPickedDateState()), is(output));
+        assertThat(bookingViewModel.getPickedDate(), is(output));
     }
-
 
     @Test
     public void updateStartingTime_setsNewValue() throws InterruptedException {
         // Given the date gets updated
         int hours = 12, minutes = 0;
         bookingViewModel.updateStartingTime(hours, minutes);
-        String output = Utility.getTimeOf(hours, minutes);
+        String output = BookingDetails.Time.getTimeOf(hours, minutes);
         // Then it should update the livedata's value
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedStartingTime()), is(not(nullValue())));
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedStartingTime()), is(output));
-        assertThat(bookingViewModel.getPickedStartingTimeValue(), is(output));
+        assertThat(getOrAwaitValue(bookingViewModel.getPickedStartingTimeState()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(bookingViewModel.getPickedStartingTimeState()).toString(), is(output));
+        assertThat(bookingViewModel.getPickedStartingTime().toString(), is(output));
+    }
+
+    @Test
+    public void name() {
     }
 }

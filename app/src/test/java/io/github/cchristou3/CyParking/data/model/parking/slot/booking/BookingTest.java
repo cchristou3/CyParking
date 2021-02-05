@@ -20,11 +20,11 @@ public class BookingTest {
     private static final String ISSUER_ID = "81";
     private final BookingDetails bookingDetailsA =
             new BookingDetails(new Date(),
-                    "14 : 30",
+                    new BookingDetails.Time(14, 30),
                     new SlotOffer(1, 1));
     private final BookingDetails bookingDetailsB =
             new BookingDetails(new Date(),
-                    "14 : 30",
+                    new BookingDetails.Time(14, 30),
                     new SlotOffer(1, 1));
 
     @Test

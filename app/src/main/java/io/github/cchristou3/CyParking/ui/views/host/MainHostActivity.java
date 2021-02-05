@@ -101,6 +101,17 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
     }
 
     /**
+     * Clean up the activity's resources.
+     * Unregister network callback.
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBinding = null;
+        mConnectivityHelper.unregisterNetworkCallback();
+    }
+
+    /**
      * Shows or hides the loading bar based on the given flag.
      *
      * @param shouldShowLoadingBar Indicates whether to show or hide the loading bar.
@@ -151,16 +162,6 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
 
         // Loading Bar state //
         mGlobalStateViewModel.getLoadingBarState().observe(this, this::updateLoadingBarVisibility);
-    }
-
-    /**
-     * Clean up the activity's resources.
-     * Unregister network callback.
-     */
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mConnectivityHelper.unregisterNetworkCallback();
     }
 
     /**

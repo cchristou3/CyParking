@@ -26,13 +26,13 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_hostee_auth_til_email"
+            style="@style/Widget.CyParking.TextInputLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
             android:layout_marginTop="60dp"
+            android:layout_marginEnd="24dp"
             android:hint="@string/prompt_email"
-            app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_logo">
@@ -49,12 +49,12 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_hostee_auth_til_name"
+            style="@style/Widget.CyParking.TextInputLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
             android:hint="@string/name_surname"
-            app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_til_email">
@@ -70,6 +70,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_hostee_auth_til_password"
+            style="@style/Widget.CyParking.TextInputLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -77,7 +78,6 @@
             android:hint="@string/prompt_password"
             android:imeActionLabel="@string/action_sign_in_short"
             app:endIconMode="password_toggle"
-            app:errorEnabled="true"
             app:helperText="@string/password_helper"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -87,8 +87,8 @@
                 android:id="@+id/fragment_hostee_auth_et_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
                 android:imeOptions="actionDone"
+                android:inputType="textPassword"
                 android:maxLines="1"
                 android:selectAllOnFocus="true" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -126,7 +126,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="100dp"
-                android:layout_marginLeft="100dp"
                 android:button="@drawable/checkbox"
                 app:layout_constraintBottom_toBottomOf="@+id/fragment_hostee_auth_txt_role_user_title"
                 app:layout_constraintEnd_toEndOf="parent"

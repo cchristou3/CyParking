@@ -1,6 +1,5 @@
 package io.github.cchristou3.CyParking.ui.views.parking.slots.booking;
 
-import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,14 +14,15 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewbinding.ViewBinding;
 
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.timepicker.MaterialTimePicker;
 
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
@@ -30,6 +30,7 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
+import io.github.cchristou3.CyParking.data.manager.DateTimePicker;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
@@ -44,8 +45,7 @@ import io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking.ViewBoo
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
-import io.github.cchristou3.CyParking.ui.widgets.TimePickerDialog;
-import io.github.cchristou3.CyParking.utilities.Utility;
+import io.github.cchristou3.CyParking.utilities.DateTimeUtility;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
 /**
@@ -197,10 +197,12 @@ public class BookingFragment extends CommonFragment<FragmentBookingBinding> impl
      */
     private void setViewModelObservers() {
         // Set up LiveData's Observers
-        mBookingViewModel.getPickedDate()
+        mBookingViewModel.getPickedDateState()
                 .observe(getViewLifecycleOwner(), getBinding().fragmentParkingBookingTxtDate::setText);
-        mBookingViewModel.getPickedStartingTime()
-                .observe(getViewLifecycleOwner(), getBinding().fragmentParkingBookingTxtStartingTime::setText);
+
+        mBookingViewModel.getPickedStartingTimeState()
+                .observe(getViewLifecycleOwner(),
+                        time -> getBinding().fragmentParkingBookingTxtStartingTime.setText(time.toString()));
 
         // Observe the user's Auth state
         observeUserState(loggedInUser -> {
@@ -229,8 +231,12 @@ public class BookingFragment extends CommonFragment<FragmentBookingBinding> impl
         setUpSlotOfferSpinner(); // Initialize, attach listener to the spinner
 
         // Set the date and the start time to their corresponding TextView objects
-        getBinding().fragmentParkingBookingTxtDate.setText(mBookingViewModel.getPickedDate().getValue());
-        getBinding().fragmentParkingBookingTxtStartingTime.setText(mBookingViewModel.getPickedStartingTime().getValue());
+        getBinding().fragmentParkingBookingTxtDate.setText(
+                mBookingViewModel.getPickedDateState().getValue()
+        );
+        getBinding().fragmentParkingBookingTxtStartingTime.setText(
+                mBookingViewModel.getPickedStartingTime().toString()
+        );
 
         // Set up time pickers' listeners
         getBinding().fragmentParkingBookingBtnStartingTimeButton
@@ -238,23 +244,10 @@ public class BookingFragment extends CommonFragment<FragmentBookingBinding> impl
 
         // Set up date picker listener
         getBinding().fragmentParkingBookingBtnDateButton.setOnClickListener(v -> {
-            // Access the current date via the a Calendar object
-            final int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-            final int currentMonth = Calendar.getInstance().get(Calendar.MONTH);
-            final int currentDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-
-            // Instantiate a DatePickerDialog and how it to the user
-            // The dialog's date will be set to the current date.
-            new DatePickerDialog(requireContext(),
-                    (viewObject, selectedYear, selectedMonth, selectedDayOfMonth) ->
-                            mBookingViewModel.updatePickedDate(
-                                    selectedYear,
-                                    selectedMonth + 1, // As the Georgian Calendar's months starts from 0
-                                    selectedDayOfMonth
-                            ),
-                    // The date to show when the user is prompt the date picker - current date
-                    currentYear, currentMonth, currentDay)
-                    .show();
+            DateTimePicker.getDatePicker(
+                    mBookingViewModel::updatePickedDate // On date selected callback
+            )
+                    .show(getChildFragmentManager(), MaterialDatePicker.class.getCanonicalName());
         });
 
         // Set listener to "BOOK" button
@@ -306,49 +299,47 @@ public class BookingFragment extends CommonFragment<FragmentBookingBinding> impl
             Toast.makeText(requireContext(), getString(R.string.no_space_msg), Toast.LENGTH_SHORT).show();
             return;
         }
+
+        // TODO: 05/02/2021 Check time if the date is the same as the current date
+
         // Access parking operator's details via the Intent object
-        final String pickedDate = mBookingViewModel.getPickedDateValue();
+        final String pickedDate = mBookingViewModel.getPickedDate();
         Date pickedDateObject;
         try {
-            pickedDateObject = Utility.fromStringToDate(pickedDate);
+            pickedDateObject = DateTimeUtility.fromStringToDate(pickedDate);
         } catch (ParseException e) {
             // Display error message
             Toast.makeText(requireContext(), getString(R.string.parse_error_msg), Toast.LENGTH_SHORT).show();
             return; // Terminate the method
         }
-        // Access the current date and compare it with the inputted one.
-        Log.d(TAG, "today: " + Utility.getCurrentDate());
-        Log.d(TAG, "picked date: " + pickedDateObject);
-        if (pickedDateObject.compareTo(Utility.getCurrentDate()) >= 0) {// Date is larger or equal than today's date)
-            final LoggedInUser user = getUser();
-            if (user == null) return; // If not logged in, exit the method
 
-            getGlobalStateViewModel().showLoadingBar(); // show loading bar
-            // Otherwise, proceed with transaction and create a booking
-            // Create a new Booking instance that will hold all data of the booking.
-            final Booking booking = buildBooking(user, pickedDateObject);
+        final LoggedInUser user = getUser();
+        if (user == null) return; // If not logged in, exit the method
 
-            mBookingViewModel.bookParkingLot(booking)
-                    .addOnCompleteListener(task -> {
-                        getGlobalStateViewModel().hideLoadingBar(); // hide loading bar
-                        // Inform the user booking was successful and offer a temporary UNDO option
-                        if (task.isSuccessful() && task.getException() == null) {
-                            // TODO: Generate QR Code
-                            // Display undo option
-                            Snackbar.make(requireView(), getString(R.string.booking_success), Snackbar.LENGTH_LONG)
-                                    .setAction(R.string.undo,
-                                            v -> mBookingViewModel.cancelBooking(booking.generateUniqueId())).show();
-                            // Navigate one screen back
-                            goBack(requireActivity());
-                            return;
-                        }
-                        // Otherwise, display an error message to the user
-                        Toast.makeText(requireContext(), getString(R.string.slot_already_booked), Toast.LENGTH_SHORT).show();
-                    });
-        } else {
-            Toast.makeText(requireContext(), getString(R.string.date_error_msg), Toast.LENGTH_SHORT).show();
-        }
+        getGlobalStateViewModel().showLoadingBar(); // show loading bar
+        // Create a new Booking instance that will hold all data of the booking.
+        final Booking booking = buildBooking(user, pickedDateObject);
+
+        mBookingViewModel.bookParkingLot(booking)
+                // Attach an onComplete listener to handle the task's result
+                .addOnCompleteListener(task -> {
+                    getGlobalStateViewModel().hideLoadingBar(); // hide loading bar
+                    // Inform the user booking was successful and offer a temporary UNDO option
+                    if (task.isSuccessful() && task.getException() == null) {
+                        // TODO: Generate QR Code
+                        // Display undo option
+                        Snackbar.make(requireView(), getString(R.string.booking_success), Snackbar.LENGTH_LONG)
+                                .setAction(R.string.undo,
+                                        v -> mBookingViewModel.cancelBooking(booking.generateUniqueId())).show();
+                        // Navigate one screen back
+                        goBack(requireActivity());
+                        return;
+                    }
+                    // Otherwise, display an error message to the user
+                    Toast.makeText(requireContext(), getString(R.string.slot_already_booked), Toast.LENGTH_SHORT).show();
+                });
     }
+
 
     /**
      * Gather all information needed to create a Booking instance
@@ -370,28 +361,29 @@ public class BookingFragment extends CommonFragment<FragmentBookingBinding> impl
                 userID,
                 new BookingDetails(
                         pickedDate,
-                        mBookingViewModel.getPickedStartingTimeValue(),
-                        mBookingViewModel.getPickedSlotOfferValue()
+                        mBookingViewModel.getPickedStartingTime(),
+                        mBookingViewModel.getPickedSlotOffer()
                 )
         );
     }
 
     /**
      * Creates an OnClickListener to the given button.
-     * OnClick: Creates a TimePickerDialog with its own OnTimeSetListener.
-     * OnTimeSetListener-onClick: Updates the value of the specified LiveData Object.
+     * OnClick: Creates a {@link MaterialTimePicker} with its own OnPositiveButtonClickListener.
+     * OnPositiveButtonClickListener-onClick: Updates the value of the specified LiveData Object.
      *
      * @return An View.OnClickListener
      */
     @NotNull
     @Contract(pure = true)
     private View.OnClickListener buildTimePickerListener() {
+
         return v -> {
-            TimePickerDialog timePickerDialog = new TimePickerDialog(
+            DateTimePicker.getTimePicker(
                     requireContext(),
-                    (view, hourOfDay, minute) -> mBookingViewModel.updateStartingTime(hourOfDay, minute)
-            );
-            timePickerDialog.show();
+                    mBookingViewModel::updateStartingTime) // On time selected listener
+                    // Display it
+                    .show(getChildFragmentManager(), MaterialTimePicker.class.getCanonicalName());
         };
     }
 

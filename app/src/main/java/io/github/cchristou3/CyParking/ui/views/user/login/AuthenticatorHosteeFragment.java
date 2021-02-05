@@ -42,6 +42,8 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * Purpose: Use the {@link AuthenticatorHosteeFragment#newInstance} factory method to
  * create an instance of this fragment.
  * Can be used for both logging in and signing up.</p>
+ * <p>
+ * TODO: 04/02/21 remove user as a role. Logging in == user.role.isTrue
  *
  * @author Charalambos Christou
  * @version 6.0 28/01/21

@@ -170,6 +170,7 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
      * The message has to do about the user not having any bookings.
      */
     private void displayMessage() {
+        // TODO: 04/02/2021 Update to a more fancier message. e.g. MaterialCardView, icons, etc.
         // Display message to user
         getBinding().fragmentViewBookingsTxtNoBookings.setVisibility(View.VISIBLE);
         // Hide view's related to displaying

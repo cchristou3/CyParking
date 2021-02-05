@@ -27,7 +27,7 @@
         android:imeActionLabel="@string/action_update"
         android:padding="5dp"
         android:textSize="22sp"
-        app:errorEnabled="true"
+        style="@style/Widget.CyParking.TextInputLayout"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/dialog_account_update_mtv_field_title"
         app:layout_constraintStart_toStartOf="@+id/dialog_account_update_mtv_field_title"

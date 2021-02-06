@@ -15,9 +15,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
-            app:tabIndicatorColor="@color/purple_700"
+            app:tabIconTint="@color/white"
             app:tabIndicatorHeight="5dp"
-            app:tabSelectedTextColor="@color/purple_700"
+            app:tabIndicatorColor="@color/teal_200"
+            app:tabInlineLabel="true"
+            app:tabSelectedTextColor="@color/teal_200"
             app:tabTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>

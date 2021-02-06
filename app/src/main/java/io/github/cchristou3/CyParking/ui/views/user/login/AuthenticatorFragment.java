@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
+import io.github.cchristou3.CyParking.data.manager.TabHelper;
 import io.github.cchristou3.CyParking.databinding.FragmentAuthenticationBinding;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
@@ -43,12 +44,16 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
         final ViewPager2 viewPager = binding.fragmentAuthenticationVp2ViewPager2;
         viewPager.setAdapter(sectionsPagerAdapter);
         final TabLayout tabLayout = binding.fragmentAuthenticationTlTabs;
+
+        final TabHelper tabHelper = new TabHelper();
+
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) -> {
-                    tab.setText((position == 0) ? getString(R.string.sign_in) : getString(R.string.sign_up));
-                    tab.setTabLabelVisibility(TabLayout.TAB_LABEL_VISIBILITY_LABELED);
+                    tabHelper.initializeTab(requireContext(), tab, position);
                 }
         ).attach();
+
+        tabLayout.addOnTabSelectedListener(tabHelper.getOnTabSelectedListener(requireContext()));
 
         checkIfUserWantsToRegister(tabLayout);
 

@@ -5,6 +5,7 @@
     <color name="textInputOutlineColor">@color/purple_200</color>
     <color name="cardViewSurface">#D1C4E9</color>
     <color name="background">#A1C4A0</color>
+    <color name="amber">#ffb20a</color>
 
     <color name="light_amber">#ffd54f</color>
 

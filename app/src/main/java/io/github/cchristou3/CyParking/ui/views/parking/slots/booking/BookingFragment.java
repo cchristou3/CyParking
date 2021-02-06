@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -223,12 +224,12 @@ public class BookingFragment extends CommonFragment<FragmentBookingBinding> impl
      */
     private void initializeUi() {
         // Set their text to their corresponding value
-        final String parkingID = "ParkingId: " + mSelectedParking.getParkingId(); // Compose parking id text
+        final String parkingID = getString(R.string.lot_name) + mSelectedParking.getLotName(); // Compose parking name text
         final String availability = mSelectedParking.getLotAvailability(requireContext()); // Compose lot availability text
         getBinding().fragmentParkingBookingTxtParkingName.setText(parkingID); // Set parking name
         getBinding().fragmentParkingBookingTxtParkingAvailability.setText(availability); // Set parking availability
 
-        setUpSlotOfferSpinner(); // Initialize, attach listener to the spinner
+        setUpSlotOfferDropDownMenu(); // Initialize, attach listener to the drop down menu
 
         // Set the date and the start time to their corresponding TextView objects
         getBinding().fragmentParkingBookingTxtDate.setText(
@@ -255,12 +256,22 @@ public class BookingFragment extends CommonFragment<FragmentBookingBinding> impl
     }
 
     /**
-     * Initialize the Spinner's values. Also, hook it up with an {@link AdapterView.OnItemSelectedListener}.
+     * Initialize the AutoCompleteTextView's values. Also, hook it up with an {@link AdapterView.OnItemSelectedListener}.
      * Whenever the listener gets triggered, update the value of ViewModel's slotOffer member
-     * with the spinner's value.
+     * with the AutoCompleteTextView's value.
      */
-    private void setUpSlotOfferSpinner() {
-        getBinding().fragmentParkingBookingSSlotOffer
+    private void setUpSlotOfferDropDownMenu() {
+        if (!(getBinding().fragmentParkingBookingDropDown.getEditText() instanceof
+                AutoCompleteTextView)) {
+            return; // should never happen as fragmentParkingBookingDropDown's direct child is an
+            // AutoCompleteTextView
+        }
+
+        // Get a reference to it
+        AutoCompleteTextView autoCompleteTextView =
+                (AutoCompleteTextView) getBinding().fragmentParkingBookingDropDown.getEditText();
+
+        autoCompleteTextView // Add an on item selected listener
                 .setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -275,15 +286,41 @@ public class BookingFragment extends CommonFragment<FragmentBookingBinding> impl
                 });
 
         // Create an array that will hold all the values of the spinner - the lot's slot offers.
-        int numOfOffers = mSelectedParking.getSlotOfferList().size();
-        final SlotOffer[] slotOffers = new SlotOffer[numOfOffers];
-        mSelectedParking.getSlotOfferList().toArray(slotOffers);
+        final SlotOffer[] slotOffers = SlotOffer.toArray(mSelectedParking.getSlotOfferList());
+        SlotOffer.sortArray(slotOffers, true); // sort it in ascending order
+
         // Initialize an ArrayAdapter
-        final ArrayAdapter<SlotOffer> volumeAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_dropdown_item,
+        final ArrayAdapter<SlotOffer> slotOfferArrayAdapter = new ArrayAdapter<>(requireContext(),
+                R.layout.slot_offer_drop_down_item,
                 slotOffers);
-        // Bind the spinner with its adapter
-        getBinding().fragmentParkingBookingSSlotOffer.setAdapter(volumeAdapter);
+        // bind the autoCompleteTextView with the above adapter
+        autoCompleteTextView.setAdapter(slotOfferArrayAdapter);
+        // Add an OnFocusChangeListener
+        setDropDownMenuInitialFocus(autoCompleteTextView);
+    }
+
+    /**
+     * Set an {@link android.view.View.OnFocusChangeListener} to the given
+     * {@link AutoCompleteTextView} instance.
+     * On-focus-changed: sets both the text of the {@link AutoCompleteTextView}
+     * instance and the state's value, responsible for the slot offer,
+     * with the first {@link SlotOffer} of the adapter's array.
+     * purpose: ensures that a slot offer is picked, even if the user dismisses
+     * the drop-down menu.
+     *
+     * @param autoCompleteTextView The {@link AutoCompleteTextView} instance to be attached the
+     *                             onFocusChangeListener.
+     */
+    private void setDropDownMenuInitialFocus(@NotNull AutoCompleteTextView autoCompleteTextView) {
+        autoCompleteTextView.setOnFocusChangeListener((v, hasFocus) -> {
+            autoCompleteTextView.setText(
+                    autoCompleteTextView.getAdapter().getItem(0).toString(), false
+            );
+            mBookingViewModel.updateSlotOffer(
+                    (SlotOffer) autoCompleteTextView.getAdapter().getItem(0)
+            );
+            autoCompleteTextView.setOnFocusChangeListener(null);// remove listener
+        });
     }
 
     /**

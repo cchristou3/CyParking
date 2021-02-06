@@ -10,6 +10,8 @@ import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -19,7 +21,7 @@ import java.util.Random;
  * parking lot.
  *
  * @author Charalambos Christou
- * @version 4.0 23/01/21
+ * @version 5.0 06/02/21
  */
 public class SlotOffer implements Parcelable, Comparable<SlotOffer> {
 
@@ -74,6 +76,35 @@ public class SlotOffer implements Parcelable, Comparable<SlotOffer> {
     public static SlotOffer getRandomInstance(final Random generator) {
         return new SlotOffer(generator.nextInt(10 + 1) + 1,
                 generator.nextInt(10 + 1) + 1
+        );
+    }
+
+    /**
+     * Converts the given list into an array.
+     *
+     * @param list The list to be converted to an array.
+     * @return An array containing all item of the given lists with the same
+     * sequence.
+     */
+    @NonNull
+    public static SlotOffer[] toArray(@NonNull List<SlotOffer> list) {
+        int numOfItems = list.size();
+        final SlotOffer[] array = new SlotOffer[numOfItems];
+        list.toArray(array);
+        return array;
+    }
+
+    /**
+     * Sorts the given SlotOffer array based on the their prices.
+     * The order is based on the given flag.
+     *
+     * @param array The array to be sorted.
+     */
+    public static void sortArray(@NonNull SlotOffer[] array, boolean ascending) {
+        Arrays.sort(array,
+                ascending ?
+                        (o1, o2) -> (o1.price > o2.price) ? 0 : -1 : // ascending
+                        (o1, o2) -> (o1.price > o2.price) ? -1 : 0 // descending
         );
     }
 

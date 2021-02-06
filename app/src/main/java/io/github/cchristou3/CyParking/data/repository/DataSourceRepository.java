@@ -29,15 +29,20 @@ class DataSourceRepository {
     // Cloud functions
     private static final String FILTER_LOCATIONS = "filterLocations";
     private static final String GET_NEARBY_PARKING_LOTS = "getNearbyParkingLots";
+    // Firebase Firestore paths (nodes)
+    private static final String PARKING_LOTS = "parking_lots";
 
     // Additional fields for payments...
     // TODO: 06/02/2021  add database nodes related to payments
-
-    // Firebase Firestore paths (nodes)
-    private static final String PARKING_LOTS = "parking_lots";
     private static final String BOOKINGS = "bookings";
     private static final String FEEDBACK = "feedback";
     private static final String USERS = "users";
+
+    /**
+     * Private access constructor.
+     */
+    private DataSourceRepository() {
+    }
 
     /**
      * Get a reference to the database node with the given name.

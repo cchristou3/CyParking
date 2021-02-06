@@ -7,7 +7,7 @@
     tools:context=".ui.views.parking.slots.booking.BookingFragment">
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/materialCardView2"
+        android:id="@+id/fragment_parking_booking_cv_basic_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout2"
+            android:id="@+id/fragment_parking_booking_cl_basic_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
@@ -116,31 +116,25 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <TextView
-        android:id="@+id/fragment_parking_booking_txt_slot_offer"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/fragment_parking_booking_drop_down"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:gravity="start"
-        android:maxLines="2"
-        android:padding="8dp"
-        android:text="@string/please_choose_an_offer"
-        android:textSize="23sp"
-        app:layout_constraintEnd_toEndOf="@+id/materialCardView2"
-        app:layout_constraintStart_toStartOf="@+id/materialCardView2"
-        app:layout_constraintTop_toBottomOf="@+id/materialCardView2" />
-
-    <Spinner
-        android:id="@+id/fragment_parking_booking_s_slot_offer"
-        style="@style/Widget.AppCompat.Spinner.Underlined"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:spinnerMode="dropdown"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_parking_booking_txt_slot_offer"
-        app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_txt_slot_offer"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_txt_slot_offer" />
+        android:focusable="true"
+        android:layout_height="wrap_content"
+        android:focusableInTouchMode="true"
+        android:hint="@string/please_choose_an_offer"
+        app:layout_constraintEnd_toEndOf="@+id/fragment_parking_booking_cv_basic_info"
+        app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_cv_basic_info"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_cv_basic_info">
+
+        <AutoCompleteTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:id="@+id/fragment_parking_booking_txt_todo"
@@ -154,7 +148,7 @@
         app:layout_constraintBottom_toTopOf="@+id/fragment_parking_btn_booking_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_s_slot_offer" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_drop_down" />
 
     <Button
         android:id="@+id/fragment_parking_btn_booking_button"

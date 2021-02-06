@@ -28,8 +28,10 @@ public class BookingViewModel extends ViewModel {
     // Data members
     private final MutableLiveData<String> mPickedDate =
             new MutableLiveData<>(DateTimeUtility.dateToString(DateTimeUtility.getCurrentDate()));
+
     private final MutableLiveData<BookingDetails.Time> mPickedStartingTime =
             new MutableLiveData<>(BookingDetails.Time.getCurrentTime());
+
     private final MutableLiveData<SlotOffer> mPickedSlotOffer =
             new MutableLiveData<>();
 

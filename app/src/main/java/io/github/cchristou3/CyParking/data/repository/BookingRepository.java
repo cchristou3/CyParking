@@ -1,11 +1,7 @@
 package io.github.cchristou3.CyParking.data.repository;
 
-import android.util.Log;
-
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import org.jetbrains.annotations.NotNull;
@@ -13,21 +9,13 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 
-import static io.github.cchristou3.CyParking.data.repository.RepositoryData.BOOKINGS;
-import static io.github.cchristou3.CyParking.data.repository.RepositoryData.PARKING_LOTS;
-
 /**
  * Purpose: <p>contain all methods to access the (cloud / local) database's booking node.</p>
  *
  * @author Charalambos Christou
- * @version 8.0 23/01/21
+ * @version 9.0 06/02/21
  */
-public class BookingRepository {
-
-    public static final String COMPLETED = "completed";
-    private static final String BOOKING_USER_ID = "bookingUserId";
-    private static final String BOOKING_DETAILS = "bookingDetails";
-    private static final String TAG = BookingRepository.class.getName();
+public class BookingRepository implements DataSourceRepository.BookingHandler, DataSourceRepository.ParkingLotHandler {
 
     /**
      * Returns the bookings of the specified userId,
@@ -38,10 +26,7 @@ public class BookingRepository {
      */
     @NotNull
     public Query getUserBookings(String userId) {
-        Log.d(TAG, "retrieveUserBookings: GET " + BOOKINGS
-                + " WHERE " + BOOKING_USER_ID + " == " + userId
-                + " AND " + BOOKING_DETAILS + "." + COMPLETED + " == " + true);
-        return getBookingsNode()
+        return getBookingsRef()
                 .whereEqualTo(BOOKING_USER_ID, userId)
                 .whereEqualTo(BOOKING_DETAILS + "." + COMPLETED, false);
     }
@@ -55,9 +40,8 @@ public class BookingRepository {
      */
     @NotNull
     public DocumentReference getParkingLot(@NotNull ParkingLot selectedParking) {
-        return FirebaseFirestore.getInstance().collection(PARKING_LOTS)
+        return getParkingLotsRef()
                 .document(selectedParking.generateUniqueId());
-        // TODO: 13/01/2021 Avoid method duplication
     }
 
     /**
@@ -69,7 +53,7 @@ public class BookingRepository {
     @NotNull
     private Task<Void> bookParkingSlot(@NotNull Booking bookingToBeStored) {
         // Add the booking info to the database
-        return getBookingsNode()
+        return getBookingsRef()
                 .document(bookingToBeStored.generateUniqueId())
                 .set(bookingToBeStored);
     }
@@ -90,7 +74,7 @@ public class BookingRepository {
      */
     public Task<Void> bookParkingSlot(@NotNull Booking booking, boolean checkIfAlreadyExists) {
         if (checkIfAlreadyExists) {
-            return getBookingsNode()
+            return getBookingsRef()
                     .document(booking.generateUniqueId()).get()
                     .continueWithTask(task -> {
                         if (task.isSuccessful()) {
@@ -114,19 +98,7 @@ public class BookingRepository {
      */
     public void cancelParkingBooking(@NotNull String idOfBookingToBeCancelled) {
         // Delete the booking info to the database
-        getBookingsNode()
+        getBookingsRef()
                 .document(idOfBookingToBeCancelled).delete();
-    }
-
-    /**
-     * Hold a {@link CollectionReference} of the bookings node
-     * from the database.
-     *
-     * @return The {@link CollectionReference} reference to be observed.
-     */
-    @NotNull
-    private CollectionReference getBookingsNode() {
-        return FirebaseFirestore.getInstance()
-                .collection(BOOKINGS);
     }
 }

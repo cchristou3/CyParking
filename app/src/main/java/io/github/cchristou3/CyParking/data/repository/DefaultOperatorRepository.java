@@ -5,7 +5,6 @@ import android.util.Log;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +17,6 @@ import io.github.cchristou3.CyParking.data.interfaces.OperatorRepository;
 import io.github.cchristou3.CyParking.data.model.parking.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 
-import static io.github.cchristou3.CyParking.data.repository.RepositoryData.PARKING_LOTS;
 import static io.github.cchristou3.CyParking.ui.views.parking.lots.map.ParkingMapFragment.TAG;
 
 /**
@@ -28,13 +26,9 @@ import static io.github.cchristou3.CyParking.ui.views.parking.lots.map.ParkingMa
  * for operator-role users.
  *
  * @author Charalambos Christou
- * @version 2.0 13/01/21
+ * @version 3.0 06/02/21
  */
-public class DefaultOperatorRepository extends ParkingMapRepository implements OperatorRepository {
-
-    private static final String AVAILABILITY = "availability";
-    private static final String OPERATOR_ID = "operatorId";
-    private final String AVAILABLE_SPACES = "availableSpaces";
+public class DefaultOperatorRepository implements OperatorRepository, DataSourceRepository.ParkingLotHandler {
 
     /**
      * Stores to the database's PRIVATE_PARKING node the specified object.
@@ -51,7 +45,7 @@ public class DefaultOperatorRepository extends ParkingMapRepository implements O
     @Override
     public Task<Void> registerParkingLot(@NotNull ParkingLot parkingLotToBeStored) {
         // Add the info to the database
-        return getParkingLots()
+        return getParkingLotsRef()
                 .document(parkingLotToBeStored.generateUniqueId())
                 .get()
                 .continueWithTask(task -> {
@@ -66,8 +60,7 @@ public class DefaultOperatorRepository extends ParkingMapRepository implements O
                     } else {
                         Log.d(TAG, "registerParkingLot: " + parkingLotToBeStored);
                         // Add it to the database
-                        return FirebaseFirestore.getInstance()
-                                .collection(PARKING_LOTS)
+                        return getParkingLotsRef()
                                 .document(parkingLotToBeStored.generateUniqueId())
                                 .set(parkingLotToBeStored);
                     }
@@ -83,7 +76,7 @@ public class DefaultOperatorRepository extends ParkingMapRepository implements O
     @Override
     @NotNull
     public Query getParkingLot(String operatorId) {
-        return getParkingLots()
+        return getParkingLotsRef()
                 .whereEqualTo(OPERATOR_ID, operatorId).limit(1L);
     }
 

@@ -187,7 +187,7 @@ public class ParkingMapViewModel extends ViewModel {
      */
     public Query getParkingLots(Set<String> ids) throws IllegalArgumentException {
         if (ids == null || ids.isEmpty()) throw new IllegalArgumentException();
-        return mParkingMapRepository.getParkingLots()
+        return mParkingMapRepository.getParkingLotsRef()
                 .whereIn(FieldPath.documentId(), new ArrayList<>(ids));
     }
 

@@ -8,7 +8,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.functions.FirebaseFunctions;
 
 import org.jetbrains.annotations.NotNull;
@@ -17,8 +16,6 @@ import java.util.HashMap;
 
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 
-import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USERS;
-import static io.github.cchristou3.CyParking.data.repository.RepositoryData.USER_DISPLAY_NAME;
 import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
 
 /**
@@ -28,9 +25,9 @@ import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
  * <p>- Update their password
  *
  * @author Charalambos Christou
- * @version 4.0 12/01/21
+ * @version 5.0 06/02/21
  */
-public class AccountRepository {
+public class AccountRepository implements DataSourceRepository.UserHandler {
 
     private final FirebaseUser mFirebaseUser;
 
@@ -73,7 +70,7 @@ public class AccountRepository {
      */
     @NotNull
     public Task<Void> updateUserDisplayName(String userId, String newDisplayName) {
-        return FirebaseFirestore.getInstance().collection(USERS)
+        return getUserRef()
                 .document(userId)
                 .update(USER_DISPLAY_NAME, newDisplayName);
     }

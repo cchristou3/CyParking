@@ -41,6 +41,7 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.HttpsCallHandler;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
+import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
 import io.github.cchristou3.CyParking.data.manager.MarkerManager;
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
@@ -622,8 +623,14 @@ public class ParkingMapFragment extends CommonFragment<FragmentParkingMapBinding
             public void onFailure(Exception exception) {
                 if (exception == null) return;
                 // Plan B: Reload map
-                Toast.makeText(requireContext(), "Unexpected error occurred!\n" + exception.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e(ParkingMapFragment.TAG, "Error of class " + exception.getClass() + ": " + exception.getMessage());
+                AlertBuilder.showSingleActionAlert(
+                        getChildFragmentManager(),
+                        R.string.volley_error_title,
+                        R.string.volley_error_body,
+                        (v) -> goBack(requireActivity()) // go back to home screen
+                );
+                //Toast.makeText(requireContext(), "Unexpected error occurred!\n" + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                //Log.e(ParkingMapFragment.TAG, "Error of class " + exception.getClass() + ": " + exception.getMessage());
             }
 
             @Override

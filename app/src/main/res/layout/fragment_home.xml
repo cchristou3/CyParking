@@ -35,7 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="10dp"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/fragment_home_txt_lot_name"
@@ -95,10 +95,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
+                android:gravity="center"
                 android:text="@string/no_parking_lots_text"
                 android:textColor="@color/red"
                 android:textSize="20sp"
-                android:gravity="center"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toTopOf="@+id/fragment_home_mbtn_register_parking_lot"
                 app:layout_constraintEnd_toEndOf="parent"

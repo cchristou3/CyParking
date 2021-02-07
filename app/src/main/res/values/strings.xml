@@ -16,7 +16,6 @@
     <string name="menu_bookings">Bookings</string>
     <string name="menu_account">My Account</string>
     <string name="menu_feedback">Feedback</string>
-    <string name="title_activity_parking_map">Map</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -31,14 +30,12 @@
     <string name="invalid_role_choice">At least of role must be selected</string>
     <string name="invalid_name">This field must not be left empty</string>
     <string name="login_failed">Login failed</string>
-    <string name="title_activity_testing">Testing</string>
-    <string name="tab_text_1">Tab 1</string>
-    <string name="tab_text_2">Tab 2</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_up">Sign up</string>
     <string name="cancel">Cancel</string>
     <string name="user_desc">- Book a parking \n- Pay via card</string>
     <string name="op_desc">- Register their parking area \n- Offer parking slots via the app</string>
+    <string name="password_helper">You should also include special characters (!, @, %, etc.) to make it difficult to be guessed</string>
 
     <!-- Strings related to the description dialog -->
     <string name="dial_intro">Privileges</string>
@@ -56,7 +53,6 @@
 
     <!-- Strings related to the feedback -->
     <string name="invalid_feedback">Cannot be empty</string>
-    <string name="parking_map">Parking Map</string>
     <string name="no_parking_lots_text">No parking lots registered yet</string>
 
     <!-- Strings related to the registering a parking lot -->
@@ -100,13 +96,20 @@
     <string name="error_lot_registration">Oops! Something went wrong! Please check your details and try again.</string>
     <string name="error_lot_already_exists">The Parking Lot already exists!</string>
 
+    <!-- Strings related to the HomeFragment -->
+    <string name="parking_map">Parking Map</string>
+
     <!-- Strings related to the HomeFragment's lot section -->
     <string name="increment_by_one">Increment by one</string>
     <string name="decrement_by_one">Decrement by one</string>
     <string name="availability">Availability: </string> <!-- used in ParkingLot.getAvailability() -->
 
+    <!-- Strings related to the ParkingMapFragment -->
+    <string name="volley_error_title">No Internet connection</string>
+    <string name="volley_error_body">Make sure that Wi-Fi or mobile data is turned on, then try again.</string>
+
     <!-- String related to viewing bookings -->
-    <string name="booking_cancellation_confirmation">Are you sure you would like to cancel the booking?</string>
+    <string name="swipe_left_to_use_options">Swipe left to use options</string>
 
     <!-- Strings related to the BookingFragment -->
     <string name="please_choose_an_offer">Please choose an offer</string>
@@ -163,12 +166,6 @@
     <string name="any_error">Error</string>
     <string name="any">Any</string>
     <string name="no_connection">No connection</string>
-    <string name="password_helper">You should also include special characters (!, @, %, etc.) to make it difficult to be guessed</string>
-    <string name="status">Status</string>
-    <string name="offer">Offer</string>
-    <string name="parking_name">Parking name</string>
-    <string name="date">Date</string>
-    <string name="time">Time</string>
-    <string name="swipe_left_to_use_options">Swipe left to use options</string>
+    <string name="error">Error</string>
 
 </resources>

@@ -140,12 +140,11 @@ public class BookingFragment extends CommonFragment<FragmentBookingBinding> impl
                     final ParkingLot lot = value.toObject(ParkingLot.class);
                     Log.d(TAG, "Lot: " + lot);
                     if (lot == null) {
-                        AlertBuilder.showAlert(
-                                requireContext(),
+                        AlertBuilder.showSingleActionAlert(
+                                getChildFragmentManager(),
                                 R.string.no_lot_found_title,
                                 R.string.no_lot_found_msg,
-                                android.R.string.ok,
-                                (dialog, which) -> goBack(requireActivity())
+                                (v) -> goBack(requireActivity())
                         );
                         Log.d(TAG, "lot == null");
                         return;
@@ -209,7 +208,7 @@ public class BookingFragment extends CommonFragment<FragmentBookingBinding> impl
         observeUserState(loggedInUser -> {
             // If the user logged out, prompt to either log in or to return to previous screen.
             if (loggedInUser == null) {
-                AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
+                AlertBuilder.promptUserToLogIn(getChildFragmentManager(), requireActivity(), this,
                         R.string.logout_book_parking_screen_msg);
             }
         });

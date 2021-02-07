@@ -24,7 +24,6 @@ import androidx.transition.Transition;
 import androidx.transition.TransitionManager;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
@@ -76,7 +75,6 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FirebaseApp.initializeApp(this.getApplicationContext()); // Initialize Firebase
         mBinding = ActivityMainHostBinding.inflate(getLayoutInflater()); // Inflate activity's View Binding
         setContentView(mBinding.getRoot());
 
@@ -107,8 +105,8 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mBinding = null;
-        mConnectivityHelper.unregisterNetworkCallback();
+        mBinding = null; // Ready to be GCed
+        mConnectivityHelper.unregisterNetworkCallback(); // No longer listen to network broadcasts
     }
 
     /**
@@ -162,24 +160,6 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
 
         // Loading Bar state //
         mGlobalStateViewModel.getLoadingBarState().observe(this, this::updateLoadingBarVisibility);
-    }
-
-    /**
-     * Updates the visibility of {@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}.
-     *
-     * @param visibility The new visibility of {@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}.
-     */
-    private void changeNoConnectionWarningVisibilityTo(int visibility) {
-        switch (visibility) {
-            case View.GONE:
-                toggle(false);
-                //hideNoConnectionWarning();
-                break;
-            case View.VISIBLE:
-                toggle(true);
-                //showNoConnectionWarning();
-                break;
-        }
     }
 
     /**
@@ -272,9 +252,9 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
      * Animate the {@link ActivityMainHostBinding#activityMainHostTxtNoConnectionWarning}
      * upwards or downwards based on the given flag.
      *
-     * @param show Whether to the show (slide up) or hide (slide down) the above view.
+     * @param visibility Whether to the show (slide up) or hide (slide down) the above view.
      */
-    private void toggle(boolean show) {
+    private void changeNoConnectionWarningVisibilityTo(int visibility) {
         // Get a reference to:
         // The view we want to animate and
         // its parent ViewGroup
@@ -284,7 +264,7 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
         // BOTTOM indicates that we want to push the view to the bottom of its container,
         // without changing its size.
         Transition transition = new Slide(Gravity.BOTTOM);
-        transition.setDuration(1600);
+        transition.setDuration(1600); // how long the animation will last
         // Add the id of the target view that this Transition is interested in
         transition.addTarget(warning.getId()); // In this case it is our "No connection" warning View
 
@@ -294,7 +274,7 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
 
         // If visibility set to VISIBLE, it will slide up
         // Otherwise, it will slide down.
-        warning.setVisibility(show ? View.VISIBLE : View.GONE);
+        warning.setVisibility(visibility);
     }
 
     /**
@@ -388,10 +368,9 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
         try {
             return (Navigable) getActiveFragment();
         } catch (NullPointerException | ClassCastException e) {
-            AlertBuilder.showAlert(this,
+            AlertBuilder.showSingleActionAlert(getSupportFragmentManager(),
                     R.string.app_name,
                     R.string.unexpected_error_title,
-                    android.R.string.ok,
                     null // TODO: Find counter-measure for this test case
             );
             return Navigable.empty();

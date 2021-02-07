@@ -277,8 +277,8 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
     @Override
     public void onUserStateChanged(@Nullable LoggedInUser loggedInUser) {
         Log.d(TAG, "User State: " + loggedInUser);
-        if (loggedInUser == null) { // User has logged out
-            AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
+        if (loggedInUser == null || !loggedInUser.isUser()) { // User has logged out
+            AlertBuilder.promptUserToLogIn(getChildFragmentManager(), requireActivity(), this,
                     R.string.logout_view_bookings_screen_msg);
         } else {
             // Get bookings from Firestore

@@ -217,7 +217,7 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
     private void addObserverToUserState() {
         observeUserState(loggedInUser -> {
             if (loggedInUser == null) { // User has logged out
-                AlertBuilder.promptUserToLogIn(requireContext(), requireActivity(), this,
+                AlertBuilder.promptUserToLogIn(getChildFragmentManager(), requireActivity(), this,
                         R.string.logout_register_lot_screen_msg);
             }
         });

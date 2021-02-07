@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:openDrawer="start">
+    tools:openDrawer="end">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -44,7 +44,7 @@
                 app:defaultNavHost="true"
                 app:navGraph="@navigation/mobile_navigation" />
 
-            <TextView
+            <LinearLayout
                 android:id="@+id/activity_main_host_txt_no_connection_warning"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -52,12 +52,20 @@
                 android:background="@color/dark_grey"
                 android:elevation="2dp"
                 android:gravity="center"
-                android:paddingTop="2dp"
-                android:paddingBottom="3dp"
-                android:text="@string/no_connection"
-                android:textColor="@color/white"
-                android:textSize="13sp"
-                android:visibility="visible" />
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="10dp"
+                    android:gravity="center"
+                    android:text="@string/no_connection"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    app:drawableStartCompat="@drawable/ic_error" />
+
+            </LinearLayout>
 
         </RelativeLayout>
 

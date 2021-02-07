@@ -372,7 +372,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
     private void handleError(@NotNull Exception exception) {
         Log.d(TAG, "displayErrorMessage: " + exception.getClass());
         if (exception instanceof FirebaseAuthRecentLoginRequiredException) {
-            AlertBuilder.promptUserToLogIn(requireContext(),
+            AlertBuilder.promptUserToLogIn(getChildFragmentManager(),
                     requireActivity(),
                     this, // Access the parent's Navigable interface implementation
                     R.string.login_required_exception);
@@ -381,7 +381,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         // Exceptions associated to both email and password
         else if (exception instanceof FirebaseAuthInvalidUserException) {
             //  if the current user's account has been disabled, deleted, or its credentials are no longer valid
-            AlertBuilder.promptUserToLogIn(requireContext(),
+            AlertBuilder.promptUserToLogIn(getChildFragmentManager(),
                     requireActivity(),
                     this, // Access the parent's Navigable interface implementation
                     R.string.invalid_user_exception_msg);

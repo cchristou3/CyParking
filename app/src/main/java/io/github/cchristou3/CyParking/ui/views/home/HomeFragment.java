@@ -32,7 +32,7 @@ import io.github.cchristou3.CyParking.data.manager.location.SingleUpdateHelper;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentHomeBinding;
-import io.github.cchristou3.CyParking.ui.components.CommonFragment;
+import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
@@ -51,7 +51,7 @@ import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
  * @author Charalambos Christou
  * @version 9.0 28/01/21
  */
-public class HomeFragment extends CommonFragment<FragmentHomeBinding> implements Navigable, LocationHandler {
+public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements Navigable, LocationHandler {
 
     // Fragment variables
     private static final String TAG = HomeFragment.class.getName();
@@ -67,7 +67,7 @@ public class HomeFragment extends CommonFragment<FragmentHomeBinding> implements
      * @param container          The parent view
      * @param savedInstanceState A bundle which contains info about previously stored data
      * @return The view of the fragment
-     * @see CommonFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding)
      */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -142,7 +142,7 @@ public class HomeFragment extends CommonFragment<FragmentHomeBinding> implements
      * non-null view.  Internally it is called after the view's state has
      * been saved but before it has been removed from its parent.
      *
-     * @see CommonFragment#onDestroyView()
+     * @see BaseFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {

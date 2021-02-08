@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.data.manager;
+package io.github.cchristou3.CyParking.ui.helper;
 
 import android.content.Context;
 import android.graphics.PorterDuff;

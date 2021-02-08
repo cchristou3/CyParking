@@ -23,11 +23,12 @@ import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentViewBookingsBinding;
-import io.github.cchristou3.CyParking.ui.components.CommonFragment;
+import io.github.cchristou3.CyParking.ui.components.BaseFragment;
+import io.github.cchristou3.CyParking.ui.components.BaseItemTouchHelper;
+import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
@@ -48,8 +49,8 @@ import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
  * @author Charalambos Christou
  * @version 7.0 03/02/21
  */
-public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBinding>
-        implements Navigable, CommonFragment.UserStateUiHandler {
+public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBinding>
+        implements Navigable, BaseFragment.UserStateUiHandler {
 
     // Fragment variables
     private static final String TAG = ViewBookingsFragment.class.getName() + "UniqueTag";
@@ -70,7 +71,7 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
     /**
      * Called to have the fragment instantiate its user interface view.
      *
-     * @see CommonFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding)
      */
     @Nullable
     @Override
@@ -92,12 +93,13 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.
      *
-     * @see CommonFragment#onDestroyView()
+     * @see BaseFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
+        getBinding().fragmentViewBookingsRvRecyclerview.setAdapter(null);
         BookingAdapter.setOnItemClickListener(null);
+        super.onDestroyView();
     }
 
     /**
@@ -151,7 +153,7 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
      */
     @NotNull
     private ItemTouchHelper getItemTouchHelper() {
-        return new ItemTouchHelper(new BookingTouchHelper(
+        return new ItemTouchHelper(new BaseItemTouchHelper(
                 itemPosition -> {
                     // Access the current list - with a new reference
                     List<Booking> newBookings = cloneList(mViewBookingsViewModel.getBookingList());
@@ -161,7 +163,7 @@ public class ViewBookingsFragment extends CommonFragment<FragmentViewBookingsBin
                     mViewBookingsViewModel.cancelParkingBooking(bookingToBeCancelledId);
                     // Update the adapter's list
                     mViewBookingsViewModel.updateBookingList(newBookings);
-                }, getResources()
+                }, getResources(), R.id.booking_item_cv // Id of the card view
         ));
     }
 

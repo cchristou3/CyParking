@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentAuthenticatorHosteeBinding;
-import io.github.cchristou3.CyParking.ui.components.CommonFragment;
+import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
 
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.hideKeyboard;
@@ -48,7 +48,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * @author Charalambos Christou
  * @version 6.0 28/01/21
  */
-public class AuthenticatorHosteeFragment extends CommonFragment<FragmentAuthenticatorHosteeBinding> implements TextWatcher {
+public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthenticatorHosteeBinding> implements TextWatcher {
 
     // Constant variables
     public static final String PAGE_TYPE_KEY = "PAGE_TYPE_KEY";
@@ -96,7 +96,7 @@ public class AuthenticatorHosteeFragment extends CommonFragment<FragmentAuthenti
      * @param container          The parent view
      * @param savedInstanceState A bundle which contains info about previously stored data
      * @return The view of the fragment
-     * @see CommonFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding)
      */
     @Nullable
     @Override
@@ -143,7 +143,7 @@ public class AuthenticatorHosteeFragment extends CommonFragment<FragmentAuthenti
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment. Cleans up all listeners.
      *
-     * @see CommonFragment#onDestroyView()
+     * @see BaseFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {

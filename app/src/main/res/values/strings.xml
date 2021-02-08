@@ -123,7 +123,7 @@
 
     <!-- Strings related to when the user logs out, while being at a screen that requires authentication -->
     <string name="log_in">Log In</string>
-    <string name="go_back">Go back</string>
+    <string name="go_back">Back</string>
     <string name="logout_of_auth_required_screen">Log in required</string>
 
     <!-- Strings related to the registering a parking lot errors -->

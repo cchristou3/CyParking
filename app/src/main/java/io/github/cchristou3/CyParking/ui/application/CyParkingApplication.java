@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.ui.components;
+package io.github.cchristou3.CyParking.ui.application;
 
 import android.app.Application;
 

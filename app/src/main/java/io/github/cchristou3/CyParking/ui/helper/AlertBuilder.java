@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.data.manager;
+package io.github.cchristou3.CyParking.ui.helper;
 
 import android.view.View;
 
@@ -26,7 +26,7 @@ public class AlertBuilder {
      * negativeActionHandler. This kind of alert supports only positive and negative
      * responses, no neutral ones.
      *
-     * @param context               The context of the fragment/activity.
+     * @param fragmentManager       The fragmentManager of the fragment/activity.
      * @param title                 The title of the dialog.
      * @param message               The message body of the dialog.
      * @param positiveButtonText    The text of the positive button.
@@ -52,14 +52,15 @@ public class AlertBuilder {
      * This kind of alert supports only neutral
      * responses, no positive and negative ones.
      *
-     * @param context              The context of the fragment/activity.
+     * @param fragmentManager      The fragmentManager of the fragment/activity.
      * @param title                The title of the dialog.
      * @param message              The message body of the dialog.
-     * @param neutralButtonText    The text of the neutral button.
      * @param neutralActionHandler The handler for the negative response.
      */
-    public static void showSingleActionAlert(@NotNull FragmentManager fragmentManager, int title, int message,
-                                             @Nullable View.OnClickListener neutralActionHandler) {
+    public static void showSingleActionAlert(
+            @NotNull FragmentManager fragmentManager, int title,
+            int message, @Nullable View.OnClickListener neutralActionHandler
+    ) {
 
         AppAlertDialog.getSingleActionBuilder()
                 .setTitle(title)
@@ -77,10 +78,10 @@ public class AlertBuilder {
      * requires authentication. Thus, the user has the options
      * to either log in, or to return to previous screen.
      *
-     * @param context   The context of the fragment/activity.
-     * @param activity  The hosting activity.
-     * @param navigable An implementation of the {@link Navigable} interface.
-     * @param msg       The body of the alert dialog.
+     * @param fragmentManager The fragmentManager of the fragment/activity.
+     * @param activity        The hosting fragmentActivity.
+     * @param navigable       An implementation of the {@link Navigable} interface.
+     * @param msg             The body of the alert dialog.
      */
     public static void promptUserToLogIn(
             @NotNull FragmentManager fragmentManager, final FragmentActivity activity,

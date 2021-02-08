@@ -31,8 +31,8 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.databinding.DialogAccountUpdateBinding;
+import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking.ViewBookingsFragment;

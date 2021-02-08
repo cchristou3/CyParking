@@ -1,9 +1,8 @@
-package io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking;
+package io.github.cchristou3.CyParking.ui.components;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
@@ -19,6 +18,7 @@ import com.google.android.material.card.MaterialCardView;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking.BookingAdapter;
 
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.drawableToBitmap;
 
@@ -26,19 +26,23 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.drawableToBit
  * Purpose: Handle item swipe events from a {@link RecyclerView}.
  *
  * @author Charalambos Christou
- * @version 1.0 03/02/21
+ * @version 2.0 08/02/21
  */
-public class BookingTouchHelper extends ItemTouchHelper.SimpleCallback {
+public class BaseItemTouchHelper extends ItemTouchHelper.SimpleCallback {
 
     // Constants
-    private static final String TAG = BookingTouchHelper.class.getCanonicalName();
+    private static final String TAG = BaseItemTouchHelper.class.getCanonicalName();
     private static final int ON_SWIPING_ELEVATION = 20;
     private static final int ON_IDLE_ELEVATION = 2;
 
     // Data members
     private final Swipeable<Integer> mSwipeable;
-    private final Paint paint;
+    private final Paint mPaint;
     private final Bitmap mBitmap;
+    private final int mCardViewId;
+    private RectF mBackground;
+    private RectF mIconDestination;
+
 
     /**
      * Initializes the {@link #mSwipeable}
@@ -50,11 +54,15 @@ public class BookingTouchHelper extends ItemTouchHelper.SimpleCallback {
      * @param swipeable The handler.
      * @param resources The resources.
      */
-    public BookingTouchHelper(Swipeable<Integer> swipeable, Resources resources) {
+    public BaseItemTouchHelper(Swipeable<Integer> swipeable, Resources resources, int cardViewId) {
         super(0, ItemTouchHelper.LEFT);
         this.mSwipeable = swipeable;
+        // TODO: 08/02/2021 Get colour as well
         mBitmap = drawableToBitmap(ResourcesCompat.getDrawable(resources, R.drawable.ic_delete, null));
-        paint = new Paint();
+        mPaint = new Paint();
+        mCardViewId = cardViewId;
+        // Set the color that will be drawn on the canvas
+        mPaint.setColor(resources.getColor(R.color.light_red));
     }
 
     /**
@@ -87,7 +95,6 @@ public class BookingTouchHelper extends ItemTouchHelper.SimpleCallback {
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         int position = viewHolder.getAdapterPosition();
-
         Log.d(TAG, "onSwiped: ");
         if (direction == ItemTouchHelper.LEFT) {
             mSwipeable.onSwipeLeft(position);
@@ -120,19 +127,41 @@ public class BookingTouchHelper extends ItemTouchHelper.SimpleCallback {
 
             float height = (float) itemView.getBottom() - (float) itemView.getTop();
             float width = height / 3;
-
-            if (dX > -1000 && dX < 0) {
-                paint.setColor(Color.parseColor("#FF6565"));
-                RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom());
-                canvas.drawRect(background, paint);
-                RectF icon_dest = new RectF((float) itemView.getRight() - 2 * width, (float) itemView.getTop() + width, (float) itemView.getRight() - width, (float) itemView.getBottom() - width);
-                canvas.drawBitmap(mBitmap, null, icon_dest, paint);
+            Log.d(TAG, "onChildDraw: Left: " + itemView.getLeft() + ", Right: " + itemView.getRight()
+                    + ", dx: " + dX);
+            if (isCurrentlyActive) {
+                // Calculate the maximum swipe distance of the left side
+                float swipedDistance = -Math.abs(itemView.getLeft() - itemView.getRight());
+                if ((dX > swipedDistance && dX < 0)) {
+                    // If within the view's range, calculate the RectFs
+                    mBackground = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom());
+                    mIconDestination = new RectF((float) itemView.getRight() - 2 * width, (float) itemView.getTop() + width, (float) itemView.getRight() - width, (float) itemView.getBottom() - width);
+                    drawOnCanvas(canvas); // and draw them
+                    // from the view's initial position till the new one.
+                } else if (dX <= swipedDistance) {
+                    // Otherwise, if the user swiped more left that the boundaries
+                    // then draw only the view's boundaries, do not draw after the view's
+                    // max left position.
+                    drawOnCanvas(canvas);
+                }
             }
 
             // Update the item's elevation
             updateItemElevation(itemView, isCurrentlyActive);
         }
         super.onChildDraw(canvas, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+    }
+
+    /**
+     * Draws the pre-calculated background
+     * and bitmap (icon) {@link RectF}s' on
+     * the given canvas.
+     *
+     * @param canvas the canvas the be drew on.
+     */
+    private void drawOnCanvas(@NonNull Canvas canvas) {
+        canvas.drawRect(mBackground, mPaint);
+        canvas.drawBitmap(mBitmap, null, mIconDestination, mPaint);
     }
 
     /**
@@ -158,7 +187,7 @@ public class BookingTouchHelper extends ItemTouchHelper.SimpleCallback {
      * @return a reference to the view's {@link MaterialCardView} instance.
      */
     private MaterialCardView getMaterialCardView(@NotNull View itemView) {
-        return itemView.findViewById(R.id.booking_item_cv);
+        return itemView.findViewById(mCardViewId);
     }
 
     /**

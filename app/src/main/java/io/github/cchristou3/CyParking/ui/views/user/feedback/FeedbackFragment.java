@@ -21,7 +21,7 @@ import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.model.user.Feedback;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FeedbackFragmentBinding;
-import io.github.cchristou3.CyParking.ui.components.CommonFragment;
+import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
@@ -40,7 +40,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * @author Charalambos Christou
  * @version 7.0 02/02/21
  */
-public class FeedbackFragment extends CommonFragment<FeedbackFragmentBinding> implements Navigable, TextWatcher {
+public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> implements Navigable, TextWatcher {
 
     // Fragment data members
     private FeedbackViewModel mFeedbackViewModel;
@@ -48,7 +48,7 @@ public class FeedbackFragment extends CommonFragment<FeedbackFragmentBinding> im
     /**
      * Called to have the fragment instantiate its user interface view.
      *
-     * @see CommonFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding)
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -78,7 +78,7 @@ public class FeedbackFragment extends CommonFragment<FeedbackFragmentBinding> im
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.
      *
-     * @see CommonFragment#onDestroyView()
+     * @see BaseFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {

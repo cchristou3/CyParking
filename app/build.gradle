@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'  // Google Services plugin'
+    id 'kotlin-android'                  // Kotlin plugin
 }
 
 android {
@@ -100,7 +101,7 @@ dependencies {
     // CardView
     implementation 'androidx.cardview:cardview:' + cardviewVersion
 
-    // Shimmer
+    // Shimmer - TODO: Remove
     implementation 'com.facebook.shimmer:shimmer:' + shimmerVersion
 
     // Java 8 DefaultLifecycleObserver dependency

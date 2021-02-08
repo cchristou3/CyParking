@@ -11,6 +11,10 @@ import org.jetbrains.annotations.NotNull;
  * Follows the builder pattern to allow chaining calls
  * of set methods.
  *
+ * <strong>Makes use of the Covariant type to allow the return
+ * type to be the subtype of the type of the overridden method.
+ * see: {@link #setTitle(int)} and {@link #setBody(int)}.</strong>
+ *
  * @param <T> Any instance of type {@link Builder}.
  * @param <S> Any instance of type {@link Builder.AlertParams}.
  * @author Charalambos Christou

@@ -48,7 +48,7 @@ import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
  * @see FeedbackFragmentBinding
  * @see io.github.cchristou3.CyParking.databinding.FragmentHomeBinding
  */
-public class CommonFragment<T extends ViewBinding> extends Fragment {
+public class BaseFragment<T extends ViewBinding> extends Fragment {
 
     private T mViewBinding;
     private GlobalStateViewModel mGlobalStateViewModel;
@@ -174,7 +174,7 @@ public class CommonFragment<T extends ViewBinding> extends Fragment {
     }
 
     /**
-     * Purpose: Provide the subclasses of {@link CommonFragment}
+     * Purpose: Provide the subclasses of {@link BaseFragment}
      * an interface to update the Ui based on the
      * the value of {@link GlobalStateViewModel#getUserState()}.
      */

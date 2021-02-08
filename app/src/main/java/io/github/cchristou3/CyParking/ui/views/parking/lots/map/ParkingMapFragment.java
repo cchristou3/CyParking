@@ -41,14 +41,14 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.HttpsCallHandler;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
 import io.github.cchristou3.CyParking.data.manager.MarkerManager;
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
 import io.github.cchristou3.CyParking.data.manager.location.SubsequentUpdateHelper;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.databinding.FragmentParkingMapBinding;
-import io.github.cchristou3.CyParking.ui.components.CommonFragment;
+import io.github.cchristou3.CyParking.ui.components.BaseFragment;
+import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
@@ -110,7 +110,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVis
  *     </ul>
  * </p>
  */
-public class ParkingMapFragment extends CommonFragment<FragmentParkingMapBinding>
+public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
         implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener, Navigable, LocationHandler {
 
@@ -162,7 +162,7 @@ public class ParkingMapFragment extends CommonFragment<FragmentParkingMapBinding
      * @param savedInstanceState A bundle which contains info about previously stored data
      * @param inflater           The object which will inflate (create) our layout
      * @param container          ViewGroup container
-     * @see CommonFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding)
      */
     @Nullable
     @Override
@@ -235,7 +235,7 @@ public class ParkingMapFragment extends CommonFragment<FragmentParkingMapBinding
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.
      *
-     * @see CommonFragment#onDestroyView()
+     * @see BaseFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {

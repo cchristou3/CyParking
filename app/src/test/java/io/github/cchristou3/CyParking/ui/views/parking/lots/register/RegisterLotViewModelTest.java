@@ -154,4 +154,40 @@ public class RegisterLotViewModelTest extends InstantTaskRuler {
         assertThat(registerLotViewModel.getSlotOfferList().get(0),
                 is(slotOffer));
     }
+
+    @Test
+    public void getSelectedSlotOfferArgumentsState_returnsNonNullInvalidFormInitially() throws InterruptedException {
+        assertThat(getOrAwaitValue(registerLotViewModel.getSelectedSlotOfferArgumentsState()),
+                is(not(nullValue())));
+        assertThat(getOrAwaitValue(registerLotViewModel.getSelectedSlotOfferArgumentsState()).isDataValid(),
+                is(not(true)));
+    }
+
+    @Test
+    public void updateSelectedSlotOfferArguments_NullDurationNonNullPrice_returnsInvalidForm() throws InterruptedException {
+        registerLotViewModel.updateSelectedSlotOfferArguments(null, 1.0f);
+        assertThat(getOrAwaitValue(registerLotViewModel.getSelectedSlotOfferArgumentsState()).isDataValid(),
+                is(not(true)));
+    }
+
+    @Test
+    public void updateSelectedSlotOfferArguments_NonNullDurationNullPrice_returnsInvalidForm() throws InterruptedException {
+        registerLotViewModel.updateSelectedSlotOfferArguments(1.0f, null);
+        assertThat(getOrAwaitValue(registerLotViewModel.getSelectedSlotOfferArgumentsState()).isDataValid(),
+                is(not(true)));
+    }
+
+    @Test
+    public void updateSelectedSlotOfferArguments_NullDurationNullPrice_returnsInvalidForm() throws InterruptedException {
+        registerLotViewModel.updateSelectedSlotOfferArguments(null, null);
+        assertThat(getOrAwaitValue(registerLotViewModel.getSelectedSlotOfferArgumentsState()).isDataValid(),
+                is(not(true)));
+    }
+
+    @Test
+    public void updateSelectedSlotOfferArguments_NonNullDurationNonNullPrice_returnsInvalidForm() throws InterruptedException {
+        registerLotViewModel.updateSelectedSlotOfferArguments(1.0f, 1.0f);
+        assertThat(getOrAwaitValue(registerLotViewModel.getSelectedSlotOfferArgumentsState()).isDataValid(),
+                is(true));
+    }
 }

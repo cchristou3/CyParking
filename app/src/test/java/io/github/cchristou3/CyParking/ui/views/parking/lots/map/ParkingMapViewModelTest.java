@@ -42,7 +42,7 @@ public class ParkingMapViewModelTest extends InstantTaskRuler {
     public void setUp() {
         ParkingMapRepository mockRepo = Mockito.mock(ParkingMapRepository.class);
         CollectionReference mockRef = Mockito.mock(CollectionReference.class);
-        when(mockRepo.getParkingLots()).thenReturn(mockRef);
+        when(mockRepo.getParkingLotsRef()).thenReturn(mockRef);
         parkingMapViewModel = new ParkingMapViewModel(mockRepo);
     }
 

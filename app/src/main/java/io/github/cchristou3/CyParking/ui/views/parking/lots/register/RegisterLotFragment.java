@@ -10,7 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -20,6 +22,7 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
@@ -27,23 +30,29 @@ import androidx.viewbinding.ViewBinding;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
 import io.github.cchristou3.CyParking.data.manager.location.SingleUpdateHelper;
 import io.github.cchristou3.CyParking.data.model.parking.Parking;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.databinding.RegisterLotFragmentBinding;
-import io.github.cchristou3.CyParking.ui.components.CommonFragment;
+import io.github.cchristou3.CyParking.ui.components.BaseFragment;
+import io.github.cchristou3.CyParking.ui.components.BaseItemTouchHelper;
+import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
+import io.github.cchristou3.CyParking.ui.helper.DropDownMenuHelper;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;
@@ -59,9 +68,9 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * <p>
  *
  * @author Charalambos Christou
- * @version 5.0 28/01/21
+ * @version 6.0 08/02/21
  */
-public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBinding>
+public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding>
         implements Navigable, LocationHandler, TextWatcher, View.OnClickListener {
 
     // Fragment's constants
@@ -69,8 +78,8 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
 
     // Fragment's members
     private RegisterLotViewModel mRegisterLotViewModel;
-    private float mSelectedDuration;
-    private float mSelectedPrice;
+    private Float mSelectedDuration = null;
+    private Float mSelectedPrice = null;
     private SingleUpdateHelper mLocationManager;
     private SlotOfferAdapter mSlotOfferAdapter;
     private int slotOfferCounter;
@@ -91,7 +100,7 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
     /**
      * Called to have the fragment instantiate its user interface view.
      *
-     * @see CommonFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding)
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -137,7 +146,7 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.
      *
-     * @see CommonFragment#onDestroyView()
+     * @see BaseFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {
@@ -156,9 +165,11 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
                 getBinding().registerLotFragmentEtLocationLat,
                 getBinding().registerLotFragmentEtLocationLng
         );
-
-        getBinding().registerLotFragmentSDuration.setOnItemSelectedListener(null);
-        getBinding().registerLotFragmentSPrice.setOnItemSelectedListener(null);
+        // Remove On item selected listeners
+        ((AutoCompleteTextView) getBinding().registerLotFragmentSDuration.getEditText())
+                .setOnItemSelectedListener(null);
+        ((AutoCompleteTextView) getBinding().registerLotFragmentSPrice.getEditText())
+                .setOnItemSelectedListener(null);
         super.onDestroyView();
     }
 
@@ -171,6 +182,7 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
         addObserverToUserState();
         addObserverToSlotOfferList();
         addObserverToForm();
+        addObserverToSlotOfferArguments();
     }
 
     /**
@@ -191,6 +203,7 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
      * - a Toast message is shown to the user
      */
     private void addObserverToSlotOfferList() {
+
         mRegisterLotViewModel.getSlotOfferListState().observe(getViewLifecycleOwner(), slotOffers -> {
             mSlotOfferAdapter.submitList(slotOffers); // Inform the adapter
             Log.d(TAG, "addObserverToSlotOfferList: " + slotOffers);
@@ -249,11 +262,11 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
             }
             // Update the view's related to the lot's location
             if (updateErrorOf(requireContext(),
-                    getBinding().registerLotFragmentEtLocationLat, registerLotFormState.getLatLngError())) {
+                    getBinding().registerLotFragmentTilLocationLat, registerLotFormState.getLatLngError())) {
                 return;
             }
             if (updateErrorOf(requireContext(),
-                    getBinding().registerLotFragmentEtLocationLng, registerLotFormState.getLatLngError())) {
+                    getBinding().registerLotFragmentTilLocationLng, registerLotFormState.getLatLngError())) {
                 return;
             }
             // Update the view's related to the lot's slot offers
@@ -269,6 +282,18 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
                 // Connect the warning's top with the RecyclerView's bottom
                 adjustLayoutConstraints(getBinding().registerLotFragmentRvPriceList.getId());
             }
+        });
+    }
+
+    /**
+     * Observes the user's selection of duration and price.
+     * The 'add' button is disabled till the user selects a
+     * value for both of them.
+     */
+    private void addObserverToSlotOfferArguments() {
+        mRegisterLotViewModel.getSelectedSlotOfferArgumentsState().observe(getViewLifecycleOwner(), formState -> {
+            if (formState == null) return;
+            getBinding().registerLotFragmentBtnAdd.setEnabled(formState.isDataValid());
         });
     }
 
@@ -298,12 +323,17 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
         // Initially the button is disabled
         getBinding().registerLotFragmentBtnRegisterLot.setEnabled(false);
 
+        getBinding().registerLotFragmentTxtPrice.setText("Price (" + Currency.getInstance(Locale.getDefault()).getCurrencyCode() + ")");
+
         // Set the user's current email
         getBinding().registerLotFragmentTxtEmail.setText(
                 getUser().getEmail()
         );
 
+        // TODO: 08/02/2021 Replace with InputTextLayout - AutoCompleteTextView
+
         // Set up both spinners
+
         setUpSpinner(getBinding().registerLotFragmentSDuration, this::setSelectedDuration, 1.0f);
         setUpSpinner(getBinding().registerLotFragmentSPrice, this::setSelectedPrice, 0.5f);
 
@@ -387,7 +417,7 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         // Set up the RecyclerView's adapter
-        mSlotOfferAdapter = new SlotOfferAdapter(new SlotOffersDiffCallback());
+        mSlotOfferAdapter = new SlotOfferAdapter(new SlotOffersDiffCallback(), getItemTouchHelper());
         SlotOfferAdapter.setOnItemClickListener(v -> {
             // Access the item's position
             RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
@@ -405,6 +435,28 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
         // If recyclerView is inside a ScrollView then there is an issue while scrolling recyclerView’s inner contents.
         // So, when touching the recyclerView forbid the ScrollView from intercepting touch events.
         disableParentScrollingInterferenceOf(recyclerView);
+    }
+
+    /**
+     * Returns an instance of {@link ItemTouchHelper}.
+     * onSwipeLeft: Remove the item from the list
+     * and notify the adapter.
+     *
+     * @return An instance of {@link ItemTouchHelper}.
+     */
+    @NotNull
+    @Contract(" -> new")
+    private ItemTouchHelper getItemTouchHelper() {
+        return new ItemTouchHelper(new BaseItemTouchHelper(
+                itemPosition -> {
+                    // Access the current list - with a new reference
+                    List<SlotOffer> newOffers = cloneList(mRegisterLotViewModel.getSlotOfferList());
+                    // Remove the booking fro the list
+                    newOffers.remove((int) itemPosition); // Cast to primitive to trigger appropriate method
+                    // Update the adapter's list
+                    mRegisterLotViewModel.updateSlotOfferList(newOffers);
+                }, getResources(), R.id.slot_offer_item__cv
+        ));
     }
 
     /**
@@ -483,56 +535,50 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
      * Whenever the listener gets triggered, set the value of the current spinner to the value of the
      * fragment's corresponding data member ({@link #mSelectedDuration}/{@link #mSelectedPrice}).
      *
-     * @param targetSpinner      A reference of the spinner to be set up.
+     * @param textInputLayout    A reference of the spinner to be set up.
      * @param settable           The interface's method to act as a callback inside the listener.
      * @param volumeMultiplicand A float determining the sequence of values of the spinner.
      */
-    private void setUpSpinner(@NotNull Spinner targetSpinner, Settable settable, float volumeMultiplicand) {
-        // Get a reference to the spinner with the specified spinner id
-        // Attach an OnItemSelectedListener on it
-        targetSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Cast the selected object to a String
-                // TODO: Convert it to Float straight away.
-                final String selectedVolume = (String) parent.getItemAtPosition(position);
-                // Convert the spinner's value into a float and pass it in, to the settable's method.
-                settable.setVolume(Float.parseFloat(selectedVolume));
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) { /* ignore */ }
-        });
-
+    private void setUpSpinner(@NotNull TextInputLayout textInputLayout, Settable settable, float volumeMultiplicand) {
         // Create an array that will hold all the values of the spinner, based on a multiplicand
         final String[] volume = Utility.getVolume(volumeMultiplicand, 1, 10);
-        // Initialize an ArrayAdapter
-        final ArrayAdapter<String> volumeAdapter = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_spinner_dropdown_item,
-                volume);
-        // Bind the spinner with its adapter
-        targetSpinner.setAdapter(volumeAdapter);
+        DropDownMenuHelper.setUpSlotOfferDropDownMenu(requireContext(), textInputLayout, volume,
+                new DropDownMenuHelper.ItemHandler<String>() {
+                    @Override
+                    public String castItem(@NotNull ListAdapter parent, int position) {
+                        return parent.getItem(position).toString();
+                    }
+
+                    @Override
+                    public void onItemSelected(String item) {
+                        // Convert the spinner's value into a float and pass it in, to the settable's method.
+                        settable.setVolume(Float.parseFloat(item));
+                    }
+                });
     }
 
     /**
      * Setter for {@link #mSelectedDuration}
      * Used to substitute {@link Settable#setVolume(float)}
-     * in {@link #setUpSpinner(Spinner, Settable, float)}
+     * in {@link #setUpSpinner(TextInputLayout, Settable, float)}
      *
      * @param mSelectedDuration The latest selected duration of our duration spinner.
      */
     public void setSelectedDuration(float mSelectedDuration) {
         this.mSelectedDuration = mSelectedDuration;
+        mRegisterLotViewModel.updateSelectedSlotOfferArguments(mSelectedDuration, mSelectedPrice);
     }
 
     /**
      * Setter for {@link #mSelectedPrice}
      * Used to substitute {@link Settable#setVolume(float)}
-     * in {@link #setUpSpinner(Spinner, Settable, float)}
+     * in {@link #setUpSpinner(TextInputLayout, Settable, float)}
      *
      * @param mSelectedPrice The latest selected price of our price spinner.
      */
     public void setSelectedPrice(float mSelectedPrice) {
         this.mSelectedPrice = mSelectedPrice;
+        mRegisterLotViewModel.updateSelectedSlotOfferArguments(mSelectedDuration, mSelectedPrice);
     }
 
     /**
@@ -651,7 +697,7 @@ public class RegisterLotFragment extends CommonFragment<RegisterLotFragmentBindi
     }
 
     /**
-     * Interface used in {@link #setUpSpinner(Spinner, Settable, float)}.
+     * Interface used in {@link #setUpSpinner(TextInputLayout, Settable, float)}.
      */
     private interface Settable {
         void setVolume(float selectedVolume);

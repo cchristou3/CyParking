@@ -15,8 +15,8 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.TabHelper;
 import io.github.cchristou3.CyParking.databinding.FragmentAuthenticationBinding;
+import io.github.cchristou3.CyParking.ui.helper.TabHelper;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 

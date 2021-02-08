@@ -23,20 +23,20 @@ import java.util.Locale;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.BookingDetails;
+import io.github.cchristou3.CyParking.ui.components.SwipeableAdapter;
 
 /**
  * Purpose: <p> Handles how each item of the RecyclerView will look like. </p>
  * Used in {@link ViewBookingsFragment} to show the user's bookings.
  *
  * @author Charalambos Christou
- * @version 3.0 03/02/21
+ * @version 4.0 08/02/21
  */
-public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingViewHolder> {
+public class BookingAdapter extends SwipeableAdapter<Booking, BookingAdapter.BookingViewHolder> {
 
     private static final String TAG = BookingAdapter.class.getName();
     private static final long DURATION = 500;
     private static View.OnClickListener mOnItemClickListener;
-    private final ItemTouchHelper mItemTouchHelper;
     private final RecyclerView.OnScrollListener mOnScrollListener;
     private boolean mOnAttach = true;
 
@@ -50,9 +50,8 @@ public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingV
     protected BookingAdapter(
             @NonNull DiffUtil.ItemCallback<Booking> diffCallback, @NonNull ItemTouchHelper itemTouchHelper
     ) {
-        super(diffCallback);
+        super(diffCallback, itemTouchHelper);
         mOnScrollListener = getOnScrollChangedListener();
-        mItemTouchHelper = itemTouchHelper;
     }
 
     /**
@@ -158,24 +157,19 @@ public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingV
 
     /**
      * Called by RecyclerView when it starts observing this Adapter.
-     * Attaches the {@link #mItemTouchHelper} to the recycler view
-     * and also adds the {@link #mOnScrollListener}.
+     * Attaches the {@link #mOnScrollListener} to the RecyclerView.
      *
      * @param recyclerView The RecyclerView instance which started observing this adapter.
      */
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-
-        recyclerView.addOnScrollListener(mOnScrollListener);
-        // Attach the item touch helper to the recycler view
-        mItemTouchHelper.attachToRecyclerView(recyclerView);
         super.onAttachedToRecyclerView(recyclerView);
+        recyclerView.addOnScrollListener(mOnScrollListener);
     }
 
     /**
      * Called by RecyclerView when it stops observing this Adapter.
-     * Detaches the {@link #mItemTouchHelper} to the recycler view.
-     * Also, remove the recycler view's {@link #mOnScrollListener}.
+     * Detaches the recycler view's {@link #mOnScrollListener}.
      *
      * @param recyclerView The RecyclerView instance which stopped observing this adapter.
      * @see #onAttachedToRecyclerView(RecyclerView)
@@ -183,8 +177,6 @@ public class BookingAdapter extends ListAdapter<Booking, BookingAdapter.BookingV
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
-        // Detach the item touch helper to the recycler view
-        mItemTouchHelper.attachToRecyclerView(null);
         recyclerView.removeOnScrollListener(mOnScrollListener);
     }
 

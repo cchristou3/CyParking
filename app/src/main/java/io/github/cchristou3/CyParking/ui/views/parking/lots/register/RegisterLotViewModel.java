@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.ui.views.parking.lots.register;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -13,6 +14,7 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.OperatorRepository;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.data.pojo.form.FormState;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormState;
 
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.Availability.isCapacityValid;
@@ -38,6 +40,7 @@ public class RegisterLotViewModel extends ViewModel {
     private final MutableLiveData<LatLng> mLotLatLng = new MutableLiveData<>();
     private final MutableLiveData<List<SlotOffer>> mSlotOfferList = new MutableLiveData<>();
     private final MutableLiveData<RegisterLotFormState> mRegisterLotFormState = new MutableLiveData<>();
+    private final MutableLiveData<FormState> mSelectedSlotOfferArguments = new MutableLiveData<>(new FormState(false));
 
     private final OperatorRepository mOperatorRepository;
 
@@ -76,27 +79,46 @@ public class RegisterLotViewModel extends ViewModel {
         this.mLotCapacity.setValue(lotCapacity);
         this.mLotName.setValue(lotName);
         this.mLotLatLng.setValue(lotLatLng);
-        //this.mSlotOfferList.setValue(slotOfferList);
 
+        mRegisterLotFormState.setValue(validateForm(operatorMobileNumber, lotCapacity, lotName, lotLatLng, slotOfferList));
+    }
+
+    /**
+     * Validates the input data of the form and returns an appropriate
+     * {@link RegisterLotFormState} object.
+     *
+     * @param operatorMobileNumber The operatorMobileNumber of the lot.
+     * @param lotCapacity          The Capacity of the lot.
+     * @param lotName              The Name of the lot.
+     * @param lotLatLng            The LatLng of the lot.
+     * @param slotOfferList        The slotOfferList of the lot.
+     * @return A {@link RegisterLotFormState} object based on the user's input data.
+     */
+    @Nullable
+    private RegisterLotFormState validateForm(final String operatorMobileNumber, final Integer lotCapacity,
+                                              final String lotName, final LatLng lotLatLng,
+                                              final List<SlotOffer> slotOfferList) {
         // Validate the input and set the RegisterLotFormState accordingly
+        RegisterLotFormState newForm;
         if (!isValidPhoneNumber(operatorMobileNumber)) {
-            mRegisterLotFormState.setValue(new RegisterLotFormState(R.string.mobile_phone_error,
-                    null, null, null, null));
+            newForm = new RegisterLotFormState(R.string.mobile_phone_error,
+                    null, null, null, null);
         } else if (!isNameValid(lotName)) {
-            mRegisterLotFormState.setValue(new RegisterLotFormState(null,
-                    R.string.lot_name_error, null, null, null));
+            newForm = new RegisterLotFormState(null,
+                    R.string.lot_name_error, null, null, null);
         } else if (!isCapacityValid(lotCapacity)) {
-            mRegisterLotFormState.setValue(new RegisterLotFormState(null,
-                    null, R.string.lot_capacity_error, null, null));
+            newForm = new RegisterLotFormState(null,
+                    null, R.string.lot_capacity_error, null, null);
         } else if (!isLotLatLngValid(lotLatLng)) {
-            mRegisterLotFormState.setValue(new RegisterLotFormState(null,
-                    null, null, null, R.string.lot_lat_lng_error));
+            newForm = new RegisterLotFormState(null,
+                    null, null, null, R.string.lot_lat_lng_error);
         } else if (!areSlotOffersValid(slotOfferList)) {
-            mRegisterLotFormState.setValue(new RegisterLotFormState(null,
-                    null, null, R.string.lot_slot_offer_error, null));
+            newForm = new RegisterLotFormState(null,
+                    null, null, R.string.lot_slot_offer_error, null);
         } else {
-            mRegisterLotFormState.setValue(new RegisterLotFormState(true));
+            newForm = new RegisterLotFormState(true);
         }
+        return newForm;
     }
 
     /**
@@ -128,6 +150,15 @@ public class RegisterLotViewModel extends ViewModel {
     }
 
     /**
+     * Getter of the {@link RegisterLotViewModel#mSlotOfferList}.
+     *
+     * @return the LiveData instance of it, to limit any direct changes to it outside of the ViewModel.
+     */
+    public LiveData<FormState> getSelectedSlotOfferArgumentsState() {
+        return mSelectedSlotOfferArguments;
+    }
+
+    /**
      * Returns the value of {@link #mSlotOfferList}.
      *
      * @return a reference to the value of {@link #mSlotOfferList}.
@@ -144,5 +175,22 @@ public class RegisterLotViewModel extends ViewModel {
      */
     public void updateSlotOfferList(List<SlotOffer> slotOffers) {
         mSlotOfferList.setValue(slotOffers);
+    }
+
+    /**
+     * Updates the value of {@link #mSelectedSlotOfferArguments}
+     * with the given argument.
+     *
+     * @param duration the duration of a potential new slot offer.
+     * @param price    the price of a potential new slot offer.
+     */
+    public void updateSelectedSlotOfferArguments(Float duration, Float price) {
+        if (mSelectedSlotOfferArguments.getValue().isDataValid()) return;
+
+        if (duration == null || price == null) {
+            mSelectedSlotOfferArguments.setValue(new FormState(false));
+        } else {
+            mSelectedSlotOfferArguments.setValue(new FormState(true));
+        }
     }
 }

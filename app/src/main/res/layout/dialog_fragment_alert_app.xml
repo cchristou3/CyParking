@@ -71,10 +71,10 @@
                 android:layout_marginTop="15dp"
                 android:layout_marginEnd="10dp"
                 android:layout_weight="1"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
                 android:maxLines="1"
                 android:text="Nasdasddaso"
                 android:textColor="@color/purple_500"
-                android:visibility="visible"
                 app:strokeColor="@color/purple_500"
                 app:strokeWidth="2dp" />
 
@@ -87,11 +87,11 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="15dp"
                 android:layout_marginEnd="10dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
                 android:layout_weight="1"
                 android:maxLines="1"
                 android:text="Yes"
                 android:textColor="@color/purple_500"
-                android:visibility="visible"
                 app:strokeColor="@color/purple_500"
                 app:strokeWidth="2dp" />
 

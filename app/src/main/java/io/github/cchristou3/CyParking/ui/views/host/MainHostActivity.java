@@ -31,10 +31,10 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.ConnectionHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.manager.ConnectivityHelper;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.ActivityMainHostBinding;
+import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateVisibilityOfLoadingBarTo;
 

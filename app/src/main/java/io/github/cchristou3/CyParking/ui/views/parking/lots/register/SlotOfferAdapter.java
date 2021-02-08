@@ -8,11 +8,13 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.ui.components.SwipeableAdapter;
 
 /**
  * Purpose: <p> Handles how each item of the RecyclerView will look like. </p>
@@ -22,7 +24,7 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
  * @author Charalambos Christou
  * @version 2.0 24/01/21
  */
-public class SlotOfferAdapter extends ListAdapter<SlotOffer, SlotOfferAdapter.SlotOfferViewHolder> {
+public class SlotOfferAdapter extends SwipeableAdapter<SlotOffer, SlotOfferAdapter.SlotOfferViewHolder> {
 
     private static View.OnClickListener mOnItemClickListener;
 
@@ -32,8 +34,10 @@ public class SlotOfferAdapter extends ListAdapter<SlotOffer, SlotOfferAdapter.Sl
      *
      * @param diffCallback The callback to be used to compare the items of both lists.
      */
-    protected SlotOfferAdapter(@NonNull DiffUtil.ItemCallback<SlotOffer> diffCallback) {
-        super(diffCallback);
+    protected SlotOfferAdapter(
+            @NonNull DiffUtil.ItemCallback<SlotOffer> diffCallback, @NonNull ItemTouchHelper itemTouchHelper
+    ) {
+        super(diffCallback, itemTouchHelper);
     }
 
     /**

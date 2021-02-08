@@ -15,10 +15,10 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.AlertBuilder;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentAccountBinding;
-import io.github.cchristou3.CyParking.ui.components.CommonFragment;
+import io.github.cchristou3.CyParking.ui.components.BaseFragment;
+import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.user.account.update.UpdateAccountDialog;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
@@ -30,7 +30,7 @@ import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorHosteeFra
  * @author Charalambos Christou
  * @version 6.0 02/02/21
  */
-public class AccountFragment extends CommonFragment<FragmentAccountBinding> implements Navigable {
+public class AccountFragment extends BaseFragment<FragmentAccountBinding> implements Navigable {
 
     // Fragment's data members
     private final String TAG = AccountFragment.this.getClass().getName();
@@ -39,7 +39,7 @@ public class AccountFragment extends CommonFragment<FragmentAccountBinding> impl
     /**
      * Called to have the fragment instantiate its user interface view.
      *
-     * @see CommonFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding)
      */
     @Nullable
     @Override
@@ -65,7 +65,7 @@ public class AccountFragment extends CommonFragment<FragmentAccountBinding> impl
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.
      *
-     * @see CommonFragment#onDestroyView()
+     * @see BaseFragment#onDestroyView()
      */
     @Override
     public void onDestroyView() {
@@ -160,7 +160,7 @@ public class AccountFragment extends CommonFragment<FragmentAccountBinding> impl
             FragmentManager fm = isAdded() ? getParentFragmentManager() : null;
             if (fm != null) {
                 if (getGlobalStateViewModel().getUser() == null) {
-                    AlertBuilder.promptUserToLogIn(requireContext(),
+                    AlertBuilder.promptUserToLogIn(getChildFragmentManager(),
                             requireActivity(),
                             this, // Access the parent's Navigable interface implementation
                             R.string.not_logged_in_account_2);

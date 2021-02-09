@@ -31,16 +31,17 @@
             android:text="@string/price"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/slot_offer_item__btn_remove"
+            app:layout_constraintEnd_toStartOf="@+id/slot_offer_item__iv_swipe_left"
             app:layout_constraintStart_toEndOf="@+id/slot_offer_item_txt_duration"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/slot_offer_item__btn_remove"
+            android:id="@+id/slot_offer_item__iv_swipe_left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/swipe_left_to_use_options"
             android:src="@drawable/ic_swipe_left"
+            android:layout_margin="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

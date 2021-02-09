@@ -3,7 +3,6 @@ package io.github.cchristou3.CyParking.ui.views.parking.lots.register;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,11 +21,9 @@ import io.github.cchristou3.CyParking.ui.components.SwipeableAdapter;
  * their current Slot Offers.
  *
  * @author Charalambos Christou
- * @version 2.0 24/01/21
+ * @version 3.0 09/02/21
  */
 public class SlotOfferAdapter extends SwipeableAdapter<SlotOffer, SlotOfferAdapter.SlotOfferViewHolder> {
-
-    private static View.OnClickListener mOnItemClickListener;
 
     /**
      * Constructor used to initialize the {@link ListAdapter}
@@ -38,16 +35,6 @@ public class SlotOfferAdapter extends SwipeableAdapter<SlotOffer, SlotOfferAdapt
             @NonNull DiffUtil.ItemCallback<SlotOffer> diffCallback, @NonNull ItemTouchHelper itemTouchHelper
     ) {
         super(diffCallback, itemTouchHelper);
-    }
-
-    /**
-     * Setter for {@link #mOnItemClickListener}.
-     *
-     * @param onItemClickListener The {@link View.OnClickListener} object to be
-     *                            attached to the {@link SlotOfferViewHolder#mRemovalButton}
-     */
-    public static void setOnItemClickListener(View.OnClickListener onItemClickListener) {
-        SlotOfferAdapter.mOnItemClickListener = onItemClickListener;
     }
 
     /**
@@ -85,7 +72,6 @@ public class SlotOfferAdapter extends SwipeableAdapter<SlotOffer, SlotOfferAdapt
         holder.mDuration.setText(duration);
         final String price = Float.toString(slotOfferInThisPosition.getPrice());
         holder.mPrice.setText(price);
-
     }
 
     /**
@@ -98,12 +84,9 @@ public class SlotOfferAdapter extends SwipeableAdapter<SlotOffer, SlotOfferAdapt
         // Public data members
         public TextView mDuration;
         public TextView mPrice;
-        public Button mRemovalButton;
 
         /**
          * Public Constructor. Gets the necessary references from the UI.
-         * Hooks up the {@link #mRemovalButton} with the {@link #mOnItemClickListener} instance
-         * and sets the current ViewHolder object as its tag.
          *
          * @param view The UI for a single item.
          */
@@ -111,9 +94,6 @@ public class SlotOfferAdapter extends SwipeableAdapter<SlotOffer, SlotOfferAdapt
             super(view);
             mDuration = view.findViewById(R.id.slot_offer_item_txt_duration);
             mPrice = view.findViewById(R.id.slot_offer_item_txt_price);
-            mRemovalButton = view.findViewById(R.id.slot_offer_item__btn_remove);
-            mRemovalButton.setTag(this);
-            mRemovalButton.setOnClickListener(mOnItemClickListener);
         }
     }
 }

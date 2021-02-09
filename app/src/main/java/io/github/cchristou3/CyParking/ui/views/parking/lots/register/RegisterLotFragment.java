@@ -156,7 +156,6 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
                 getBinding().registerLotFragmentBtnAdd,
                 getBinding().registerLotFragmentMbtnGetLocation
         );
-        SlotOfferAdapter.setOnItemClickListener(null);
         // Remove TextWatchers
         super.removeTextWatchers(
                 getBinding().registerLotFragmentEtPhoneBody,
@@ -418,17 +417,6 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
 
         // Set up the RecyclerView's adapter
         mSlotOfferAdapter = new SlotOfferAdapter(new SlotOffersDiffCallback(), getItemTouchHelper());
-        SlotOfferAdapter.setOnItemClickListener(v -> {
-            // Access the item's position
-            RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
-            int position = viewHolder.getAdapterPosition();
-            // Remove it from the list and  update the slot offer list state
-            if (!mRegisterLotViewModel.getSlotOfferList().isEmpty()) {
-                List<SlotOffer> newSlotOfferList = cloneList(mRegisterLotViewModel.getSlotOfferList());
-                newSlotOfferList.remove(position);
-                mRegisterLotViewModel.updateSlotOfferList(newSlotOfferList);
-            }
-        });
         // Bind recyclerView with its adapter
         recyclerView.setAdapter(mSlotOfferAdapter);
 

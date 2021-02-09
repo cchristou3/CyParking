@@ -27,7 +27,7 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <RelativeLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_main_host_cl_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -40,20 +40,28 @@
                 android:id="@+id/activity_main_host_fcv_nav_host_fragment"
                 android:name="androidx.navigation.fragment.NavHostFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
+                android:layout_alignParentTop="true"
                 app:defaultNavHost="true"
+                app:layout_constraintBottom_toTopOf="@+id/activity_main_host_txt_no_connection_warning"
+                app:layout_constraintTop_toTopOf="parent"
                 app:navGraph="@navigation/mobile_navigation" />
 
             <LinearLayout
                 android:id="@+id/activity_main_host_txt_no_connection_warning"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/activity_main_host_fcv_nav_host_fragment"
                 android:layout_alignParentBottom="true"
                 android:background="@color/dark_grey"
                 android:elevation="2dp"
                 android:gravity="center"
                 android:paddingTop="3dp"
-                android:paddingBottom="3dp">
+                android:paddingBottom="3dp"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -67,7 +75,7 @@
 
             </LinearLayout>
 
-        </RelativeLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/activity_main_host_cpi_progress_bar"

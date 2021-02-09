@@ -2,6 +2,7 @@ package io.github.cchristou3.CyParking.ui.views.host;
 
 import android.view.View;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
@@ -9,7 +10,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import io.github.cchristou3.CyParking.data.manager.ConnectivityHelper;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.InstantTaskRuler;
@@ -19,7 +19,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link GlobalStateViewModel} class.
@@ -33,7 +32,7 @@ public class GlobalStateViewModelTest extends InstantTaskRuler {
     @Before
     public void setUp() {
         AuthenticatorRepository mockRepository = Mockito.mock(AuthenticatorRepository.class);
-        globalStateViewModel = new GlobalStateViewModel(mockRepository);
+        globalStateViewModel = new GlobalStateViewModel(ApplicationProvider.getApplicationContext(), mockRepository);
     }
 
     @Test
@@ -70,27 +69,6 @@ public class GlobalStateViewModelTest extends InstantTaskRuler {
         globalStateViewModel.updateNoConnectionWarningState(visibility);
         // Then calling getNoConnectionWarningState should return the same value
         assertThat(getOrAwaitValue(globalStateViewModel.getNoConnectionWarningState()), is(visibility));
-    }
-
-    @Test
-    public void updateConnectionState_setsNewValue() throws InterruptedException {
-        // Given the connection state got changed
-        boolean isConnected = true;
-        // When updateConnectionState gets called
-        globalStateViewModel.updateConnectionState(isConnected);
-        // Then calling getConnectionState should return the same value
-        assertThat(getOrAwaitValue(globalStateViewModel.getConnectionState()), is(isConnected));
-    }
-
-    @Test
-    public void setInitialConnectionState_setsNewValue() throws InterruptedException {
-        // Given the connectivity helper's isConnected method returns true
-        ConnectivityHelper helper = Mockito.mock(ConnectivityHelper.class);
-        when(helper.isConnected()).thenReturn(true);
-        // When setInitialConnectionState gets called
-        globalStateViewModel.setInitialConnectionState(helper);
-        // Then calling getConnectionState should return the same value
-        assertThat(getOrAwaitValue(globalStateViewModel.getConnectionState()), is(helper.isConnected()));
     }
 
     @Test

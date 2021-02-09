@@ -1,7 +1,5 @@
 package io.github.cchristou3.CyParking.ui.views.host;
 
-import android.net.ConnectivityManager;
-import android.net.Network;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -29,9 +27,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.interfaces.ConnectionHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.ConnectivityHelper;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.ActivityMainHostBinding;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
@@ -44,9 +40,9 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateVisibil
  * of all fragments which it is the host of.</p>
  *
  * @author Charalambos Christou
- * @version 7.0 03/02/21
+ * @version 8.0 09/02/21
  */
-public class MainHostActivity extends AppCompatActivity implements ConnectionHandler {
+public class MainHostActivity extends AppCompatActivity {
 
     // Activity constants
     public static final String TAG = MainHostActivity.class.getName() + "UniqueTag";
@@ -62,7 +58,6 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
     // Activity variables
     private Menu mActionBarMenu;
     private GlobalStateViewModel mGlobalStateViewModel;
-    private ConnectivityHelper mConnectivityHelper;
     private ActivityMainHostBinding mBinding;
 
     /**
@@ -81,16 +76,8 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
         setUpNavigation(); // Set up drawer and action bar
 
         // Initialize the activity's ViewModel instance
-        mGlobalStateViewModel = new ViewModelProvider(this, new GlobalStateViewModelFactory())
+        mGlobalStateViewModel = new ViewModelProvider(this, new GlobalStateViewModelFactory(this))
                 .get(GlobalStateViewModel.class);
-
-        // Instantiate the connection helper
-        mConnectivityHelper = new ConnectivityHelper(
-                getApplicationContext(), this); // Handle connection callbacks
-        mConnectivityHelper.registerNetworkCallback(); // Listen to connection state changes
-
-        // Set initial connection state.
-        mGlobalStateViewModel.setInitialConnectionState(mConnectivityHelper);
 
         addObserversToStates(); // Attach observers to the global states
 
@@ -106,7 +93,6 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
     protected void onDestroy() {
         super.onDestroy();
         mBinding = null; // Ready to be GCed
-        mConnectivityHelper.unregisterNetworkCallback(); // No longer listen to network broadcasts
     }
 
     /**
@@ -264,7 +250,7 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
         // BOTTOM indicates that we want to push the view to the bottom of its container,
         // without changing its size.
         Transition transition = new Slide(Gravity.BOTTOM);
-        transition.setDuration(1600); // how long the animation will last
+        transition.setDuration(1000); // how long the animation will last
         // Add the id of the target view that this Transition is interested in
         transition.addTarget(warning.getId()); // In this case it is our "No connection" warning View
 
@@ -403,22 +389,5 @@ public class MainHostActivity extends AppCompatActivity implements ConnectionHan
      */
     public Menu getDrawerMenu() {
         return mBinding.activityMainHostNvNavView.getMenu();
-    }
-
-    /**
-     * Triggered whenever the
-     * {@link ConnectivityManager.NetworkCallback} invokes
-     * either {@link ConnectivityManager.NetworkCallback#onAvailable(Network)}
-     * or {@link ConnectivityManager.NetworkCallback#onLost(Network)}.
-     *
-     * @param isConnected The state of the Internet connection.
-     * @see io.github.cchristou3.CyParking.data.manager.ConnectivityHelper#onLost(Network)
-     * @see io.github.cchristou3.CyParking.data.manager.ConnectivityHelper#onAvailable(Network)
-     */
-    @Override
-    public void onConnectionStateChanged(boolean isConnected) {
-        runOnUiThread(() -> {
-            mGlobalStateViewModel.updateConnectionState(isConnected);
-        });
     }
 }

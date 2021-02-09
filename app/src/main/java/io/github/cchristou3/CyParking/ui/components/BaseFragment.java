@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FeedbackFragmentBinding;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
+import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModelFactory;
 
 /**
  * Purpose: encapsulate common logic found in the application's screens:
@@ -63,7 +64,7 @@ public class BaseFragment<T extends ViewBinding> extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Initialize GlobalStateViewModel of the fragment
-        mGlobalStateViewModel = new ViewModelProvider(requireActivity())
+        mGlobalStateViewModel = new ViewModelProvider(requireActivity(), new GlobalStateViewModelFactory(requireContext()))
                 .get(GlobalStateViewModel.class);
     }
 

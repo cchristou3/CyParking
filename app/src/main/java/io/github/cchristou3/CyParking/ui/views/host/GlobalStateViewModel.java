@@ -14,7 +14,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.List;
 
-import io.github.cchristou3.CyParking.data.manager.ConnectivityHelper;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.components.LoadingBarViewModel;
@@ -37,14 +36,14 @@ import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
  * </p>
  *
  * @author Charalambos Christou
- * @version 3.0 26/01/21
+ * @version 4.0 09/02/21
  */
 public class GlobalStateViewModel extends LoadingBarViewModel {
 
     // User state - initially set to null
     private final MutableLiveData<LoggedInUser> mUserState = new MutableLiveData<>(null);
     // connectivity state
-    private final MutableLiveData<Boolean> mConnectionState = new MutableLiveData<>();
+    private final ConnectionLiveData mConnectionState;
     // no connection layout state
     private final MutableLiveData<Integer> mNoConnectionWarningState = new MutableLiveData<>();
     // ViewModel's API
@@ -52,20 +51,15 @@ public class GlobalStateViewModel extends LoadingBarViewModel {
 
     /**
      * Initialize the ViewModel's AuthenticatorRepository instance
-     * with the given argument.
+     * with the given argument. Also, creates a new instance of
+     * {@link ConnectionLiveData} with the given context
      *
+     * @param context                 The context to make use of.
      * @param authenticatorRepository An AuthenticatorRepository instance.
      */
-    public GlobalStateViewModel(AuthenticatorRepository authenticatorRepository) {
-        super();
+    public GlobalStateViewModel(Context context, AuthenticatorRepository authenticatorRepository) {
         this.mAuthenticatorRepository = authenticatorRepository;
-    }
-
-    /**
-     * Required public no-argument constructor.
-     */
-    public GlobalStateViewModel() {
-        this(new AuthenticatorRepository());
+        this.mConnectionState = new ConnectionLiveData(context);
     }
 
     /**
@@ -85,29 +79,6 @@ public class GlobalStateViewModel extends LoadingBarViewModel {
      */
     /*package-private*/ void updateNoConnectionWarningState(int visibility) {
         mNoConnectionWarningState.setValue(visibility);
-    }
-
-    /**
-     * Assign the value of {@link #mConnectionState}
-     * the given argument.
-     *
-     * @param isConnected the new value of {@link #mConnectionState}.
-     */
-    public void updateConnectionState(boolean isConnected) {
-        Log.d(TAG, "updateConnectionState: " + isConnected);
-        this.mConnectionState.setValue(isConnected);
-    }
-
-    /**
-     * Sets the initial value of {@link #mConnectionState}
-     * based on the current connection state provided by
-     * {@link ConnectivityHelper#isConnected()}.
-     *
-     * @param connectivityHelper The helper to provide the current connection state
-     *                           of the device.
-     */
-    public void setInitialConnectionState(@NonNull ConnectivityHelper connectivityHelper) {
-        updateConnectionState(connectivityHelper.isConnected());
     }
 
     /**

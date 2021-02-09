@@ -1,5 +1,7 @@
 package io.github.cchristou3.CyParking.ui.views.host;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
@@ -11,9 +13,15 @@ import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
  * Required given GlobalStateViewModel has a non-empty constructor</p>
  *
  * @author Charalambos Christou
- * @version 1.0 24/12/20
+ * @version 2.0 02/02/21
  */
 public class GlobalStateViewModelFactory implements ViewModelProvider.Factory {
+
+    private final Context mContext;
+
+    public GlobalStateViewModelFactory(Context context) {
+        this.mContext = context;
+    }
 
     /**
      * Creates a new instance of the given {@code Class}.
@@ -27,7 +35,7 @@ public class GlobalStateViewModelFactory implements ViewModelProvider.Factory {
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(GlobalStateViewModel.class)) {
-            return (T) new GlobalStateViewModel(new AuthenticatorRepository());
+            return (T) new GlobalStateViewModel(mContext, new AuthenticatorRepository());
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

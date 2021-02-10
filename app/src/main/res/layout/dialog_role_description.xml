@@ -5,30 +5,27 @@
     android:layout_height="wrap_content"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="10dp">
-
-    <TextView
-        android:id="@+id/dialog_role_description_txt_intro"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:gravity="left"
-        android:text="@string/dial_intro"
-        android:textSize="25dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    android:padding="30dp">
 
     <TextView
         android:id="@+id/dialog_role_description_txt_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxLines="5"
-        android:layout_marginTop="20dp"
-        android:textSize="25dp"
+        android:text="@string/op_desc"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dialog_role_description_txt_intro" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ListView
+        android:id="@+id/dialog_role_description_lv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="@+id/dialog_role_description_txt_description"
+        app:layout_constraintStart_toStartOf="@+id/dialog_role_description_txt_description"
+        app:layout_constraintTop_toBottomOf="@+id/dialog_role_description_txt_description" />
 
     <Button
         android:id="@+id/dialog_role_description_btn_dismiss"
@@ -37,8 +34,8 @@
         android:layout_marginTop="20dp"
         android:text="@string/dismiss"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dialog_role_description_txt_description" />
+        app:layout_constraintEnd_toEndOf="@+id/dialog_role_description_lv"
+        app:layout_constraintStart_toStartOf="@+id/dialog_role_description_lv"
+        app:layout_constraintTop_toBottomOf="@+id/dialog_role_description_lv" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

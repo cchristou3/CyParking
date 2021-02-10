@@ -14,8 +14,6 @@ public class AuthFormState extends EmailFormState {
     private final Integer mNameError;
     @Nullable
     private final Integer mPasswordError;
-    @Nullable
-    private final Integer mRoleError;
 
     /**
      * Constructor used when there is an error in the LoginState (E.g. pass too short, no username, etc.)
@@ -26,13 +24,11 @@ public class AuthFormState extends EmailFormState {
      * @param roleError     The id of the error related to the role.
      */
     public AuthFormState(
-            @Nullable Integer emailError, @Nullable Integer nameError,
-            @Nullable Integer passwordError, @Nullable Integer roleError
+            @Nullable Integer emailError, @Nullable Integer nameError, @Nullable Integer passwordError
     ) {
         super(emailError);
         this.mNameError = nameError;
         this.mPasswordError = passwordError;
-        this.mRoleError = roleError;
     }
 
     /**
@@ -44,7 +40,6 @@ public class AuthFormState extends EmailFormState {
         super(isDataValid);
         this.mNameError = null;
         this.mPasswordError = null;
-        this.mRoleError = null;
     }
 
     /**
@@ -54,11 +49,6 @@ public class AuthFormState extends EmailFormState {
     @Nullable
     public Integer getPasswordError() {
         return mPasswordError;
-    }
-
-    @Nullable
-    public Integer getRoleError() {
-        return mRoleError;
     }
 
     @Nullable

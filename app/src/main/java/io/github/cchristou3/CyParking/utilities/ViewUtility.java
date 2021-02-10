@@ -34,7 +34,7 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
  * related to the View.</p>
  *
  * @author Charalambos Christou
- * @version 7.0 28/01/21
+ * @version 8.0 10/02/21
  */
 public class ViewUtility {
 
@@ -127,7 +127,7 @@ public class ViewUtility {
      */
     public static void hideKeyboard(@NotNull FragmentActivity activity, @NotNull View view) {
         InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+        inputMethodManager.hideSoftInputFromWindow(view.getRootView().getApplicationWindowToken(), 0);
     }
 
     /**

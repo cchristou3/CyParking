@@ -29,7 +29,7 @@ import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
  * maintains an in-memory cache of login status (TODO:) and user credentials information.</p>
  *
  * @author Charalambos Christou
- * @version 5.0 06/02/21
+ * @version 6.0 3.0 10/02/21
  */
 public class AuthenticatorRepository implements DataSourceRepository.UserHandler {
 
@@ -81,16 +81,11 @@ public class AuthenticatorRepository implements DataSourceRepository.UserHandler
     /**
      * Sign the user up with the given email (email) and password
      *
-     * @param email      A string which corresponds to the email of the user.
-     * @param password   A string which corresponds to the password of the user.
-     * @param isUser     true if the user selected the checkbox which corresponds to the user. Otherwise, false.
-     * @param isOperator true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
+     * @param email    A string which corresponds to the email of the user.
+     * @param password A string which corresponds to the password of the user.
      * @return A {@link Task<AuthResult>} to be handled by the caller.
      */
-    public Task<AuthResult> register(String email, String password,
-                                     boolean isUser, boolean isOperator) throws IllegalArgumentException {
-        if (!isUser && !isOperator)
-            throw new IllegalArgumentException("At least one of the given roles must be selected!");
+    public Task<AuthResult> register(String email, String password) {
         // handle registration. A registered User is also a loggedInUser
         // Handle loggedInUser authentication
         return mDataSource.createUserWithEmailAndPassword(email, password);
@@ -141,18 +136,18 @@ public class AuthenticatorRepository implements DataSourceRepository.UserHandler
         List<String> roles = new SharedPreferencesManager(context.getApplicationContext()).getValue(user.getUid());
         // Local data is found
         if (!(roles == null || roles.isEmpty())) {
-            handler.onLocalData(roles);
+            handler.onLocalDataFound(roles);
         } else {
             // fetch user's data from the database
             this.getUser(user)
                     .addOnCompleteListener(task -> {
                         Log.d(TAG, "getUserInfo: data found on server");
                         if (task.getException() != null) {
-                            handler.onRemoteDataFailure(task.getException());
+                            handler.onRemoteDataNotFound(task.getException());
                             return;
                         }
                         if (task.isSuccessful()) {
-                            handler.onRemoteDataSuccess(task);
+                            handler.onRemoteDataFound(task);
                         }
                     });
         }
@@ -178,7 +173,7 @@ public class AuthenticatorRepository implements DataSourceRepository.UserHandler
          *
          * @param roles The roles of the user that are stored locally.
          */
-        void onLocalData(List<String> roles);
+        void onLocalDataFound(List<String> roles);
 
         /**
          * Invoked when the user's data was found on the server's
@@ -186,7 +181,7 @@ public class AuthenticatorRepository implements DataSourceRepository.UserHandler
          *
          * @param task The {@link Task} instance that contains the user's data.
          */
-        void onRemoteDataSuccess(Task<DocumentSnapshot> task);
+        void onRemoteDataFound(Task<DocumentSnapshot> task);
 
         /**
          * Invoked when an error occurred when retrieving the user's
@@ -194,6 +189,6 @@ public class AuthenticatorRepository implements DataSourceRepository.UserHandler
          *
          * @param exception The error that caused the requests's failure.
          */
-        void onRemoteDataFailure(Exception exception);
+        void onRemoteDataNotFound(Exception exception);
     }
 }

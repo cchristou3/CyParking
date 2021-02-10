@@ -34,7 +34,11 @@
     <string name="sign_up">Sign up</string>
     <string name="cancel">Cancel</string>
     <string name="user_desc">- Book a parking \n- Pay via card</string>
-    <string name="op_desc">- Register their parking area \n- Offer parking slots via the app</string>
+    <string name="op_desc">An operator is responsible for managing his/her own parking area such as: </string>
+    <string name="op_item1">Offer parking slots to other users</string>
+    <string name="op_item2">Handle payments</string>
+    <string name="op_item3">Provide real-time data about the parking lot</string>
+    <string name="operator">Operator</string>
     <string name="password_helper">You should also include special characters (!, @, %, etc.) to make it difficult to be guessed</string>
 
     <!-- Strings related to the description dialog -->
@@ -167,5 +171,9 @@
     <string name="any">Any</string>
     <string name="no_connection">No connection</string>
     <string name="error">Error</string>
+    <string name="operator_question">Would you like to be an operator?</string>
+    <string name="view_description">View Description</string>
+    <string name="scan_a_lot">Scan a lot</string>
+    <string name="scan_a_booking">Scan a booking</string>
 
 </resources>

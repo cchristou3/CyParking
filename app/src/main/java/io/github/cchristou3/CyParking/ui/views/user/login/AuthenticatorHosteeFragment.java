@@ -1,7 +1,5 @@
 package io.github.cchristou3.CyParking.ui.views.user.login;
 
-import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -11,12 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -43,10 +38,9 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * create an instance of this fragment.
  * Can be used for both logging in and signing up.</p>
  * <p>
- * TODO: 04/02/21 remove user as a role. Logging in == user.role.isTrue
  *
  * @author Charalambos Christou
- * @version 6.0 28/01/21
+ * @version 7.0 3.0 10/02/21
  */
 public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthenticatorHosteeBinding> implements TextWatcher {
 
@@ -149,9 +143,7 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
     public void onDestroyView() {
         if (!mAuthenticatorViewModel.isUserSigningIn()) {
             super.removeOnClickListeners(
-                    getBinding().fragmentHosteeAuthBtnDialogUserButton,
                     getBinding().fragmentHosteeAuthBtnDialogOperatorButton,
-                    getBinding().fragmentHosteeAuthCbRoleUserCheckbox,
                     getBinding().fragmentHosteeAuthCbRoleOperatorCheckbox,
                     getBinding().fragmentHosteeAuthEtName
             );
@@ -231,11 +223,8 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
         mAuthenticatorViewModel.dataChanged(
                 getBinding().fragmentHosteeAuthEtEmail.getText().toString(), // Inputted email
                 getBinding().fragmentHosteeAuthEtName.getText().toString(), // Inputted name
-                getBinding().fragmentHosteeAuthEtPassword.getText().toString(), // Inputted password
-                (!mAuthenticatorViewModel.isUserSigningIn() // If logging in
-                        && getBinding().fragmentHosteeAuthCbRoleUserCheckbox.isChecked()), // user got checked
-                (!mAuthenticatorViewModel.isUserSigningIn() // If logging in
-                        && getBinding().fragmentHosteeAuthCbRoleOperatorCheckbox.isChecked())); // operator got checked
+                getBinding().fragmentHosteeAuthEtPassword.getText().toString() // Inputted password
+        ); // operator got checked
     }
 
     /**
@@ -245,26 +234,18 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
         // Add a text watcher to the name edit text
         getBinding().fragmentHosteeAuthEtName.addTextChangedListener(this);
 
-        // Get a reference to both Checkboxes
-        final CheckBox userCheckbox = getBinding().fragmentHosteeAuthCbRoleUserCheckbox;
-        final CheckBox operatorCheckbox = getBinding().fragmentHosteeAuthCbRoleOperatorCheckbox;
+        getCheckBox().setOnCheckedChangeListener( // Set an on checked changed listener to the checkbox
+                (buttonView, isChecked) -> mAuthenticatorViewModel
+                        .updateIsOperatorChecked(getCheckBox().isChecked()) // Update the livedata's value
+        );
 
-        // create an on checked listener for the checkboxes
-        final CompoundButton.OnCheckedChangeListener onCheckedChangeListener =
-                (buttonView, isChecked) -> notifyDataChanged();
-        // Hook up listeners to both checkboxes
-        userCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
-        operatorCheckbox.setOnCheckedChangeListener(onCheckedChangeListener);
         // Set up authButton
-        setUpAuthButton(R.string.sign_up, v -> register());
+        setUpAuthButton(R.string.sign_up, this::register);
 
         // Add listeners to both "description" buttons
-        getBinding().fragmentHosteeAuthBtnDialogUserButton.setOnClickListener(
-                getRoleDescriptionOnClickListener(
-                        R.id.fragment_hostee_auth_txt_role_user_title, R.string.user_desc));
         getBinding().fragmentHosteeAuthBtnDialogOperatorButton.setOnClickListener(
                 getRoleDescriptionOnClickListener(
-                        R.id.fragment_hostee_auth_txt_role_operator_title, R.string.op_desc));
+                ));
     }
 
     /**
@@ -284,16 +265,10 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
     /**
      * Registers the user.
      */
-    private void register() {
+    private void register(View view) {
         getGlobalStateViewModel().showLoadingBar();
-        hideKeyboard(requireActivity(), requireView());
-        mAuthenticatorViewModel.register(
-                getBinding().fragmentHosteeAuthEtEmail.getText().toString(),
-                getBinding().fragmentHosteeAuthEtName.getText().toString(),
-                getBinding().fragmentHosteeAuthEtPassword.getText().toString(),
-                getBinding().fragmentHosteeAuthCbRoleUserCheckbox.isChecked(),
-                getBinding().fragmentHosteeAuthCbRoleOperatorCheckbox.isChecked(),
-                requireContext());
+        hideKeyboard(requireActivity(), view.getRootView());
+        mAuthenticatorViewModel.register(requireContext());
     }
 
     /**
@@ -311,11 +286,11 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
         getBinding().fragmentHosteeAuthEtPassword.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 if (mAuthenticatorViewModel.isFormValid())
-                    login(requireContext());
+                    login(v);
             }
             return false;
         });
-        setUpAuthButton(R.string.sign_in, v -> login(requireContext()));
+        setUpAuthButton(R.string.sign_in, this::login);
     }
 
     /**
@@ -329,13 +304,11 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
 
     /**
      * Logs in the user.
-     *
-     * @param requiredContext The context of the fragment.
      */
-    private void login(Context requiredContext) {
+    private void login(View view) {
         getGlobalStateViewModel().showLoadingBar();
-        hideKeyboard(requireActivity(), requireView());
-        mAuthenticatorViewModel.login(requiredContext,
+        hideKeyboard(requireActivity(), view);
+        mAuthenticatorViewModel.login(requireContext(),
                 getBinding().fragmentHosteeAuthEtEmail.getText().toString(),
                 getBinding().fragmentHosteeAuthEtPassword.getText().toString());
     }
@@ -387,13 +360,10 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
             // If there is an error, show it for the specific UI field.
             // If there was an error before, and it got resolved then hide the error.
             updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilEmail, formState.getEmailError());
-            updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilName, formState.getNameError());
             updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilPassword, formState.getPasswordError());
 
             if (!mAuthenticatorViewModel.isUserSigningIn()) {// User signs up
-                updateErrorOf(requireContext(), formState.getRoleError(),
-                        getBinding().fragmentHosteeAuthCbRoleUserCheckbox,
-                        getBinding().fragmentHosteeAuthCbRoleOperatorCheckbox);
+                updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilName, formState.getNameError());
             }
         });
     }
@@ -402,24 +372,17 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
     /**
      * Creates an instance of View.OnClickListener which creates a DialogFragment once triggered.
      *
-     * @param roleResId   The id of a EditText element
-     * @param description The resource id of a string
      * @return A View.OnClickListener instance
      */
     @NotNull
     @Contract(pure = true)
-    private View.OnClickListener getRoleDescriptionOnClickListener(@IdRes Integer roleResId, @StringRes final Integer description) {
+    private View.OnClickListener getRoleDescriptionOnClickListener() {
         return v -> {
             FragmentManager fm = isAdded() ? getParentFragmentManager() : null;
             if (fm != null) {
-                // For the clicked description button, show the text of its corresponding role as the dialog's title.
-                CharSequence roleTitle = ((TextView) v.getRootView().findViewById(roleResId)).getText();
-                // Access the device's night mode configurations
-                int nightModeFlags = this.requireContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
                 // Instantiate the dialog fragment and show it
-                DescriptionDialog dialogFragment = DescriptionDialog.newInstance(roleTitle,
-                        getString(description), nightModeFlags);
-                dialogFragment.show(fm, roleTitle + " dialog");
+                DescriptionDialog dialogFragment = DescriptionDialog.newInstance();
+                dialogFragment.show(fm, DescriptionDialog.class.getCanonicalName());
             }
         };
     }
@@ -473,6 +436,10 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
                     errorString,
                     Toast.LENGTH_LONG).show();
         }
+    }
+
+    private CheckBox getCheckBox() {
+        return getBinding().fragmentHosteeAuthCbRoleOperatorCheckbox;
     }
 
     /**

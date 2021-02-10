@@ -86,6 +86,15 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         super.onViewCreated(view, savedInstanceState);
         observeUserState(this::updateUi);
 
+        // TODO: 10/02/2021 Implement the buttons and add descriptions below then
+        getBinding().fragmentHomeBtnScanBooking.setOnClickListener(v -> {
+            Toast.makeText(requireContext(), "Not implemented yet!", Toast.LENGTH_SHORT).show();
+        });
+
+        getBinding().fragmentHomeBtnScanLot.setOnClickListener(v -> {
+            Toast.makeText(requireContext(), "Not implemented yet!", Toast.LENGTH_SHORT).show();
+        });
+
         // Attach listener to "Parking Map" button
         getBinding().fragmentHomeBtnNavToMap.setOnClickListener(v -> {
             // Initialize the SingleLocationManager object
@@ -99,7 +108,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
             mLocationManager.requestUserLocationUpdates(this);
         });
 
-        // TODO: Add loading effect till the UI has been initialized
+        // TODO: Add splash screen till the app has been initialized (FirebaseApp, Network broadcasters, validating user's data, etc.).
     }
 
     /**
@@ -174,19 +183,15 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
             return;
         }
 
-        // Check whether logged in.
-        boolean isOperator = loggedInUser.getRoles().contains(LoggedInUser.OPERATOR);
-        boolean isUser = loggedInUser.getRoles().contains(LoggedInUser.USER);
-        if (!isOperator && !isUser) {
-            return;// If neither stop here.
-        }
+        // TODO: 10/02/2021 Display QR Code scanner button:
+        //  users use it to can scan the QR Code of an operator nad
+        //  they will be navigated to the payment screen (see Instant App)
 
-        // Do not check for user role as
-        // in this fragment the "User" role has not extra actions
-        if (isOperator) {
+        if (loggedInUser.isOperator()) {
             // Is an operator but not a user
             initializeOperator();
-        } else { // Is a user but not an operator
+        } else {
+            // User is not an operator
             // Hide anything related to parking lot from the user
             getBinding().fragmentHomeCvLotInfo.setVisibility(View.GONE);
         }
@@ -211,6 +216,8 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         String operatorId = getGlobalStateViewModel().getUser().getUserId();
         // Get the operator's lot info from the database.
         getParkingLotInfo(operatorId);
+
+        // TODO: 10/02/2021 Display QR scanner button: scan QR code of users that have booked a slot.
     }
 
     /**

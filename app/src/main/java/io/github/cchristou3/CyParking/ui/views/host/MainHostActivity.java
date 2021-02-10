@@ -271,26 +271,18 @@ public class MainHostActivity extends AppCompatActivity {
     private void updateDrawer(LoggedInUser currentUser) {
         // Logged in user can
         // see/perform bookings
-        if (currentUser != null && !(currentUser.getRoles() == null || currentUser.getRoles().isEmpty())) {
-            boolean isUser = currentUser.isUser();
-            boolean isOperator = currentUser.isOperator();
-            // TODO: Do underlying Drawer update
-            if (!isOperator && !isUser) return;// If neither stop here.
-            if (isOperator && !isUser) { // Is an operator but not a user
-            } else if (isUser && !isOperator) { // Is a user but not an operator
-                // Show bookings in drawer
-                getDrawerMenu().findItem(R.id.nav_view_bookings).setVisible(true);
-            } else { // Is both
-                // Show bookings in drawer
-                getDrawerMenu().findItem(R.id.nav_view_bookings).setVisible(true);
-            }
+        if (currentUser != null) { // User is logged in
+            // Enable all 'logged in user' features'
+            enableLoggedInDestinations();
         } else {
             // TODO: Update drawer to only show non-loggedIn-specific actions
-            // View Map
-            // User cannot book -> thus cannot see their bookings
-            // Remove Bookings from drawer
             getDrawerMenu().findItem(R.id.nav_view_bookings).setVisible(false);
         }
+    }
+
+    private void enableLoggedInDestinations() {
+        // Show 'view bookings' in drawer
+        getDrawerMenu().findItem(R.id.nav_view_bookings).setVisible(true);
     }
 
     /**

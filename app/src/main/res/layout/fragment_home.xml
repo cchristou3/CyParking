@@ -8,6 +8,28 @@
     tools:context=".ui.views.home.HomeFragment">
 
     <Button
+        android:id="@+id/fragment_home_btn_scan_booking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/scan_a_booking"
+        app:icon="@drawable/ic_qr_code_scanner"
+        app:layout_constraintBottom_toTopOf="@+id/fragment_home_btn_nav_to_map"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/fragment_home_btn_scan_lot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/scan_a_lot"
+        app:icon="@drawable/ic_qr_code_scanner"
+        app:layout_constraintBottom_toTopOf="@+id/fragment_home_btn_nav_to_map"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_home_btn_scan_booking" />
+
+    <Button
         android:id="@+id/fragment_home_btn_nav_to_map"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

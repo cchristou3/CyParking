@@ -23,7 +23,7 @@ public class LoggedInUserTest {
     private static final String NAME = "Name";
     private static final String EMAIL = "email@gmail.com";
     private static final String UID = "qwertyuiolkjhgfdsazxcvbnxcvb";
-    private static final List<String> ROLES = Arrays.asList(LoggedInUser.USER, LoggedInUser.OPERATOR);
+    private static final List<String> ROLES = Arrays.asList(LoggedInUser.OPERATOR);
 
     @Mock
     FirebaseUser mockFirebaseUser;
@@ -70,36 +70,6 @@ public class LoggedInUserTest {
     }
 
     @Test
-    public void isUser_isUser_returnsTrue() {
-        // Given a LoggedInUser object as a `user`
-        LoggedInUser user = new LoggedInUser(mockFirebaseUser, Arrays.asList(LoggedInUser.USER));
-        // When isUser is invoked,
-        boolean isUser = user.isUser();
-        // Then isUser returns true
-        assertTrue(isUser);
-    }
-
-    @Test
-    public void isUser_isOperator_returnsTrue() {
-        // Given a LoggedInUser object as a `user`
-        LoggedInUser user = new LoggedInUser(mockFirebaseUser, Arrays.asList(LoggedInUser.OPERATOR));
-        // When isUser is invoked,
-        boolean isUser = user.isUser();
-        // Then isUser returns false
-        assertFalse(isUser);
-    }
-
-    @Test
-    public void isUser_null_returnsTrue() {
-        // Given a LoggedInUser object as a `user`
-        LoggedInUser user = new LoggedInUser(mockFirebaseUser, null);
-        // When isUser is invoked,
-        boolean isUser = user.isUser();
-        // Then isUser returns false
-        assertFalse(isUser);
-    }
-
-    @Test
     public void isOperator_isOperator_returnsTrue() {
         // Given a LoggedInUser object as a `user`
         LoggedInUser user = new LoggedInUser(mockFirebaseUser, Arrays.asList(LoggedInUser.OPERATOR));
@@ -107,16 +77,6 @@ public class LoggedInUserTest {
         boolean isUser = user.isOperator();
         // Then isOperator returns true
         assertTrue(isUser);
-    }
-
-    @Test
-    public void isOperator_isUser_returnsTrue() {
-        // Given a LoggedInUser object as a `user`
-        LoggedInUser user = new LoggedInUser(mockFirebaseUser, Arrays.asList(LoggedInUser.USER));
-        // When isOperator is invoked,
-        boolean isUser = user.isOperator();
-        // Then isOperator returns false
-        assertFalse(isUser);
     }
 
     @Test

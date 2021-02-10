@@ -138,24 +138,24 @@ public class GlobalStateViewModel extends LoadingBarViewModel {
         if (user == null) return; // If not logged in, then terminate method.
         mAuthenticatorRepository.getUserInfo(context, user, new AuthenticatorRepository.UserDataHandler() {
             @Override
-            public void onLocalData(List<String> roles) {
+            public void onLocalDataFound(List<String> roles) {
                 Log.d(TAG, "getUserInfo: data found locally");
                 mUserState.setValue(new LoggedInUser(user, roles));
             }
 
             @Override
-            public void onRemoteDataSuccess(Task<DocumentSnapshot> task) {
+            public void onRemoteDataFound(Task<DocumentSnapshot> task) {
                 try {
                     final LoggedInUser loggedInUser = task.getResult().toObject(LoggedInUser.class);
                     mUserState.setValue(loggedInUser);
                 } catch (NullPointerException e) {
-                    onRemoteDataFailure(e);
+                    onRemoteDataNotFound(e);
                     Log.e(TAG, "getUserInfo: ", e);
                 }
             }
 
             @Override
-            public void onRemoteDataFailure(Exception exception) {
+            public void onRemoteDataNotFound(Exception exception) {
                 mUserState.setValue(null);
             }
         });

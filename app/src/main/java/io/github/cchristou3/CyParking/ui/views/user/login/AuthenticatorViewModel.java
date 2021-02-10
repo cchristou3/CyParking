@@ -34,7 +34,7 @@ import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.i
  * Used when the user tries to login/register.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 16/01/21
+ * @version 3.0 3.0 10/02/21
  */
 public class AuthenticatorViewModel extends ViewModel {
 
@@ -44,6 +44,8 @@ public class AuthenticatorViewModel extends ViewModel {
     private final MutableLiveData<String> mEmailState = new MutableLiveData<>();
     private final MutableLiveData<String> mNameState = new MutableLiveData<>();
     private final MutableLiveData<String> mPasswordState = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> mOperatorCheckedState = new MutableLiveData<>(false);
+
     private final AuthenticatorRepository mAuthenticatorRepository;
     // First fragment which appears to the user is the "sign in" tab
     private final MutableLiveData<Boolean> mIsUserInSigningInTab = new MutableLiveData<>(true);
@@ -101,12 +103,12 @@ public class AuthenticatorViewModel extends ViewModel {
                         mAuthenticatorRepository.getUserInfo(context, loginTask.getResult().getUser(),
                                 new AuthenticatorRepository.UserDataHandler() {
                                     @Override
-                                    public void onLocalData(List<String> roles) {
+                                    public void onLocalDataFound(List<String> roles) {
                                         updateAuthResult(loginTask.getResult().getUser(), roles);
                                     }
 
                                     @Override
-                                    public void onRemoteDataSuccess(Task<DocumentSnapshot> retrieveUserDataTask) {
+                                    public void onRemoteDataFound(Task<DocumentSnapshot> retrieveUserDataTask) {
                                         // The task was successful and the user has data stored on the server
                                         LoggedInUser loggedInUser = null;
                                         try {
@@ -118,7 +120,7 @@ public class AuthenticatorViewModel extends ViewModel {
                                     }
 
                                     @Override
-                                    public void onRemoteDataFailure(Exception exception) {
+                                    public void onRemoteDataNotFound(Exception exception) {
                                         updateAuthResult(exception.getMessage());
                                     }
                                 });
@@ -129,17 +131,12 @@ public class AuthenticatorViewModel extends ViewModel {
     /**
      * Connect with our backend to sign the user up.
      *
-     * @param email      The email of the user.
-     * @param name       The name of the user.
-     * @param password   The password of the user.
-     * @param isUser     true if the user selected the checkbox which corresponds to the user. Otherwise, false.
-     * @param isOperator true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
-     * @param context    The context of the current tab.
+     * @param context The context of the current tab.
      */
-    public void register(String email, String name, String password, boolean isUser, boolean isOperator, Context context) {
+    public void register(Context context) {
         // can be launched in a separate asynchronous job
         try {
-            mAuthenticatorRepository.register(email, password, isUser, isOperator)
+            mAuthenticatorRepository.register(mEmailState.getValue(), mPasswordState.getValue())
                     .addOnCompleteListener(task -> {
                         // Check whether an exception occurred
                         if (task.getException() != null) {
@@ -150,17 +147,16 @@ public class AuthenticatorViewModel extends ViewModel {
                         // If the user successfully registered
                         if (task.isSuccessful() && task.getResult().getUser() != null) {
                             // Create a list to store the user's selected role(s)
-                            List<String> listOfRoles = new ArrayList<>();
-                            if (isUser) listOfRoles.add(LoggedInUser.USER);
-                            if (isOperator) listOfRoles.add(LoggedInUser.OPERATOR);
+                            List<String> roles = new ArrayList<>();
+                            if (isOperatorChecked()) roles.add(LoggedInUser.OPERATOR);
 
                             // Save the user's roles locally via SharedPreferences
                             // Each user in the database has a unique Uid. Thus, to be used as the key.
                             new SharedPreferencesManager(context.getApplicationContext())
-                                    .setValue(task.getResult().getUser().getUid(), listOfRoles);
+                                    .setValue(task.getResult().getUser().getUid(), roles);
 
-                            final LoggedInUser loggedInUser = new LoggedInUser(task.getResult().getUser(), listOfRoles);
-                            loggedInUser.setDisplayName(name);
+                            final LoggedInUser loggedInUser = new LoggedInUser(task.getResult().getUser(), roles);
+                            loggedInUser.setDisplayName(mNameState.getValue());
 
                             // Initialize the Repository's LoggedInUser instance
                             // and trigger loginResult observer update
@@ -177,6 +173,15 @@ public class AuthenticatorViewModel extends ViewModel {
         } catch (IllegalArgumentException e) {
             mAuthResultState.setValue(new AuthResult(e.getMessage()));
         }
+    }
+
+    /**
+     * Check whether the operator value got checked.
+     *
+     * @return True if it was checked. Otherwise, false.
+     */
+    private boolean isOperatorChecked() {
+        return mOperatorCheckedState.getValue();
     }
 
     /**
@@ -204,25 +209,31 @@ public class AuthenticatorViewModel extends ViewModel {
     /**
      * Validates all elements our our login / registration form.
      *
-     * @param email      The email of the user.
-     * @param password   The password of the user.
-     * @param isUser     true if the user checked the checkbox which corresponds to the user. Otherwise, false.
-     * @param isOperator true if the user checked the checkbox which corresponds to the operator. Otherwise, false.
+     * @param email    The email of the user.
+     * @param password The password of the user.
      */
-    public void dataChanged(String email, String name, String password, boolean isUser, boolean isOperator) {
+    public void dataChanged(String email, String name, String password) {
         mPasswordState.setValue(password);
         updateEmail(email);
         if (!isEmailValid(email)) {
-            updateFromState(R.string.invalid_email, null, null, null);
+            updateFromState(R.string.invalid_email, null, null);
         } else if (!isUserSigningIn() && !isNameValid(name)) {
-            updateFromState(null, R.string.invalid_name, null, null);
+            updateFromState(null, R.string.invalid_name, null);
         } else if (!isPasswordValid(password)) {
-            updateFromState(null, null, R.string.invalid_password, null);
-        } else if (!isUserSigningIn() && !areAnyRolesSelected(isUser, isOperator)) { // Checks only if the user is registering
-            updateFromState(null, null, null, R.string.invalid_role_choice);
+            updateFromState(null, null, R.string.invalid_password);
         } else {
             updateFromStateToValid();
         }
+    }
+
+    /**
+     * Updates the value of {@link #mOperatorCheckedState}
+     * based on the given error ids.
+     *
+     * @param isChecked the new value of {@link #mOperatorCheckedState}.
+     */
+    public void updateIsOperatorChecked(boolean isChecked) {
+        mOperatorCheckedState.setValue(isChecked);
     }
 
     /**
@@ -244,10 +255,9 @@ public class AuthenticatorViewModel extends ViewModel {
      * @param emailError    The id of the email error.
      * @param nameError     The id of the name error.
      * @param passwordError The id of the password error.
-     * @param roleError     The id of the role error.
      */
-    private void updateFromState(Integer emailError, Integer nameError, Integer passwordError, Integer roleError) {
-        updateFromState(new AuthFormState(emailError, nameError, passwordError, roleError));
+    private void updateFromState(Integer emailError, Integer nameError, Integer passwordError) {
+        updateFromState(new AuthFormState(emailError, nameError, passwordError));
     }
 
     /**
@@ -392,5 +402,4 @@ public class AuthenticatorViewModel extends ViewModel {
     LiveData<AuthResult> getAuthenticatorResult() {
         return mAuthResultState;
     }
-
 }

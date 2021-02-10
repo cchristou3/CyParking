@@ -279,7 +279,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
     @Override
     public void onUserStateChanged(@Nullable LoggedInUser loggedInUser) {
         Log.d(TAG, "User State: " + loggedInUser);
-        if (loggedInUser == null || !loggedInUser.isUser()) { // User has logged out
+        if (loggedInUser == null) { // User has logged out
             AlertBuilder.promptUserToLogIn(getChildFragmentManager(), requireActivity(), this,
                     R.string.logout_view_bookings_screen_msg);
         } else {

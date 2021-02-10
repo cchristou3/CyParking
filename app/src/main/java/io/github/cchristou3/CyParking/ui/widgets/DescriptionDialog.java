@@ -1,11 +1,11 @@
 package io.github.cchristou3.CyParking.ui.widgets;
 
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,13 +14,23 @@ import androidx.fragment.app.DialogFragment;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 import io.github.cchristou3.CyParking.R;
 
+/**
+ * Purpose: Display information related to the operator role.
+ * <p>
+ * <strong>Note:</strong>
+ * Could be easily used as a generic Role-display dialog
+ * when updated correctly. Useful when future roles are going to
+ * be added. E.g. administrator, etc.
+ * </p>
+ *
+ * @author Charalambos Christou
+ * @version 2.0 10/02/21
+ */
 public class DescriptionDialog extends DialogFragment {
-
-    private CharSequence mDescription;
-    private CharSequence mTitle;
-    private int mNightModeFlags;
 
     /**
      * Use this factory method to create a new instance of
@@ -29,27 +39,10 @@ public class DescriptionDialog extends DialogFragment {
      * @return A new instance of fragment DescriptionDialog.
      */
     @NotNull
-    public static DescriptionDialog newInstance(CharSequence title, CharSequence description, int nightModeFlags) {
+    public static DescriptionDialog newInstance() {
         DescriptionDialog descriptionDialog = new DescriptionDialog();
-        descriptionDialog.setDescription(description);
-        descriptionDialog.setTitle(title);
-        descriptionDialog.mNightModeFlags = nightModeFlags;
-        // TODO: 01/02/2021 Update Themes
         descriptionDialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.Widget_CyParking_Dialog);
-        //descriptionDialog.setStyle(DialogFragment.STYLE_NORMAL, getStyleConfiguration(nightModeFlags));
         return descriptionDialog;
-    }
-
-    /**
-     * Returns a style based on the current Night mode configs.
-     *
-     * @param nightModeFlags Indicates the device's settings on Night mode (On/Off/???)
-     * @return TODO: Update
-     */
-    public static int getStyleConfiguration(int nightModeFlags) {
-        //if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) return R.style.CustomDialogDark;
-
-        return R.style.Theme_MaterialComponents_Light_Dialog; // UI_MODE_NIGHT_NO or UI_MODE_NIGHT_UNDEFINED
     }
 
     /**
@@ -74,25 +67,20 @@ public class DescriptionDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // Set the dialog's title
-        requireDialog().setTitle(mTitle);
+        requireDialog().setTitle(getString(R.string.operator));
         // Set the dialog's description
-        ((TextView) view.findViewById(R.id.dialog_role_description_txt_description)).setText(mDescription);
+        ((TextView) view.findViewById(R.id.dialog_role_description_txt_description)).setText(getString(R.string.op_desc));
         // Hook up the listener to the dismiss button
         view.findViewById(R.id.dialog_role_description_btn_dismiss).setOnClickListener(v -> dismiss());
 
-        if (mNightModeFlags != Configuration.UI_MODE_NIGHT_YES)
-            ((Button) view.findViewById(R.id.dialog_role_description_btn_dismiss))
-                    .setTextColor(getResources().getColor(R.color.black));
-    }
-
-    /**
-     * Setters
-     */
-    public void setDescription(CharSequence mDescription) {
-        this.mDescription = mDescription;
-    }
-
-    public void setTitle(CharSequence mTitle) {
-        this.mTitle = mTitle;
+        // Display the role's responsibilities
+        ListView listView = view.findViewById(R.id.dialog_role_description_lv);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1,
+                Arrays.asList(
+                        getString(R.string.op_item1),
+                        getString(R.string.op_item2),
+                        getString(R.string.op_item3)
+                ));
+        listView.setAdapter(arrayAdapter);
     }
 }

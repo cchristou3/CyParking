@@ -15,7 +15,7 @@ import java.util.List;
  * Also, exposes authenticated user details to the UI.
  *
  * @author Charalambos Christou
- * @version 2.0 16/01/21
+ * @version 3.0 10/02/21
  */
 public class LoggedInUser implements Parcelable {
 
@@ -30,10 +30,10 @@ public class LoggedInUser implements Parcelable {
             return new LoggedInUser[size];
         }
     };
-    public static final String USER = "User";
+
     public static final String OPERATOR = "Operator";
     private String userId;
-    private List<String> roles;
+    private List<String> roles; // Note: HashSet is more convenient but Firebase does not support it.
     private String displayName;
     private String email;
 
@@ -98,16 +98,6 @@ public class LoggedInUser implements Parcelable {
 
     public List<String> getRoles() {
         return roles;
-    }
-
-    /**
-     * Checks whether the instance is a {@link #USER} of role.
-     *
-     * @return True if the user is. Otherwise, false.
-     */
-    @Exclude
-    public boolean isUser() {
-        return isRole(USER);
     }
 
     /**

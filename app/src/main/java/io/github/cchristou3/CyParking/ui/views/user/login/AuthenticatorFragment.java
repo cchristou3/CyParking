@@ -26,11 +26,9 @@ import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
  * acquire the same instance of {@link AuthenticatorViewModel}.
  *
  * @author Charalambos Christou
- * @version 4.0 02/02/21
+ * @version 5.0 11/02/21
  */
 public class AuthenticatorFragment extends Fragment implements Navigable {
-
-    public static final String SIGN_UP_KEY = "userWantsToSignUp";
 
     public AuthenticatorFragment() {/* Required empty public constructor */}
 
@@ -68,7 +66,7 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
      * @see AccountFragment#toAuthenticator()
      */
     private void checkIfUserWantsToRegister(TabLayout tabLayout) {
-        if (getArguments() != null && getArguments().getBoolean(SIGN_UP_KEY)) {
+        if (getArguments() != null && getArguments().getBoolean(getString(R.string.email_arg))) {
             tabLayout.selectTab(tabLayout
                             .getTabAt(1), // Sign up tab
                     true);
@@ -92,7 +90,10 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
     @Override
     public void toBookings() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_authenticator_fragment_to_nav_view_bookings);
+                .navigate(
+                        AuthenticatorFragmentDirections
+                                .actionNavAuthenticatorFragmentToNavViewBookings()
+                );
     }
 
     /**
@@ -102,7 +103,9 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
     @Override
     public void toAccount() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_authenticator_fragment_to_nav_account);
+                .navigate(
+                        AuthenticatorFragmentDirections.actionNavAuthenticatorFragmentToNavAccount()
+                );
     }
 
     /**
@@ -112,7 +115,9 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
     @Override
     public void toFeedback() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_authenticator_fragment_to_nav_feedback);
+                .navigate(
+                        AuthenticatorFragmentDirections.actionNavAuthenticatorFragmentToNavFeedback()
+                );
     }
 
     /**
@@ -122,6 +127,8 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
     @Override
     public void toHome() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_authenticator_fragment_to_nav_home);
+                .navigate(
+                        AuthenticatorFragmentDirections.actionNavAuthenticatorFragmentToNavHome()
+                );
     }
 }

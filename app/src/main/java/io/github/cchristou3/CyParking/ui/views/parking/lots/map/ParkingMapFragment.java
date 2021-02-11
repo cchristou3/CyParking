@@ -79,7 +79,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVis
  * </p>
  *
  * @author Charalambos Christou
- * @version 12.0 28/01/21
+ * @version 13.0 11/02/21
  * <p>
  * New changes:
  * <p><b>On server</b>: via a cloud function retrieve the document ids of all
@@ -384,7 +384,10 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     @Override
     public void toAuthenticator() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_parking_map_fragment_to_nav_authenticator_fragment);
+                .navigate(
+                        ParkingMapFragmentDirections
+                                .actionNavParkingMapFragmentToNavAuthenticatorFragment()
+                );
     }
 
     /**
@@ -394,7 +397,9 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     @Override
     public void toBookings() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_parking_map_fragment_to_nav_view_bookings);
+                .navigate(
+                        ParkingMapFragmentDirections.actionNavParkingMapFragmentToNavViewBookings()
+                );
     }
 
     /**
@@ -404,7 +409,9 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     @Override
     public void toAccount() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_parking_map_fragment_to_nav_account);
+                .navigate(
+                        ParkingMapFragmentDirections.actionNavParkingMapFragmentToNavAccount()
+                );
     }
 
     /**
@@ -414,7 +421,9 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     @Override
     public void toFeedback() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_parking_map_fragment_to_nav_feedback);
+                .navigate(
+                        ParkingMapFragmentDirections.actionNavParkingMapFragmentToNavFeedback()
+                );
     }
 
     /**
@@ -424,7 +433,9 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     @Override
     public void toHome() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_parking_map_fragment_to_nav_home);
+                .navigate(
+                        ParkingMapFragmentDirections.actionNavParkingMapFragmentToNavHome()
+                );
     }
 
 
@@ -753,7 +764,9 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
             Log.d(TAG, "onViewCreated: sending over: " + mMarkerManager.getSelectedParkingLot());
             EventBus.getDefault().postSticky(mMarkerManager.getSelectedParkingLot()); // TODO: 21/01/2021 Convert to bundle - getArguments
             getNavController(requireActivity())
-                    .navigate(R.id.action_nav_parking_map_fragment_to_parking_booking_fragment);
+                    .navigate(
+                            ParkingMapFragmentDirections.actionNavParkingMapFragmentToParkingBookingFragment()
+                    );
         } else {
             Toast.makeText(requireContext(), "Oops something went wrong!", Toast.LENGTH_SHORT).show();
         }

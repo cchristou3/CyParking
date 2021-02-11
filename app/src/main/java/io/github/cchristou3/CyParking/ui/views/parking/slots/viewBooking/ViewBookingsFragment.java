@@ -47,7 +47,7 @@ import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
  * </p>
  *
  * @author Charalambos Christou
- * @version 7.0 03/02/21
+ * @version 8.0 11/02/21
  */
 public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBinding>
         implements Navigable, BaseFragment.UserStateUiHandler {
@@ -227,7 +227,10 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
          *  However, in case the user is in this screen and decides to logout,
          *  an alert will be displayed. */
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_view_bookings_to_nav_authenticator_fragment);
+                .navigate(
+                        ViewBookingsFragmentDirections
+                                .actionNavViewBookingsToNavAuthenticatorFragment()
+                );
     }
 
     /**
@@ -246,7 +249,9 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
     @Override
     public void toAccount() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_view_bookings_to_nav_account);
+                .navigate(
+                        ViewBookingsFragmentDirections.actionNavViewBookingsToNavAccount()
+                );
     }
 
     /**
@@ -256,7 +261,9 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
     @Override
     public void toFeedback() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_view_bookings_to_nav_feedback);
+                .navigate(
+                        ViewBookingsFragmentDirections.actionNavViewBookingsToNavFeedback()
+                );
     }
 
     /**
@@ -266,7 +273,9 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
     @Override
     public void toHome() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_view_bookings_to_nav_home);
+                .navigate(
+                        ViewBookingsFragmentDirections.actionNavViewBookingsToNavHome()
+                );
     }
 
     /**

@@ -68,7 +68,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * <p>
  *
  * @author Charalambos Christou
- * @version 6.0 08/02/21
+ * @version 7.0 11/02/21
  */
 public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding>
         implements Navigable, LocationHandler, TextWatcher, View.OnClickListener {
@@ -641,7 +641,10 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     @Override
     public void toAuthenticator() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_register_lot_fragment_to_nav_authenticator_fragment);
+                .navigate(
+                        RegisterLotFragmentDirections
+                                .actionNavRegisterLotFragmentToNavAuthenticatorFragment()
+                );
     }
 
     /**
@@ -651,7 +654,9 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     @Override
     public void toBookings() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_register_lot_fragment_to_nav_view_bookings);
+                .navigate(
+                        RegisterLotFragmentDirections.actionNavRegisterLotFragmentToNavViewBookings()
+                );
     }
 
     /**
@@ -661,7 +666,9 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     @Override
     public void toAccount() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_register_lot_fragment_to_nav_account);
+                .navigate(
+                        RegisterLotFragmentDirections.actionNavRegisterLotFragmentToNavAccount()
+                );
     }
 
     /**
@@ -671,7 +678,9 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     @Override
     public void toFeedback() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_register_lot_fragment_to_nav_feedback);
+                .navigate(
+                        RegisterLotFragmentDirections.actionNavRegisterLotFragmentToNavFeedback()
+                );
     }
 
     /**
@@ -681,7 +690,9 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     @Override
     public void toHome() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_register_lot_fragment_to_nav_home);
+                .navigate(
+                        RegisterLotFragmentDirections.actionNavRegisterLotFragmentToNavHome()
+                );
     }
 
     /**

@@ -165,6 +165,8 @@
         authentication. Log in again before retrying this request.</string>
     <string name="directions">directions</string>
     <string name="book">Book</string>
+    <string name="sign_up_arg">sign_up</string>
+    <string name="email_arg">email</string>
 
     <!-- String related to test cases   -->
     <string name="any_error">Error</string>

@@ -21,14 +21,13 @@ import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.user.account.update.UpdateAccountDialog;
-import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorHosteeFragment;
 
 /**
  * Purpose: <p>Allow logged in users to change their private data.</p>
  *
  * @author Charalambos Christou
- * @version 6.0 02/02/21
+ * @version 7.0 11/02/21
  */
 public class AccountFragment extends BaseFragment<FragmentAccountBinding> implements Navigable {
 
@@ -186,16 +185,14 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding> implem
      */
     @Override
     public void toAuthenticator() {
-        Bundle bundle = null;
+        AccountFragmentDirections.ActionNavAccountToNavAuthenticatorFragment
+                directions = AccountFragmentDirections.actionNavAccountToNavAuthenticatorFragment();
         if (getGlobalStateViewModel().getUser() != null) {
-            bundle = new Bundle();
-            bundle.putString(getString(R.string.email_low), getGlobalStateViewModel().getUser().getEmail());
+            directions.setEmail(getGlobalStateViewModel().getUser().getEmail());
         } else if (signUpWasClicked) {
-            bundle = new Bundle();
-            bundle.putBoolean(AuthenticatorFragment.SIGN_UP_KEY, true);
+            directions.setSignUp(true);
         }
-        getNavController(requireActivity())
-                .navigate(R.id.action_nav_account_to_nav_authenticator_fragment, bundle);
+        getNavController(requireActivity()).navigate(directions);
     }
 
     /**
@@ -205,7 +202,9 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding> implem
     @Override
     public void toBookings() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_account_to_nav_view_bookings);
+                .navigate(
+                        AccountFragmentDirections.actionNavAccountToNavViewBookings()
+                );
     }
 
     /**
@@ -224,7 +223,9 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding> implem
     @Override
     public void toFeedback() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_account_to_nav_feedback);
+                .navigate(
+                        AccountFragmentDirections.actionNavAccountToNavFeedback()
+                );
     }
 
     /**
@@ -234,6 +235,8 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding> implem
     @Override
     public void toHome() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_account_to_nav_home);
+                .navigate(
+                        AccountFragmentDirections.actionNavAccountToNavHome()
+                );
     }
 }

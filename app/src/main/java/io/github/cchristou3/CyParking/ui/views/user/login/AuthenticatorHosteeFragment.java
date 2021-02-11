@@ -40,7 +40,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * <p>
  *
  * @author Charalambos Christou
- * @version 7.0 3.0 10/02/21
+ * @version 7.0 10/02/21
  */
 public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthenticatorHosteeBinding> implements TextWatcher {
 

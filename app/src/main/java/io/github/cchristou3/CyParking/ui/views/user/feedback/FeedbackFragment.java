@@ -38,7 +38,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * </p>
  *
  * @author Charalambos Christou
- * @version 7.0 02/02/21
+ * @version 8.0 11/02/21
  */
 public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> implements Navigable, TextWatcher {
 
@@ -240,7 +240,10 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
     @Override
     public void toAuthenticator() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_feedback_to_nav_authenticator_fragment);
+                .navigate(
+                        FeedbackFragmentDirections
+                                .actionNavFeedbackToNavAuthenticatorFragment()
+                );
     }
 
     /**
@@ -250,7 +253,9 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
     @Override
     public void toBookings() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_feedback_to_nav_view_bookings);
+                .navigate(
+                        FeedbackFragmentDirections.actionNavFeedbackToNavViewBookings()
+                );
     }
 
     /**
@@ -260,7 +265,9 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
     @Override
     public void toAccount() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_feedback_to_nav_account);
+                .navigate(
+                        FeedbackFragmentDirections.actionNavFeedbackToNavAccount()
+                );
     }
 
     /**
@@ -279,6 +286,8 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
     @Override
     public void toHome() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_feedback_to_nav_home);
+                .navigate(
+                        FeedbackFragmentDirections.actionNavFeedbackToNavHome()
+                );
     }
 }

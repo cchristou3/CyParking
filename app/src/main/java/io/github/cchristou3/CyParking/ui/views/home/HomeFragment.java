@@ -49,7 +49,7 @@ import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
  * </p>
  *
  * @author Charalambos Christou
- * @version 9.0 28/01/21
+ * @version 10.0 11/02/21
  */
 public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements Navigable, LocationHandler {
 
@@ -293,7 +293,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
                 .setOnClickListener(v ->
                         // Navigate to the parking lot registration form
                         getNavController(requireActivity())
-                                .navigate(R.id.action_nav_home_to_nav_register_lot_fragment));
+                                .navigate(
+                                        HomeFragmentDirections.actionNavHomeToNavRegisterLotFragment()
+                                ));
     }
 
     /**
@@ -353,7 +355,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     @Override
     public void toAuthenticator() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_home_to_nav_authenticator_fragment);
+                .navigate(
+                        HomeFragmentDirections.actionNavHomeToNavAuthenticatorFragment()
+                );
     }
 
     /**
@@ -363,7 +367,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     @Override
     public void toBookings() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_home_to_nav_view_bookings);
+                .navigate(
+                        HomeFragmentDirections.actionNavHomeToNavViewBookings()
+                );
     }
 
     /**
@@ -373,7 +379,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     @Override
     public void toAccount() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_home_to_nav_account);
+                .navigate(
+                        HomeFragmentDirections.actionNavHomeToNavAccount()
+                );
     }
 
     /**
@@ -383,7 +391,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     @Override
     public void toFeedback() {
         getNavController(requireActivity())
-                .navigate(R.id.action_nav_home_to_nav_feedback);
+                .navigate(
+                        HomeFragmentDirections.actionNavHomeToNavFeedback()
+                );
     }
 
     /**
@@ -411,7 +421,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
             EventBus.getDefault().postSticky(new LatLng(userLatestLocation.getLatitude(), userLatestLocation.getLongitude()));
             // Navigate to the ParkingMapFragment
             getNavController(requireActivity())
-                    .navigate(R.id.action_home_to_parking_map);
+                    .navigate(
+                            HomeFragmentDirections.actionHomeToParkingMap()
+                    );
         } else {
             // Inform the user something wrong happened
             Toast.makeText(requireContext(), getString(R.string.error_retrieving_location), Toast.LENGTH_SHORT).show();

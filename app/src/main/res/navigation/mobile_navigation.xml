@@ -112,10 +112,16 @@
             app:popUpTo="@id/nav_account">
 
             <argument
-                android:name="@string/email_low"
+                android:name="email"
                 android:defaultValue="@null"
                 app:argType="string"
                 app:nullable="true" />
+
+            <argument
+                android:name="sign_up"
+                android:defaultValue="true"
+                app:argType="boolean"
+                app:nullable="false" />
 
         </action>
         <action

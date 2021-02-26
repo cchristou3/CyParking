@@ -36,7 +36,6 @@ public class AuthenticatorRepository implements DataSourceRepository.UserHandler
     private final FirebaseAuth mDataSource;
 
     /**
-     * Private Constructor : singleton access.
      * Initializes the Repository's {@link FirebaseAuth}
      * member with its current available instance.
      */

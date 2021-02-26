@@ -21,6 +21,10 @@ public class DateTimeUtility {
     // Static Constants
     private static final String DATE_PATTERN = "dd/MM/yyyy";
 
+    // No instances. Static utilities only.
+    private DateTimeUtility() {
+    }
+
     /**
      * Checks whether the given date is the same or greater than the
      * current date.

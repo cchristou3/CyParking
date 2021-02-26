@@ -35,6 +35,10 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
  */
 public class ViewUtility {
 
+    // No instances. Static utilities only.
+    private ViewUtility() {
+    }
+
     /**
      * Updates the specified Checkboxes' error status with the given error.
      * Used in {@link io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorHosteeFragment}.

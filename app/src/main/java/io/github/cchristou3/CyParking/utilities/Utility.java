@@ -17,6 +17,10 @@ import java.util.List;
  */
 public class Utility {
 
+    // No instances. Static utilities only.
+    private Utility() {
+    }
+
     /**
      * Checks whether the given list contains the given element
      * via the use of {@link Comparable#compareTo(Object)}.

@@ -99,7 +99,7 @@ public interface Navigable {
      * @return The NavController associated with the
      * {@link MainHostActivity}'s NavigationView.
      * @see MainHostActivity#getNavigationView()
-     * @see MainHostActivity#setApplicationNavController()
+     * @see MainHostActivity#setUpApplicationNavController()
      */
     default NavController getNavController(@NotNull FragmentActivity activity) {
         if (activity instanceof MainHostActivity) {

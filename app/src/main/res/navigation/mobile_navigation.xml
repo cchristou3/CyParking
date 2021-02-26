@@ -293,10 +293,6 @@
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit"
             app:popUpTo="@id/nav_authenticator_fragment" />
-        <!--        <action-->
-        <!--            android:id="@+id/action_nav_authenticator_fragment_pop"-->
-        <!--            app:popUpTo="@id/nav_authenticator_fragment"-->
-        <!--            app:popUpToInclusive="true" />-->
     </fragment>
 
     <fragment
@@ -347,7 +343,7 @@
     <fragment
         android:id="@+id/nav_register_lot_fragment"
         android:name="io.github.cchristou3.CyParking.ui.views.parking.lots.register.RegisterLotFragment"
-        android:label="Parking Lot Registration"
+        android:label="@string/fill_in_details"
         tools:layout="@layout/register_lot_fragment">
         <action
             android:id="@+id/action_nav_register_lot_fragment_to_nav_authenticator_fragment"

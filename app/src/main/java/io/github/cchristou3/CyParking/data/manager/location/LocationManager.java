@@ -17,7 +17,6 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +60,7 @@ public abstract class LocationManager {
      */
     /*package-private*/ LocationManager(@NonNull final Context context) {
         Log.d(TAG, "LocationManager initialized");
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+        mFusedLocationProviderClient = ServiceLocator.getInstance(context).getLocationProviderClient();
     }
 
     /**

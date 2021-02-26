@@ -318,6 +318,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      */
     @Override
     public void onLocationResult(LocationResult locationResult) {
+        Log.d(TAG, "onLocationResult: From Map");
         if (locationResult == null) return;
 
         mLocationUpdatesCounter++; // Increment the counter

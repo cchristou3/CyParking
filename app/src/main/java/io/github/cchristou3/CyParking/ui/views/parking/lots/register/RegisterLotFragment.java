@@ -621,7 +621,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
      */
     @Override
     public void onLocationResult(LocationResult locationResult) {
-        Log.d(TAG, "onLocationResult");
+        Log.d(TAG, "onLocationResult: From Register");
         if (locationResult != null) {
             // Access the latest location
             Location currentLocation = locationResult.getLastLocation();

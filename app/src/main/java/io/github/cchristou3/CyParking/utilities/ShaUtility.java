@@ -17,6 +17,10 @@ public class ShaUtility {
 
     private static final String SHA256 = "SHA-256";
 
+    // No instances. Static utilities only.
+    private ShaUtility() {
+    }
+
     /**
      * Hashes the specified input using a hashing algorithm
      *

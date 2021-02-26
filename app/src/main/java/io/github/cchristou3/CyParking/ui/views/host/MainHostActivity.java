@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,6 +28,7 @@ import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.ActivityMainHostBinding;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.utilities.AnimationUtility;
+import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateVisibilityOfLoadingBarTo;
 
@@ -106,16 +108,32 @@ public class MainHostActivity extends AppCompatActivity {
      */
     private void setUpNavigation() {
         // Set up ActionBar //
-        setSupportActionBar(mBinding.activityMainHostTbToolbar);
-
+        setUpActionBar();
         // Set up drawer //
+        setUpDrawer();
+        // Set Up global NavController //
+        setUpApplicationNavController();
+    }
+
+    /**
+     * Set the Activity's action bar, its icon, and an on click listener
+     * on-click: open the drawer menu.
+     */
+    private void setUpActionBar() {
+        setSupportActionBar(mBinding.activityMainHostTbToolbar);
+        mBinding.activityMainHostTbToolbar.setNavigationOnClickListener(v -> mBinding.activityMainHostDlDrawerLayout.open());
+        mBinding.activityMainHostTbToolbar.setNavigationIcon(R.drawable.ic_action_menu_white);
+    }
+
+    /**
+     * Attaches on click listeners to the drawer's menu items.
+     */
+    private void setUpDrawer() {
         // Attach listeners to the drawer's items
         final int numOfDrawerItems = getDrawerMenu().size();
         for (int i = 0; i < numOfDrawerItems; i++) {
             getDrawerMenu().getItem(i).setOnMenuItemClickListener(this::onMenuItemClick);
         }
-        // Set Up global NavController //
-        setApplicationNavController();
     }
 
     /**
@@ -223,7 +241,7 @@ public class MainHostActivity extends AppCompatActivity {
      *
      * @see Navigable#getNavController(FragmentActivity)
      */
-    public void setApplicationNavController() {
+    public void setUpApplicationNavController() {
         // Set up the NavController, bind it with the specified NavigationView
         // The fragments can access the same controller by passing in the same NavigationView
         Navigation.setViewNavController(getNavigationView(),
@@ -250,15 +268,32 @@ public class MainHostActivity extends AppCompatActivity {
      * @param currentUser The latest {@link LoggedInUser} object.
      */
     private void updateDrawer(LoggedInUser currentUser) {
+        // Access the Drawer's header elements
+        TextView drawerName = mBinding.activityMainHostDlDrawerLayout.findViewById(R.id.nav_header_main_tv_name);
+        TextView drawerEmail = mBinding.activityMainHostDlDrawerLayout.findViewById(R.id.nav_header_main_tv_email);
+
         // Logged in user can
         // see/perform bookings
         if (currentUser != null) { // User is logged in
             // Enable all 'logged in user' features'
             enableLoggedInDestinations();
+            if (drawerName != null && drawerEmail != null) {
+                updateDrawerHeaderTextVisibilityTo(drawerName, drawerEmail, View.VISIBLE);
+                drawerName.setText(currentUser.getDisplayName());
+                drawerEmail.setText(currentUser.getEmail());
+            }
         } else {
             // TODO: Update drawer to only show non-loggedIn-specific actions
             getDrawerMenu().findItem(R.id.nav_view_bookings).setVisible(false);
+            if (drawerName != null && drawerEmail != null) {
+                updateDrawerHeaderTextVisibilityTo(drawerName, drawerEmail, View.GONE);
+            }
         }
+    }
+
+    private void updateDrawerHeaderTextVisibilityTo(TextView drawerName, TextView drawerEmail, int visible) {
+        ViewUtility.updateViewVisibilityTo(drawerName, visible);
+        ViewUtility.updateViewVisibilityTo(drawerEmail, visible);
     }
 
     private void enableLoggedInDestinations() {
@@ -312,7 +347,7 @@ public class MainHostActivity extends AppCompatActivity {
                 getActiveNavigableFragment().toFeedback();
                 break;
         }
-        mBinding.activityMainHostDlDrawerLayout.close();
+        mBinding.activityMainHostDlDrawerLayout.closeDrawers();
         return false;
     }
 

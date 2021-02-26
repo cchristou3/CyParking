@@ -68,7 +68,7 @@
     <string name="mobile_phone">Mobile phone: </string>
     <string name="basic_info">Basic Info</string>
     <string name="capacity">Capacity: </string>
-    <string name="get_location_text">Or get location via GPS</string>
+    <string name="get_location_text">Or input latitude and longitude below</string>
     <string name="get_location">Get location</string>
     <string name="hint_longitude">Longitude</string>
     <string name="longitude">Longitude:</string>
@@ -178,5 +178,6 @@
     <string name="scan_a_lot">Scan a lot</string>
     <string name="scan_a_booking">Scan a booking</string>
     <string name="view_qr_code">View QR Code</string>
+    <string name="fill_in_details">Fill In Details</string>
 
 </resources>

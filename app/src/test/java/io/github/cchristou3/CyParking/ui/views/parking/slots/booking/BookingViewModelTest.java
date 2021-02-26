@@ -79,6 +79,62 @@ public class BookingViewModelTest extends InstantTaskRuler {
     }
 
     @Test
-    public void name() {
+    public void setQRCodeMessage_SetsNewValue() {
+        // Given a new message got given
+        String message = "hello";
+        // When setQRCodeMessage gets invoked with the above string
+        bookingViewModel.setQRCodeMessage(message);
+        // Then getQRCodeMessage() should return the same message
+        assertThat(bookingViewModel.getQRCodeMessage(), is(message));
+    }
+
+    @Test
+    public void getQRCodeButtonState_returnsFalseInitially() throws InterruptedException {
+        assertThat(getOrAwaitValue(bookingViewModel.getQRCodeButtonState()), is(false));
+    }
+
+    @Test
+    public void updateQRCodeButtonState_setsTrue() throws InterruptedException {
+        // Given the date gets updated
+        boolean shouldShow = true;
+        // When updateQRCodeButtonState gets called
+        bookingViewModel.updateQRCodeButtonState(shouldShow);
+        // Then it should update the livedata's value and getQRCodeButtonState should return the assigned value
+        assertThat(getOrAwaitValue(bookingViewModel.getQRCodeButtonState()), is(shouldShow));
+    }
+
+    @Test
+    public void updateQRCodeButtonState_setsFalse() throws InterruptedException {
+        // Given the date gets updated
+        boolean shouldShow = false;
+        // When updateQRCodeButtonState gets called
+        bookingViewModel.updateQRCodeButtonState(shouldShow);
+        // Then it should update the livedata's value and getQRCodeButtonState should return the assigned value
+        assertThat(getOrAwaitValue(bookingViewModel.getQRCodeButtonState()), is(shouldShow));
+    }
+
+    @Test
+    public void getBookingButtonState_returnsFalseInitially() throws InterruptedException {
+        assertThat(getOrAwaitValue(bookingViewModel.getBookingButtonState()), is(false));
+    }
+
+    @Test
+    public void updateBookingButtonState_setsTrue() throws InterruptedException {
+        // Given the date gets updated
+        boolean shouldShow = true;
+        // When updateBookingButtonState gets called
+        bookingViewModel.updateBookingButtonState(shouldShow);
+        // Then it should update the livedata's value and getBookingButtonState should return the assigned value
+        assertThat(getOrAwaitValue(bookingViewModel.getBookingButtonState()), is(shouldShow));
+    }
+
+    @Test
+    public void updateBookingButtonState_setsFalse() throws InterruptedException {
+        // Given the date gets updated
+        boolean shouldShow = false;
+        // When updateBookingButtonState gets called
+        bookingViewModel.updateBookingButtonState(shouldShow);
+        // Then it should update the livedata's value and getBookingButtonState should return the assigned value
+        assertThat(getOrAwaitValue(bookingViewModel.getBookingButtonState()), is(shouldShow));
     }
 }

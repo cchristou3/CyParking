@@ -4,18 +4,15 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.core.widget.ContentLoadingProgressBar;
@@ -34,7 +31,7 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
  * related to the View.</p>
  *
  * @author Charalambos Christou
- * @version 8.0 10/02/21
+ * @version 9.0 25/02/21
  */
 public class ViewUtility {
 
@@ -101,25 +98,6 @@ public class ViewUtility {
     }
 
     /**
-     * Changes the background color of the fragment's "availability" view to either green
-     * or red based on availability's change and back to its original background color via
-     * animation.
-     *
-     * @param updatedAvailability The latest availability retrieved from the database.
-     * @param oldAvailability     The current availability.
-     */
-    public static void animateAvailabilityColorChanges(CardView cardViewParent, @NotNull View child,
-                                                       int updatedAvailability, int oldAvailability) {
-        if (updatedAvailability != oldAvailability) { // If availability got changed
-            ViewUtility.animateColorChange(
-                    cardViewParent,
-                    child,
-                    // If more spaces, animate with green. Otherwise, animate with red
-                    (updatedAvailability > oldAvailability) ? Color.GREEN : Color.RED);
-        }
-    }
-
-    /**
      * Hide the virtual keyboard.
      *
      * @param activity Any activity.
@@ -139,21 +117,6 @@ public class ViewUtility {
      */
     public static void scrollTo(@NotNull View view) {
         view.getParent().requestChildFocus(view, view);
-    }
-
-    /**
-     * Animates the view's color to the specified color
-     * and then back to its original one.
-     *
-     * @param cardViewParent A CardView with children.
-     * @param child          The child to have it color animated.
-     * @param to             The color to animate.
-     */
-    public static void animateColorChange(CardView cardViewParent, @NotNull View child, @ColorInt int to) {
-        ColorDrawable[] colorDrawables = {new ColorDrawable(to), getCardViewColor(cardViewParent)};
-        TransitionDrawable transitionDrawable = new TransitionDrawable(colorDrawables);
-        child.setBackground(transitionDrawable);
-        transitionDrawable.startTransition(2000);
     }
 
     /**

@@ -55,6 +55,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:' + viewmodelVersion
     implementation 'androidx.legacy:legacy-support-v4:' + legacySupportVersion
     implementation 'androidx.annotation:annotation:' + annotationVersion
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     // Junit testing framework - imported by default
     testImplementation 'junit:junit:' + junitVersion
@@ -62,6 +64,9 @@ dependencies {
     // AndroidX Test - Instrumented testing
     androidTestImplementation 'androidx.test.ext:junit:' + androidXTestExtRunnerVersion
     androidTestImplementation 'androidx.test.espresso:espresso-core:' + espressoVersion
+    androidTestImplementation 'androidx.navigation:navigation-testing:' + navVersion
+    androidTestImplementation 'androidx.fragment:fragment-testing:' + fragmentTestVersion
+    // For FragmentScenario
 
     // AndroidX Test - JVM testing - for local tests where you need simulated Android framework
     testImplementation 'androidx.test.ext:junit:' + androidXTestExtRunnerVersion
@@ -102,9 +107,12 @@ dependencies {
     // CardView
     implementation 'androidx.cardview:cardview:' + cardviewVersion
 
-    // Shimmer - TODO: Remove
-    implementation 'com.facebook.shimmer:shimmer:' + shimmerVersion
-
     // Java 8 DefaultLifecycleObserver dependency
     implementation 'android.arch.lifecycle:common-java8:' + lifecycleCommonJava8Version
+
+    // Dependencies for QR Code scanning and decoding
+    implementation('com.journeyapps:zxing-android-embedded:' + zxingAndroidEmbeddedVersion) { transitive = false }
+    implementation 'com.google.zxing:core:' + zxingVersion
+
+    implementation "androidx.security:security-crypto:1.1.0-alpha03"
 }

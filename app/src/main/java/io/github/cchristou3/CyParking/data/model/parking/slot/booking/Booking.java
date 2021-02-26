@@ -24,7 +24,7 @@ import io.github.cchristou3.CyParking.utilities.ShaUtility;
  * for the booking in the database.</p>
  *
  * @author Charalambos Christou
- * @version 5.0 23/01/21
+ * @version 5.0 24/02/2021
  */
 public class Booking extends ParkingId implements Parcelable, Comparable<Booking> {
 
@@ -40,6 +40,7 @@ public class Booking extends ParkingId implements Parcelable, Comparable<Booking
         }
     };
     public static final String LOT_NAME = "lotName";
+    public static final String REG_EX = ",";
     // Operator attributes
     private String operatorId;
     private String lotName;
@@ -47,6 +48,8 @@ public class Booking extends ParkingId implements Parcelable, Comparable<Booking
     private String bookingUserId;
     // Booking details
     private BookingDetails bookingDetails;
+
+    private String mQRCode;
 
     public Booking() { /* no-argument constructor to be used for deserialization */ }
 
@@ -105,6 +108,33 @@ public class Booking extends ParkingId implements Parcelable, Comparable<Booking
     }
 
     /**
+     * Converts the given string into a {@link Booking} instance.
+     * The string contains the attributes of the object separated by ',' ({@link #REG_EX}).
+     *
+     * @param sequence A string having the exact same syntax and order as {@link #toString()}.
+     * @return a {@link Booking} instance.
+     * @see #toString()
+     */
+    public static Booking toBooking(@NotNull String sequence) {
+        String[] attributes = sequence.split(REG_EX, 5);
+        return new Booking(
+                Integer.parseInt(attributes[0]),
+                attributes[1],
+                attributes[2],
+                attributes[3],
+                BookingDetails.toBookingDetails(attributes[4])
+        );
+    }
+
+    public String getQRCode() {
+        return mQRCode;
+    }
+
+    public void setQRCode(String mQRCode) {
+        this.mQRCode = mQRCode;
+    }
+
+    /**
      * Non-implemented Parcelable method.
      */
     @Override
@@ -130,16 +160,20 @@ public class Booking extends ParkingId implements Parcelable, Comparable<Booking
 
     /**
      * Returns a string representation of the object.
+     * The string contains the attributes of the object separated by ',' ({@link #REG_EX}).
      *
      * @return a string representation of the object.
+     * @see Booking#generateUniqueId()
+     * @see #toBooking(String)
      */
     @NonNull
     @Override
     public String toString() {
-        return super.toString() + ", operatorId: " + operatorId
-                + ", lotName: " + lotName
-                + ", bookingUserId: " + bookingUserId
-                + ", bookingDetails: { " + bookingDetails + " }";
+        return parkingId + REG_EX
+                + operatorId + REG_EX
+                + lotName + REG_EX
+                + bookingUserId + REG_EX
+                + bookingDetails.toString();
     }
 
     /**

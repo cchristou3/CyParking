@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +34,7 @@ import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
+import io.github.cchristou3.CyParking.ui.widgets.QRCodeDialog;
 
 import static io.github.cchristou3.CyParking.utilities.Utility.cloneList;
 import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
@@ -199,9 +199,19 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
      */
     private void setUpAdapter() {
         mBookingAdapter = new BookingAdapter(new BookingsDiffCallback(), getItemTouchHelper());
-        BookingAdapter.setOnItemClickListener(v ->
-                Toast.makeText(requireContext(), "TODO: Navigate to booking details screen!", Toast.LENGTH_SHORT).show()
-        );
+        BookingAdapter.setOnItemClickListener(v -> {
+            RecyclerView.ViewHolder h = (RecyclerView.ViewHolder) v.getTag();
+            // get the item's QR code that got clicked
+            String qrcode = mBookingAdapter.getCurrentList().get(h.getAdapterPosition()).getQRCode();
+
+            // Show a fragment that will display the QR code
+            new QRCodeDialog(
+                    requireContext(),
+                    getBinding().fragmentViewBookingsClMainCl,
+                    qrcode)
+                    .show();
+
+        });
     }
 
     /**

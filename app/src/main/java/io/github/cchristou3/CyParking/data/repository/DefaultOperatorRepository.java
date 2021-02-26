@@ -28,7 +28,9 @@ import static io.github.cchristou3.CyParking.ui.views.parking.lots.map.ParkingMa
  * @author Charalambos Christou
  * @version 3.0 06/02/21
  */
-public class DefaultOperatorRepository implements OperatorRepository, DataSourceRepository.ParkingLotHandler {
+public class DefaultOperatorRepository implements OperatorRepository,
+        DataSourceRepository.ParkingLotHandler,
+        DataSourceRepository.BookingHandler {
 
     /**
      * Stores to the database's PRIVATE_PARKING node the specified object.
@@ -98,6 +100,18 @@ public class DefaultOperatorRepository implements OperatorRepository, DataSource
     @Override
     public void decrementAvailableSpacesOf(@NotNull final DocumentReference lotReference) {
         lotReference.update(AVAILABILITY + "." + AVAILABLE_SPACES, FieldValue.increment(-1));
+    }
+
+    /**
+     * The booking that has the given document id, gets its
+     * completed attribute set to true (aka, completed).
+     *
+     * @param bookingDocId The document id of a booking
+     */
+    @Override
+    public void updateBookingStatus(String bookingDocId) {
+        getBookingsRef().document(bookingDocId)
+                .update(BOOKING_DETAILS + "." + COMPLETED, true);
     }
 
     /**

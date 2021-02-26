@@ -47,9 +47,7 @@ public class BookingDetailsTest {
         // When a BookingDetails instance gets initialized
         BookingDetails details = new BookingDetails(DATE, TIME, OFFER);
         // Then
-        assertEquals(details.toString(), "dateOfBooking: " + DATE
-                + ", startingTime: " + TIME
-                + ", slotOffer: " + OFFER);
+        assertEquals(details.toString(), DATE.getTime() + "," + TIME.hour + "," + TIME.minute + "," + OFFER.getDuration() + "," + OFFER.getPrice());
 
     }
 

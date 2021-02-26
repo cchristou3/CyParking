@@ -60,7 +60,7 @@ public abstract class ParkingId {
     @NonNull
     @Override
     public String toString() {
-        return "Id: " + parkingId;
+        return Integer.toString(parkingId);
     }
 
     /**

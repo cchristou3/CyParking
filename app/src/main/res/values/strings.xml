@@ -177,5 +177,6 @@
     <string name="view_description">View Description</string>
     <string name="scan_a_lot">Scan a lot</string>
     <string name="scan_a_booking">Scan a booking</string>
+    <string name="view_qr_code">View QR Code</string>
 
 </resources>

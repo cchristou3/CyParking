@@ -21,7 +21,7 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
  * as booking details are part of a booking.
  *
  * @author Charalambos Christou
- * @version 05/02/2021
+ * @version 3.0 24/02/2021
  */
 public class BookingDetails implements Parcelable, Comparable<BookingDetails> {
 
@@ -36,7 +36,7 @@ public class BookingDetails implements Parcelable, Comparable<BookingDetails> {
             return new BookingDetails[size];
         }
     };
-
+    public static final String REG_EX = ",";
     // Booking attributes
     private boolean completed;
     private Date dateOfBooking;
@@ -89,6 +89,34 @@ public class BookingDetails implements Parcelable, Comparable<BookingDetails> {
         startingTime = in.readParcelable(Time.class.getClassLoader());
         slotOffer = in.readParcelable(SlotOffer.class.getClassLoader());
         completed = in.readByte() != 0;
+    }
+
+    /**
+     * Converts the given string into a {@link BookingDetails} instance.
+     * The string contains the attributes of the object separated by ','.
+     * The attributes must be given in this exact order:
+     * date(in Long,see {@link Date#getTime()}),hour,minutes,duration,price.
+     * E.g.
+     * 6543212345,2,34,2.0,1.0.
+     *
+     * @param sequence A string having the exact same syntax and order as {@link #toString()}.
+     * @return a {@link BookingDetails} instance.
+     * @see #toString()
+     */
+    @NotNull
+    public static BookingDetails toBookingDetails(@NotNull String sequence) {
+        String[] attributes = sequence.split(REG_EX, 5);
+        return new BookingDetails(
+                new Date(Long.parseLong(attributes[0])), // dateOfBooking
+                new Time(
+                        Integer.parseInt(attributes[1]), // hour
+                        Integer.parseInt(attributes[2]) // minute
+                ),
+                new SlotOffer(
+                        Float.parseFloat(attributes[3]), // duration
+                        Float.parseFloat(attributes[4]) // price
+                )
+        );
     }
 
     /**
@@ -199,16 +227,20 @@ public class BookingDetails implements Parcelable, Comparable<BookingDetails> {
     /**
      * Returns a string representation of the object.
      * Note: {@link #completed} is not included on purpose.
+     * The string contains the attributes of the object separated by ','.
      *
      * @return a string representation of the object.
      * @see Booking#generateUniqueId()
+     * @see #toBookingDetails(String)
      */
     @NonNull
     @Override
     public String toString() {
-        return "dateOfBooking: " + dateOfBooking
-                + ", startingTime: " + startingTime
-                + ", slotOffer: " + slotOffer;
+        return dateOfBooking.getTime() + REG_EX // passing the date as long
+                + startingTime.hour + REG_EX
+                + startingTime.minute + REG_EX
+                + slotOffer.getDuration() + REG_EX
+                + slotOffer.getPrice();
     }
 
     /**

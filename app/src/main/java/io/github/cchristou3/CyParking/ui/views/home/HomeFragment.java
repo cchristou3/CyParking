@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.ui.views.home;
 
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +20,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
@@ -27,9 +30,11 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
+import io.github.cchristou3.CyParking.data.manager.EncryptionManager;
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
 import io.github.cchristou3.CyParking.data.manager.location.SingleUpdateHelper;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentHomeBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
@@ -49,7 +54,7 @@ import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
  * </p>
  *
  * @author Charalambos Christou
- * @version 10.0 11/02/21
+ * @version 11.0 24/02/21
  */
 public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements Navigable, LocationHandler {
 
@@ -59,6 +64,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     // Members related to the Operator
     private OperatorViewModel mOperatorViewModel;
     private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
+    private IntentIntegrator mIntentIntegrator;
 
     /**
      * Inflates our fragment's view.
@@ -85,28 +91,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         observeUserState(this::updateUi);
-
-        // TODO: 10/02/2021 Implement the buttons and add descriptions below then
-        getBinding().fragmentHomeBtnScanBooking.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Not implemented yet!", Toast.LENGTH_SHORT).show();
-        });
-
-        getBinding().fragmentHomeBtnScanLot.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Not implemented yet!", Toast.LENGTH_SHORT).show();
-        });
-
-        // Attach listener to "Parking Map" button
-        getBinding().fragmentHomeBtnNavToMap.setOnClickListener(v -> {
-            // Initialize the SingleLocationManager object
-            if (mLocationManager == null) {
-                mLocationManager = LocationManager.createSingleUpdateHelper(requireContext(), this);
-            } else {
-                mLocationManager.prepareCallback();
-            }
-            // Request for the user's latest known location
-            Log.d(TAG, "requestUserLocationUpdates");
-            mLocationManager.requestUserLocationUpdates(this);
-        });
+        initializeButtonListeners();
 
         // TODO: Add splash screen till the app has been initialized (FirebaseApp, Network broadcasters, validating user's data, etc.).
     }
@@ -165,6 +150,71 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
 
         mLocationManager = null;
         super.onDestroyView();
+    }
+
+    /**
+     * Receive the result from a previous call to
+     * {@link #startActivityForResult(Intent, int)}.
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode  The integer result code returned by the child activity
+     *                    through its setResult().
+     * @param data        An Intent, which can return result data to the caller
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() == null) { // Used pressed the back button
+                Toast.makeText(requireContext(), "Cancelled", Toast.LENGTH_LONG).show();
+            } else {
+                try {
+                    // Access the qr code's payload
+                    String hex = result.getContents();
+                    // Convert it to an array of bytes
+                    byte[] newEncodedBytes = EncryptionManager.hexStringToByteArray(hex);
+                    // Decrypt it
+                    String decodedWithHex = new EncryptionManager().decrypt(newEncodedBytes);
+                    mOperatorViewModel.receiveBooking(
+                            // Access the previously stored lot reference
+                            (DocumentReference) getIntentIntegrator().getMoreExtras().get("ref"),
+                            // Convert the string into a Booking object and access its unique id
+                            Booking.toBooking(decodedWithHex).generateUniqueId()
+                    );
+                } catch (Exception ignored) {
+                }
+
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    /**
+     * Attach on click listeners to the 'scan lot' and 'parking map' buttons.
+     * 'Scan lot' on click: open up the QR code scanner.
+     * 'Parking map' on click: transition to the Google maps fragment.
+     */
+    private void initializeButtonListeners() {
+        // TODO: 10/02/2021 Implement the buttons and add descriptions below then
+        getBinding().fragmentHomeBtnScanLot.setOnClickListener(v -> {
+            Toast.makeText(requireContext(), "Not implemented yet!", Toast.LENGTH_SHORT).show();
+        });
+
+        // Attach listener to "Parking Map" button
+        getBinding().fragmentHomeBtnNavToMap.setOnClickListener(v -> {
+            // Initialize the SingleLocationManager object
+            if (mLocationManager == null) {
+                mLocationManager = LocationManager.createSingleUpdateHelper(requireContext(), this);
+            } else {
+                mLocationManager.prepareCallback();
+            }
+            // Request for the user's latest known location
+            Log.d(TAG, "requestUserLocationUpdates");
+            mLocationManager.requestUserLocationUpdates(this);
+        });
     }
 
     /**
@@ -264,6 +314,35 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         mDatabaseObserver.registerLifecycleObserver(getLifecycle());
     }
 
+    public void setUpScanBookingButton(DocumentReference lotRef) {
+        getBinding().fragmentHomeBtnScanBooking.setOnClickListener(v -> {
+            // Only available to operators
+            getIntentIntegrator()
+                    .addExtra("ref", lotRef)
+                    .initiateScan();
+        });
+    }
+
+    /**
+     * Return the fragment's {@link #mIntentIntegrator}.
+     * Lazy initialization is used.
+     *
+     * @return the fragment's {@link #mIntentIntegrator}.
+     */
+    private IntentIntegrator getIntentIntegrator() {
+        if (mIntentIntegrator == null) {
+            mIntentIntegrator = IntentIntegrator
+                    .forSupportFragment(HomeFragment.this)
+                    .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
+                    .setCameraId(0)
+                    .setPrompt("Please place the scanner on a booking generated QR Code.")
+                    .setBeepEnabled(true)
+                    .setBarcodeImageEnabled(true)
+                    .setCaptureActivity(PortraitCaptureActivity.class);
+        }
+        return mIntentIntegrator;
+    }
+
     /**
      * Updates the views related to the lot with the specified {@link ParkingLot}
      * instance.
@@ -330,6 +409,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      * @param userParkingLot The latest retrieved parking lot of the database.
      */
     private void setUpOperatorButtons(DocumentReference ref, ParkingLot userParkingLot) {
+        // add an appropriate on click listener
+        setUpScanBookingButton(ref);
+
         // Attach listeners to "increment", "decrement" buttons
         getBinding().fragmentHomeBtnIncrement.setOnClickListener(v -> {
             // If the lot has available spaces decrease its value by one

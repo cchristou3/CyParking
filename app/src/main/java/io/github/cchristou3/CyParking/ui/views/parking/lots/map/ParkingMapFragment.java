@@ -58,8 +58,8 @@ import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 
+import static io.github.cchristou3.CyParking.utilities.AnimationUtility.animateAvailabilityColorChanges;
 import static io.github.cchristou3.CyParking.utilities.Utility.getDistanceApart;
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.animateAvailabilityColorChanges;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVisibilityTo;
 
 /**
@@ -687,7 +687,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
             }
         });
 
-        // Attach observer to
+        // Attach observer to the latest retrieved document changes
         mParkingMapViewModel.getDocumentChangesState().observe(getViewLifecycleOwner(),
                 this::updateLocalDocuments);
 

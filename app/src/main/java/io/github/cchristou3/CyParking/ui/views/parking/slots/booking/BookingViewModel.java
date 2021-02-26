@@ -21,7 +21,7 @@ import io.github.cchristou3.CyParking.utilities.DateTimeUtility;
  * Purpose: Data persistence during orientation changes.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 30/10/20
+ * @version 3.0 24/02/21
  */
 public class BookingViewModel extends ViewModel {
 
@@ -35,7 +35,14 @@ public class BookingViewModel extends ViewModel {
     private final MutableLiveData<SlotOffer> mPickedSlotOffer =
             new MutableLiveData<>();
 
+    private final MutableLiveData<Boolean> mBookingButtonState =
+            new MutableLiveData<>(false); // Initially disabled
+
+    private final MutableLiveData<Boolean> mQRCodeButtonState =
+            new MutableLiveData<>(false); // Initially hidden
+
     private final BookingRepository mBookingRepository;
+    private String mQRCodeMessage;
 
     /**
      * Initialize the ViewModel's BookingRepository instance
@@ -45,6 +52,59 @@ public class BookingViewModel extends ViewModel {
      */
     public BookingViewModel(BookingRepository bookingRepository) {
         this.mBookingRepository = bookingRepository;
+    }
+
+    /**
+     * Access the {@link #mQRCodeMessage}.
+     *
+     * @return A reference to {@link #mQRCodeMessage}.
+     */
+    public String getQRCodeMessage() {
+        return mQRCodeMessage;
+    }
+
+    /**
+     * Sets the value of {@link #mQRCodeMessage}
+     * with the given argument.
+     */
+    public void setQRCodeMessage(String qrcodeValue) {
+        mQRCodeMessage = qrcodeValue;
+    }
+
+    /**
+     * Access the {@link #mQRCodeButtonState}.
+     *
+     * @return A reference to {@link #mQRCodeButtonState}.
+     */
+    public LiveData<Boolean> getQRCodeButtonState() {
+        return mQRCodeButtonState;
+    }
+
+    /**
+     * Updates the value of {@link #mQRCodeButtonState}
+     * with the given argument.
+     */
+    public void updateQRCodeButtonState(boolean show) {
+        mQRCodeButtonState.setValue(show);
+    }
+
+    /**
+     * Access the {@link #mBookingButtonState}.
+     *
+     * @return A reference to {@link #mBookingButtonState}.
+     */
+    public LiveData<Boolean> getBookingButtonState() {
+        return mBookingButtonState;
+    }
+
+    /**
+     * Updates the value of {@link #mBookingButtonState}
+     * with the given argument. If the state already has
+     * that value then it is ignored.
+     */
+    public void updateBookingButtonState(boolean isEnabled) {
+        if (mBookingButtonState.getValue() == isEnabled) return;
+        mBookingButtonState.setValue(isEnabled);
     }
 
     /**

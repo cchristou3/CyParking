@@ -49,4 +49,15 @@ public class FakeOperatorRepository implements OperatorRepository {
     public void decrementAvailableSpacesOf(@NotNull DocumentReference lotReference) {
 
     }
+
+    /**
+     * The booking that has the given document id, gets its
+     * completed attribute set to true (aka, completed).
+     *
+     * @param bookingDocId The document id of a booking
+     */
+    @Override
+    public void updateBookingStatus(String bookingDocId) {
+
+    }
 }

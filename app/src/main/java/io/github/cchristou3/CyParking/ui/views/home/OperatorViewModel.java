@@ -18,7 +18,7 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
  * Used when the operator is viewing/updating his/her parking lot.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 12/01/21
+ * @version 3.0 24/02/21
  */
 public class OperatorViewModel extends ViewModel {
 
@@ -88,5 +88,17 @@ public class OperatorViewModel extends ViewModel {
     public void decrementPersonCount(@NotNull final DocumentReference lotReference) {
         // One person left the parking lot, increase the number of available spaces.
         mDefaultOperatorRepository.incrementAvailableSpacesOf(lotReference);
+    }
+
+    /**
+     * Sets the Booking's (document id) completed status to true and
+     * decreases the lot's number of a available slots by one.
+     *
+     * @param lotReference The lot that the booking was issued for.
+     * @param bookingDocId The document id of the booking.
+     */
+    public void receiveBooking(DocumentReference lotReference, String bookingDocId) {
+        mDefaultOperatorRepository.updateBookingStatus(bookingDocId);
+        mDefaultOperatorRepository.decrementAvailableSpacesOf(lotReference);
     }
 }

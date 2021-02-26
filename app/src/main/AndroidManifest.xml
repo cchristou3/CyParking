@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="io.github.cchristou3.CyParking">
+
+    <!--  Needed for using the zxing-android-embedded library  -->
+    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -13,11 +17,19 @@
     <application
         android:name=".ui.application.CyParkingApplication"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CyParking">
+
+        <activity
+            android:name=".ui.views.home.PortraitCaptureActivity"
+            android:screenOrientation="fullSensor"
+            tools:replace="screenOrientation">
+
+        </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").

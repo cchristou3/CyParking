@@ -1,5 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+    ext {
+        kotlin_version = '1.4.30'
+    }
     repositories {
         google()
         jcenter()
@@ -55,7 +58,8 @@ ext {
     multidexVersion = '1.0.3'
     viewpager2Version = '1.0.0'
     cardviewVersion = '1.0.0'
-    shimmerVersion = '0.1.0@aar'
+    zxingAndroidEmbeddedVersion = '4.1.0'
+    zxingVersion = '3.3.0'
 
     // Shared Testing Dependencies
     androidXTestExtRunnerVersion = '1.1.2'
@@ -69,4 +73,6 @@ ext {
 
     // AndroidTest Dependencies
     espressoVersion = '3.3.0'
+    navVersion = '2.3.3'
+    fragmentTestVersion = '1.3.0'
 }

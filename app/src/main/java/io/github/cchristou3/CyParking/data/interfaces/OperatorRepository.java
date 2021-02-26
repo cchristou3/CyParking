@@ -13,7 +13,7 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
  * functionality related to the operator's tasks.
  *
  * @author Charalambos Christou
- * @version 12/01/2021
+ * @version 24/02/2021
  * @see io.github.cchristou3.CyParking.data.repository.DefaultOperatorRepository
  */
 public interface OperatorRepository {
@@ -54,4 +54,12 @@ public interface OperatorRepository {
      * @param lotReference A DocumentReference of the lot
      */
     void decrementAvailableSpacesOf(@NotNull DocumentReference lotReference);
+
+    /**
+     * The booking that has the given document id, gets its
+     * completed attribute set to true (aka, completed).
+     *
+     * @param bookingDocId The document id of a booking
+     */
+    void updateBookingStatus(String bookingDocId);
 }

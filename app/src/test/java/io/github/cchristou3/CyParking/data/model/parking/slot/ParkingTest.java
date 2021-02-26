@@ -41,7 +41,7 @@ public class ParkingTest {
             }
         };
         // Then
-        assertEquals("Id: " + ID + ", " + "coordinates: { "
+        assertEquals(ID + ", " + "coordinates: { "
                 + "latitude:" + COORDS.getLatitude()
                 + ", longitude:" + COORDS.getLongitude()
                 + " }", parking.toString());

@@ -220,8 +220,8 @@ public class BookingAdapter extends SwipeableAdapter<Booking, BookingAdapter.Boo
 
             // Hook up the item with an on click listener
             // TODO: 04/02/2021 Implement booking details screen
-            //itemView.setOnClickListener(mOnItemClickListener);
-            //itemView.setTag(this);
+            itemView.setOnClickListener(mOnItemClickListener);
+            itemView.setTag(this);
 
             status = view.findViewById(R.id.booking_item_txt_status);
             offer = view.findViewById(R.id.booking_item_txt_offer);

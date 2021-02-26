@@ -2,11 +2,9 @@ package io.github.cchristou3.CyParking.ui.views.host;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,9 +15,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.transition.Slide;
-import androidx.transition.Transition;
-import androidx.transition.TransitionManager;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,6 +26,7 @@ import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.ActivityMainHostBinding;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
+import io.github.cchristou3.CyParking.utilities.AnimationUtility;
 
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateVisibilityOfLoadingBarTo;
 
@@ -40,7 +36,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateVisibil
  * of all fragments which it is the host of.</p>
  *
  * @author Charalambos Christou
- * @version 8.0 09/02/21
+ * @version 9.0 25/02/21
  */
 public class MainHostActivity extends AppCompatActivity {
 
@@ -241,26 +237,11 @@ public class MainHostActivity extends AppCompatActivity {
      * @param visibility Whether to the show (slide up) or hide (slide down) the above view.
      */
     private void changeNoConnectionWarningVisibilityTo(int visibility) {
-        // Get a reference to:
-        // The view we want to animate and
-        // its parent ViewGroup
-        View warning = mBinding.activityMainHostTxtNoConnectionWarning;
-        ViewGroup parent = mBinding.activityMainHostClLayout;
-
-        // BOTTOM indicates that we want to push the view to the bottom of its container,
-        // without changing its size.
-        Transition transition = new Slide(Gravity.BOTTOM);
-        transition.setDuration(1000); // how long the animation will last
-        // Add the id of the target view that this Transition is interested in
-        transition.addTarget(warning.getId()); // In this case it is our "No connection" warning View
-
-        // The TransitionManager starts the animation and
-        // handles updating the scene between the frames
-        TransitionManager.beginDelayedTransition(parent, transition);
-
-        // If visibility set to VISIBLE, it will slide up
-        // Otherwise, it will slide down.
-        warning.setVisibility(visibility);
+        AnimationUtility.slideVerticallyToBottom(
+                mBinding.activityMainHostClLayout,
+                mBinding.activityMainHostTxtNoConnectionWarning,
+                visibility == View.GONE
+        );
     }
 
     /**

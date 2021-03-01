@@ -2,11 +2,6 @@ package io.github.cchristou3.CyParking.utilities;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -14,14 +9,12 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
@@ -31,7 +24,7 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
  * related to the View.</p>
  *
  * @author Charalambos Christou
- * @version 9.0 25/02/21
+ * @version 10.0 01/03/21
  */
 public class ViewUtility {
 
@@ -104,11 +97,11 @@ public class ViewUtility {
     /**
      * Hide the virtual keyboard.
      *
-     * @param activity Any activity.
-     * @param view     The view to remove the keyboard from.
+     * @param fragmentActivity Any activity.
+     * @param view             The view to remove the keyboard from.
      */
-    public static void hideKeyboard(@NotNull FragmentActivity activity, @NotNull View view) {
-        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
+    public static void hideKeyboard(@NotNull FragmentActivity fragmentActivity, @NotNull View view) {
+        InputMethodManager inputMethodManager = (InputMethodManager) fragmentActivity.getSystemService(INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getRootView().getApplicationWindowToken(), 0);
     }
 
@@ -121,20 +114,6 @@ public class ViewUtility {
      */
     public static void scrollTo(@NotNull View view) {
         view.getParent().requestChildFocus(view, view);
-    }
-
-    /**
-     * Access the background color of the given CardView
-     * element.
-     *
-     * @param cardView The CardView to have its color converted into
-     *                 a ColorDrawable.
-     * @return The ColorDrawable of the view's root.
-     */
-    @NotNull
-    @Contract("_ -> new")
-    public static ColorDrawable getCardViewColor(@NotNull CardView cardView) {
-        return new ColorDrawable(cardView.getCardBackgroundColor().getDefaultColor());
     }
 
     /**
@@ -155,34 +134,6 @@ public class ViewUtility {
             }
             return false;
         });
-    }
-
-    /**
-     * Creates a Bitmap object based on a specified drawable
-     *
-     * @param drawable the drawable to be placed on a bitmap
-     * @return A bitmap used to indicate the user's location
-     */
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        Bitmap bitmap;
-
-        if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if (bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
-            }
-        }
-
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
-
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
     }
 
     /**

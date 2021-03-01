@@ -27,6 +27,9 @@ public class RegisterLotFormState extends FormState {
     @Nullable
     private final Integer mLatLngError;
 
+    @Nullable
+    private final Integer mPhotoError;
+
     /**
      * Constructor used when there is an error in the RegisterLotFormState
      * (E.g. Negative capacity, invalid mobile number, etc.).
@@ -39,13 +42,15 @@ public class RegisterLotFormState extends FormState {
      */
     public RegisterLotFormState(@Nullable Integer mobileNumberError,
                                 @Nullable Integer lotNameError, @Nullable Integer lotCapacityError,
-                                @Nullable Integer slotOfferError, @Nullable Integer latLngError) {
+                                @Nullable Integer slotOfferError, @Nullable Integer latLngError,
+                                @Nullable Integer photoError) {
         super(false);
         this.mMobileNumberError = mobileNumberError;
         this.mLotNameError = lotNameError;
         this.mLotCapacityError = lotCapacityError;
         this.mSlotOfferError = slotOfferError;
         this.mLatLngError = latLngError;
+        this.mPhotoError = photoError;
     }
 
     /**
@@ -60,6 +65,7 @@ public class RegisterLotFormState extends FormState {
         this.mLotCapacityError = null;
         this.mSlotOfferError = null;
         this.mLatLngError = null;
+        this.mPhotoError = null;
     }
 
     /**
@@ -88,5 +94,10 @@ public class RegisterLotFormState extends FormState {
     @Nullable
     public Integer getLatLngError() {
         return mLatLngError;
+    }
+
+    @Nullable
+    public Integer getPhotoError() {
+        return mPhotoError;
     }
 }

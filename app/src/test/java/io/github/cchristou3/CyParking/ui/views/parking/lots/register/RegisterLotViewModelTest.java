@@ -1,5 +1,7 @@
 package io.github.cchristou3.CyParking.ui.views.parking.lots.register;
 
+import android.net.Uri;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -7,6 +9,7 @@ import com.google.android.gms.maps.model.LatLng;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,12 +46,17 @@ public class RegisterLotViewModelTest extends InstantTaskRuler {
     String invalidLotName = "";
     LatLng invalidLotLatLng = null;
     List<SlotOffer> invalidSlotOfferList = null;
+
+    // Other
+    Uri mockUri;
+
     // Subject under test
     private RegisterLotViewModel registerLotViewModel;
 
     @Before
     public void setUp() {
         registerLotViewModel = new RegisterLotViewModel(new DefaultOperatorRepository());
+        mockUri = Mockito.mock(Uri.class);
     }
 
     @Test
@@ -189,5 +197,19 @@ public class RegisterLotViewModelTest extends InstantTaskRuler {
         registerLotViewModel.updateSelectedSlotOfferArguments(1.0f, 1.0f);
         assertThat(getOrAwaitValue(registerLotViewModel.getSelectedSlotOfferArgumentsState()).isDataValid(),
                 is(true));
+    }
+
+    @Test
+    public void updateImageUri_setsNewValue() {
+        registerLotViewModel.updateImageUri(mockUri);
+        assertThat(registerLotViewModel.getImageUri(),
+                is(mockUri));
+    }
+
+    @Test
+    public void updateImageUri_setsNullValue() {
+        registerLotViewModel.updateImageUri(null);
+        assertThat(registerLotViewModel.getImageUri(),
+                is(nullValue()));
     }
 }

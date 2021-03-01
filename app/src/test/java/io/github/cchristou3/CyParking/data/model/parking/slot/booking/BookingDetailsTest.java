@@ -79,4 +79,22 @@ public class BookingDetailsTest {
     ///////////////////////////////////////////////////////////////////////////
     // checkIfFieldsValid(int, int) - END
     ///////////////////////////////////////////////////////////////////////////
+
+
+    @Test
+    public void getEndTime_13TimeHours_2duration_returns15Hours() {
+        SlotOffer offer = new SlotOffer(2, 1);
+        BookingDetails.Time time = new BookingDetails.Time(13, 0);
+        assertEquals(BookingDetails.Time.getEndTime(new BookingDetails(new Date(), time, offer))
+                .hour, (int) (offer.getDuration() + time.hour));
+    }
+
+
+    @Test
+    public void getEndTime_0000Time_1duration_returns0100() {
+        SlotOffer offer = new SlotOffer(1, 1);
+        BookingDetails.Time time = new BookingDetails.Time(0, 0);
+        assertEquals(BookingDetails.Time.getEndTime(new BookingDetails(new Date(), time, offer))
+                .hour, (int) (offer.getDuration() + time.hour));
+    }
 }

@@ -1,12 +1,18 @@
 package io.github.cchristou3.CyParking.data.repository;
 
+import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.storage.StorageReference;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -30,7 +36,8 @@ import static io.github.cchristou3.CyParking.ui.views.parking.lots.map.ParkingMa
  */
 public class DefaultOperatorRepository implements OperatorRepository,
         DataSourceRepository.ParkingLotHandler,
-        DataSourceRepository.BookingHandler {
+        DataSourceRepository.BookingHandler,
+        DataSourceRepository.StorageHandler {
 
     /**
      * Stores to the database's PRIVATE_PARKING node the specified object.
@@ -45,28 +52,84 @@ public class DefaultOperatorRepository implements OperatorRepository,
      */
     @NotNull
     @Override
-    public Task<Void> registerParkingLot(@NotNull ParkingLot parkingLotToBeStored) {
+    public Task<Boolean> registerParkingLot(Uri selectedImageUri, @NotNull ParkingLot parkingLotToBeStored) {
         // Add the info to the database
+        return checkIfAlreadyExists(parkingLotToBeStored)
+                .continueWithTask(checkResultTask -> {
+                    boolean lotAlreadyExist = checkResultTask.getResult();
+                    if (lotAlreadyExist) {
+                        return sendResponse(checkResultTask, false);
+                    } else {
+                        return checkResultTask // Upload the photo in Firebase Storage
+                                .continueWithTask(task -> uploadPhoto(selectedImageUri))
+                                // Add the lot to the database
+                                .continueWithTask(uploadPhotoTask -> {
+                                    if (uploadPhotoTask.isSuccessful()) {
+                                        // Access the download URL
+                                        Uri photoDownloadUri = uploadPhotoTask.getResult();
+
+                                        // Set its photo url
+                                        parkingLotToBeStored.setLotPhotoUrl(photoDownloadUri.toString());
+
+                                        // Store to database
+                                        return sendResponse(registerParkingLot(parkingLotToBeStored), true);
+
+                                    }
+                                    // Should never reach to this point
+                                    return null;
+                                });
+                    }
+                });
+
+    }
+
+    @NotNull
+    @Contract("_, _ -> !null")
+    private <T> Task<Boolean> sendResponse(@NotNull Task<T> checkResultTask, boolean isSuccessful) {
+        return checkResultTask.continueWith(new Continuation<T, Boolean>() {
+            @Override
+            public Boolean then(@NonNull Task<T> task) throws Exception {
+                return isSuccessful;
+            }
+        });
+    }
+
+    @NotNull
+    @Contract("_ -> !null")
+    private Task<Boolean> checkIfAlreadyExists(@NotNull ParkingLot parkingLotToBeStored) {
         return getParkingLotsRef()
                 .document(parkingLotToBeStored.generateUniqueId())
                 .get()
-                .continueWithTask(task -> {
+                .continueWith(checkIfAlreadyExistTask -> {
                     // If the task was successful, then the document already exists
                     // within the database.
-                    if (task.isSuccessful() && task.getResult().getData() != null) {
-                        return null; // Do not do any more tasks
-                        // Returning null will result into a NullPointerException("Continuation returned null")
-                        // As the continueWithTask method cannot return null.
-                        // Thus, in fragment check for this kind of exception and handle it appropriately
+                    if (checkIfAlreadyExistTask.isSuccessful()
+                            && checkIfAlreadyExistTask.getResult().getData() != null) {
+                        return true; // Do not do any more tasks - registration failed
                         // TODO: what if the task failed?
                     } else {
                         Log.d(TAG, "registerParkingLot: " + parkingLotToBeStored);
-                        // Add it to the database
-                        return getParkingLotsRef()
-                                .document(parkingLotToBeStored.generateUniqueId())
-                                .set(parkingLotToBeStored);
+                        return false;
                     }
                 });
+    }
+
+    /**
+     * Stores to the database's PRIVATE_PARKING node the specified object.
+     * The document id used corresponds to the merge of the ParkingLot object's
+     * coordinates and the given operator mobile number.
+     *
+     * @param parkingLotToBeStored Stores all necessary info about the private parking
+     * @return The task to be handled in the active fragment
+     * @throws NullPointerException in case the continuation returns null
+     * @see ParkingLot#generateUniqueId()
+     * @see Task#getException()
+     */
+    @NotNull
+    private Task<Void> registerParkingLot(@NotNull ParkingLot parkingLotToBeStored) {
+        return getParkingLotsRef()
+                .document(parkingLotToBeStored.generateUniqueId())
+                .set(parkingLotToBeStored);
     }
 
     /**
@@ -112,6 +175,27 @@ public class DefaultOperatorRepository implements OperatorRepository,
     public void updateBookingStatus(String bookingDocId) {
         getBookingsRef().document(bookingDocId)
                 .update(BOOKING_DETAILS + "." + COMPLETED, true);
+    }
+
+    /**
+     * Uploads the given file Uri to Firebase storage
+     *
+     * @param selectedImageUri The Uri of an image.
+     * @return A {@link Task<Uri>} instance to be handled by the caller.
+     */
+    @Override
+    public Task<Uri> uploadPhoto(@NotNull Uri selectedImageUri) {
+        // Get a reference to store file at LOT_PHOTOS/<FILENAME>
+        StorageReference photoRef = getLotPhotosStorageRef().child(selectedImageUri.getLastPathSegment());
+
+        // Upload file to Firebase storage
+        return photoRef.putFile(selectedImageUri) // upload photo task
+                .continueWithTask(task -> {
+                    if (!task.isSuccessful()) throw task.getException();
+
+                    // Continue with the task to get the URL
+                    return photoRef.getDownloadUrl();
+                });
     }
 
     /**

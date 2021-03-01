@@ -17,7 +17,7 @@ import java.util.Set;
 
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.ui.views.parking.lots.map.ParkingMapFragment;
-import io.github.cchristou3.CyParking.utilities.ViewUtility;
+import io.github.cchristou3.CyParking.utilities.DrawableUtility;
 
 /**
  * Purpose: manage {@link Marker} objects of {@link ParkingMapFragment}.
@@ -70,7 +70,7 @@ public class MarkerManager {
         mUserMarker = mGoogleMap.addMarker(new MarkerOptions()
                 .title("Title")
                 .position(mCurrentLatLngOfUser)
-                .icon(BitmapDescriptorFactory.fromBitmap(ViewUtility.drawableToBitmap(mUserMapIcon)))
+                .icon(BitmapDescriptorFactory.fromBitmap(DrawableUtility.drawableToBitmap(mUserMapIcon)))
                 // TODO: Replace with an actual icon
                 .snippet("Current Location!")
                 .title("Me"));

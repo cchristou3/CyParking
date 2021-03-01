@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,8 +14,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
-
-import com.google.firebase.firestore.QuerySnapshot;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -34,10 +33,8 @@ import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
-import io.github.cchristou3.CyParking.ui.widgets.QRCodeDialog;
 
 import static io.github.cchristou3.CyParking.utilities.Utility.cloneList;
-import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
 
 /**
  * Purpose: <p>Shows pending / completed bookings of the user / operator?</p>
@@ -53,7 +50,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
         implements Navigable, BaseFragment.UserStateUiHandler {
 
     // Fragment variables
-    private static final String TAG = ViewBookingsFragment.class.getName() + "UniqueTag";
+    private static final String TAG = ViewBookingsFragment.class.getCanonicalName() + "UniqueTag";
     private BookingAdapter mBookingAdapter;
     private ViewBookingsViewModel mViewBookingsViewModel;
 
@@ -88,7 +85,6 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
         setViewModelObservers();
     }
 
-
     /**
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.
@@ -109,16 +105,17 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
         // Attach an observer to the user's state.
         // If the user logs out while being in this screen, an alert is shown
         observeUserState(this);
-
         mViewBookingsViewModel.getBookingListState().observe(getViewLifecycleOwner(), bookings -> {
             // The RecyclerView's adapter uses DiffUtil to update the list accordingly
-            Log.d(TAG, "BookingListState: ");
-            if (mBookingAdapter == null) {
-                initializeUi(bookings);
-            } else {
-                updateUi(bookings);
-            }
+            Log.d(TAG, "observe bookings: ");
+            updateUi(bookings);
         });
+
+        mViewBookingsViewModel.getToastMessage().observe(getViewLifecycleOwner(),
+                message -> {
+                    if (message != null)
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                });
     }
 
     /**
@@ -127,10 +124,13 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
      * @param bookings A list of bookings.
      */
     private void updateUi(List<Booking> bookings) {
+
+        initializeUi();
+        Log.d(TAG, "updateUi: " + bookings);
         if (bookings == null || bookings.isEmpty()) {
             displayMessage();
         } else {
-            Log.d(TAG, "updateUi: " + bookings.size());
+            hideMessage();
             mBookingAdapter.submitList(bookings);
         }
     }
@@ -172,46 +172,60 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
      * The message has to do about the user not having any bookings.
      */
     private void displayMessage() {
+        updateMessage(true);
+    }
+
+    /**
+     * Displays any list related Views and hides a message to the user.
+     * The message has to do about the user not having any bookings.
+     */
+    private void hideMessage() {
+        updateMessage(false);
+    }
+
+    /**
+     * Hides/Diaplsy any list related Views and displays/hides a message to the user.
+     * based on the given flag.
+     */
+    private void updateMessage(boolean show) {
         // TODO: 04/02/2021 Update to a more fancier message. e.g. MaterialCardView, icons, etc.
         // Display message to user
-        getBinding().fragmentViewBookingsTxtNoBookings.setVisibility(View.VISIBLE);
+        getBinding().fragmentViewBookingsTxtNoBookings.setVisibility(show ? View.VISIBLE : View.GONE);
         // Hide view's related to displaying
-        getBinding().fragmentViewBookingsRvRecyclerview.setVisibility(View.GONE);
+        getBinding().fragmentViewBookingsRvRecyclerview.setVisibility(show ? View.GONE : View.VISIBLE);
     }
+
 
     /**
      * Initializes the fragment's RecyclerView and its adapter instance.
      */
-    private void initializeUi(List<Booking> bookingList) {
+    private void initializeUi() {
         // Create adapter - set up RecyclerView
         setUpAdapter();
         setUpRecyclerView();
         // Set the RecyclerView's adapter
         getBinding().fragmentViewBookingsRvRecyclerview.setAdapter(mBookingAdapter);
-        updateUi(bookingList);
     }
 
     /**
      * Initialize the RecyclerView's {@link androidx.recyclerview.widget.ListAdapter}.
      * Add an onClick listener to the adapter's items.
-     * onClick: TODO: Navigate to a screen to view the booking details and its QR code
+     * onClick: Navigate to a screen to view the booking details and its QR code
      * using shared element as animation.
      */
     private void setUpAdapter() {
-        mBookingAdapter = new BookingAdapter(new BookingsDiffCallback(), getItemTouchHelper());
-        BookingAdapter.setOnItemClickListener(v -> {
-            RecyclerView.ViewHolder h = (RecyclerView.ViewHolder) v.getTag();
-            // get the item's QR code that got clicked
-            String qrcode = mBookingAdapter.getCurrentList().get(h.getAdapterPosition()).getQRCode();
-
-            // Show a fragment that will display the QR code
-            new QRCodeDialog(
-                    requireContext(),
-                    getBinding().fragmentViewBookingsClMainCl,
-                    qrcode)
-                    .show();
-
-        });
+        if (mBookingAdapter == null)
+            mBookingAdapter = new BookingAdapter(new BookingsDiffCallback(), getItemTouchHelper());
+        BookingAdapter.setOnItemClickListener(v ->
+                getNavController(requireActivity()).navigate(
+                        ViewBookingsFragmentDirections.actionNavViewBookingsToNavBookingDetailsFragment(
+                                // get the booking that got clicked from the list
+                                mBookingAdapter.getCurrentList().get((
+                                        // Position of the item that got clicked
+                                        (RecyclerView.ViewHolder) v.getTag()).getAdapterPosition())
+                        )
+                )
+        );
     }
 
     /**
@@ -224,6 +238,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
         getBinding().fragmentViewBookingsRvRecyclerview
                 .setLayoutManager(manager);
         getBinding().fragmentViewBookingsRvRecyclerview.setHasFixedSize(true);
+        //getBinding().fragmentViewBookingsRvRecyclerview.setItemAnimator(new DefaultItemAnimator());
     }
 
     /**
@@ -297,29 +312,21 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
      */
     @Override
     public void onUserStateChanged(@Nullable LoggedInUser loggedInUser) {
-        Log.d(TAG, "User State: " + loggedInUser);
         if (loggedInUser == null) { // User has logged out
             AlertBuilder.promptUserToLogIn(getChildFragmentManager(), requireActivity(), this,
                     R.string.logout_view_bookings_screen_msg);
         } else {
             // Get bookings from Firestore
-            String userId = loggedInUser.getUserId();
-            mViewBookingsViewModel.getUserBookings(userId)
-                    .addOnCompleteListener(task -> {
-                        Log.d(TAG, "On SnapShot Query: " + task.getResult().getQuery().toString());
-                        final Exception error = task.getException();
-                        final QuerySnapshot value = task.getResult();
-                        if (error != null || value == null) { // Check whether an error occurred
-                            Log.d(TAG, "New Snapshot error: " + error);
-                            // TODO: 22/01/2021 Show message 'Unfortunately, couldn't load your bookings...'
-                            return;
-                        }
-
-                        List<Booking> bookings = getListOf(value, Booking.class);
-                        Log.d(TAG, "New Snapshot success: " + bookings);
-                        // - Update the booking list state with the newly created booking list
-                        mViewBookingsViewModel.updateBookingList(bookings);
-                    });
+            loadBookings(loggedInUser);
         }
+    }
+
+    /**
+     * Loads the bookings from the Database.
+     *
+     * @param loggedInUser The user to fetch the bookings for.
+     */
+    private void loadBookings(@NotNull LoggedInUser loggedInUser) {
+        mViewBookingsViewModel.getUserBookings(loggedInUser.getUserId());
     }
 }

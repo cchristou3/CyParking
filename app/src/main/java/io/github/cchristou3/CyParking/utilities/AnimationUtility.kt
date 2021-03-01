@@ -78,7 +78,7 @@ fun animateAvailabilityColorChanges(cardViewParent: CardView, child: View,
  * @param to             The color to animate.
  */
 fun animateColorChange(cardViewParent: CardView, child: View, @ColorInt to: Int) {
-    val colorDrawables = arrayOf(ColorDrawable(to), ViewUtility.getCardViewColor(cardViewParent))
+    val colorDrawables = arrayOf(ColorDrawable(to), getCardViewColor(cardViewParent))
     val transitionDrawable = TransitionDrawable(colorDrawables)
     child.background = transitionDrawable
     transitionDrawable.startTransition(2000)

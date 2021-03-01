@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.data.model.parking.slot.booking;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -8,8 +9,10 @@ import androidx.annotation.NonNull;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Exclude;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.ParkingId;
 import io.github.cchristou3.CyParking.utilities.ShaUtility;
 
@@ -124,6 +127,20 @@ public class Booking extends ParkingId implements Parcelable, Comparable<Booking
                 attributes[3],
                 BookingDetails.toBookingDetails(attributes[4])
         );
+    }
+
+    /**
+     * Prepares the text of the status TextView based
+     * on the given String.
+     *
+     * @param status  A boolean indicating the status of the booking.
+     * @param context The context to make use of.
+     * @return A concise message based on the given boolean.
+     */
+    @NotNull
+    @Contract(pure = true)
+    public static String getStatusText(@NotNull Context context, boolean status) {
+        return context.getString((status ? R.string.completed : R.string.pending));
     }
 
     public String getQRCode() {

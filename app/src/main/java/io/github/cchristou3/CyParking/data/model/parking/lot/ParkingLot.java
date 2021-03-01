@@ -70,6 +70,8 @@ public class ParkingLot extends Parking implements Parcelable {
     private String operatorMobileNumber;
     @SerializedName("availability")
     private Availability availability;
+    @SerializedName("lotPhotoUrl")
+    private String lotPhotoUrl;
     @SerializedName("slotOfferList")
     private List<SlotOffer> slotOfferList;
 
@@ -101,6 +103,7 @@ public class ParkingLot extends Parking implements Parcelable {
         this.lotName = lotName;
         this.operatorMobileNumber = operatorMobileNumber;
         this.availability = new Availability();
+        this.lotPhotoUrl = "";
         this.slotOfferList = new ArrayList<>();
         // Generate a random list of slot offers
         final Random generator = new Random();
@@ -119,6 +122,7 @@ public class ParkingLot extends Parking implements Parcelable {
      * @param operatorId           The lot's operator's email address.
      * @param operatorMobileNumber The lot's operator's phone number.
      * @param capacity             The lot's capacity.
+     * @param lotPhotoUrl          The url that contains the photo of the lot in the Firebase storage.
      * @param slotOfferList        The lot's offers.
      * @throws IllegalArgumentException If the capacity is invalid, or the available spaces are not
      *                                  in the bounds of the capacity's value.
@@ -128,7 +132,7 @@ public class ParkingLot extends Parking implements Parcelable {
      */
     public ParkingLot(
             Coordinates coordinates, String lotName, String operatorId,
-            String operatorMobileNumber, int capacity, List<SlotOffer> slotOfferList
+            String operatorMobileNumber, int capacity, String lotPhotoUrl, List<SlotOffer> slotOfferList
     ) throws IllegalArgumentException {
         super(coordinates, 0);
         this.setParkingId(generateParkingId(coordinates, operatorMobileNumber));
@@ -136,6 +140,7 @@ public class ParkingLot extends Parking implements Parcelable {
         this.operatorId = operatorId;
         this.operatorMobileNumber = operatorMobileNumber;
         this.availability = new Availability(capacity, capacity).checkIfValid();
+        this.lotPhotoUrl = lotPhotoUrl;
         this.slotOfferList = slotOfferList;
     }
 
@@ -153,6 +158,7 @@ public class ParkingLot extends Parking implements Parcelable {
         operatorId = in.readString();
         operatorMobileNumber = in.readString();
         availability = Availability.CREATOR.createFromParcel(in);
+        lotPhotoUrl = in.readString();
 
         slotOfferList = new ArrayList<>();
         int size = in.readInt();
@@ -214,6 +220,14 @@ public class ParkingLot extends Parking implements Parcelable {
         return dc.getDocument().toObject(ParkingLot.class);
     }
 
+    public String getLotPhotoUrl() {
+        return lotPhotoUrl;
+    }
+
+    public void setLotPhotoUrl(String lotPhotoUrl) {
+        this.lotPhotoUrl = lotPhotoUrl;
+    }
+
     /**
      * Flatten this object in to a Parcel.
      *
@@ -230,6 +244,8 @@ public class ParkingLot extends Parking implements Parcelable {
         dest.writeString(operatorId);
         dest.writeString(operatorMobileNumber);
         availability.writeToParcel(dest, flags);
+
+        dest.writeString(lotPhotoUrl);
 
         int size = slotOfferList.size();
         dest.writeInt(size);
@@ -259,6 +275,7 @@ public class ParkingLot extends Parking implements Parcelable {
                 + "operatorId: " + operatorId + ", "
                 + "operatorMobileNumber: " + operatorMobileNumber + ", "
                 + "availability: " + availability + ", "
+                + "lotPhotoUri: " + lotPhotoUrl + ", "
                 + "slotOfferList: " + slotOfferList;
 
     }
@@ -350,7 +367,7 @@ public class ParkingLot extends Parking implements Parcelable {
     }
 
     /**
-     * Assign the valie of {@link #availability#availableSpaces}
+     * Assign the value of {@link #availability#availableSpaces}
      * to the given argument.
      *
      * @param availableSpaces The new availableSpaces of the lot.

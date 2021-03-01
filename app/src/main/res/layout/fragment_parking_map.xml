@@ -115,6 +115,7 @@
                 android:background="@drawable/ic_directions"
                 android:contentDescription="@string/directions"
                 android:padding="27dp"
+                android:backgroundTint="@color/blue"
                 app:layout_constraintBottom_toTopOf="@+id/fragment_parking_map_btn_booking"
                 app:layout_constraintEnd_toEndOf="@+id/fragment_parking_map_btn_booking"
                 app:layout_constraintStart_toStartOf="@+id/fragment_parking_map_btn_booking"

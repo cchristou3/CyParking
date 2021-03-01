@@ -1,6 +1,9 @@
 package io.github.cchristou3.CyParking.ui.views.parking.lots.register;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,6 +22,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -27,6 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
@@ -58,6 +63,8 @@ import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.utilities.Utility;
 import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
 import static io.github.cchristou3.CyParking.utilities.Utility.cloneList;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.disableParentScrollingInterferenceOf;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf;
@@ -68,13 +75,15 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf
  * <p>
  *
  * @author Charalambos Christou
- * @version 7.0 11/02/21
+ * @version 8.0 27/02/21
  */
 public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding>
         implements Navigable, LocationHandler, TextWatcher, View.OnClickListener {
 
     // Fragment's constants
     public static final String TAG = RegisterLotFragment.class.getName() + "UniqueTag";
+    private static final int EXTERNAL_STORAGE_CODE = 400;
+    private static final int RC_PHOTO_PICKER = 730;
 
     // Fragment's members
     private RegisterLotViewModel mRegisterLotViewModel;
@@ -83,6 +92,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     private SingleUpdateHelper mLocationManager;
     private SlotOfferAdapter mSlotOfferAdapter;
     private int slotOfferCounter;
+    private int mTextColour;
 
     /**
      * Called to do initial creation of a fragment.
@@ -94,7 +104,6 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initializeViewModel();
-        slotOfferCounter = 0;
     }
 
     /**
@@ -125,6 +134,16 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         super.onViewCreated(view, savedInstanceState);
         addObserversToStates();
         initializeUi();
+        slotOfferCounter = mRegisterLotViewModel.getSlotOfferList().size();
+        // TODO: 27/02/2021 Move to a more appropriate position
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, EXTERNAL_STORAGE_CODE);
+        } else {
+            // no need to ask for permission
+            // Do something... fetch position
+        }
     }
 
     /**
@@ -154,7 +173,8 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         super.removeOnClickListeners(
                 getBinding().registerLotFragmentBtnRegisterLot,
                 getBinding().registerLotFragmentBtnAdd,
-                getBinding().registerLotFragmentMbtnGetLocation
+                getBinding().registerLotFragmentMbtnGetLocation,
+                getBinding().registerLotFragmentIvPickPhoto
         );
         // Remove TextWatchers
         super.removeTextWatchers(
@@ -172,6 +192,32 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         super.onDestroyView();
     }
 
+    /**
+     * Receive the result from a previous call to
+     * {@link #startActivityForResult(Intent, int)}.
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode  The integer result code returned by the child activity
+     *                    through its setResult().
+     * @param data        An Intent, which can return result data to the caller
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_PHOTO_PICKER) {
+            if (resultCode == RESULT_OK) {
+                if (data != null) {
+                    mRegisterLotViewModel.updateImageUri(
+                            data.getData() // uri of selected image
+                    );
+                }
+            } else if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(requireContext(), "A photo was not picked.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
     /**
      * Add observers to the user's state, the registration form
@@ -180,8 +226,38 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     private void addObserversToStates() {
         addObserverToUserState();
         addObserverToSlotOfferList();
+        addObserverToPickedPhoto();
         addObserverToForm();
         addObserverToSlotOfferArguments();
+    }
+
+    /**
+     * Observe the state of the image Uri.
+     * Once picked, display it.
+     */
+    private void addObserverToPickedPhoto() {
+        mRegisterLotViewModel.getImageUriState().observe(getViewLifecycleOwner(), uri -> {
+            if (uri != null) {
+                // Hide the hint text
+                getBinding().registerLotFragmentTvPickPhoto.setVisibility(View.GONE);
+                displayPickedPhoto(uri);
+            }
+        });
+    }
+
+    /**
+     * Displays the given Image Uri in an ImageView.
+     *
+     * @param selectedImageUri The Uri of an image.
+     */
+    private void displayPickedPhoto(Uri selectedImageUri) {
+        Glide.with(this).asBitmap().load(selectedImageUri)
+                .override(
+                        // take 70% (0.7f) of the parent's size
+                        (int) (getBinding().registerLotFragmentClMainCl.getMeasuredWidth() * 0.7f),
+                        (int) (getBinding().registerLotFragmentClMainCl.getMeasuredWidth() * 0.7f)
+                )
+                .into(getBinding().registerLotFragmentIvPhoto);
     }
 
     /**
@@ -202,9 +278,9 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
      * - a Toast message is shown to the user
      */
     private void addObserverToSlotOfferList() {
-
         mRegisterLotViewModel.getSlotOfferListState().observe(getViewLifecycleOwner(), slotOffers -> {
             mSlotOfferAdapter.submitList(slotOffers); // Inform the adapter
+            if (slotOffers.size() == slotOfferCounter) return;
             Log.d(TAG, "addObserverToSlotOfferList: " + slotOffers);
             // Scroll down-wards to the "register" button
             ViewUtility.scrollTo(getBinding().registerLotFragmentBtnRegisterLot);
@@ -268,6 +344,13 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
                     getBinding().registerLotFragmentTilLocationLng, registerLotFormState.getLatLngError())) {
                 return;
             }
+            if (registerLotFormState.getPhotoError() != null) {
+                getBinding().registerLotFragmentCvPhoto.setStrokeColor(getResources().getColor(R.color.red));
+                getBinding().registerLotFragmentTvPickPhoto.setTextColor(getResources().getColor(R.color.red));
+            } else {
+                getBinding().registerLotFragmentCvPhoto.setStrokeColor(getResources().getColor(R.color.purple_700));
+                getBinding().registerLotFragmentTvPickPhoto.setTextColor(mTextColour);
+            }
             // Update the view's related to the lot's slot offers
             if (registerLotFormState.getSlotOfferError() != null) {
                 // Show the warning
@@ -319,6 +402,9 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     private void initializeUi() {
         if (getUser() == null) return;
 
+        // Keep track of the text's initial colour
+        mTextColour = getBinding().registerLotFragmentTvPickPhoto.getCurrentTextColor();
+
         // Initially the button is disabled
         getBinding().registerLotFragmentBtnRegisterLot.setEnabled(false);
 
@@ -329,17 +415,13 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
                 getUser().getEmail()
         );
 
-        // TODO: 08/02/2021 Replace with InputTextLayout - AutoCompleteTextView
-
         // Set up both spinners
-
         setUpSpinner(getBinding().registerLotFragmentSDuration, this::setSelectedDuration, 1.0f);
         setUpSpinner(getBinding().registerLotFragmentSPrice, this::setSelectedPrice, 0.5f);
 
+        preparePhotoPickerButton();
         prepareGetLocationButton();
-
         prepareAddButton();
-
         setUpRecyclerViewWithAdapter();
 
         // Hook up a listener to the "Register" button
@@ -354,9 +436,29 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     }
 
     /**
+     * Hook up the photo picker button with a listener.
+     * on-click: Open up the device photo gallery.
+     */
+    private void preparePhotoPickerButton() {
+        getBinding().registerLotFragmentIvPickPhoto
+                .setOnClickListener(v -> openPhotoGallery());
+    }
+
+    /**
+     * Open up the device photo gallery.
+     */
+    private void openPhotoGallery() {
+        // Create an intent for accessing the device's content (gallery)
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/jpeg");
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+        startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
+    }
+
+    /**
      * Attaches an {@link android.view.View.OnClickListener} to the
      * 'add' button.
-     * onClick:
+     * onClick: adds the slot offer with the specified arguments onto the list.
      */
     private void prepareAddButton() {
         // Hook up a listener to the "add" button
@@ -467,7 +569,8 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
                     getBinding().registerLotFragmentEtLotName.getText().toString(), // lotName
                     getUser().getUserId(), // operatorId
                     getBinding().registerLotFragmentEtPhoneBody.getNonSpacedText(), // operatorMobileNumber
-                    Integer.parseInt(getBinding().registerLotFragmentEtCapacity.getText().toString()), // capacity
+                    Integer.parseInt(getBinding().registerLotFragmentEtCapacity.getText().toString()), // capacity,
+                    null, //
                     mRegisterLotViewModel.getSlotOfferList() // slotOfferList
             );
         } catch (NullPointerException exception) {
@@ -582,18 +685,24 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         // User is not logged in
         // Callback added on addObserverToUserState should kick in.
         // Otherwise, finish registration
+        getGlobalStateViewModel().showLoadingBar();
         mRegisterLotViewModel.registerParkingLot(lotToBeRegistered)
-                .addOnCompleteListener((Task<Void> task) -> {
-                    if (task.getException() == null) {
-                        // Display message to user.
-                        Toast.makeText(RegisterLotFragment.this.requireContext(), RegisterLotFragment.this.getString(R.string.success_lot_registration), Toast.LENGTH_SHORT).show();
-                        // Navigate back to home screen
-                        getNavController(requireActivity())
-                                .popBackStack();
-                    } else if (task.getException() instanceof NullPointerException
-                            && task.getException().getMessage().equals("Continuation returned null")) {
-                        // Display error message to user that the parking lot already exists
-                        Toast.makeText(RegisterLotFragment.this.requireContext(), RegisterLotFragment.this.getString(R.string.error_lot_already_exists), Toast.LENGTH_SHORT).show();
+                .addOnCompleteListener((Task<Boolean> task) -> {
+                    getGlobalStateViewModel().hideLoadingBar();
+                    if (task.isSuccessful()) {
+                        boolean wasRegistrationSuccessful = task.getResult();
+                        if (wasRegistrationSuccessful) {
+                            // Display message to user.
+                            Toast.makeText(RegisterLotFragment.this.requireContext(),
+                                    getString(R.string.success_lot_registration), Toast.LENGTH_SHORT).show();
+                            // Navigate back to home screen
+                            getNavController(requireActivity())
+                                    .popBackStack();
+                        } else {
+                            // Display error message to user that the parking lot already exists
+                            Toast.makeText(RegisterLotFragment.this.requireContext(),
+                                    getString(R.string.error_lot_already_exists), Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
     }
@@ -628,6 +737,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
             // Set the Lat and Lng editTexts' text with the retrieved location's values.
             getBinding().registerLotFragmentEtLocationLat.setText(String.valueOf(currentLocation.getLatitude()));
             getBinding().registerLotFragmentEtLocationLng.setText(String.valueOf(currentLocation.getLongitude()));
+            ViewUtility.hideKeyboard(requireActivity(), requireView());
         } else {
             // Inform the user something wrong happened
             Toast.makeText(requireContext(), getString(R.string.error_retrieving_location), Toast.LENGTH_SHORT).show();

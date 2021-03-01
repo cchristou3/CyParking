@@ -1,8 +1,6 @@
 package io.github.cchristou3.CyParking.ui.views.parking.lots.map;
 
 import android.app.Dialog;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -57,10 +55,11 @@ import io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking.ViewBoo
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
+import io.github.cchristou3.CyParking.utilities.AnimationUtility;
 
+import static android.view.View.GONE;
 import static io.github.cchristou3.CyParking.utilities.AnimationUtility.animateAvailabilityColorChanges;
 import static io.github.cchristou3.CyParking.utilities.Utility.getDistanceApart;
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVisibilityTo;
 
 /**
  * Purpose: <p>View all nearby parking.
@@ -79,7 +78,7 @@ import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateViewVis
  * </p>
  *
  * @author Charalambos Christou
- * @version 13.0 11/02/21
+ * @version 14.0 28/02/21
  * <p>
  * New changes:
  * <p><b>On server</b>: via a cloud function retrieve the document ids of all
@@ -208,14 +207,6 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
         // Initialize the LocationManager
         mLocationManager = LocationManager.createSubsequentUpdateHelper(requireContext(), this, this);
         clearBackgroundMode();
-    }
-
-    /**
-     * Called when the fragment is visible to the user and actively running.
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
     }
 
     /**
@@ -477,12 +468,14 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
         // Access the coordinates of the selected marker
         double selectedParkingLatitude = mMarkerManager.getSelectedMarkerLatitude();
         double selectedParkingLongitude = mMarkerManager.getSelectedMarkerLongitude();
-        // Create Uri (query string) for a Google Maps Intent
-        // :q= indicates that we request for directions
-        // Launch Google Maps activity
-        startActivity(new Intent(Intent.ACTION_VIEW,
-                Uri.parse("google.navigation:q=" + selectedParkingLatitude
-                        + "," + selectedParkingLongitude)).setPackage("com.google.android.apps.maps"));
+
+        LocationManager.launchGoogleMaps(
+                requireContext(),
+                selectedParkingLatitude,
+                selectedParkingLongitude,
+                mMarkerManager.getSelectedParkingLot().getLotName()
+        );
+
     }
 
     /**
@@ -744,7 +737,9 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      * @param visibility The state of the visibility (E.g. View.Gone / View.VISIBLE / View.INVISIBLE)
      */
     private void updateInfoLayoutVisibilityTo(final int visibility) {
-        updateViewVisibilityTo(getBinding().fragmentParkingMapCvInfoLayout, visibility);
+        AnimationUtility.slideVerticallyToBottom(getBinding().idFragmentParkingMap,
+                getBinding().fragmentParkingMapCvInfoLayout, visibility == GONE);
+        //updateViewVisibilityTo(getBinding().fragmentParkingMapCvInfoLayout, visibility);
     }
 
     /**

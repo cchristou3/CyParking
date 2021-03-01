@@ -1,5 +1,7 @@
 package io.github.cchristou3.CyParking.ui.views.home;
 
+import android.net.Uri;
+
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Query;
@@ -22,6 +24,7 @@ public class FakeOperatorRepository implements OperatorRepository {
      * The document id used corresponds to the merge of the ParkingLot object's
      * coordinates and the given operator mobile number.
      *
+     * @param selectedImageUri     The Uri of an image.
      * @param parkingLotToBeStored Stores all necessary info about the private parking
      * @return The task to be handled in the active fragment
      * @throws NullPointerException in case the continuation returns null
@@ -30,7 +33,7 @@ public class FakeOperatorRepository implements OperatorRepository {
      */
     @NotNull
     @Override
-    public Task<Void> registerParkingLot(@NotNull ParkingLot parkingLotToBeStored) {
+    public Task<Boolean> registerParkingLot(Uri selectedImageUri, @NotNull ParkingLot parkingLotToBeStored) {
         return null;
     }
 
@@ -59,5 +62,16 @@ public class FakeOperatorRepository implements OperatorRepository {
     @Override
     public void updateBookingStatus(String bookingDocId) {
 
+    }
+
+    /**
+     * Uploads the given file Uri to Firebase storage
+     *
+     * @param selectedImageUri The Uri of an image.
+     * @return
+     */
+    @Override
+    public Task<Uri> uploadPhoto(Uri selectedImageUri) {
+        return null;
     }
 }

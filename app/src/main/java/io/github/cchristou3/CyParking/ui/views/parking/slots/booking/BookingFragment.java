@@ -260,9 +260,9 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      */
     private void initializeUi() {
         // Set their text to their corresponding value
-        final String parkingID = getString(R.string.lot_name) + mSelectedParking.getLotName(); // Compose parking name text
+        final String parkingName = getString(R.string.lot_name) + " " + mSelectedParking.getLotName(); // Compose parking name text
         final String availability = mSelectedParking.getLotAvailability(requireContext()); // Compose lot availability text
-        getBinding().fragmentParkingBookingTxtParkingName.setText(parkingID); // Set parking name
+        getBinding().fragmentParkingBookingTxtParkingName.setText(parkingName); // Set parking name
         getBinding().fragmentParkingBookingTxtParkingAvailability.setText(availability); // Set parking availability
 
         setUpSlotOfferDropDownMenu(); // Initialize, attach listener to the drop down menu

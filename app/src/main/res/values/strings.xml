@@ -134,6 +134,7 @@
     <string name="logout_book_parking_screen_msg">Booking a parking slot requires authentication. \nPlease login and try again!</string>
     <string name="logout_view_bookings_screen_msg">Viewing bookings requires authentication. \nPlease login and try again!</string>
     <string name="logout_register_lot_screen_msg">Registering a parking lot requires authentication. \nPlease login and try again!</string>
+    <string name="logout_bookings_details_screen_msg">Viewing bookings details requires authentication. \nPlease login and try again!</string>
 
     <!-- Strings related to the hosting activity not being able to find current active fragment -->
     <string name="unexpected_error_title">An unexpected error occurred</string>
@@ -168,6 +169,9 @@
     <string name="sign_up_arg">sign_up</string>
     <string name="email_arg">email</string>
 
+    <!-- String related to BookingDetailsFragment   -->
+    <string name="selected_booking_arg">selected_booking</string>
+
     <!-- String related to test cases   -->
     <string name="any_error">Error</string>
     <string name="any">Any</string>
@@ -179,5 +183,13 @@
     <string name="scan_a_booking">Scan a booking</string>
     <string name="view_qr_code">View QR Code</string>
     <string name="fill_in_details">Fill In Details</string>
+    <string name="pick_a_photo">pick a photo</string>
+    <string name="please_pick_a_photo">Please pick a photo</string>
+    <string name="selected_photo">Selected Photo</string>
+    <string name="parking_lot_photo">Parking Lot Photo</string>
+    <string name="completed">Completed</string>
+    <string name="pending">Pending</string>
+    <string name="no_google_maps_app_found">No apps installed that support this kind of action.</string>
+    <string name="load_booking_failed">Unfortunately, couldn\'t load your bookings. Check you Internet connection and try again.</string>
 
 </resources>

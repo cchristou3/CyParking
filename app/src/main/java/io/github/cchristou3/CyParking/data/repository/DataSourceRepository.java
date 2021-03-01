@@ -6,6 +6,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableReference;
 import com.google.firebase.functions.HttpsCallableResult;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +24,7 @@ import kotlin.NotImplementedError;
  * only the repository classes can access them.
  *
  * @author Charalambos Christou
- * @version 3.0 06/02/21
+ * @version 4.0 27/02/21
  */
 class DataSourceRepository {
 
@@ -182,6 +184,25 @@ class DataSourceRepository {
         // TODO: 06/02/2021 Add cloud functions related to payments
         default HttpsCallableReference getPaymentIntent() {
             throw new NotImplementedError();
+        }
+    }
+
+    /**
+     * Purpose: provide the implementer access to the Firebase
+     * storage.
+     *
+     * @see FirebaseStorage#getReference()
+     */
+    interface StorageHandler {
+        String LOT_PHOTOS = "parking_lot_photos";
+
+        /**
+         * Access the operators Firebase storage.
+         *
+         * @return A {@link StorageReference} of the operators' Firebase storage.
+         */
+        default StorageReference getLotPhotosStorageRef() {
+            return FirebaseStorage.getInstance().getReference().child(LOT_PHOTOS);
         }
     }
 }

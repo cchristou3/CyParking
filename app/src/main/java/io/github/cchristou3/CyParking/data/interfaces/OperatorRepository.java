@@ -1,5 +1,7 @@
 package io.github.cchristou3.CyParking.data.interfaces;
 
+import android.net.Uri;
+
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Query;
@@ -23,6 +25,7 @@ public interface OperatorRepository {
      * The document id used corresponds to the merge of the ParkingLot object's
      * coordinates and the given operator mobile number.
      *
+     * @param selectedImageUri     The Uri of an image.
      * @param parkingLotToBeStored Stores all necessary info about the private parking
      * @return The task to be handled in the active fragment
      * @throws NullPointerException in case the continuation returns null
@@ -30,7 +33,7 @@ public interface OperatorRepository {
      * @see Task#getException()
      */
     @NotNull
-    Task<Void> registerParkingLot(@NotNull ParkingLot parkingLotToBeStored);
+    Task<Boolean> registerParkingLot(Uri selectedImageUri, @NotNull ParkingLot parkingLotToBeStored);
 
     /**
      * Returns the operator's parking lot based on his/hers id.
@@ -62,4 +65,12 @@ public interface OperatorRepository {
      * @param bookingDocId The document id of a booking
      */
     void updateBookingStatus(String bookingDocId);
+
+    /**
+     * Uploads the given file Uri to Firebase storage
+     *
+     * @param selectedImageUri The Uri of an image.
+     * @return
+     */
+    Task<Uri> uploadPhoto(Uri selectedImageUri);
 }

@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking.BookingAdapter;
 
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.drawableToBitmap;
+import static io.github.cchristou3.CyParking.utilities.DrawableUtility.drawableToBitmap;
 
 /**
  * Purpose: Handle item swipe events from a {@link RecyclerView}.

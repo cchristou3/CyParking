@@ -1,17 +1,21 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext {
-        kotlin_version = '1.4.30'
+        gradleVersion = '4.1.2'
+        kotlinVersion = '1.4.31'
+        googleServicesVersion = '4.3.5'
+        argsVersion = '2.3.3'
     }
     repositories {
         google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.2'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.30'
-        classpath 'com.google.gms:google-services:4.3.5' // Google Services plugin
-        classpath 'androidx.navigation:navigation-safe-args-gradle-plugin:2.3.3' // Safe args - navigation plugin
+        classpath 'com.android.tools.build:gradle:' + gradleVersion
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:' + kotlinVersion
+        classpath 'com.google.gms:google-services:'+ googleServicesVersion // Google Services plugin
+        classpath 'androidx.navigation:navigation-safe-args-gradle-plugin:'+ argsVersion
+        // Safe args - navigation plugin
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -60,6 +64,9 @@ ext {
     cardviewVersion = '1.0.0'
     zxingAndroidEmbeddedVersion = '4.1.0'
     zxingVersion = '3.3.0'
+    glideVersion = '4.12.0'
+    navigationRuntimeKtxVersion = '2.3.3'
+    workRuntimeKtxVersion = '2.5.0'
 
     // Shared Testing Dependencies
     androidXTestExtRunnerVersion = '1.1.2'

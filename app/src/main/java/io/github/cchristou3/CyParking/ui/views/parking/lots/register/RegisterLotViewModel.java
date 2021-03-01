@@ -1,6 +1,7 @@
 package io.github.cchristou3.CyParking.ui.views.parking.lots.register;
 
-import androidx.annotation.Nullable;
+import android.net.Uri;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -8,6 +9,9 @@ import androidx.lifecycle.ViewModel;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
@@ -38,9 +42,10 @@ public class RegisterLotViewModel extends ViewModel {
     private final MutableLiveData<Integer> mLotCapacity = new MutableLiveData<>();
     private final MutableLiveData<String> mLotName = new MutableLiveData<>();
     private final MutableLiveData<LatLng> mLotLatLng = new MutableLiveData<>();
-    private final MutableLiveData<List<SlotOffer>> mSlotOfferList = new MutableLiveData<>();
+    private final MutableLiveData<List<SlotOffer>> mSlotOfferList = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<RegisterLotFormState> mRegisterLotFormState = new MutableLiveData<>();
     private final MutableLiveData<FormState> mSelectedSlotOfferArguments = new MutableLiveData<>(new FormState(false));
+    private final MutableLiveData<Uri> mImageUri = new MutableLiveData<>();
 
     private final OperatorRepository mOperatorRepository;
 
@@ -94,31 +99,31 @@ public class RegisterLotViewModel extends ViewModel {
      * @param slotOfferList        The slotOfferList of the lot.
      * @return A {@link RegisterLotFormState} object based on the user's input data.
      */
-    @Nullable
+    @NotNull
     private RegisterLotFormState validateForm(final String operatorMobileNumber, final Integer lotCapacity,
                                               final String lotName, final LatLng lotLatLng,
                                               final List<SlotOffer> slotOfferList) {
         // Validate the input and set the RegisterLotFormState accordingly
-        RegisterLotFormState newForm;
         if (!isValidPhoneNumber(operatorMobileNumber)) {
-            newForm = new RegisterLotFormState(R.string.mobile_phone_error,
-                    null, null, null, null);
+            return new RegisterLotFormState(R.string.mobile_phone_error,
+                    null, null, null, null, null);
         } else if (!isNameValid(lotName)) {
-            newForm = new RegisterLotFormState(null,
-                    R.string.lot_name_error, null, null, null);
+            return new RegisterLotFormState(null,
+                    R.string.lot_name_error, null, null, null, null);
         } else if (!isCapacityValid(lotCapacity)) {
-            newForm = new RegisterLotFormState(null,
-                    null, R.string.lot_capacity_error, null, null);
+            return new RegisterLotFormState(null,
+                    null, R.string.lot_capacity_error, null, null, null);
         } else if (!isLotLatLngValid(lotLatLng)) {
-            newForm = new RegisterLotFormState(null,
-                    null, null, null, R.string.lot_lat_lng_error);
+            return new RegisterLotFormState(null,
+                    null, null, null, R.string.lot_lat_lng_error, null);
+        } else if (!isImageUriValid()) {
+            return new RegisterLotFormState(null,
+                    null, null, null, null, 0);
         } else if (!areSlotOffersValid(slotOfferList)) {
-            newForm = new RegisterLotFormState(null,
-                    null, null, R.string.lot_slot_offer_error, null);
-        } else {
-            newForm = new RegisterLotFormState(true);
+            return new RegisterLotFormState(null,
+                    null, null, R.string.lot_slot_offer_error, null, null);
         }
-        return newForm;
+        return new RegisterLotFormState(true);
     }
 
     /**
@@ -127,8 +132,8 @@ public class RegisterLotViewModel extends ViewModel {
      * @param parkingLot The lot to be added to the database.
      * @return A {@link Task<Void>} object to be handled by the view.
      */
-    public Task<Void> registerParkingLot(ParkingLot parkingLot) {
-        return mOperatorRepository.registerParkingLot(parkingLot);
+    public Task<Boolean> registerParkingLot(ParkingLot parkingLot) {
+        return mOperatorRepository.registerParkingLot(getImageUri(), parkingLot);
     }
 
     /**
@@ -156,6 +161,41 @@ public class RegisterLotViewModel extends ViewModel {
      */
     public LiveData<FormState> getSelectedSlotOfferArgumentsState() {
         return mSelectedSlotOfferArguments;
+    }
+
+    /**
+     * Returns the value of {@link #mImageUri}.
+     *
+     * @return a reference to the value of {@link #mImageUri}.
+     */
+    public Uri getImageUri() {
+        return mImageUri.getValue();
+    }
+
+    /**
+     * Returns the LiveData reference of {@link #mImageUri}.
+     *
+     * @return the LiveData reference of {@link #mImageUri}.
+     */
+    public LiveData<Uri> getImageUriState() {
+        return mImageUri;
+    }
+
+    /**
+     * Updates the value of {@link #mImageUri}
+     * with the given argument.
+     *
+     * @param imageUri the new value of {@link #mImageUri}.
+     */
+    public void updateImageUri(Uri imageUri) {
+        mImageUri.setValue(imageUri);
+        mRegisterLotFormState.setValue(validateForm(
+                mOperatorMobileNumber.getValue(),
+                mLotCapacity.getValue(),
+                mLotName.getValue(),
+                mLotLatLng.getValue(),
+                mSlotOfferList.getValue())
+        );
     }
 
     /**
@@ -192,5 +232,15 @@ public class RegisterLotViewModel extends ViewModel {
         } else {
             mSelectedSlotOfferArguments.setValue(new FormState(true));
         }
+    }
+
+    /**
+     * Check whether the current value of {@link #mImageUri}
+     * is valid.
+     *
+     * @return True, if non-null. Otherwise, false.
+     */
+    private boolean isImageUriValid() {
+        return getImageUri() != null;
     }
 }

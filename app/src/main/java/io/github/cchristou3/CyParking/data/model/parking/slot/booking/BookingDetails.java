@@ -10,8 +10,10 @@ import com.google.firebase.firestore.Exclude;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 
@@ -21,7 +23,7 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
  * as booking details are part of a booking.
  *
  * @author Charalambos Christou
- * @version 3.0 24/02/2021
+ * @version 4.0 28/02/2021
  */
 public class BookingDetails implements Parcelable, Comparable<BookingDetails> {
 
@@ -117,6 +119,20 @@ public class BookingDetails implements Parcelable, Comparable<BookingDetails> {
                         Float.parseFloat(attributes[4]) // price
                 )
         );
+    }
+
+    /**
+     * Prepares the text of the date TextView based
+     * on the given String.
+     *
+     * @param date The date to be represented in String.
+     * @return A String representation of the given date..
+     */
+    @NotNull
+    @Contract(pure = true)
+    public static String getDateText(Date date) {
+        return DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
+                .format(date);
     }
 
     /**
@@ -292,6 +308,27 @@ public class BookingDetails implements Parcelable, Comparable<BookingDetails> {
         protected Time(@NotNull Parcel in) {
             hour = in.readInt();
             minute = in.readInt();
+        }
+
+        /**
+         * A new Time instance whose hours is equal to the
+         * addition of given time's hours and
+         * the slot offer's duration.
+         * E.g. for time 13:30 and offer (1.0 duration, £1.0), it
+         * will return  14:30.
+         *
+         * @param booking The booking.
+         * @return The end time based on the start time and the offer's duration.
+         */
+        @NotNull
+        @Contract("_ -> new")
+        @Exclude
+        public static Time getEndTime(@NotNull BookingDetails bookingDetails) {
+            return new Time((int) (
+                    bookingDetails.startingTime.hour // hours plus
+                            + bookingDetails.slotOffer.getDuration() // the duration
+            ),
+                    bookingDetails.startingTime.minute);
         }
 
         /**

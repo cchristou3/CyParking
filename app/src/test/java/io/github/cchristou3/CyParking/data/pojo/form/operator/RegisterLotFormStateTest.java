@@ -23,16 +23,18 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError() == null
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && state.isDataValid());
     }
 
     @Test
-    public void registerFormState_fiveErrors_ErrorsNotNullValidIsFalse() {
+    public void registerFormState_SixErrors_ErrorsNotNullValidIsFalse() {
         // Given
         Integer error = R.string.any_error;
         // When
         RegisterLotFormState state =
                 new RegisterLotFormState(error,
+                        error,
                         error,
                         error,
                         error,
@@ -43,6 +45,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError().equals(error)
                 && !state.isDataValid());
     }
 
@@ -56,6 +59,7 @@ public class RegisterLotFormStateTest {
                         null,
                         null,
                         null,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
@@ -63,6 +67,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError() == null
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -76,6 +81,7 @@ public class RegisterLotFormStateTest {
                         error,
                         null,
                         null,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
@@ -83,6 +89,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError() == null
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -96,6 +103,7 @@ public class RegisterLotFormStateTest {
                         null,
                         error,
                         null,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
@@ -103,6 +111,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError() == null
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -116,6 +125,7 @@ public class RegisterLotFormStateTest {
                         null,
                         null,
                         error,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
@@ -123,6 +133,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -136,13 +147,37 @@ public class RegisterLotFormStateTest {
                         null,
                         null,
                         null,
-                        error);
+                        error,
+                        null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
                 && state.getLotNameError() == null
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError() == null
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError() == null
+                && !state.isDataValid());
+    }
+
+    @Test
+    public void registerFormState_photoError_lotLatLngNotNullInvalid() {
+        // Given
+        Integer error = R.string.any_error;
+        // When
+        RegisterLotFormState state =
+                new RegisterLotFormState(null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        error);
+        // Then
+        Assert.assertTrue(state.getMobileNumberError() == null
+                && state.getLotNameError() == null
+                && state.getLotCapacityError() == null
+                && state.getSlotOfferError() == null
+                && state.getLatLngError() == null
+                && state.getPhotoError().equals(error)
                 && !state.isDataValid());
     }
 
@@ -156,6 +191,7 @@ public class RegisterLotFormStateTest {
                         error,
                         null,
                         null,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
@@ -163,6 +199,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError() == null
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -176,6 +213,7 @@ public class RegisterLotFormStateTest {
                         null,
                         error,
                         null,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
@@ -183,6 +221,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError() == null
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -196,6 +235,7 @@ public class RegisterLotFormStateTest {
                         null,
                         null,
                         error,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
@@ -203,6 +243,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -216,13 +257,15 @@ public class RegisterLotFormStateTest {
                         null,
                         null,
                         null,
-                        error);
+                        error,
+                        null);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
                 && state.getLotNameError() == null
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError() == null
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -236,6 +279,7 @@ public class RegisterLotFormStateTest {
                         error,
                         error,
                         null,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
@@ -243,6 +287,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError() == null
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -256,6 +301,7 @@ public class RegisterLotFormStateTest {
                         error,
                         null,
                         error,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
@@ -263,6 +309,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -276,13 +323,15 @@ public class RegisterLotFormStateTest {
                         error,
                         null,
                         null,
-                        error);
+                        error,
+                        null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
                 && state.getLotNameError().equals(error)
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError() == null
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -296,6 +345,7 @@ public class RegisterLotFormStateTest {
                         null,
                         error,
                         error,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
@@ -303,6 +353,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -316,13 +367,125 @@ public class RegisterLotFormStateTest {
                         null,
                         null,
                         error,
-                        error);
+                        error,
+                        null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
                 && state.getLotNameError() == null
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError() == null
+                && !state.isDataValid());
+    }
+
+    @Test
+    public void registerFormState_photoSlotOfferErrors_thoseErrorsNotNullInvalid() {
+        // Given
+        Integer error = R.string.any_error;
+        // When
+        RegisterLotFormState state =
+                new RegisterLotFormState(null,
+                        null,
+                        null,
+                        error,
+                        null,
+                        error);
+        // Then
+        Assert.assertTrue(state.getMobileNumberError() == null
+                && state.getLotNameError() == null
+                && state.getLotCapacityError() == null
+                && state.getSlotOfferError().equals(error)
+                && state.getLatLngError() == null
+                && state.getPhotoError().equals(error)
+                && !state.isDataValid());
+    }
+
+    @Test
+    public void registerFormState_photoLatLngErrors_thoseErrorsNotNullInvalid() {
+        // Given
+        Integer error = R.string.any_error;
+        // When
+        RegisterLotFormState state =
+                new RegisterLotFormState(null,
+                        null,
+                        null,
+                        null,
+                        error,
+                        error);
+        // Then
+        Assert.assertTrue(state.getMobileNumberError() == null
+                && state.getLotNameError() == null
+                && state.getLotCapacityError() == null
+                && state.getSlotOfferError() == null
+                && state.getLatLngError().equals(error)
+                && state.getPhotoError().equals(error)
+                && !state.isDataValid());
+    }
+
+    @Test
+    public void registerFormState_photoMobileErrors_thoseErrorsNotNullInvalid() {
+        // Given
+        Integer error = R.string.any_error;
+        // When
+        RegisterLotFormState state =
+                new RegisterLotFormState(error,
+                        null,
+                        null,
+                        null,
+                        null,
+                        error);
+        // Then
+        Assert.assertTrue(state.getMobileNumberError().equals(error)
+                && state.getLotNameError() == null
+                && state.getLotCapacityError() == null
+                && state.getSlotOfferError() == null
+                && state.getLatLngError() == null
+                && state.getPhotoError().equals(error)
+                && !state.isDataValid());
+    }
+
+    @Test
+    public void registerFormState_photoNameErrors_thoseErrorsNotNullInvalid() {
+        // Given
+        Integer error = R.string.any_error;
+        // When
+        RegisterLotFormState state =
+                new RegisterLotFormState(null,
+                        error,
+                        null,
+                        null,
+                        null,
+                        error);
+        // Then
+        Assert.assertTrue(state.getMobileNumberError() == null
+                && state.getLotNameError().equals(error)
+                && state.getLotCapacityError() == null
+                && state.getSlotOfferError() == null
+                && state.getLatLngError() == null
+                && state.getPhotoError().equals(error)
+                && !state.isDataValid());
+    }
+
+    @Test
+    public void registerFormState_photoCapacityErrors_thoseErrorsNotNullInvalid() {
+        // Given
+        Integer error = R.string.any_error;
+        // When
+        RegisterLotFormState state =
+                new RegisterLotFormState(null,
+                        null,
+                        error,
+                        null,
+                        null,
+                        error);
+        // Then
+        Assert.assertTrue(state.getMobileNumberError() == null
+                && state.getLotNameError() == null
+                && state.getLotCapacityError().equals(error)
+                && state.getSlotOfferError() == null
+                && state.getLatLngError() == null
+                && state.getPhotoError().equals(error)
                 && !state.isDataValid());
     }
 
@@ -336,6 +499,7 @@ public class RegisterLotFormStateTest {
                         error,
                         error,
                         null,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
@@ -343,6 +507,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError() == null
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -356,6 +521,7 @@ public class RegisterLotFormStateTest {
                         error,
                         null,
                         error,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
@@ -363,6 +529,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -376,13 +543,15 @@ public class RegisterLotFormStateTest {
                         error,
                         null,
                         null,
-                        error);
+                        error,
+                        null);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
                 && state.getLotNameError().equals(error)
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError() == null
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -396,6 +565,7 @@ public class RegisterLotFormStateTest {
                         error,
                         error,
                         error,
+                        null,
                         null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
@@ -403,6 +573,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError() == null
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -416,13 +587,15 @@ public class RegisterLotFormStateTest {
                         error,
                         error,
                         null,
-                        error);
+                        error,
+                        null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
                 && state.getLotNameError().equals(error)
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError() == null
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 
@@ -436,13 +609,81 @@ public class RegisterLotFormStateTest {
                         null,
                         error,
                         error,
-                        error);
+                        error,
+                        null);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
                 && state.getLotNameError() == null
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError() == null
+                && !state.isDataValid());
+    }
+
+    @Test
+    public void registerFormState_photoSlotOfferLatLngErrors_thoseErrorsNotNullInvalid() {
+        // Given
+        Integer error = R.string.any_error;
+        // When
+        RegisterLotFormState state =
+                new RegisterLotFormState(null,
+                        null,
+                        null,
+                        error,
+                        error,
+                        error);
+        // Then
+        Assert.assertTrue(state.getMobileNumberError() == null
+                && state.getLotNameError() == null
+                && state.getLotCapacityError() == null
+                && state.getSlotOfferError().equals(error)
+                && state.getLatLngError().equals(error)
+                && state.getPhotoError().equals(error)
+                && !state.isDataValid());
+    }
+
+    @Test
+    public void registerFormState_photoNameCapacityErrors_thoseErrorsNotNullInvalid() {
+        // Given
+        Integer error = R.string.any_error;
+        // When
+        RegisterLotFormState state =
+                new RegisterLotFormState(null,
+                        error,
+                        error,
+                        null,
+                        null,
+                        error);
+        // Then
+        Assert.assertTrue(state.getMobileNumberError() == null
+                && state.getLotNameError().equals(error)
+                && state.getLotCapacityError().equals(error)
+                && state.getSlotOfferError() == null
+                && state.getLatLngError() == null
+                && state.getPhotoError().equals(error)
+                && !state.isDataValid());
+    }
+
+    @Test
+    public void registerFormState_photoNameMobileErrors_thoseErrorsNotNullInvalid() {
+        // Given
+        Integer error = R.string.any_error;
+        // When
+        RegisterLotFormState state =
+                new RegisterLotFormState(error,
+                        error,
+                        null,
+                        null,
+                        null,
+                        error);
+        // Then
+        Assert.assertTrue(state.getMobileNumberError().equals(error)
+                && state.getLotNameError().equals(error)
+                && state.getLotCapacityError() == null
+                && state.getSlotOfferError() == null
+                && state.getLatLngError() == null
+                && state.getPhotoError().equals(error)
                 && !state.isDataValid());
     }
 
@@ -456,6 +697,7 @@ public class RegisterLotFormStateTest {
                         error,
                         error,
                         error,
+                        error,
                         error);
         // Then
         Assert.assertTrue(state.getMobileNumberError() == null
@@ -463,6 +705,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError().equals(error)
                 && !state.isDataValid());
     }
 
@@ -476,6 +719,7 @@ public class RegisterLotFormStateTest {
                         null,
                         error,
                         error,
+                        error,
                         error);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
@@ -483,6 +727,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError().equals(error)
                 && !state.isDataValid());
     }
 
@@ -496,6 +741,7 @@ public class RegisterLotFormStateTest {
                         error,
                         null,
                         error,
+                        error,
                         error);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
@@ -503,6 +749,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError() == null
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError().equals(error)
                 && !state.isDataValid());
     }
 
@@ -516,6 +763,7 @@ public class RegisterLotFormStateTest {
                         error,
                         error,
                         null,
+                        error,
                         error);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
@@ -523,6 +771,7 @@ public class RegisterLotFormStateTest {
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError() == null
                 && state.getLatLngError().equals(error)
+                && state.getPhotoError().equals(error)
                 && !state.isDataValid());
     }
 
@@ -536,13 +785,37 @@ public class RegisterLotFormStateTest {
                         error,
                         error,
                         error,
-                        null);
+                        null,
+                        error);
         // Then
         Assert.assertTrue(state.getMobileNumberError().equals(error)
                 && state.getLotNameError().equals(error)
                 && state.getLotCapacityError().equals(error)
                 && state.getSlotOfferError().equals(error)
                 && state.getLatLngError() == null
+                && state.getPhotoError().equals(error)
+                && !state.isDataValid());
+    }
+
+    @Test
+    public void registerFormState_allErrorsExceptPhoto_thoseErrorsNotNullInvalid() {
+        // Given
+        Integer error = R.string.any_error;
+        // When
+        RegisterLotFormState state =
+                new RegisterLotFormState(error,
+                        error,
+                        error,
+                        error,
+                        error,
+                        null);
+        // Then
+        Assert.assertTrue(state.getMobileNumberError().equals(error)
+                && state.getLotNameError().equals(error)
+                && state.getLotCapacityError().equals(error)
+                && state.getSlotOfferError().equals(error)
+                && state.getLatLngError().equals(error)
+                && state.getPhotoError() == null
                 && !state.isDataValid());
     }
 }

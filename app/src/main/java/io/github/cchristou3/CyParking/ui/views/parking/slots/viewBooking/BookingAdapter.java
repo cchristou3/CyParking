@@ -16,10 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.BookingDetails;
@@ -114,9 +110,9 @@ public class BookingAdapter extends SwipeableAdapter<Booking, BookingAdapter.Boo
         final Booking booking = getItem(position);
 
         final String offer = booking.getBookingDetails().getSlotOffer().toString();
-        final String date = getDateText(booking.getBookingDetails().getDateOfBooking());
+        final String date = BookingDetails.getDateText(booking.getBookingDetails().getDateOfBooking());
         final BookingDetails.Time time = booking.getBookingDetails().getStartingTime();
-        final String status = getStatusText(booking.isCompleted());
+        final String status = Booking.getStatusText(holder.itemView.getContext(), booking.isCompleted());
         final String parkingName = booking.getLotName();
 
         // - replace the contents of the view with that element
@@ -126,34 +122,6 @@ public class BookingAdapter extends SwipeableAdapter<Booking, BookingAdapter.Boo
         holder.date.setText(date);
         holder.time.setText(time.toString());
     }
-
-    /**
-     * Prepares the text of the date TextView based
-     * on the given String.
-     *
-     * @param date The date to be represented in String.
-     * @return A String representation of the given date..
-     */
-    @NotNull
-    @Contract(pure = true)
-    private String getDateText(Date date) {
-        return DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
-                .format(date);
-    }
-
-    /**
-     * Prepares the text of the status TextView based
-     * on the given String.
-     *
-     * @param status A boolean indicating the status of the booking.
-     * @return A String with format `status: ` + given String.
-     */
-    @NotNull
-    @Contract(pure = true)
-    private String getStatusText(boolean status) {
-        return (status ? "Completed" : "Pending");
-    }
-
 
     /**
      * Called by RecyclerView when it starts observing this Adapter.
@@ -219,7 +187,6 @@ public class BookingAdapter extends SwipeableAdapter<Booking, BookingAdapter.Boo
             super(view);
 
             // Hook up the item with an on click listener
-            // TODO: 04/02/2021 Implement booking details screen
             itemView.setOnClickListener(mOnItemClickListener);
             itemView.setTag(this);
 

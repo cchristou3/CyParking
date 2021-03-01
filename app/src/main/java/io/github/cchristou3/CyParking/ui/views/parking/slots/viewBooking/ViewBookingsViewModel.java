@@ -1,35 +1,46 @@
 package io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.data.repository.BookingRepository;
+
+import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
 
 /**
  * Purpose: <p>Data persistence when orientation changes.
  * Used when the users try to view their bookings.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 23/01/21
+ * @version 3.0 28/02/21
  */
 public class ViewBookingsViewModel extends ViewModel {
 
     private static final String TAG = ViewBookingsViewModel.class.getName();
-
     // Data member
     private final MutableLiveData<List<Booking>> mBookingList =
             new MutableLiveData<>();
-
     private final BookingRepository mBookingRepository;
+    private final MutableLiveData<Integer> mToastMessage = new MutableLiveData<Integer>() {
+        @Override
+        protected void onInactive() {
+            super.onInactive();
+            setValue(null); // In case configs change / or returning back to the screen
+            // it will not show a message.
+        }
+    };
+    private boolean mWasDataLoaded = false;
 
     /**
      * Initialize the ViewModel's BookingRepository instance
@@ -39,6 +50,15 @@ public class ViewBookingsViewModel extends ViewModel {
      */
     public ViewBookingsViewModel(BookingRepository bookingRepository) {
         this.mBookingRepository = bookingRepository;
+    }
+
+    /**
+     * Access the {@link #mToastMessage}.
+     *
+     * @return The state of the {@link #mToastMessage}.
+     */
+    public LiveData<Integer> getToastMessage() {
+        return mToastMessage;
     }
 
     /**
@@ -71,14 +91,29 @@ public class ViewBookingsViewModel extends ViewModel {
 
     /**
      * Returns the bookings of the specified userId,
-     * starting from the "Pending" ones and finishing with the "Completed" ones
+     * that are not completed. Also, if this method is called
+     * more than one time, then the remaining calls are ignored.
      *
-     * @param userId The is of the Firebase user
-     * @return A query which returns all the bookings of the specified userId
+     * @param userId The id of the Firebase user.
      */
-    @NotNull
-    public Task<QuerySnapshot> getUserBookings(String userId) {
-        return this.mBookingRepository.getUserBookings(userId).get();
+    public void getUserBookings(String userId) {
+        if (!mWasDataLoaded) {
+            this.mBookingRepository.getUserBookings(userId).get()
+                    .addOnCompleteListener(task -> {
+                        final Exception error = task.getException();
+                        final QuerySnapshot value = task.getResult();
+                        if (error != null || value == null) { // Check whether an error occurred
+                            mToastMessage.setValue(R.string.load_booking_failed);
+                            return;
+                        }
+
+                        List<Booking> bookings = getListOf(value, Booking.class);
+                        Log.d(TAG, "New Snapshot success: " + bookings.size());
+                        // - Update the booking list state with the newly created booking list
+                        updateBookingList(bookings);
+                        mWasDataLoaded = true;
+                    });
+        }
     }
 
     /**

@@ -3,7 +3,9 @@ package io.github.cchristou3.CyParking.data.manager.location;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
@@ -21,6 +23,7 @@ import com.google.android.gms.location.LocationResult;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 
 /**
@@ -40,7 +43,7 @@ import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
  *  the implementation of the LocationHandler provided by the fragment/activity.
  *
  * @author Charalambos Christou
- * @version 4.0 23/01/21
+ * @version 5.0 28/02/21
  */
 public abstract class LocationManager {
 
@@ -93,6 +96,35 @@ public abstract class LocationManager {
     }
 
     /**
+     * Launch a Google Maps intent in which the given latitude and longitude
+     * are set the center point of the map. Also, the point is given the
+     * specified label.
+     * If the device has no apps that support this operation, then a Toast
+     * message is displayed.
+     *
+     * @param context   The context to make use of.
+     * @param latitude  the center point of the map in the Y axis.
+     * @param longitude the center point of the map in the X axis.
+     * @param label     The label of the point in the map.
+     */
+    public static void launchGoogleMaps(@NonNull Context context, double latitude, double longitude, String label) {
+        // Create Uri (query string) for a Google Maps Intent
+        // Launch Google Maps activity
+        Intent mapIntent = new Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("geo:0,0?q=" + latitude
+                        + "," + longitude + "("
+                        + label
+                        + ")")
+        ).setPackage("com.google.android.apps.maps");
+        if (mapIntent.resolveActivity(context.getPackageManager()) != null) {
+            context.startActivity(mapIntent);
+        } else {
+            Toast.makeText(context, context.getString(R.string.no_google_maps_app_found), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
      * Requests the user's latest known location.
      * This procedure is wrapped around appropriate permission
      * checks to avoid requesting the user's location without
@@ -102,13 +134,12 @@ public abstract class LocationManager {
      */
     public void requestUserLocationUpdates(@NonNull Fragment fragment) {
         // Check for location permissions
-        if (ActivityCompat.checkSelfPermission(fragment.requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(fragment.requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(fragment.requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(fragment.requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Marshmallow
-
-                fragment.requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-
+                fragment.requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                        LOCATION_PERMISSION_REQUEST_CODE);
             }
         } else {
             // no need to ask for permission

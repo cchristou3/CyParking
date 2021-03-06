@@ -17,14 +17,14 @@ import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking
  */
 class BookingDetailsViewModel(private val repository: OperatorRepository) : ViewModel() {
 
-    private val _lotOfBooking = MutableLiveData<ParkingLot>()
+    private val mlotOfBooking = MutableLiveData<ParkingLot>()
 
     /**
-     * A LiveData getter of [_lotOfBooking] to ensure that
+     * A LiveData getter of [mlotOfBooking] to ensure that
      * its value cannot be changed outside of the ViewModel scope.
      * Whereas its setter is private.
      */
-    var lotOfBooking: LiveData<ParkingLot> = _lotOfBooking
+    var lotOfBooking: LiveData<ParkingLot> = mlotOfBooking
         private set
 
     /**
@@ -36,7 +36,7 @@ class BookingDetailsViewModel(private val repository: OperatorRepository) : View
                     if (task.isSuccessful) {
                         val lot = task.result.documents[0].toObject(ParkingLot::class.java)
                         lot?.let {
-                            _lotOfBooking.value = it
+                            mlotOfBooking.value = it
                         }
                     }
                 }

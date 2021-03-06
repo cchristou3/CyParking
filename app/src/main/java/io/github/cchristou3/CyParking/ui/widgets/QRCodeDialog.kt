@@ -3,13 +3,12 @@ package io.github.cchristou3.CyParking.ui.widgets
 import android.content.Context
 import android.graphics.Bitmap
 import android.view.LayoutInflater
-import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
 import com.journeyapps.barcodescanner.BarcodeEncoder
-import io.github.cchristou3.CyParking.R
+import io.github.cchristou3.CyParking.databinding.DialogQrCodeBinding
 
 /**
  * Purpose: Initializes a custom [AlertDialog.Builder] to display
@@ -32,10 +31,9 @@ class QRCodeDialog(context: Context, parent: ConstraintLayout, message: String) 
      * host our custom view.
      */
     init {
+        // TODO: 01/03/2021 Test
         // inflate our custom view
-        val qrCodeView = LayoutInflater.from(context)
-                .inflate(R.layout.dialog_qr_code, null)
-        val imageView = qrCodeView.findViewById<ImageView>(R.id.dialog_qr_code_iv)
+        val qrCodeViewBinding = DialogQrCodeBinding.inflate(LayoutInflater.from(context), null, false)
         // Generate QR Code
         val barcodeEncoder = BarcodeEncoder()
         var bitmap: Bitmap? = null
@@ -49,9 +47,9 @@ class QRCodeDialog(context: Context, parent: ConstraintLayout, message: String) 
             // TODO: 25/02/2021 Display some kind of error bitmap
         }
         // Display it on the image view
-        imageView.setImageBitmap(bitmap)
+        qrCodeViewBinding.dialogQrCodeIv.setImageBitmap(bitmap)
         // Set the dialog builder's view to our custom view
-        dialogBuilder.setView(qrCodeView)
+        dialogBuilder.setView(qrCodeViewBinding.root)
     }
 
     /**

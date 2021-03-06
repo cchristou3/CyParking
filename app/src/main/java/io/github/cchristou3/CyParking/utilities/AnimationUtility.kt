@@ -20,7 +20,7 @@ import androidx.transition.TransitionManager
  * are accessible from everywhere in the application.
  *
  * @author Charalambos Christou
- * @version 1.0 25/02/21
+ * @version 2.0 06/03/21
  */
 
 /**
@@ -32,13 +32,14 @@ import androidx.transition.TransitionManager
  *
  * @param parent The parent ViewGroup of the child we want to animate.
  * @param childToBeAnimated The view we want to animate.
+ * @param duration The duration of the animation.
  * @param hide Whether to hide or show the animating view.
  */
-fun slideVerticallyToBottom(parent: ViewGroup, childToBeAnimated: View, hide: Boolean) {
+fun slideVerticallyToBottom(parent: ViewGroup, childToBeAnimated: View, hide: Boolean, duration: Long) {
     // BOTTOM indicates that we want to push the view to the bottom of its container,
     // without changing its size.
     val transition = Slide(Gravity.BOTTOM)
-    transition.duration = 1000 // how long the animation will last
+    transition.duration = duration // how long the animation will last
     // Add the id of the target view that this Transition is interested in
     transition.addTarget(childToBeAnimated.id)
 

@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +34,7 @@ import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 
 import static io.github.cchristou3.CyParking.utilities.Utility.cloneList;
+import static io.github.cchristou3.CyParking.utilities.ViewUtility.showToast;
 
 /**
  * Purpose: <p>Shows pending / completed bookings of the user / operator?</p>
@@ -112,10 +112,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
         });
 
         mViewBookingsViewModel.getToastMessage().observe(getViewLifecycleOwner(),
-                message -> {
-                    if (message != null)
-                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-                });
+                message -> showToast(requireContext(), message));
     }
 
     /**

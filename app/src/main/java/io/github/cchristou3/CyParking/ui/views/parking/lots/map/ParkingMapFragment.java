@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -60,6 +59,7 @@ import io.github.cchristou3.CyParking.utilities.AnimationUtility;
 import static android.view.View.GONE;
 import static io.github.cchristou3.CyParking.utilities.AnimationUtility.animateAvailabilityColorChanges;
 import static io.github.cchristou3.CyParking.utilities.Utility.getDistanceApart;
+import static io.github.cchristou3.CyParking.utilities.ViewUtility.showToast;
 
 /**
  * Purpose: <p>View all nearby parking.
@@ -115,9 +115,10 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
 
     // Constant variables
     public static final String TAG = ParkingMapFragment.class.getName() + "UniqueTag";
-    private static final int ZOOM_LEVEL = 16;
+    private static final int DEFAULT_ZOOM_LEVEL = 16;
     private static final String UNAVAILABLE = "Unavailable";
     private static final double UPDATE_LOCATION_THRESHOLD = 100.0D;
+    private static final float MIN_ZOOM_LEVEL = 10.0f;
 
     // Fragment's variables
     private ParkingMapViewModel mParkingMapViewModel;
@@ -141,7 +142,6 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Toast.makeText(requireContext(), "Please wait while the map is loading.", Toast.LENGTH_LONG).show();
         try {
             mUserCurrentLatLng = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(LatLng.class));
         } catch (ClassCastException | NullPointerException e) {
@@ -191,7 +191,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
         }
         attachButtonListeners(); // Ui listeners
         // The fetching lots initially
-        if (mParkingMapViewModel.getDocumentIdsOfNearbyLots().getValue() == null) {
+        if (!mParkingMapViewModel.didPreviouslyRetrieveDocumentIds()) {
             fetchParkingLots(mUserCurrentLatLng); // HTTPS call
         }
     }
@@ -293,6 +293,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap; // Save a reference of the GoogleMap instance
+        mGoogleMap.setMinZoomPreference(MIN_ZOOM_LEVEL);
         // Start listening to the user's location updates
         mLocationManager.requestUserLocationUpdates(this);
 
@@ -560,7 +561,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
             // If its info was showing, hide it and inform the user
             boolean wasVisibleBefore = mParkingMapViewModel.hideInfoLayoutWithStateCheck();
             if (wasVisibleBefore) {
-                Toast.makeText(getContext(), "Unfortunately, the parking got removed!", Toast.LENGTH_SHORT).show();
+                mParkingMapViewModel.updateToastMessage(R.string.parking_got_removed);
             }
         });
     }
@@ -617,7 +618,6 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
             public void onSuccess(String rawJsonResponse) {
                 // Zoom in
                 Log.d(TAG, "Before parsing: " + rawJsonResponse);
-                mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
                 // Convert json object into an array of ParkingLot objects and add for each a marker to the map.
                 String[] result = new Gson().fromJson(rawJsonResponse, String[].class);
                 mParkingMapViewModel.updateIdsState(result);
@@ -627,15 +627,15 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
             @Override
             public void onFailure(Exception exception) {
                 if (exception == null) return;
-                // Plan B: Reload map
+                // TODO: What if user had internet initially and then
+                // it got lost? Should we navigate the user back to the home screen
+                // or keep him?
                 AlertBuilder.showSingleActionAlert(
                         getChildFragmentManager(),
                         R.string.volley_error_title,
                         R.string.volley_error_body,
                         (v) -> goBack(requireActivity()) // go back to home screen
                 );
-                //Toast.makeText(requireContext(), "Unexpected error occurred!\n" + exception.getMessage(), Toast.LENGTH_SHORT).show();
-                //Log.e(ParkingMapFragment.TAG, "Error of class " + exception.getClass() + ": " + exception.getMessage());
             }
 
             @Override
@@ -663,6 +663,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
         // Initialize the mParkingMapViewModel and the mGlobalStateViewModel
         mParkingMapViewModel = new ViewModelProvider(this, new ParkingMapViewModelFactory())
                 .get(ParkingMapViewModel.class);
+        mParkingMapViewModel.updateToastMessage(R.string.loading_map);
     }
 
     /**
@@ -686,7 +687,14 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
                 this::updateLocalDocuments);
 
         mParkingMapViewModel.getDocumentIdsOfNearbyLots().observe(getViewLifecycleOwner(), documentIds -> {
+            mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM_LEVEL));
             Log.d(TAG, "IdsState observer: " + mDatabaseObserver + " ids: " + documentIds);
+            if (documentIds == null || documentIds.isEmpty()) {
+                // Display message
+                mParkingMapViewModel.updateToastMessage(R.string.no_nearby_parking_lots);
+                return;
+            }
+
             // Get all the parking lots where their doc ids are in the documentIds list set
             // then attach an observer to them
             if (mDatabaseObserver == null) {
@@ -695,7 +703,8 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
                         .createQueryObserver( // Internally adds a snapshot listener
                                 mParkingMapViewModel.getParkingLots(documentIds), // Query reference
                                 (value, error) -> { // Event handler
-                                    mParkingMapViewModel.updateDocumentState(value.getDocumentChanges());
+                                    if (value != null)
+                                        mParkingMapViewModel.updateDocumentState(value.getDocumentChanges());
                                 }
                         )).registerLifecycleObserver(getLifecycle());
             } else {
@@ -705,6 +714,10 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
                 );
             }
         });
+
+        // Display Toast messages whenever a message is set
+        mParkingMapViewModel.getToastMessage().observe(getViewLifecycleOwner(),
+                messageResId -> showToast(requireContext(), messageResId));
     }
 
     /**
@@ -738,8 +751,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      */
     private void updateInfoLayoutVisibilityTo(final int visibility) {
         AnimationUtility.slideVerticallyToBottom(getBinding().idFragmentParkingMap,
-                getBinding().fragmentParkingMapCvInfoLayout, visibility == GONE);
-        //updateViewVisibilityTo(getBinding().fragmentParkingMapCvInfoLayout, visibility);
+                getBinding().fragmentParkingMapCvInfoLayout, visibility == GONE, 250L);
     }
 
     /**
@@ -751,8 +763,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     private void navigateToBookingScreen() {
         // If the user is not logged in, display a Toast msg
         if (getUser() == null) {
-            // TODO: 16/01/2021 Replace string with getString(R.string...)
-            Toast.makeText(requireContext(), "You need to be logged in to book a parking slot!", Toast.LENGTH_SHORT).show();
+            mParkingMapViewModel.updateToastMessage(R.string.no_booking_allowed_to_non_logged_in_users);
             return;
         }
         if (mMarkerManager.getSelectedParkingLot() != null) {
@@ -764,7 +775,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
                             ParkingMapFragmentDirections.actionNavParkingMapFragmentToParkingBookingFragment()
                     );
         } else {
-            Toast.makeText(requireContext(), "Oops something went wrong!", Toast.LENGTH_SHORT).show();
+            mParkingMapViewModel.updateToastMessage(R.string.unknown_error);
         }
     }
 

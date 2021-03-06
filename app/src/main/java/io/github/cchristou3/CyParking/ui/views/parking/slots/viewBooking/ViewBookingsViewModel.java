@@ -4,7 +4,6 @@ import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -15,6 +14,7 @@ import java.util.List;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.data.repository.BookingRepository;
+import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
 
 import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
 
@@ -25,21 +25,13 @@ import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
  * @author Charalambos Christou
  * @version 3.0 28/02/21
  */
-public class ViewBookingsViewModel extends ViewModel {
+public class ViewBookingsViewModel extends ToastViewModel {
 
     private static final String TAG = ViewBookingsViewModel.class.getName();
     // Data member
     private final MutableLiveData<List<Booking>> mBookingList =
             new MutableLiveData<>();
     private final BookingRepository mBookingRepository;
-    private final MutableLiveData<Integer> mToastMessage = new MutableLiveData<Integer>() {
-        @Override
-        protected void onInactive() {
-            super.onInactive();
-            setValue(null); // In case configs change / or returning back to the screen
-            // it will not show a message.
-        }
-    };
     private boolean mWasDataLoaded = false;
 
     /**
@@ -50,15 +42,6 @@ public class ViewBookingsViewModel extends ViewModel {
      */
     public ViewBookingsViewModel(BookingRepository bookingRepository) {
         this.mBookingRepository = bookingRepository;
-    }
-
-    /**
-     * Access the {@link #mToastMessage}.
-     *
-     * @return The state of the {@link #mToastMessage}.
-     */
-    public LiveData<Integer> getToastMessage() {
-        return mToastMessage;
     }
 
     /**
@@ -103,7 +86,7 @@ public class ViewBookingsViewModel extends ViewModel {
                         final Exception error = task.getException();
                         final QuerySnapshot value = task.getResult();
                         if (error != null || value == null) { // Check whether an error occurred
-                            mToastMessage.setValue(R.string.load_booking_failed);
+                            updateToastMessage(R.string.load_booking_failed);
                             return;
                         }
 

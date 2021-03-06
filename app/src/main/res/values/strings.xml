@@ -57,7 +57,6 @@
 
     <!-- Strings related to the feedback -->
     <string name="invalid_feedback">Cannot be empty</string>
-    <string name="no_parking_lots_text">No parking lots registered yet</string>
 
     <!-- Strings related to the registering a parking lot -->
     <string name="hint_mobile_number">Mobile number</string>
@@ -107,10 +106,12 @@
     <string name="increment_by_one">Increment by one</string>
     <string name="decrement_by_one">Decrement by one</string>
     <string name="availability">Availability: </string> <!-- used in ParkingLot.getAvailability() -->
+    <string name="no_parking_lots_text">No parking lots registered yet</string>
 
     <!-- Strings related to the ParkingMapFragment -->
     <string name="volley_error_title">No Internet connection</string>
     <string name="volley_error_body">Make sure that Wi-Fi or mobile data is turned on, then try again.</string>
+    <string name="no_nearby_parking_lots">No nearby parking lots were found.</string>
 
     <!-- String related to viewing bookings -->
     <string name="swipe_left_to_use_options">Swipe left to use options</string>
@@ -191,5 +192,9 @@
     <string name="pending">Pending</string>
     <string name="no_google_maps_app_found">No apps installed that support this kind of action.</string>
     <string name="load_booking_failed">Unfortunately, couldn\'t load your bookings. Check you Internet connection and try again.</string>
+    <string name="no_booking_allowed_to_non_logged_in_users">You need to be logged in to book a parking slot!</string>
+    <string name="unknown_error">Oops something went wrong!</string>
+    <string name="loading_map">Please wait while the map is loading.</string>
+    <string name="parking_got_removed">Unfortunately, the parking got removed!</string>
 
 </resources>

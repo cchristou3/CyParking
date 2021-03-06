@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.widget.ContentLoadingProgressBar;
@@ -24,12 +25,23 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
  * related to the View.</p>
  *
  * @author Charalambos Christou
- * @version 10.0 01/03/21
+ * @version 11.0 06/03/21
  */
 public class ViewUtility {
 
     // No instances. Static utilities only.
     private ViewUtility() {
+    }
+
+    /**
+     * Displays a Toast of the given message if it is not null.
+     *
+     * @param context The context to make use of.
+     * @param message The message to display.
+     */
+    public static void showToast(Context context, @Nullable Integer message) {
+        if (message != null)
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
     /**

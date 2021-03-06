@@ -5,7 +5,6 @@ import android.view.View;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FieldPath;
@@ -21,15 +20,16 @@ import java.util.Set;
 import io.github.cchristou3.CyParking.data.interfaces.HttpsCallHandler;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.repository.ParkingMapRepository;
+import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
 
 /**
  * <p>A ViewModel implementation, adopted to the ParkingMapFragment fragment.
  * Purpose: Data persistence during orientation changes.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 29/12/20
+ * @version 2.0 06/03/21
  */
-public class ParkingMapViewModel extends ViewModel {
+public class ParkingMapViewModel extends ToastViewModel {
 
     // Static constant
     private static final String TAG = ParkingMapViewModel.class.getName();
@@ -38,6 +38,7 @@ public class ParkingMapViewModel extends ViewModel {
     private final MutableLiveData<Set<String>> mDocumentIdsOfNearbyLots = new MutableLiveData<>();
     private final MutableLiveData<ParkingLot> mSelectedLotState = new MutableLiveData<>(null);
     private final MutableLiveData<Integer> mInfoLayoutState = new MutableLiveData<>(View.GONE);
+
     // Its repository
     private final ParkingMapRepository mParkingMapRepository;
 
@@ -83,6 +84,15 @@ public class ParkingMapViewModel extends ViewModel {
      */
     public LiveData<Set<String>> getDocumentIdsOfNearbyLots() {
         return mDocumentIdsOfNearbyLots;
+    }
+
+    /**
+     * Checks whether the ids of nearby parking lots have been already fetched.
+     *
+     * @return True, if {@link #mDocumentIdsOfNearbyLots} is not null. Otherwise, false.
+     */
+    public boolean didPreviouslyRetrieveDocumentIds() {
+        return mDocumentIdsOfNearbyLots.getValue() != null;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -186,7 +196,6 @@ public class ParkingMapViewModel extends ViewModel {
      * @throws IllegalArgumentException if the given set is empty or null.
      */
     public Query getParkingLots(Set<String> ids) throws IllegalArgumentException {
-        if (ids == null || ids.isEmpty()) throw new IllegalArgumentException();
         return mParkingMapRepository.getParkingLotsRef()
                 .whereIn(FieldPath.documentId(), new ArrayList<>(ids));
     }

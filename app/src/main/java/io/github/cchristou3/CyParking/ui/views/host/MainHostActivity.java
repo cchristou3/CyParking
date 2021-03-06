@@ -258,7 +258,8 @@ public class MainHostActivity extends AppCompatActivity {
         AnimationUtility.slideVerticallyToBottom(
                 mBinding.activityMainHostClLayout,
                 mBinding.activityMainHostTxtNoConnectionWarning,
-                visibility == View.GONE
+                visibility == View.GONE,
+                1000L
         );
     }
 

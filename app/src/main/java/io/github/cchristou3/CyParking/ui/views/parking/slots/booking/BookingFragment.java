@@ -236,7 +236,8 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
         AnimationUtility.slideVerticallyToBottom(
                 getBinding().fragmentParkingBookingClMainCl, // ViewGroup / parent
                 getBinding().fragmentParkingBookingBtnDisplayQrCode, // child we want to animate
-                false // we want to display it
+                false, // we want to display it
+                1000L
         );
 
         // And hook it up with an click listener that will display the

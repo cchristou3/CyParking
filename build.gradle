@@ -5,6 +5,7 @@ buildscript {
         kotlinVersion = '1.4.31'
         googleServicesVersion = '4.3.5'
         argsVersion = '2.3.3'
+        kotlin_version = '1.4.31'
     }
     repositories {
         google()
@@ -15,6 +16,7 @@ buildscript {
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:' + kotlinVersion
         classpath 'com.google.gms:google-services:'+ googleServicesVersion // Google Services plugin
         classpath 'androidx.navigation:navigation-safe-args-gradle-plugin:'+ argsVersion
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // Safe args - navigation plugin
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -24,6 +26,7 @@ buildscript {
 
 allprojects {
     repositories {
+        gradlePluginPortal()
         google()
         jcenter()
     }
@@ -36,8 +39,8 @@ task clean(type: Delete) {
 // Define versions in a single place
 ext {
     // Sdk and tools
-    // Support library and architecture components support minSdk 21 and above.
-    minSdkVersion = 21
+    // Support library and architecture components support minSdk 23 and above.
+    minSdkVersion = 23
     targetSdkVersion = 28
     compileSdkVersion = 28
 

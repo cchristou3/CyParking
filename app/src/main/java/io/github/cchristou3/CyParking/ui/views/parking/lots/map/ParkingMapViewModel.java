@@ -24,7 +24,7 @@ import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
 
 /**
  * <p>A ViewModel implementation, adopted to the ParkingMapFragment fragment.
- * Purpose: Data persistence during orientation changes.</p>
+ * Purpose: Data persistence during configuration changes.</p>
  *
  * @author Charalambos Christou
  * @version 2.0 06/03/21
@@ -193,9 +193,8 @@ public class ParkingMapViewModel extends ToastViewModel {
      *
      * @return The collection reference that contains all the parking lots
      * in the database.
-     * @throws IllegalArgumentException if the given set is empty or null.
      */
-    public Query getParkingLots(Set<String> ids) throws IllegalArgumentException {
+    public Query getParkingLots(Set<String> ids) {
         return mParkingMapRepository.getParkingLotsRef()
                 .whereIn(FieldPath.documentId(), new ArrayList<>(ids));
     }

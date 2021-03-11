@@ -55,6 +55,24 @@ public class SingleActionBuilder extends Builder<SingleActionBuilder, SingleActi
     }
 
     /**
+     * @see Builder#setTitle(intString
+     */
+    @Override
+    public SingleActionBuilder setTitle(String title) {
+        this.getAlertParams().sTitle = title;
+        return this;
+    }
+
+    /**
+     * @see Builder#setBody(String)
+     */
+    @Override
+    public SingleActionBuilder setBody(String body) {
+        this.getAlertParams().sBody = body;
+        return this;
+    }
+
+    /**
      * Pass the Builder's arguments
      * to the given {@link AppAlertDialog} instance.
      *

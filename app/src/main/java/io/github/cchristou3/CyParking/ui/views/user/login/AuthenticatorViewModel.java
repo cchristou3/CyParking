@@ -30,7 +30,7 @@ import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isNameValid;
 
 /**
- * Purpose: <p>Data persistence when orientation changes. Shared amongst all tab fragments.
+ * Purpose: <p>Data persistence when configuration changes. Shared amongst all tab fragments.
  * Used when the user tries to login/register.</p>
  *
  * @author Charalambos Christou

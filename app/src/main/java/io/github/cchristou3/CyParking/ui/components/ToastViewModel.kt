@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModel
  */
 open class ToastViewModel : ViewModel() {
 
-    private val mToastMessage = ToastLiveData()
+    private val mToastMessage = SingleLiveEvent<Int>()
 
     /**
      * A LiveData getter of [mToastMessage] to ensure that

@@ -28,7 +28,7 @@ import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.i
 import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidPhoneNumber;
 
 /**
- * Purpose: <p>Data persistence when orientation changes.
+ * Purpose: <p>Data persistence when configuration changes.
  * Used when operator-typed users try to register
  * their parking lot onto the system.</p>
  *

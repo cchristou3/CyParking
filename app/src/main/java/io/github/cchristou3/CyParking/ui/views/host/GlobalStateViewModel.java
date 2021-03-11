@@ -22,7 +22,7 @@ import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
 
 /**
- * Purpose: <p>Data persistence when orientation changes.
+ * Purpose: <p>Data persistence when configuration changes.
  * The primary mean of communicating between the fragments
  * and their hosting activity in terms of the Auth State data.
  * <p>

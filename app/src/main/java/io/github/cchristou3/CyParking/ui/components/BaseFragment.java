@@ -13,7 +13,6 @@ import androidx.viewbinding.ViewBinding;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
-import io.github.cchristou3.CyParking.databinding.FeedbackFragmentBinding;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModelFactory;
 
@@ -46,8 +45,6 @@ import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModelFactory;
  * @version 2.0 28/01/21
  * @see ViewBinding
  * @see GlobalStateViewModel
- * @see FeedbackFragmentBinding
- * @see io.github.cchristou3.CyParking.databinding.FragmentHomeBinding
  */
 public class BaseFragment<T extends ViewBinding> extends Fragment {
 

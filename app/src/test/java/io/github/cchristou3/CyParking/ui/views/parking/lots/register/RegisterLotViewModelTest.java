@@ -67,11 +67,16 @@ public class RegisterLotViewModelTest extends InstantTaskRuler {
 
     @Test
     public void lotRegistrationDataChanged_setNewValidValueToAllFields_returnsValidForm() throws InterruptedException {
+        // Setting the mock uri first and triggering an update
+        // as the Uri validation check is before the Slot offer check in lotRegistrationDataChanged
+        registerLotViewModel.updateImageUri(mockUri);
+        getOrAwaitValue(registerLotViewModel.getImageUriState());
         // When the user invokes the lotRegistrationDataChanged method
         registerLotViewModel.lotRegistrationDataChanged(
                 validOperatorMobileNumber, validLotCapacity,
                 validLotName, validLotLatLng, validSlotOfferList
         );
+
         // Then the livedata's values should have been updated
         assertThat(getOrAwaitValue(registerLotViewModel.getRegisterLotFormState()).isDataValid(),
                 is(true));
@@ -141,6 +146,11 @@ public class RegisterLotViewModelTest extends InstantTaskRuler {
                 validOperatorMobileNumber, validLotCapacity,
                 validLotName, validLotLatLng, invalidSlotOfferList
         );
+        // Setting the mock uri first and triggering an update
+        // as the Uri validation check is before the Slot offer check in lotRegistrationDataChanged
+        registerLotViewModel.updateImageUri(mockUri);
+        getOrAwaitValue(registerLotViewModel.getImageUriState());
+
         // Then the livedata's form should be invalid and the mobile error not null
         RegisterLotFormState latestForm = getOrAwaitValue(registerLotViewModel.getRegisterLotFormState());
         assertThat(latestForm.isDataValid(), is(false));

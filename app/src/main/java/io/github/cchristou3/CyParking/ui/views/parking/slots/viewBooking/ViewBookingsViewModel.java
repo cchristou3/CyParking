@@ -19,7 +19,7 @@ import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
 import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
 
 /**
- * Purpose: <p>Data persistence when orientation changes.
+ * Purpose: <p>Data persistence when configuration changes.
  * Used when the users try to view their bookings.</p>
  *
  * @author Charalambos Christou

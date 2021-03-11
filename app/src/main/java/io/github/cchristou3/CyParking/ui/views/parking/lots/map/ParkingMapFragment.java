@@ -54,10 +54,10 @@ import io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking.ViewBoo
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
-import io.github.cchristou3.CyParking.utilities.AnimationUtility;
 
 import static android.view.View.GONE;
 import static io.github.cchristou3.CyParking.utilities.AnimationUtility.animateAvailabilityColorChanges;
+import static io.github.cchristou3.CyParking.utilities.AnimationUtility.slideVerticallyToBottom;
 import static io.github.cchristou3.CyParking.utilities.Utility.getDistanceApart;
 import static io.github.cchristou3.CyParking.utilities.ViewUtility.showToast;
 
@@ -687,7 +687,8 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
                 this::updateLocalDocuments);
 
         mParkingMapViewModel.getDocumentIdsOfNearbyLots().observe(getViewLifecycleOwner(), documentIds -> {
-            mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM_LEVEL));
+            if (mGoogleMap != null)
+                mGoogleMap.moveCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM_LEVEL));
             Log.d(TAG, "IdsState observer: " + mDatabaseObserver + " ids: " + documentIds);
             if (documentIds == null || documentIds.isEmpty()) {
                 // Display message
@@ -750,7 +751,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      * @param visibility The state of the visibility (E.g. View.Gone / View.VISIBLE / View.INVISIBLE)
      */
     private void updateInfoLayoutVisibilityTo(final int visibility) {
-        AnimationUtility.slideVerticallyToBottom(getBinding().idFragmentParkingMap,
+        slideVerticallyToBottom(getBinding().idFragmentParkingMap,
                 getBinding().fragmentParkingMapCvInfoLayout, visibility == GONE, 250L);
     }
 

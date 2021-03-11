@@ -93,6 +93,7 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
+
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/activity_main_host_nv_nav_view"
         android:layout_width="wrap_content"

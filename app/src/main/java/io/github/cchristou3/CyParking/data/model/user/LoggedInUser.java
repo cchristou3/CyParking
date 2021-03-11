@@ -43,6 +43,7 @@ public class LoggedInUser implements Parcelable {
     public LoggedInUser() {
     }
 
+
     /**
      * Public Constructor.
      * Initialize all the attributes of the class with the given arguments.
@@ -78,6 +79,10 @@ public class LoggedInUser implements Parcelable {
         return userId;
     }
 
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     public String getDisplayName() {
         return displayName;
     }
@@ -95,6 +100,7 @@ public class LoggedInUser implements Parcelable {
         this.email = email;
         return this;
     }
+
 
     public List<String> getRoles() {
         return roles;

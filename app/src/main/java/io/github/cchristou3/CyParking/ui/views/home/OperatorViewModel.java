@@ -14,7 +14,7 @@ import io.github.cchristou3.CyParking.data.interfaces.OperatorRepository;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 
 /**
- * Purpose: <p>Data persistence when orientation changes.
+ * Purpose: <p>Data persistence when configuration changes.
  * Used when the operator is viewing/updating his/her parking lot.</p>
  *
  * @author Charalambos Christou

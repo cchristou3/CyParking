@@ -8,7 +8,7 @@ import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking
 
 /**
- * Purpose: <p>Data persistence when orientation changes.
+ * Purpose: <p>Data persistence when configuration changes.
  * Used when the users try to view the details of one of their
  * bookings.</p>
  *

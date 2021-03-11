@@ -13,7 +13,7 @@ import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
  * Purpose: <p>contain all methods to access the (cloud / local) database's booking node.</p>
  *
  * @author Charalambos Christou
- * @version 9.0 06/02/21
+ * @version 10.0 12/03/21
  */
 public class BookingRepository implements DataSourceRepository.BookingHandler, DataSourceRepository.ParkingLotHandler {
 
@@ -51,7 +51,7 @@ public class BookingRepository implements DataSourceRepository.BookingHandler, D
      * @return A Task<Void> object to be handled in the calling fragment.
      */
     @NotNull
-    private Task<Void> bookParkingSlot(@NotNull Booking bookingToBeStored) {
+    public Task<Void> storeToDatabase(@NotNull Booking bookingToBeStored) {
         // Add the booking info to the database
         return getBookingsRef()
                 .document(bookingToBeStored.generateUniqueId())
@@ -66,29 +66,23 @@ public class BookingRepository implements DataSourceRepository.BookingHandler, D
      * that the booking does not exist in the database.
      * For the latter, the booking gets then stored to the database.
      *
-     * @param booking              Holds all necessary info about a booking of a private parking
-     * @param checkIfAlreadyExists Indicates whether or not to check of this booking already exists in the database.
-     * @return A Task<Void> object to be handled in the calling fragment.
+     * @param booking Holds all necessary info about a booking of a private parking
+     * @return A {@link Task} of type Boolean. If the given booking does not already exist
+     * then it returns false. Otherwise, if it already exists, then it returns true.
      * @throws NullPointerException in case the continuation returns null
      * @see Task#getException()
      */
-    public Task<Void> bookParkingSlot(@NotNull Booking booking, boolean checkIfAlreadyExists) {
-        if (checkIfAlreadyExists) {
-            return getBookingsRef()
-                    .document(booking.generateUniqueId()).get()
-                    .continueWithTask(task -> {
-                        if (task.isSuccessful()) {
-                            if (task.getResult().getData() == null) { // If it does not already exist
-                                // Store to the database
-                                return bookParkingSlot(booking);
-                            }
-                        }
-                        return null; // This should throw a NullPointerException (to be handled by the View).
-                    });
-        } else {
-            // Store to the database immediately
-            return bookParkingSlot(booking);
-        }
+    public Task<Boolean> checkIfAlreadyBookedBySameUser(@NotNull Booking booking) {
+        return getBookingsRef()
+                .document(booking.generateUniqueId()).get()
+                .continueWith(task -> {
+                    if (task.isSuccessful()) {
+                        // If it does not already exist
+                        // proceed to next step - payment.
+                        return !(!task.getResult().exists() || task.getResult().getData() == null);
+                    }
+                    return true;
+                });
     }
 
     /**

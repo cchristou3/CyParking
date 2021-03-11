@@ -1,2 +1,3 @@
+include ':stripe'
 include ':app'
 rootProject.name = "CyParking"

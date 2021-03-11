@@ -89,6 +89,26 @@ public abstract class Builder<T extends Builder<T, S>, S extends Builder.AlertPa
     public abstract T setBody(int body);
 
     /**
+     * Set the the value of {@link AlertParams#title}
+     * with the given argument.
+     *
+     * @param title The title of the dialog.
+     * @return The builder itself to allow for for chaining of calls to set
+     * methods.
+     */
+    public abstract T setTitle(String title);
+
+    /**
+     * Sets# the the value of {@link AlertParams#body}
+     * with the given argument.
+     *
+     * @param body The body message of the dialog.
+     * @return The builder itself to allow for for chaining of calls to set
+     * methods.
+     */
+    public abstract T setBody(String body);
+
+    /**
      * Pass the Builder's title and body arguments
      * to the given {@link AppAlertDialog} instance.
      *
@@ -127,6 +147,8 @@ public abstract class Builder<T extends Builder<T, S>, S extends Builder.AlertPa
      */
     public static class AlertParams {
         /*package-private*/ int title;
+        /*package-private*/ String sTitle;
         /*package-private*/ int body;
+        /*package-private*/ String sBody;
     }
 }

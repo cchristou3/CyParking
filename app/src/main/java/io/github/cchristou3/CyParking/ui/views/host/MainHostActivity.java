@@ -22,6 +22,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
 
+import io.github.cchristou3.CyParking.PaymentSessionHelper;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
@@ -214,6 +215,7 @@ public class MainHostActivity extends AppCompatActivity {
                 break;
             case SIGN_OUT:
                 mGlobalStateViewModel.signOut();
+                PaymentSessionHelper.endCustomerSession();
                 // Display a message to the user
                 Toast.makeText(this, "You have been logged out!", Toast.LENGTH_SHORT).show();
                 break;

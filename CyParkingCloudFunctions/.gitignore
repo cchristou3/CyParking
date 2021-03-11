@@ -67,6 +67,3 @@ node_modules/
 
 # essential .json files
 package-lock.json
-
-# secret js files
-constants.js

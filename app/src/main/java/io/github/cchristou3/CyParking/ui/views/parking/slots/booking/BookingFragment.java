@@ -1,5 +1,7 @@
 package io.github.cchristou3.CyParking.ui.views.parking.slots.booking;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,19 +25,13 @@ import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.ParseException;
-import java.util.Date;
 import java.util.Objects;
 
+import io.github.cchristou3.CyParking.PaymentSessionHelper;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
-import io.github.cchristou3.CyParking.data.manager.EncryptionManager;
 import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
-import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
-import io.github.cchristou3.CyParking.data.model.parking.slot.booking.BookingDetails;
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentBookingBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
@@ -50,7 +46,7 @@ import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.ui.widgets.QRCodeDialog;
 import io.github.cchristou3.CyParking.utilities.AnimationUtility;
-import io.github.cchristou3.CyParking.utilities.DateTimeUtility;
+import io.github.cchristou3.CyParking.utilities.ViewUtility;
 
 /**
  * Purpose: <p>View parking details,
@@ -61,12 +57,9 @@ import io.github.cchristou3.CyParking.utilities.DateTimeUtility;
  * activity {@link MainHostActivity} via the {@link GlobalStateViewModel}.
  * </p>
  * <p>
- * TODO: - choose a payment method
- * - Add a Livedata form - validation for the date
- * -> if not valid show error to getBinding().fragmentParkingBookingTxtDate
  *
  * @author Charalambos Christou
- * @version 10.0 24/02/2021
+ * @version 11.0 11/03/2021
  */
 public class BookingFragment extends BaseFragment<FragmentBookingBinding> implements Navigable {
 
@@ -77,12 +70,15 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
 
     /**
      * Initialises the fragment. Uses the EventBus, to get access to data send by the previous fragment.
+     * Also sets up the Customer Session related to the payment flow.
      *
      * @param savedInstanceState A bundle which contains info about previously stored data
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Initialize a Customer Session
+        PaymentSessionHelper.initCustomerSession(requireContext());
         try {
             mSelectedParking = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(ParkingLot.class));
         } catch (ClassCastException | NullPointerException e) {
@@ -115,49 +111,18 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         initializeViewModel();
-
         initializeUi();
-
         setViewModelObservers();
     }
 
     /**
      * An observer is attached to the current document, to listen for changes (number of available spaces).
-     * Removal of observer is self-managed by the hosting activity.
      */
     @Override
     public void onStart() {
         super.onStart();
-        DatabaseObserver.createDocumentReferenceObserver(
-                mBookingViewModel.observeParkingLotToBeBooked(mSelectedParking), // The Document Reference
-                (value, error) -> { // The Event Listener
-                    if (error != null || value == null)
-                        return;
-                    final ParkingLot lot = value.toObject(ParkingLot.class);
-                    if (lot == null) {
-                        AlertBuilder.showSingleActionAlert(
-                                getChildFragmentManager(),
-                                R.string.no_lot_found_title,
-                                R.string.no_lot_found_msg,
-                                (v) -> goBack(requireActivity())
-                        );
-                        return;
-                    }
-
-                    final String availability = lot.getLotAvailability(requireContext());
-                    // Animate color to display a lot availability change to the user
-                    AnimationUtility.animateAvailabilityColorChanges(
-                            getBinding().fragmentParkingBookingCvParkingAvailability,
-                            getBinding().fragmentParkingBookingTxtParkingAvailability,
-                            lot.getAvailableSpaces(),
-                            mSelectedParking.getAvailableSpaces());
-
-                    // Update the text of the availability
-                    getBinding().fragmentParkingBookingTxtParkingAvailability.setText(availability);
-                    mSelectedParking = lot; // Save a reference to the updated lot
-                })
+        mBookingViewModel.observeParkingLotToBeBooked(requireContext(), mSelectedParking)
                 .registerLifecycleObserver(getLifecycle());
     }
 
@@ -180,6 +145,16 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
         super.onDestroyView();
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            mBookingViewModel.handlePaymentData(requestCode, resultCode,
+                    data == null ? new Intent() : data);
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            Toast.makeText(requireContext(), "No payment method got selected.", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     /**
      * Initializes the {@link #mBookingViewModel}
@@ -187,7 +162,8 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      */
     private void initializeViewModel() {
         mBookingViewModel = new ViewModelProvider(this,
-                new BookingViewModelFactory()).get(BookingViewModel.class);
+                new BookingViewModelFactory(this)).get(BookingViewModel.class);
+        mBookingViewModel.setUpPaymentSession(this);
     }
 
     /**
@@ -196,14 +172,13 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      */
     private void setViewModelObservers() {
         // Whenever a user picks a date, its corresponding TextView is updated with the new date
-        mBookingViewModel.getPickedDateState()
+        mBookingViewModel.getDateState()
                 .observe(getViewLifecycleOwner(), getBinding().fragmentParkingBookingTxtDate::setText);
 
         // The same goes for the picked time
-        mBookingViewModel.getPickedStartingTimeState()
+        mBookingViewModel.getStartingTimeState()
                 .observe(getViewLifecycleOwner(),
-                        time ->
-                                getBinding().fragmentParkingBookingTxtStartingTime.setText(time.toString())
+                        time -> getBinding().fragmentParkingBookingTxtStartingTime.setText(time.toString())
                 );
 
         // Observe the user's Auth state
@@ -223,6 +198,51 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
         // Observe the visibility of the 'View QR Code' button
         mBookingViewModel.getQRCodeButtonState().observe(getViewLifecycleOwner(), show -> {
             if (show) setUpQRCodeButton();
+        });
+
+        // Listen for new toast messages
+        mBookingViewModel.getToastMessage().observe(getViewLifecycleOwner(), message -> {
+            ViewUtility.showToast(requireContext(), message);
+        });
+
+        // Listen for snack bars
+        mBookingViewModel.getSnackBarState().observe(getViewLifecycleOwner(), this::displayUndoOption);
+
+        // Listen for the payment confirmation state
+        mBookingViewModel.getPaymentFlow().observe(getViewLifecycleOwner(), shouldInitiatePayment -> {
+            if (shouldInitiatePayment != null && shouldInitiatePayment) {
+                mBookingViewModel.confirmPayment(BookingFragment.this, getUser());
+            }
+        });
+
+        // When a payment method is selected display it
+        mBookingViewModel.getPaymentMethod().observe(getViewLifecycleOwner(), paymentMethodDetails -> {
+            getBinding().fragmentParkingBookingTxtSelectedPaymentMethod.setText(paymentMethodDetails);
+            getBinding().fragmentParkingBookingTxtSelectedPaymentMethod.setVisibility(View.VISIBLE);
+        });
+
+        // When a fatal error occurs display an alert
+        mBookingViewModel.getAlertErrorState().observe(getViewLifecycleOwner(), errorMessage ->
+                AlertBuilder.showSingleActionAlert(
+                        getChildFragmentManager(),
+                        errorMessage,
+                        R.string.navigate_back_msg,
+                        (v) -> goBack(requireActivity()))
+        );
+
+        // Listen to changes (spaces) to the current parking lot.
+        mBookingViewModel.getNewParkingLotVersion().observe(getViewLifecycleOwner(), newParkingLotVersion -> {
+            final String availability = newParkingLotVersion.getLotAvailability(requireContext());
+            // Animate color to display a lot availability change to the user
+            AnimationUtility.animateAvailabilityColorChanges(
+                    getBinding().fragmentParkingBookingCvParkingAvailability,
+                    getBinding().fragmentParkingBookingTxtParkingAvailability,
+                    newParkingLotVersion.getAvailableSpaces(),
+                    mSelectedParking.getAvailableSpaces());
+
+            // Update the text of the availability
+            getBinding().fragmentParkingBookingTxtParkingAvailability.setText(availability);
+            mSelectedParking = newParkingLotVersion; // Save a reference to the updated lot
         });
     }
 
@@ -244,11 +264,13 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
         // QR Code when clicked
         getBinding().fragmentParkingBookingBtnDisplayQrCode
                 .setOnClickListener(v -> {
-                    new QRCodeDialog(
-                            requireContext(),
-                            getBinding().fragmentParkingBookingClMainCl,
-                            mBookingViewModel.getQRCodeMessage())
-                            .show();
+                    if (mBookingViewModel.getQRCodeMessage() != null) {
+                        new QRCodeDialog(
+                                requireContext(),
+                                getBinding().fragmentParkingBookingClMainCl,
+                                mBookingViewModel.getQRCodeMessage())
+                                .show();
+                    }
                 });
     }
 
@@ -270,7 +292,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
 
         // Set the date and the start time to their corresponding TextView objects
         getBinding().fragmentParkingBookingTxtDate.setText(
-                mBookingViewModel.getPickedDateState().getValue()
+                mBookingViewModel.getDateState().getValue()
         );
         getBinding().fragmentParkingBookingTxtStartingTime.setText(
                 mBookingViewModel.getPickedStartingTime().toString()
@@ -290,6 +312,9 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
 
         // Set listener to "BOOK" button
         getBinding().fragmentParkingBtnBookingButton.setOnClickListener(v -> bookParking());
+
+        getBinding().fragmentParkingBookingBtnSelectPaymentMethod
+                .setOnClickListener(v -> mBookingViewModel.presentPaymentMethodSelection());
     }
 
     /**
@@ -326,64 +351,9 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      * instead.
      */
     public void bookParking() {
-        // Check whether there are available spaces
-        if (mSelectedParking.getAvailableSpaces() == 0) { // if not
-            // Display message to user and terminate the function.
-            Toast.makeText(requireContext(), getString(R.string.no_space_msg), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // TODO: 05/02/2021 Check time if the date is the same as the current date
-
-        // Access parking operator's details via the Intent object
-        final String pickedDate = mBookingViewModel.getPickedDate();
-        Date pickedDateObject;
-        try {
-            pickedDateObject = DateTimeUtility.fromStringToDate(pickedDate);
-        } catch (ParseException e) {
-            // Display error message
-            Toast.makeText(requireContext(), getString(R.string.parse_error_msg), Toast.LENGTH_SHORT).show();
-            return; // Terminate the method
-        }
-
-        final LoggedInUser user = getUser();
-        if (user == null) return; // If not logged in, exit the method
-
-        getGlobalStateViewModel().showLoadingBar(); // show loading bar
-        // Create a new Booking instance that will hold all data of the booking.
-        final Booking booking = buildBooking(user, pickedDateObject);
-
-        // add QR code text to the booking object
-        String qrcodeText = "";
-        try {
-            qrcodeText = EncryptionManager.hex(new EncryptionManager().encrypt(booking.toString()));
-        } catch (Exception ignore) {// used Exception for brevity as there are too many kinds of encryption related exceptions
-        }
-        booking.setQRCode(qrcodeText);
-
-        mBookingViewModel.bookParkingLot(booking)
-                // Attach an onComplete listener to handle the task's result
-                .addOnCompleteListener(task -> {
-                    getGlobalStateViewModel().hideLoadingBar(); // hide loading bar
-                    // Inform the user booking was successful and offer a temporary UNDO option
-                    if (task.isSuccessful() && task.getException() == null) {
-                        // Save the value of the QR Code message in the ViewModel
-                        mBookingViewModel.setQRCodeMessage(booking.getQRCode());
-
-                        // Display undo option
-                        displayUndoOption(booking.generateUniqueId());
-
-                        // Display the 'View QR Code' button
-                        mBookingViewModel.updateQRCodeButtonState(true);
-
-                        // Disable the 'book' button
-                        mBookingViewModel.updateBookingButtonState(false);
-                        mBookingViewModel.updateSlotOffer(null); // and set offer to null
-                        return;
-                    }
-                    // Otherwise, display an error message to the user
-                    Toast.makeText(requireContext(), getString(R.string.slot_already_booked), Toast.LENGTH_SHORT).show();
-                });
+        mBookingViewModel.bookParkingLot(getUser(), mSelectedParking,
+                () -> getGlobalStateViewModel().showLoadingBar(),
+                () -> getGlobalStateViewModel().hideLoadingBar());
     }
 
     /**
@@ -391,37 +361,12 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      *
      * @param bookingId The id of the booking to be potentially cancelled.
      */
-    private void displayUndoOption(String bookingId) {
-        Snackbar.make(requireView(), getString(R.string.booking_success), Snackbar.LENGTH_LONG)
-                .setAction(R.string.undo,
-                        v -> mBookingViewModel.cancelBooking(bookingId)).show();
-    }
-
-
-    /**
-     * Gather all information needed to create a Booking instance
-     * based on the user's input and return it.
-     *
-     * @param user       The current LoggedInUser instance.
-     * @param pickedDate The current date.
-     * @return A Booking instance.
-     */
-    @NotNull
-    @Contract("_, _ -> new")
-    private Booking buildBooking(@NotNull LoggedInUser user, Date pickedDate) {
-        final String userID = user.getUserId();
-        // coordinates parkingID operatorId lotName bookingUserId bookingDetails
-        return new Booking(
-                mSelectedParking.getParkingId(),
-                mSelectedParking.getOperatorId(),
-                mSelectedParking.getLotName(),
-                userID,
-                new BookingDetails(
-                        pickedDate,
-                        mBookingViewModel.getPickedStartingTime(),
-                        mBookingViewModel.getPickedSlotOffer()
-                )
-        );
+    private void displayUndoOption(@Nullable String bookingId) {
+        if (bookingId != null) {
+            Snackbar.make(requireView(), getString(R.string.booking_success), Snackbar.LENGTH_LONG)
+                    .setAction(R.string.undo,
+                            v -> mBookingViewModel.cancelBooking(bookingId)).show();
+        }
     }
 
     /**
@@ -429,7 +374,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      * OnClick: Creates a {@link MaterialTimePicker} with its own OnPositiveButtonClickListener.
      * OnPositiveButtonClickListener-onClick: Updates the value of the specified LiveData Object.
      *
-     * @return An View.OnClickListener
+     * @return A View.OnClickListener
      */
     @NotNull
     @Contract(pure = true)
@@ -506,5 +451,23 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
                 .navigate(
                         BookingFragmentDirections.actionNavParkingBookingFragmentToNavHome()
                 );
+    }
+
+    /**
+     * Trigger an observer update causing a dialog to pop out with the given message.
+     *
+     * @param errorMessage The message to be displayed.
+     */
+    public void showAlert(String errorMessage) {
+        mBookingViewModel.updateAlertErrorState(errorMessage);
+    }
+
+    /**
+     * Access the fragment's ViewModel
+     *
+     * @return A reference to {@link #mBookingViewModel}
+     */
+    public BookingViewModel getBookingViewModel() {
+        return mBookingViewModel;
     }
 }

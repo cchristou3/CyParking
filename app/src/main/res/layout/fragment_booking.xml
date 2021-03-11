@@ -2,9 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_parking_booking_cl_main_cl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/fragment_parking_booking_cl_main_cl"
     tools:context=".ui.views.parking.slots.booking.BookingFragment">
 
     <com.google.android.material.card.MaterialCardView
@@ -121,9 +121,9 @@
         android:id="@+id/fragment_parking_booking_drop_down"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:focusable="true"
-        android:layout_height="wrap_content"
         android:focusableInTouchMode="true"
         android:hint="@string/please_choose_an_offer"
         app:layout_constraintEnd_toEndOf="@+id/fragment_parking_booking_cv_basic_info"
@@ -138,17 +138,46 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
+        android:id="@+id/fragment_parking_booking_btn_select_payment_method"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="@string/select_payment_method"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+        app:icon="@drawable/ic_pick_payment_method"
+        app:layout_constraintEnd_toEndOf="@+id/fragment_parking_booking_drop_down"
+        app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_drop_down"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_drop_down"
+        app:strokeColor="@color/purple_500" />
+
+    <TextView
+        android:id="@+id/fragment_parking_booking_txt_selected_payment_method"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/card_text"
+        android:text="Visa card ends with 4242"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/fragment_parking_booking_btn_select_payment_method"
+        app:layout_constraintStart_toStartOf="@+id/fragment_parking_booking_btn_select_payment_method"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_btn_select_payment_method" />
+
+    <Button
         android:id="@+id/fragment_parking_booking_btn_display_qr_code"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
+        android:gravity="center"
         android:text="@string/view_qr_code"
         android:textSize="25sp"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/fragment_parking_btn_booking_button"
         app:layout_constraintEnd_toEndOf="@+id/fragment_parking_btn_booking_button"
-        app:layout_constraintStart_toStartOf="@+id/fragment_parking_btn_booking_button" />
+        app:layout_constraintStart_toStartOf="@+id/fragment_parking_btn_booking_button"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_parking_booking_txt_selected_payment_method" />
 
     <Button
         android:id="@+id/fragment_parking_btn_booking_button"

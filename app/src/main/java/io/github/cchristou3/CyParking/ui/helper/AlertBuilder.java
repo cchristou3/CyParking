@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.ui.widgets.alertDialog.AppAlertDialog;
+import io.github.cchristou3.CyParking.ui.widgets.alertDialog.SingleActionBuilder;
 
 /**
  * Purpose: Contain all logic related to creating an {@link AppAlertDialog}.
@@ -62,14 +63,40 @@ public class AlertBuilder {
             int message, @Nullable View.OnClickListener neutralActionHandler
     ) {
 
-        AppAlertDialog.getSingleActionBuilder()
+        getSingleActionBuilderWithoutTitle(message, neutralActionHandler)
                 .setTitle(title)
+                .show(fragmentManager);
+    }
+
+    /**
+     * Overloaded version of {@link #showSingleActionAlert(FragmentManager, int, int, View.OnClickListener)}.
+     */
+    public static void showSingleActionAlert(
+            @NotNull FragmentManager fragmentManager, String title,
+            int message, @Nullable View.OnClickListener neutralActionHandler
+    ) {
+        getSingleActionBuilderWithoutTitle(message, neutralActionHandler)
+                .setTitle(title)
+                .show(fragmentManager);
+    }
+
+    /**
+     * Create a builder and set its message and neutral action handler to the given
+     * arguments.
+     *
+     * @param message              The message of the dialog.
+     * @param neutralActionHandler The action of the dialog.
+     * @return A SingleActionBuilder instance.
+     */
+    private static SingleActionBuilder getSingleActionBuilderWithoutTitle(
+            int message, @Nullable View.OnClickListener neutralActionHandler
+    ) {
+        return AppAlertDialog.getSingleActionBuilder()
                 .setBody(message)
                 .setNeutralButton(
                         neutralActionHandler, // listener
                         android.R.string.ok // text
-                )
-                .show(fragmentManager);
+                );
     }
 
     /**

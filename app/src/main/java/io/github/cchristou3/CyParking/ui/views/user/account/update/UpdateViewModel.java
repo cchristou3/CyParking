@@ -16,7 +16,7 @@ import static io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorVi
 import static io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorViewModel.isPasswordValid;
 
 /**
- * Purpose: <p>Data persistence when orientation changes.
+ * Purpose: <p>Data persistence when configuration changes.
  * Used when the users try to update their information.</p>
  *
  * @author Charalambos Christou

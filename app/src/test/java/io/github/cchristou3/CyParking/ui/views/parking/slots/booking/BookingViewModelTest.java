@@ -5,9 +5,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.Random;
 
+import io.github.cchristou3.CyParking.PaymentSessionHelper;
 import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.model.parking.slot.booking.BookingDetails;
 import io.github.cchristou3.CyParking.data.repository.BookingRepository;
@@ -32,17 +34,17 @@ public class BookingViewModelTest extends InstantTaskRuler {
 
     @Before
     public void setUp() throws Exception {
-        bookingViewModel = new BookingViewModel(new BookingRepository());
+        bookingViewModel = new BookingViewModel(new BookingRepository(), Mockito.mock(PaymentSessionHelper.class));
     }
 
     @Test
     public void getPickedDate_initially_returnsNonNull() throws InterruptedException {
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedDateState()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(bookingViewModel.getDateState()), is(not(nullValue())));
     }
 
     @Test
     public void getPickedStartingTime_initially_returnsNonNull() throws InterruptedException {
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedStartingTimeState()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(bookingViewModel.getStartingTimeState()), is(not(nullValue())));
     }
 
     @Test
@@ -50,9 +52,9 @@ public class BookingViewModelTest extends InstantTaskRuler {
         // Given the slot offer gets updated
         bookingViewModel.updateSlotOffer(slotOffer);
         // Then it should update the livedata's value
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedSlotOfferState()), is(not(nullValue())));
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedSlotOfferState()), is(slotOffer));
-        assertThat(bookingViewModel.getPickedSlotOffer(), is(slotOffer));
+        assertThat(getOrAwaitValue(bookingViewModel.getSlotOfferState()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(bookingViewModel.getSlotOfferState()), is(slotOffer));
+        assertThat(bookingViewModel.getSlotOffer(), is(slotOffer));
     }
 
     @Test
@@ -61,8 +63,8 @@ public class BookingViewModelTest extends InstantTaskRuler {
         bookingViewModel.updatePickedDate(1, 1, 1);
         String output = DateTimeUtility.dateToString(1, 1, 1);
         // Then it should update the livedata's value
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedDateState()), is(not(nullValue())));
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedDateState()), is(output));
+        assertThat(getOrAwaitValue(bookingViewModel.getDateState()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(bookingViewModel.getDateState()), is(output));
         assertThat(bookingViewModel.getPickedDate(), is(output));
     }
 
@@ -73,8 +75,8 @@ public class BookingViewModelTest extends InstantTaskRuler {
         bookingViewModel.updateStartingTime(hours, minutes);
         String output = BookingDetails.Time.getTimeOf(hours, minutes);
         // Then it should update the livedata's value
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedStartingTimeState()), is(not(nullValue())));
-        assertThat(getOrAwaitValue(bookingViewModel.getPickedStartingTimeState()).toString(), is(output));
+        assertThat(getOrAwaitValue(bookingViewModel.getStartingTimeState()), is(not(nullValue())));
+        assertThat(getOrAwaitValue(bookingViewModel.getStartingTimeState()).toString(), is(output));
         assertThat(bookingViewModel.getPickedStartingTime().toString(), is(output));
     }
 
@@ -136,5 +138,35 @@ public class BookingViewModelTest extends InstantTaskRuler {
         bookingViewModel.updateBookingButtonState(shouldShow);
         // Then it should update the livedata's value and getBookingButtonState should return the assigned value
         assertThat(getOrAwaitValue(bookingViewModel.getBookingButtonState()), is(shouldShow));
+    }
+
+    @Test
+    public void updateAlertErrorState_setsNewValue() throws InterruptedException {
+        // Given the a fatal error occurred
+        String error = "some error";
+        // When updateAlertErrorState gets called
+        bookingViewModel.updateAlertErrorState(error);
+        // Then getAlertErrorState should return the same error
+        assertThat(getOrAwaitValue(bookingViewModel.getAlertErrorState()), is(error));
+    }
+
+    @Test
+    public void updatePaymentMethodState_setsNewValue() throws InterruptedException {
+        // Given the cardDetails got inputted
+        String cardDetails = "Some credit card details";
+        // When updatePaymentMethodState gets called
+        bookingViewModel.updatePaymentMethodState(cardDetails);
+        // Then getPaymentMethod should return the same cardDetails
+        assertThat(getOrAwaitValue(bookingViewModel.getPaymentMethod()), is(cardDetails));
+    }
+
+    @Test
+    public void updateSnackBarState_setsNewValue() throws InterruptedException {
+        // Given the a snack bar must be displayed for a given booking
+        String bookingId = "123456789";
+        // When updateSnackBarState gets called
+        bookingViewModel.updateSnackBarState(bookingId);
+        // Then getSnackBarState should return the same bookingId
+        assertThat(getOrAwaitValue(bookingViewModel.getSnackBarState()), is(bookingId));
     }
 }

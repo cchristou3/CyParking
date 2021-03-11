@@ -17,7 +17,7 @@ import static io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorVi
 
 
 /**
- * Purpose: <p>Data persistence when orientation changes.
+ * Purpose: <p>Data persistence when configuration changes.
  * Used when the users try to send feedback to the development team.</p>
  *
  * @author Charalambos Christou

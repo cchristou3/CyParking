@@ -5,8 +5,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
 // Import helper functions and constants.
-const helpers = require('./helpers');
-const constants = require('./constants');
+const helpers = require('../helpers');
+const constants = require('../constants');
 
 /**
  * When a user deletes their account, clean up after them.

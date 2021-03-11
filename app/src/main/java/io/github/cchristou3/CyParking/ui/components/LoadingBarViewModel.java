@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 /**
  * Purpose: persists data related to the Loading Bar's state
- * when orientation changes.
+ * when configuration changes.
  * The View simply observes its state and when updated it
  * deals with the visual representation of the Loading Bar
  * based on its new value.

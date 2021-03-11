@@ -113,7 +113,7 @@ public class ParkingMapViewModelTest extends InstantTaskRuler {
         assertThat(wasVisible, is(false));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void getParkingLots_nullSet_throwsException() {
         parkingMapViewModel.getParkingLots(null);
     }

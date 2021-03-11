@@ -34,14 +34,13 @@ public class ViewUtility {
     }
 
     /**
-     * Displays a Toast of the given message if it is not null.
+     * Displays a Toast of the given message.
      *
      * @param context The context to make use of.
      * @param message The message to display.
      */
-    public static void showToast(Context context, @Nullable Integer message) {
-        if (message != null)
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+    public static void showToast(Context context, Integer message) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
     /**

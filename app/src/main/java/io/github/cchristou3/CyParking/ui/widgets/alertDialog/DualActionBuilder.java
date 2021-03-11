@@ -72,6 +72,24 @@ public class DualActionBuilder extends Builder<DualActionBuilder, DualActionBuil
     }
 
     /**
+     * @see Builder#setTitle(String)
+     */
+    @Override
+    public DualActionBuilder setTitle(String title) {
+        this.getAlertParams().sTitle = title;
+        return this;
+    }
+
+    /**
+     * @see Builder#setBody(String)
+     */
+    @Override
+    public DualActionBuilder setBody(String body) {
+        this.getAlertParams().sBody = body;
+        return this;
+    }
+
+    /**
      * Pass the Builder's arguments
      * to the given {@link AppAlertDialog} instance.
      *

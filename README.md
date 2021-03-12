@@ -69,6 +69,7 @@ Of course, the application cannot be deployed yet. So I'll be adding more featur
 ### Features
 The application has the following features so far:
 * Book a parking slot for a specific period [User]
+* View the details of a booking [User]
 * Cancel a booking [User]
 * View all available private parking locations within a range [User]
 * View for each locations its available parking spaces [User]
@@ -76,12 +77,15 @@ The application has the following features so far:
 * Update name/email/password [Everyone]
 * Send Feedback [Everyone]
 * Register Parking Lot [Operator]
-* Update lot availability [Operator]
+* Manually update lot availability [Operator]
+* Update lot availability and booking status when scanning QR Codes [Operator]
 
+Note: Operators have the same access rights as Users. In this application context, a User is a any user that is logged in. Any non-logged in user
+is refered to a an anonymous user or guest.
 A list of commonly used resources that I find helpful are listed in the acknowledgements.
 
 ### Built With
-* [Android Java](https://developer.android.com/)
+* [Android Java & Kotlin](https://developer.android.com/)
 * [Firebase](https://firebase.google.com/)
 * [Node.js](https://nodejs.org/en/)
 

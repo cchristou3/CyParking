@@ -12,7 +12,7 @@ import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
 
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModelFactory;
 

@@ -24,14 +24,12 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.PaymentSessionHelper;
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.ActivityMainHostBinding;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.utilities.AnimationUtility;
-import io.github.cchristou3.CyParking.utilities.ViewUtility;
-
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateVisibilityOfLoadingBarTo;
+import io.github.cchristou3.CyParking.utils.ViewUtility;
 
 /**
  * <p>Main host activity of the Application.
@@ -100,7 +98,7 @@ public class MainHostActivity extends AppCompatActivity {
      * @param shouldShowLoadingBar Indicates whether to show or hide the loading bar.
      */
     private void updateLoadingBarVisibility(boolean shouldShowLoadingBar) {
-        updateVisibilityOfLoadingBarTo(mBinding.activityMainHostCpiProgressBar, shouldShowLoadingBar);
+        ViewUtility.updateVisibilityOfLoadingBarTo(mBinding.activityMainHostCpiProgressBar, shouldShowLoadingBar);
     }
 
     /**

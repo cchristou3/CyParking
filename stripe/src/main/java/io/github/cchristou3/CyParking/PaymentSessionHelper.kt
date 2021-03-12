@@ -5,8 +5,6 @@ import android.content.Intent
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.stripe.android.*
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -146,10 +144,10 @@ import com.stripe.android.view.BillingAddressFields
  *</p>
  *
  * @author Charalambos Christou
- * @since 1.0 10/03/21
+ * @since 2.0 12/03/21
  * @param mUiPaymentSessionListener A Ui handler for payment session updates.
  */
-open class PaymentSessionHelper(val mUiPaymentSessionListener: UiPaymentSessionListener) {
+open class PaymentSessionHelper(context: Context, val mUiPaymentSessionListener: UiPaymentSessionListener) {
 
     companion object {
         val TAG: String? = PaymentSessionHelper::class.java.canonicalName
@@ -170,7 +168,9 @@ open class PaymentSessionHelper(val mUiPaymentSessionListener: UiPaymentSessionL
             // Customer object s for the duration of the session.
 
             // Set up customer session
-            CustomerSession.initCustomerSession(context.applicationContext, FirebaseEphemeralKeyProvider())
+            CustomerSession.initCustomerSession(context.applicationContext, FirebaseEphemeralKeyProvider(
+                    ServiceLocator.getInstance(context).stripeRepository
+            ))
         }
 
         /**
@@ -194,6 +194,7 @@ open class PaymentSessionHelper(val mUiPaymentSessionListener: UiPaymentSessionL
     private var mSelectedPaymentMethod: PaymentMethod? = null
     private lateinit var mPaymentHandler: PaymentHandler
     private lateinit var stripe: Stripe
+    private val repository by lazy { ServiceLocator.getInstance(context).stripeRepository }
 
 
     /**
@@ -292,18 +293,12 @@ open class PaymentSessionHelper(val mUiPaymentSessionListener: UiPaymentSessionL
      */
     fun confirmPayment(fragment: Fragment, currentUserUid: String?) {
         // Step 5 - Initiate a payment charge.
-        val paymentCollection: CollectionReference = FirebaseFirestore.getInstance()
-                .collection("stripe_customers")
-                .document(currentUserUid ?: "")
-                .collection("payments")
-
-        paymentCollection.add(hashMapOf(
-                "amount" to 8800, // The amount should be calculated in the server side for security reasons.
-                "currency" to "hkd")
+        repository.createPaymentIntent(
+                userUid = currentUserUid ?: "", amount = 8800, currency = "hkd"
         )
                 // Step 6 - Create a payment intent (via cloud function) in the server side
                 // and confirm the payment from the client side.
-                .addOnSuccessListener { documentReference ->
+                ?.addOnSuccessListener { documentReference ->
                     Log.d("payment", "DocumentSnapshot added with ID: ${documentReference.id}")
                     mListenerForPaymentIntent = documentReference.addSnapshotListener { snapshot, e ->
                         if (e != null) {
@@ -329,7 +324,7 @@ open class PaymentSessionHelper(val mUiPaymentSessionListener: UiPaymentSessionL
                         }
                     }
                 }
-                .addOnFailureListener { e ->
+                ?.addOnFailureListener { e ->
                     mPaymentHandler.onPaymentFailure()
                     Log.w("payment", "Error adding document", e)
                 }

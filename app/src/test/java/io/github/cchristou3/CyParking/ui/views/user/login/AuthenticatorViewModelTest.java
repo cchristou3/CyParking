@@ -8,8 +8,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
+import io.github.cchristou3.CyParking.apiClient.remote.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.data.pojo.form.login.AuthFormState;
-import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.InstantTaskRuler;
 
 import static io.github.cchristou3.CyParking.ui.LiveDataTestUtil.getOrAwaitValue;

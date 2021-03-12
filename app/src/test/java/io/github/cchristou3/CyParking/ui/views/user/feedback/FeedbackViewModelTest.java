@@ -11,9 +11,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import io.github.cchristou3.CyParking.data.model.user.Feedback;
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
-import io.github.cchristou3.CyParking.data.repository.FeedbackRepository;
+import io.github.cchristou3.CyParking.apiClient.model.user.Feedback;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.FeedbackRepository;
 import io.github.cchristou3.CyParking.ui.InstantTaskRuler;
 
 import static io.github.cchristou3.CyParking.ui.LiveDataTestUtil.getOrAwaitValue;

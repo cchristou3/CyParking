@@ -8,7 +8,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.views.parking.slots.booking.BookingViewModel;
 
 import static org.hamcrest.CoreMatchers.is;

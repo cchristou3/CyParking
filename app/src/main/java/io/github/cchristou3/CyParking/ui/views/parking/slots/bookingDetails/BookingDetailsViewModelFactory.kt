@@ -2,7 +2,6 @@ package io.github.cchristou3.CyParking.ui.views.parking.slots.bookingDetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.github.cchristou3.CyParking.data.repository.DefaultOperatorRepository
 
 /**
  * Purpose: <p>ViewModel provider factory to instantiate [BookingDetailsViewModel].
@@ -21,7 +20,7 @@ class BookingDetailsViewModelFactory : ViewModelProvider.Factory {
      */
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         return if (modelClass.isAssignableFrom(BookingDetailsViewModel::class.java)) {
-            BookingDetailsViewModel(DefaultOperatorRepository()) as T
+            BookingDetailsViewModel(io.github.cchristou3.CyParking.apiClient.remote.repository.DefaultOperatorRepository()) as T
         } else {
             throw IllegalArgumentException("Unknown ViewModel class")
         }

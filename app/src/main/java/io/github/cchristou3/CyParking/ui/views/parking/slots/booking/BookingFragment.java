@@ -29,9 +29,9 @@ import java.util.Objects;
 
 import io.github.cchristou3.CyParking.PaymentSessionHelper;
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.databinding.FragmentBookingBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
@@ -46,7 +46,7 @@ import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.ui.widgets.QRCodeDialog;
 import io.github.cchristou3.CyParking.utilities.AnimationUtility;
-import io.github.cchristou3.CyParking.utilities.ViewUtility;
+import io.github.cchristou3.CyParking.utils.ViewUtility;
 
 /**
  * Purpose: <p>View parking details,

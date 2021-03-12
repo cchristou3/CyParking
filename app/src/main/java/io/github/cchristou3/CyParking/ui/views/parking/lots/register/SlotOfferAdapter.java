@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.ui.components.SwipeableAdapter;
 
 /**

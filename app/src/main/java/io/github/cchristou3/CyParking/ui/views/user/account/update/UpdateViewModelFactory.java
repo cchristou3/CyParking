@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-import io.github.cchristou3.CyParking.data.repository.AccountRepository;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.AccountRepository;
 
 /**
  * Purpose: <p>ViewModel provider factory to instantiate UpdateViewModel.

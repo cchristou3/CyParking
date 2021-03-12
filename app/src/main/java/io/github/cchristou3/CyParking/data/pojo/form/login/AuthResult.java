@@ -2,7 +2,7 @@ package io.github.cchristou3.CyParking.data.pojo.form.login;
 
 import androidx.annotation.Nullable;
 
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
 
 /**
  * Purpose: <p>Authentication result : success (user details) or error message.</p>

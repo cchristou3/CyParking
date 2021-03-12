@@ -15,17 +15,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.interfaces.OperatorRepository;
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorRepository;
 import io.github.cchristou3.CyParking.data.pojo.form.FormState;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormState;
 
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.Availability.isCapacityValid;
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.areSlotOffersValid;
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isLotLatLngValid;
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isNameValid;
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isValidPhoneNumber;
+import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.Availability.isCapacityValid;
+import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.areSlotOffersValid;
+import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.isLotLatLngValid;
+import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.isNameValid;
+import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.isValidPhoneNumber;
 
 /**
  * Purpose: <p>Data persistence when configuration changes.

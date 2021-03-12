@@ -12,11 +12,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
-import io.github.cchristou3.CyParking.data.repository.BookingRepository;
+import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.BookingRepository;
+import io.github.cchristou3.CyParking.apiClient.utils.Utils;
 import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
-
-import static io.github.cchristou3.CyParking.utilities.Utility.getListOf;
 
 /**
  * Purpose: <p>Data persistence when configuration changes.
@@ -90,7 +89,7 @@ public class ViewBookingsViewModel extends ToastViewModel {
                             return;
                         }
 
-                        List<Booking> bookings = getListOf(value, Booking.class);
+                        List<Booking> bookings = Utils.getListOf(value, Booking.class);
                         Log.d(TAG, "New Snapshot success: " + bookings.size());
                         // - Update the booking list state with the newly created booking list
                         updateBookingList(bookings);

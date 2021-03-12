@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.views.parking.slots.booking.BookingViewModel;
 
 import static org.hamcrest.CoreMatchers.is;

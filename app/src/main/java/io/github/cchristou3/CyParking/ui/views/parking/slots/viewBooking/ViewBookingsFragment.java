@@ -19,9 +19,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking;
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentViewBookingsBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.components.BaseItemTouchHelper;
@@ -32,9 +32,8 @@ import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
-
-import static io.github.cchristou3.CyParking.utilities.Utility.cloneList;
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.showToast;
+import io.github.cchristou3.CyParking.utils.Utility;
+import io.github.cchristou3.CyParking.utils.ViewUtility;
 
 /**
  * Purpose: <p>Shows pending / completed bookings of the user / operator?</p>
@@ -112,7 +111,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
         });
 
         mViewBookingsViewModel.getToastMessage().observe(getViewLifecycleOwner(),
-                message -> showToast(requireContext(), message));
+                message -> ViewUtility.showToast(requireContext(), message));
     }
 
     /**
@@ -153,7 +152,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
         return new ItemTouchHelper(new BaseItemTouchHelper(
                 itemPosition -> {
                     // Access the current list - with a new reference
-                    List<Booking> newBookings = cloneList(mViewBookingsViewModel.getBookingList());
+                    List<Booking> newBookings = Utility.cloneList(mViewBookingsViewModel.getBookingList());
                     // Remove the booking fro the list and store its id in a variable
                     String bookingToBeCancelledId = newBookings.remove((int) itemPosition).generateUniqueId();
                     // Remove specific booking from the database.

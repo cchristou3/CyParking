@@ -30,6 +30,7 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.databinding.DialogAccountUpdateBinding;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
@@ -39,9 +40,9 @@ import io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking.ViewBoo
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
+import io.github.cchristou3.CyParking.utils.ViewUtility;
 
 import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateVisibilityOfLoadingBarTo;
 
 /**
  * Purpose: Allows the users to update one of their attributes.
@@ -258,7 +259,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      * @param shouldShowLoadingBar Indicates whether to display or hide the loading bar.
      */
     public void updateLoadingBarVisibility(boolean shouldShowLoadingBar) {
-        updateVisibilityOfLoadingBarTo(getBinding().dialogAccountUpdateClpbLoadingBar, shouldShowLoadingBar);
+        ViewUtility.updateVisibilityOfLoadingBarTo(getBinding().dialogAccountUpdateClpbLoadingBar, shouldShowLoadingBar);
     }
 
     /**
@@ -338,7 +339,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
     }
 
     /**
-     * Updates the current {@link io.github.cchristou3.CyParking.data.model.user.LoggedInUser}
+     * Updates the current {@link LoggedInUser}
      * instance.
      *
      * @param updatedField The field that got updated.

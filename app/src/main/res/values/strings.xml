@@ -105,7 +105,6 @@
     <!-- Strings related to the HomeFragment's lot section -->
     <string name="increment_by_one">Increment by one</string>
     <string name="decrement_by_one">Decrement by one</string>
-    <string name="availability">Availability: </string> <!-- used in ParkingLot.getAvailability() -->
     <string name="no_parking_lots_text">No parking lots registered yet</string>
 
     <!-- Strings related to the ParkingMapFragment -->
@@ -189,8 +188,6 @@
     <string name="please_pick_a_photo">Please pick a photo</string>
     <string name="selected_photo">Selected Photo</string>
     <string name="parking_lot_photo">Parking Lot Photo</string>
-    <string name="completed">Completed</string>
-    <string name="pending">Pending</string>
     <string name="no_google_maps_app_found">No apps installed that support this kind of action.</string>
     <string name="load_booking_failed">Unfortunately, couldn\'t load your bookings. Check you Internet connection and try again.</string>
     <string name="no_booking_allowed_to_non_logged_in_users">You need to be logged in to book a parking slot!</string>

@@ -24,13 +24,11 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentAuthenticatorHosteeBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
-
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.hideKeyboard;
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf;
+import io.github.cchristou3.CyParking.utils.ViewUtility;
 
 /**
  * <p>A simple {@link Fragment} subclass.
@@ -267,7 +265,7 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
      */
     private void register(View view) {
         getGlobalStateViewModel().showLoadingBar();
-        hideKeyboard(requireActivity(), view.getRootView());
+        ViewUtility.hideKeyboard(requireActivity(), view.getRootView());
         mAuthenticatorViewModel.register(requireContext());
     }
 
@@ -307,7 +305,7 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
      */
     private void login(View view) {
         getGlobalStateViewModel().showLoadingBar();
-        hideKeyboard(requireActivity(), view);
+        ViewUtility.hideKeyboard(requireActivity(), view);
         mAuthenticatorViewModel.login(requireContext(),
                 getBinding().fragmentHosteeAuthEtEmail.getText().toString(),
                 getBinding().fragmentHosteeAuthEtPassword.getText().toString());
@@ -359,11 +357,11 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
 
             // If there is an error, show it for the specific UI field.
             // If there was an error before, and it got resolved then hide the error.
-            updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilEmail, formState.getEmailError());
-            updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilPassword, formState.getPasswordError());
+            ViewUtility.updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilEmail, formState.getEmailError());
+            ViewUtility.updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilPassword, formState.getPasswordError());
 
             if (!mAuthenticatorViewModel.isUserSigningIn()) {// User signs up
-                updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilName, formState.getNameError());
+                ViewUtility.updateErrorOf(requireContext(), getBinding().fragmentHosteeAuthTilName, formState.getNameError());
             }
         });
     }

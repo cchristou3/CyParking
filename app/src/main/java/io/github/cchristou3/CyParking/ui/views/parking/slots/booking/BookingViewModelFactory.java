@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.PaymentSessionHelper;
-import io.github.cchristou3.CyParking.data.repository.BookingRepository;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.BookingRepository;
 
 /**
  * Purpose: <p>ViewModel provider factory to instantiate BookingViewModel.
@@ -38,24 +38,25 @@ public class BookingViewModelFactory implements ViewModelProvider.Factory {
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(BookingViewModel.class)) {
             return (T) new BookingViewModel(new BookingRepository(),
-                    new PaymentSessionHelper(new PaymentSessionHelper.UiPaymentSessionListener() {
-                        @Override
-                        public void onPaymentMethodSelected(@NotNull String paymentMethodDetails) {
-                            mFragment.getBookingViewModel().updatePaymentMethodState(paymentMethodDetails);
-                        }
+                    new PaymentSessionHelper(mFragment.requireContext().getApplicationContext(),
+                            new PaymentSessionHelper.UiPaymentSessionListener() {
+                                @Override
+                                public void onPaymentMethodSelected(@NotNull String paymentMethodDetails) {
+                                    mFragment.getBookingViewModel().updatePaymentMethodState(paymentMethodDetails);
+                                }
 
-                        @Override
-                        public void onCommunicatingStateChanged(boolean isCommunicating) {
-                            if (isCommunicating)
-                                mFragment.getGlobalStateViewModel().showLoadingBar();
-                            else mFragment.getGlobalStateViewModel().hideLoadingBar();
-                        }
+                                @Override
+                                public void onCommunicatingStateChanged(boolean isCommunicating) {
+                                    if (isCommunicating)
+                                        mFragment.getGlobalStateViewModel().showLoadingBar();
+                                    else mFragment.getGlobalStateViewModel().hideLoadingBar();
+                                }
 
-                        @Override
-                        public void onError(int errorCode, @NotNull String errorMessage) {
-                            mFragment.showAlert(errorMessage);
-                        }
-                    }));
+                                @Override
+                                public void onError(int errorCode, @NotNull String errorMessage) {
+                                    mFragment.showAlert(errorMessage);
+                                }
+                            }));
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

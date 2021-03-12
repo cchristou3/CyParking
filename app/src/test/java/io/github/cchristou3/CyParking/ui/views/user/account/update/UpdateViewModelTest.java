@@ -9,8 +9,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
-import io.github.cchristou3.CyParking.data.repository.AccountRepository;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.AccountRepository;
 import io.github.cchristou3.CyParking.ui.InstantTaskRuler;
 
 import static io.github.cchristou3.CyParking.ui.LiveDataTestUtil.getOrAwaitValue;

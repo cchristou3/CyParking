@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.AuthenticatorRepository;
 
 /**
  * Purpose: <p>ViewModel provider factory to instantiate GlobalStateViewModel.

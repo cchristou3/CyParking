@@ -10,8 +10,8 @@ import com.google.firebase.firestore.Query;
 
 import org.jetbrains.annotations.NotNull;
 
-import io.github.cchristou3.CyParking.data.interfaces.OperatorRepository;
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorRepository;
 
 /**
  * Purpose: <p>Data persistence when configuration changes.

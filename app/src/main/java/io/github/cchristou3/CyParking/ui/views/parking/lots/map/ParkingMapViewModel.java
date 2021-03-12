@@ -1,6 +1,5 @@
 package io.github.cchristou3.CyParking.ui.views.parking.lots.map;
 
-import android.util.Log;
 import android.view.View;
 
 import androidx.lifecycle.LiveData;
@@ -9,7 +8,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.functions.FirebaseFunctionsException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,9 +15,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import io.github.cchristou3.CyParking.data.interfaces.HttpsCallHandler;
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.repository.ParkingMapRepository;
+import io.github.cchristou3.CyParking.apiClient.interfaces.HttpsCallHandler;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.ParkingMapRepository;
 import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
 
 /**
@@ -210,16 +208,7 @@ public class ParkingMapViewModel extends ToastViewModel {
      */
     public void fetchParkingLots(double userLatitude, double userLongitude,
                                  HttpsCallHandler handler) {
-        mParkingMapRepository.fetchParkingLots(userLatitude, userLongitude)
-                .addOnCompleteListener(task -> {
-                    handler.onComplete();
-                    if (task.isSuccessful() && task.getResult().getData() != null) {
-                        handler.onSuccess(task.getResult().getData().toString());
-                    } else {
-                        handler.onFailure(task.getException());
-                        logError(task.getException());
-                    }
-                });
+        mParkingMapRepository.fetchParkingLots(userLatitude, userLongitude, handler);
     }
 
     /**
@@ -228,12 +217,6 @@ public class ParkingMapViewModel extends ToastViewModel {
      * @param exception The given exception.
      */
     private void logError(Exception exception) {
-        if (exception instanceof FirebaseFunctionsException) {
-            FirebaseFunctionsException.Code code = ((FirebaseFunctionsException) exception).getCode();
-            Object details = ((FirebaseFunctionsException) exception).getDetails();
-            Log.e(TAG, "FirebaseFunctionsException error: code: "
-                    + code + ", Details: " + details);
-        }
-        Log.d(TAG, exception.getClass() + ": " + exception);
+        mParkingMapRepository.logError(exception);
     }
 }

@@ -14,8 +14,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.List;
 
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
-import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.components.LoadingBarViewModel;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 

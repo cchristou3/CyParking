@@ -17,7 +17,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import io.github.cchristou3.CyParking.utilities.DateTimeUtility;
+import io.github.cchristou3.CyParking.utils.DateTimeUtility;
 
 /**
  * Purpose: Contain all logic related to creating {@link MaterialTimePicker}

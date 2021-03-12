@@ -3,9 +3,9 @@ package io.github.cchristou3.CyParking.ui.views.parking.slots.bookingDetails
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import io.github.cchristou3.CyParking.data.interfaces.OperatorRepository
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot
-import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot
+import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking
+import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorRepository
 
 /**
  * Purpose: <p>Data persistence when configuration changes.
@@ -34,7 +34,7 @@ class BookingDetailsViewModel(private val repository: OperatorRepository) : View
         repository.getParkingLot(booking.operatorId).get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val lot = task.result.documents[0].toObject(ParkingLot::class.java)
+                        val lot = task.result?.documents?.get(0)?.toObject(ParkingLot::class.java)
                         lot?.let {
                             mlotOfBooking.value = it
                         }

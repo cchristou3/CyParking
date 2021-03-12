@@ -20,14 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.manager.SharedPreferencesManager;
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.local.SharedPreferencesManager;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.AccountRepository;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.data.pojo.form.login.AuthFormState;
 import io.github.cchristou3.CyParking.data.pojo.form.login.AuthResult;
-import io.github.cchristou3.CyParking.data.repository.AccountRepository;
-import io.github.cchristou3.CyParking.data.repository.AuthenticatorRepository;
 
-import static io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot.isNameValid;
+import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.isNameValid;
 
 /**
  * Purpose: <p>Data persistence when configuration changes. Shared amongst all tab fragments.
@@ -152,9 +152,9 @@ public class AuthenticatorViewModel extends ViewModel {
 
                             // Save the user's roles locally via SharedPreferences
                             // Each user in the database has a unique Uid. Thus, to be used as the key.
+                            storeRolesLocally(context, task.getResult().getUser().getUid(), roles);
                             new SharedPreferencesManager(context.getApplicationContext())
                                     .setValue(task.getResult().getUser().getUid(), roles);
-
                             final LoggedInUser loggedInUser = new LoggedInUser(task.getResult().getUser(), roles);
                             loggedInUser.setDisplayName(mNameState.getValue());
 
@@ -173,6 +173,10 @@ public class AuthenticatorViewModel extends ViewModel {
         } catch (IllegalArgumentException e) {
             mAuthResultState.setValue(new AuthResult(e.getMessage()));
         }
+    }
+
+    private void storeRolesLocally(Context context, String uid, List<String> roles) {
+
     }
 
     /**

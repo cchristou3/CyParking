@@ -88,7 +88,7 @@ class ConnectionLiveData(context: Context) : LiveData<Boolean>() {
              *
              * @param network The [Network] lost.
              */
-            override fun onLost(network: Network?) {
+            override fun onLost(network: Network) {
                 Log.d(TAG, "onLost: $network")
                 validNetworks.remove(network)
                 checkValidNetworks()

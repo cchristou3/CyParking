@@ -11,18 +11,17 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
 import io.github.cchristou3.CyParking.PaymentSessionHelper
 import io.github.cchristou3.CyParking.R
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer
+import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking
+import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.BookingDetails
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser
+import io.github.cchristou3.CyParking.apiClient.remote.repository.BookingRepository
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver
 import io.github.cchristou3.CyParking.data.manager.EncryptionManager
 import io.github.cchristou3.CyParking.data.manager.EncryptionManager.Companion.hex
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot
-import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer
-import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking
-import io.github.cchristou3.CyParking.data.model.parking.slot.booking.BookingDetails
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser
-import io.github.cchristou3.CyParking.data.repository.BookingRepository
 import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent
 import io.github.cchristou3.CyParking.ui.components.ToastViewModel
-import io.github.cchristou3.CyParking.utilities.DateTimeUtility
 import org.jetbrains.annotations.Contract
 import java.text.ParseException
 import java.util.*
@@ -41,7 +40,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
     : ToastViewModel() {
 
     // Data members
-    private val mPickedDate = MutableLiveData(DateTimeUtility.dateToString(DateTimeUtility.getCurrentDate()))
+    private val mPickedDate = MutableLiveData(io.github.cchristou3.CyParking.utils.DateTimeUtility.dateToString(io.github.cchristou3.CyParking.utils.DateTimeUtility.getCurrentDate()))
     private val pickedStartingTimeState = MutableLiveData(BookingDetails.Time.getCurrentTime())
     private val mPickedSlotOffer = MutableLiveData<SlotOffer?>()
     private val mBookingButtonState = MutableLiveData(false) // Initially disabled
@@ -132,7 +131,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      * @param selectedDay   The selected Day.
      */
     fun updatePickedDate(selectedYear: Int, selectedMonth: Int, selectedDay: Int) {
-        mPickedDate.value = DateTimeUtility.dateToString(selectedYear, selectedMonth, selectedDay)
+        mPickedDate.value = io.github.cchristou3.CyParking.utils.DateTimeUtility.dateToString(selectedYear, selectedMonth, selectedDay)
     }
 
     /**
@@ -250,7 +249,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      */
     private val date: Date?
         get() = try {
-            DateTimeUtility.fromStringToDate(pickedDate)
+            io.github.cchristou3.CyParking.utils.DateTimeUtility.fromStringToDate(pickedDate)
         } catch (e: ParseException) {
             null
         }

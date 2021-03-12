@@ -1,11 +1,11 @@
 package io.github.cchristou3.CyParking
 
 import android.util.Log
-import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.FirebaseFunctionsException
 import com.stripe.android.EphemeralKey
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.EphemeralKeyUpdateListener
+import io.github.cchristou3.CyParking.apiClient.remote.repository.StripeRepository
 
 /**
  * Represents an object that can call to a server and create
@@ -14,19 +14,14 @@ import com.stripe.android.EphemeralKeyUpdateListener
  * @author Charalambos Christou
  * @since 1.0 11/03/21
  */
-class FirebaseEphemeralKeyProvider : EphemeralKeyProvider {
+class FirebaseEphemeralKeyProvider(private val repository: StripeRepository) : EphemeralKeyProvider {
 
     override fun createEphemeralKey(apiVersion: String, keyUpdateListener: EphemeralKeyUpdateListener) {
-
-        // Call our endpoint to create an EphemeralKey
-        FirebaseFunctions.getInstance()
-                .getHttpsCallable("createEphemeralKey")
-                .call(hashMapOf("api_version" to apiVersion))
-                .continueWith { task ->
+        repository.createEphemeralKey(apiVersion)
+                ?.continueWith { task ->
                     if (!task.isSuccessful) {
                         val e = task.exception
                         if (e is FirebaseFunctionsException) {
-
                             val code = e.code
                             val message = e.message
                             Log.e("EphemeralKey", "Ephemeral key provider returns error: $e $code $message")

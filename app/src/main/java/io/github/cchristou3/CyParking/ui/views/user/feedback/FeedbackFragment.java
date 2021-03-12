@@ -17,18 +17,16 @@ import androidx.viewbinding.ViewBinding;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.apiClient.model.user.Feedback;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.model.user.Feedback;
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FeedbackFragmentBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
-import io.github.cchristou3.CyParking.utilities.ViewUtility;
-
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf;
+import io.github.cchristou3.CyParking.utils.ViewUtility;
 
 /**
  * Purpose: <p>Allow the user to send feedback to the development team. </p>
@@ -139,10 +137,10 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
             getBinding().feedbackFragmentMbtnSendFeedback
                     .setEnabled(feedbackFormState.isDataValid());
             // Show validity status for the feedback message
-            updateErrorOf(requireContext(), getBinding().feedbackFragmentTilFeedbackInput, feedbackFormState.getFeedbackMessageError());
+            ViewUtility.updateErrorOf(requireContext(), getBinding().feedbackFragmentTilFeedbackInput, feedbackFormState.getFeedbackMessageError());
             if (getUser() == null) {
                 // Update Email error
-                updateErrorOf(requireContext(), getBinding().feedbackFragmentTilEmailInput, feedbackFormState.getEmailError());
+                ViewUtility.updateErrorOf(requireContext(), getBinding().feedbackFragmentTilEmailInput, feedbackFormState.getEmailError());
             }
         });
     }

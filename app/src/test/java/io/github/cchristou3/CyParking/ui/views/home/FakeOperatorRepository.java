@@ -9,9 +9,9 @@ import com.google.firebase.firestore.Query;
 import org.jetbrains.annotations.NotNull;
 import org.mockito.Mockito;
 
-import io.github.cchristou3.CyParking.data.interfaces.OperatorRepository;
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.repository.DefaultOperatorRepository;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.DefaultOperatorRepository;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorRepository;
 
 /**
  * Mock repository to substitute {@link DefaultOperatorRepository}

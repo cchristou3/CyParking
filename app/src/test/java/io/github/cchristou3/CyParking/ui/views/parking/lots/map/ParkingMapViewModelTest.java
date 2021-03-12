@@ -17,8 +17,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.repository.ParkingMapRepository;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.ParkingMapRepository;
 import io.github.cchristou3.CyParking.ui.InstantTaskRuler;
 
 import static io.github.cchristou3.CyParking.ui.LiveDataTestUtil.getOrAwaitValue;

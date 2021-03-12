@@ -1,3 +1,5 @@
+include ':utils'
+include ':apiClient'
 include ':stripe'
 include ':app'
 rootProject.name = "CyParking"

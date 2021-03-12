@@ -11,11 +11,11 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import io.github.cchristou3.CyParking.R
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot
+import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking
+import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.BookingDetails
 import io.github.cchristou3.CyParking.data.interfaces.Navigable
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot
-import io.github.cchristou3.CyParking.data.model.parking.slot.booking.Booking
-import io.github.cchristou3.CyParking.data.model.parking.slot.booking.BookingDetails
 import io.github.cchristou3.CyParking.databinding.BookingDetailsFragmentBinding
 import io.github.cchristou3.CyParking.ui.components.BaseFragment
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder
@@ -93,10 +93,12 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
      */
     private fun initializeUi() {
         arguments?.let { args ->
-            val selectedBooking: Booking = args.getParcelable(getString(R.string.selected_booking_arg))
-            loadPhoto(selectedBooking)
-            displayContents(selectedBooking)
-            setListenerToQRCodeButton(selectedBooking.qrCode)
+            val selectedBooking: Booking? = args.getParcelable(getString(R.string.selected_booking_arg))
+            selectedBooking?.let {
+                loadPhoto(selectedBooking)
+                displayContents(selectedBooking)
+                setListenerToQRCodeButton(selectedBooking.qrCode)
+            }
         }
     }
 

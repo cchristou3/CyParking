@@ -8,10 +8,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.model.user.Feedback;
-import io.github.cchristou3.CyParking.data.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.user.Feedback;
+import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.FeedbackRepository;
 import io.github.cchristou3.CyParking.data.pojo.form.feedback.FeedbackFormState;
-import io.github.cchristou3.CyParking.data.repository.FeedbackRepository;
 
 import static io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorViewModel.isEmailValid;
 

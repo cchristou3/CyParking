@@ -46,13 +46,13 @@ import java.util.List;
 import java.util.Locale;
 
 import io.github.cchristou3.CyParking.R;
+import io.github.cchristou3.CyParking.apiClient.model.parking.Parking;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
 import io.github.cchristou3.CyParking.data.manager.location.SingleUpdateHelper;
-import io.github.cchristou3.CyParking.data.model.parking.Parking;
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.data.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.databinding.RegisterLotFragmentBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.components.BaseItemTouchHelper;
@@ -60,14 +60,11 @@ import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.ui.helper.DropDownMenuHelper;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
-import io.github.cchristou3.CyParking.utilities.Utility;
-import io.github.cchristou3.CyParking.utilities.ViewUtility;
+import io.github.cchristou3.CyParking.utils.Utility;
+import io.github.cchristou3.CyParking.utils.ViewUtility;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
-import static io.github.cchristou3.CyParking.utilities.Utility.cloneList;
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.disableParentScrollingInterferenceOf;
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.updateErrorOf;
 
 /**
  * Purpose: Allow the operator-typed user to register
@@ -323,24 +320,24 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
             getBinding().registerLotFragmentBtnRegisterLot.setEnabled(registerLotFormState.isDataValid());
 
             // Update the view's related to the lot's info
-            if (updateErrorOf(requireContext(),
+            if (ViewUtility.updateErrorOf(requireContext(),
                     getBinding().registerLotFragmentTilPhoneBody, registerLotFormState.getMobileNumberError())) {
                 return;
             }
-            if (updateErrorOf(requireContext(),
+            if (ViewUtility.updateErrorOf(requireContext(),
                     getBinding().registerLotFragmentTilLotName, registerLotFormState.getLotNameError())) {
                 return;
             }
-            if (updateErrorOf(requireContext(),
+            if (ViewUtility.updateErrorOf(requireContext(),
                     getBinding().registerLotFragmentTilCapacity, registerLotFormState.getLotCapacityError())) {
                 return;
             }
             // Update the view's related to the lot's location
-            if (updateErrorOf(requireContext(),
+            if (ViewUtility.updateErrorOf(requireContext(),
                     getBinding().registerLotFragmentTilLocationLat, registerLotFormState.getLatLngError())) {
                 return;
             }
-            if (updateErrorOf(requireContext(),
+            if (ViewUtility.updateErrorOf(requireContext(),
                     getBinding().registerLotFragmentTilLocationLng, registerLotFormState.getLatLngError())) {
                 return;
             }
@@ -468,7 +465,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
             if (newSlotOfferList == null) {
                 newSlotOfferList = new ArrayList<>();
             } else {
-                newSlotOfferList = cloneList(newSlotOfferList);
+                newSlotOfferList = Utility.cloneList(newSlotOfferList);
             }
             SlotOffer newSlotOffer = new SlotOffer(mSelectedDuration, mSelectedPrice);
 
@@ -524,7 +521,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
 
         // If recyclerView is inside a ScrollView then there is an issue while scrolling recyclerView’s inner contents.
         // So, when touching the recyclerView forbid the ScrollView from intercepting touch events.
-        disableParentScrollingInterferenceOf(recyclerView);
+        ViewUtility.disableParentScrollingInterferenceOf(recyclerView);
     }
 
     /**
@@ -540,7 +537,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         return new ItemTouchHelper(new BaseItemTouchHelper(
                 itemPosition -> {
                     // Access the current list - with a new reference
-                    List<SlotOffer> newOffers = cloneList(mRegisterLotViewModel.getSlotOfferList());
+                    List<SlotOffer> newOffers = Utility.cloneList(mRegisterLotViewModel.getSlotOfferList());
                     // Remove the booking fro the list
                     newOffers.remove((int) itemPosition); // Cast to primitive to trigger appropriate method
                     // Update the adapter's list

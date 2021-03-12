@@ -35,14 +35,15 @@ import java.util.List;
 import java.util.Objects;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.data.interfaces.HttpsCallHandler;
+import io.github.cchristou3.CyParking.apiClient.interfaces.HttpsCallHandler;
+import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.utils.Utils;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
 import io.github.cchristou3.CyParking.data.manager.MarkerManager;
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
 import io.github.cchristou3.CyParking.data.manager.location.SubsequentUpdateHelper;
-import io.github.cchristou3.CyParking.data.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.databinding.FragmentParkingMapBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
@@ -58,8 +59,7 @@ import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 import static android.view.View.GONE;
 import static io.github.cchristou3.CyParking.utilities.AnimationUtility.animateAvailabilityColorChanges;
 import static io.github.cchristou3.CyParking.utilities.AnimationUtility.slideVerticallyToBottom;
-import static io.github.cchristou3.CyParking.utilities.Utility.getDistanceApart;
-import static io.github.cchristou3.CyParking.utilities.ViewUtility.showToast;
+import static io.github.cchristou3.CyParking.utils.ViewUtility.showToast;
 
 /**
  * Purpose: <p>View all nearby parking.
@@ -364,7 +364,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     private boolean shouldFetchParkingDocs(LatLng initialPosition, LatLng updatedPosition) {
         // Calculate the distance between the user's initial position
         // and the updated one.
-        return getDistanceApart(
+        return Utils.getDistanceApart(
                 initialPosition, updatedPosition
         ) > UPDATE_LOCATION_THRESHOLD;  // 100 meters
     }

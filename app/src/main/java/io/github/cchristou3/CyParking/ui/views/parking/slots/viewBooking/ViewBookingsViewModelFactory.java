@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import io.github.cchristou3.CyParking.data.repository.BookingRepository;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.BookingRepository;
 
 /**
  * Purpose: <p>ViewModel provider factory to instantiate ViewBookingsViewModel.

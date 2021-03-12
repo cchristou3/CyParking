@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import io.github.cchristou3.CyParking.data.repository.DefaultOperatorRepository;
+import io.github.cchristou3.CyParking.apiClient.remote.repository.DefaultOperatorRepository;
 
 /**
  * Purpose: <p>ViewModel provider factory to instantiate RegisterLotViewModel.

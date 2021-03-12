@@ -101,6 +101,11 @@
 
     <!-- Strings related to the HomeFragment -->
     <string name="parking_map">Parking Map</string>
+    <string name="upcoming_booking">Upcoming booking</string>
+
+    <!-- Strings related to the shared Views of HomeFragment and BookingDetailsFragment -->
+    <string name="shared_booking_card_view">bookingCardView</string>
+    <string name="shared_parent">sharedParent</string>
 
     <!-- Strings related to the HomeFragment's lot section -->
     <string name="increment_by_one">Increment by one</string>

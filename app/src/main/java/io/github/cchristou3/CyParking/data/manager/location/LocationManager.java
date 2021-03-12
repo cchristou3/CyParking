@@ -48,7 +48,7 @@ import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 public abstract class LocationManager {
 
     // Constant variables
-    public static final int LOCATION_PERMISSION_REQUEST_CODE = 321;
+    public static final int RC_LOCATION_PERMISSION = 321;
     private static final String TAG = LocationManager.class.getName() + "UniqueTag";
 
     // Data members
@@ -139,7 +139,7 @@ public abstract class LocationManager {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Marshmallow
                 fragment.requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                        LOCATION_PERMISSION_REQUEST_CODE);
+                        RC_LOCATION_PERMISSION);
             }
         } else {
             // no need to ask for permission
@@ -159,7 +159,7 @@ public abstract class LocationManager {
      * @param grantResults The result of the permission request.
      */
     public void onRequestPermissionsResult(final Context context, int requestCode, @NotNull int[] grantResults) {
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+        if (requestCode == RC_LOCATION_PERMISSION) {
 
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted

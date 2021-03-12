@@ -1,15 +1,21 @@
 package io.github.cchristou3.CyParking.ui.views.parking.slots.bookingDetails
 
 import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.lifecycle.ViewModelProvider
+import androidx.transition.TransitionInflater
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
 import io.github.cchristou3.CyParking.R
 import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot
 import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking
@@ -28,7 +34,7 @@ import io.github.cchristou3.CyParking.utilities.scaleToMatchParent
  * Details include the booking's QR Code, the lot's location (directions), etc.
  *
  * @author Charalambos Christou
- * @since 26/02/21
+ * @since 12/03/21
  */
 class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Navigable {
 
@@ -39,12 +45,30 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
     private lateinit var viewModel: BookingDetailsViewModel
     private var mIsCreated: Boolean = true
 
+
+    /**
+     * Called to do initial creation of a fragment.
+     * @see <a href='https://jtmuller5-98869.medium.com/fragment-transitions-with-shared-elements-using-android-navigation-7dcfe01aacd'>
+     * source</a>
+     */
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Set both the enter and the return transitions.
+        // Used for shared views to allow for a more interactive
+        // transition between the home fragment to this one.
+        sharedElementEnterTransition = TransitionInflater.from(requireContext())
+                .inflateTransition(R.transition.shared_booking).apply { this.duration = 500 }
+        sharedElementReturnTransition = sharedElementEnterTransition
+    }
+
     /**
      * Inflate the fragment's Ui.
      * @see BaseFragment.onCreateView
      */
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        // Postpone enter transition till fragment's data has loaded.
+        postponeEnterTransition()
         return super.onCreateView(BookingDetailsFragmentBinding.inflate(inflater))
     }
 
@@ -54,7 +78,7 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Initialize the viewmodel
+        // Initialize the ViewModel
         viewModel = ViewModelProvider(this, BookingDetailsViewModelFactory())
                 .get(BookingDetailsViewModel::class.java)
 
@@ -161,18 +185,23 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
      * Display necessary data of the given booking.
      */
     private fun displayContents(selectedBooking: Booking) {
-        binding.bookingDetailsFragmentTxtStatus.text =
+        binding.bookingItemFullyCv.bookingItemFullyTxtStatus.text =
                 (Booking.getStatusText(requireContext(), selectedBooking.isCompleted))
-        binding.bookingDetailsFragmentTxtParkingName.text =
+        binding.bookingItemFullyCv
+                .bookingItemFullyTxtParkingName.text =
                 selectedBooking.lotName
-        binding.bookingDetailsFragmentTxtDate.text =
+        binding.bookingItemFullyCv
+                .bookingItemFullyTxtDate.text =
                 BookingDetails.getDateText(selectedBooking.bookingDetails.dateOfBooking)
-        binding.bookingDetailsFragmentTxtStartTime.text =
+        binding.bookingItemFullyCv
+                .bookingItemFullyTxtStartTime.text =
                 selectedBooking.bookingDetails.startingTime.toString()
         // Calculate the end time based on the starting time and the picked slot offer
         val endTime = BookingDetails.Time.getEndTime(selectedBooking.bookingDetails)
-        binding.bookingDetailsFragmentTxtEndTime.text = endTime.toString()
-        binding.bookingDetailsFragmentTxtOffer.text = selectedBooking.bookingDetails.slotOffer.toString()
+        binding.bookingItemFullyCv
+                .bookingItemFullyTxtEndTime.text = endTime.toString()
+        binding.bookingItemFullyCv
+                .bookingItemFullyTxtOffer.text = selectedBooking.bookingDetails.slotOffer.toString()
     }
 
     /**
@@ -204,6 +233,17 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
     private fun loadImageUrl(parkingLot: ParkingLot) {
         Glide.with(this)
                 .load(parkingLot.lotPhotoUrl)
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                        startPostponedEnterTransition()
+                        return false
+                    }
+
+                    override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                        startPostponedEnterTransition()
+                        return false
+                    }
+                })
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .apply(RequestOptions()
                         .error(scaleToMatchParent(resources, binding.bookingDetailsFragmentClMainCl, R.drawable.ic_photo_not_supplied,

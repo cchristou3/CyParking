@@ -44,6 +44,8 @@
                 android:layout_alignParentTop="true"
                 app:defaultNavHost="true"
                 app:layout_constraintBottom_toTopOf="@+id/activity_main_host_txt_no_connection_warning"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:navGraph="@navigation/mobile_navigation" />
 

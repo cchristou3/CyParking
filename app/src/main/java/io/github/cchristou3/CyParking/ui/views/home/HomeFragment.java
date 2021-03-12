@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.FragmentNavigator;
 import androidx.viewbinding.ViewBinding;
 
 import com.google.android.gms.location.LocationResult;
@@ -29,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.BookingDetails;
 import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
@@ -54,7 +56,7 @@ import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
  * </p>
  *
  * @author Charalambos Christou
- * @version 11.0 24/02/21
+ * @version 12.0 12/03/21
  */
 public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements Navigable, LocationHandler {
 
@@ -65,6 +67,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     private OperatorViewModel mOperatorViewModel;
     private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
     private IntentIntegrator mIntentIntegrator;
+
 
     /**
      * Inflates our fragment's view.
@@ -239,18 +242,78 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
 
         if (loggedInUser.isOperator()) {
             // Is an operator but not a user
-            initializeOperator();
+            initializeOperator(loggedInUser);
         } else {
             // User is not an operator
             // Hide anything related to parking lot from the user
             getBinding().fragmentHomeCvLotInfo.setVisibility(View.GONE);
+
+            // And display an upcoming booking if there is one
+            initializeUser(loggedInUser);
         }
     }
 
     /**
-     * Initializes both the Ui and the database logic related to the operator.
+     * Initialize components related to the user.
+     *
+     * @param loggedInUser the current instance of {@link LoggedInUser}
      */
-    private void initializeOperator() {
+    private void initializeUser(@NonNull LoggedInUser loggedInUser) {
+        // Instantiate the ViewModel
+        UserViewModel mUserViewModel = new ViewModelProvider(this, new UserViewModel.Factory()).get(UserViewModel.class);
+
+        mUserViewModel.getUpcomingBooking().observe(getViewLifecycleOwner(), this::displayBooking);
+
+        mUserViewModel.getUpcomingBooking(loggedInUser.getUserId());
+
+    }
+
+    /**
+     * Perform necessary Ui updates to display the given booking,
+     * while also attach it an on click listener
+     * on-click: navigate to booking details fragment.
+     *
+     * @param upcomingBooking The upcoming booking.
+     */
+    private void displayBooking(@NotNull Booking upcomingBooking) {
+        // Make the user related CardView visible
+        getBinding().fragmentHomeCvUserBooking.setVisibility(View.VISIBLE);
+
+        // Update the contents if its children.
+        getBinding().fragmentHomeBookingItem.bookingItemFullyTxtDate
+                .setText(BookingDetails.getDateText(upcomingBooking.getBookingDetails().getDateOfBooking()));
+        getBinding().fragmentHomeBookingItem.bookingItemFullyTxtOffer
+                .setText(upcomingBooking.getBookingDetails().getSlotOffer().toString());
+        getBinding().fragmentHomeBookingItem.bookingItemFullyTxtParkingName
+                .setText(upcomingBooking.getLotName());
+        getBinding().fragmentHomeBookingItem.bookingItemFullyTxtStatus
+                .setText(Booking.getStatusText(requireContext(), upcomingBooking.isCompleted()));
+        getBinding().fragmentHomeBookingItem.bookingItemFullyTxtStartTime
+                .setText(upcomingBooking.getBookingDetails().getStartingTime().toString());
+        getBinding().fragmentHomeBookingItem.bookingItemFullyTxtEndTime
+                .setText(BookingDetails.Time.getEndTime(upcomingBooking.getBookingDetails()).toString());
+
+        // Set the shared views to participate in the transition - see below
+        FragmentNavigator.Extras.Builder sharedView = new FragmentNavigator.Extras.Builder();
+        sharedView.addSharedElement(getBinding().fragmentHomeBookingItem.bookingItemFullyCv, getString(R.string.shared_booking_card_view));
+        sharedView.addSharedElement(getBinding().fragmentHomeCvUserBooking, getString(R.string.shared_parent));
+
+        // Hook up the whole card view with an on click listener
+        // on-click: navigate to booking details.
+        getBinding().fragmentHomeBookingItem.bookingItemFullyCv
+                .setOnClickListener(v ->
+                        getNavController(requireActivity())
+                                .navigate(HomeFragmentDirections.actionNavHomeToNavBookingDetailsFragment(upcomingBooking),
+                                        sharedView.build())
+                );
+    }
+
+    /**
+     * Initializes both the Ui and the database logic related to the operator.
+     *
+     * @param loggedInUser current user.
+     */
+    private void initializeOperator(LoggedInUser loggedInUser) {
         // TODO: 19/01/2021 Encapsulate all operator logic to a fragment and simply inflate it
         // Set up the Ui for the operator
         getBinding().fragmentHomeCvLotInfo.setVisibility(View.VISIBLE);
@@ -261,11 +324,8 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         mOperatorViewModel.getParkingLotState().observe(getViewLifecycleOwner(),
                 this::updateLotContents); // Display the parking lot's contents
 
-        if (getGlobalStateViewModel().getUser() == null) return;
-
-        String operatorId = getGlobalStateViewModel().getUser().getUserId();
         // Get the operator's lot info from the database.
-        getParkingLotInfo(operatorId);
+        getParkingLotInfo(loggedInUser.getUserId());
 
         // TODO: 10/02/2021 Display QR scanner button: scan QR code of users that have booked a slot.
     }

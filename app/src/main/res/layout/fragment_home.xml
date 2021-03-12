@@ -39,6 +39,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fragment_home_cv_user_booking"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:transitionName="@string/shared_parent"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_home_btn_nav_to_map">
+
+        <TextView
+            android:id="@+id/fragment_home_tv_headline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/upcoming_booking"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <include
+            android:id="@+id/fragment_home_booking_item"
+            layout="@layout/booking_item_fully"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_home_tv_headline" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/fragment_home_cv_lot_info"
         android:layout_width="match_parent"

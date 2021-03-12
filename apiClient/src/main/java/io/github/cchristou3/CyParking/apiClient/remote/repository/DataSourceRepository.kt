@@ -3,6 +3,7 @@ package io.github.cchristou3.CyParking.apiClient.remote.repository
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.HttpsCallableReference
 import com.google.firebase.functions.HttpsCallableResult
@@ -90,11 +91,28 @@ internal object DataSourceRepository {
         val bookingsRef: CollectionReference
             get() = getDatabaseNodeByName(BOOKINGS)
 
+        /**
+         * Returns the pending bookings of the user with the specified userId.
+         *
+         * @param userId The is of the Firebase user
+         * @return A query which returns all the bookings of the specified userId
+         */
+        @JvmDefault
+        fun getUserUpcomingBookings(userId: String?): Query {
+            return bookingsRef
+                    .whereEqualTo(BOOKING_USER_ID, userId)
+                    .whereEqualTo("$BOOKING_DETAILS.$COMPLETED", false)
+        }
+
         companion object {
             // Database fields
             const val COMPLETED = "completed"
             const val BOOKING_USER_ID = "bookingUserId"
             const val BOOKING_DETAILS = "bookingDetails"
+            const val DATE_OF_BOOKING = "dateOfBooking"
+            const val STARTING_TIME = "startingTime"
+            const val HOUR = "hour"
+            const val MINUTE = "minute"
         }
     }
 

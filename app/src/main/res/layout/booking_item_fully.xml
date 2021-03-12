@@ -1,0 +1,99 @@
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/booking_item_fully_cv"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginLeft="15dp"
+    android:layout_marginTop="25dp"
+    android:layout_marginRight="15dp"
+    android:transitionName="@string/shared_booking_card_view"
+    app:cardCornerRadius="30dp"
+    app:cardElevation="2dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/booking_details_fragment_iv_lot_photo">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="13dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/booking_item_fully_txt_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:drawablePadding="10dp"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            app:drawableStartCompat="@drawable/ic_pending_booking"
+            app:layout_constraintStart_toStartOf="@+id/booking_item_fully_txt_parking_name"
+            app:layout_constraintTop_toBottomOf="@+id/booking_item_fully_txt_parking_name" />
+
+        <TextView
+            android:id="@+id/booking_item_fully_txt_parking_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="15dp"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/booking_item_fully_txt_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:drawablePadding="10dp"
+            android:textAppearance="?attr/textAppearanceBody1"
+            app:drawableStartCompat="@drawable/ic_calendar"
+            app:layout_constraintBottom_toBottomOf="@+id/booking_item_fully_txt_start_time"
+            app:layout_constraintStart_toEndOf="@+id/booking_item_fully_txt_start_time"
+            app:layout_constraintTop_toTopOf="@+id/booking_item_fully_txt_start_time" />
+
+        <TextView
+            android:id="@+id/booking_item_fully_txt_start_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:drawablePadding="10dp"
+            android:textAppearance="?attr/textAppearanceBody1"
+            app:drawableStartCompat="@drawable/ic_time"
+            app:layout_constraintStart_toStartOf="@+id/booking_item_fully_txt_status"
+            app:layout_constraintTop_toBottomOf="@+id/booking_item_fully_txt_status" />
+
+        <TextView
+            android:id="@+id/booking_item_fully_txt_end_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:drawablePadding="10dp"
+            android:textAppearance="?attr/textAppearanceBody1"
+            app:drawableStartCompat="@drawable/ic_book_end_time"
+            app:layout_constraintBottom_toBottomOf="@+id/booking_item_fully_txt_offer"
+            app:layout_constraintEnd_toEndOf="@+id/booking_item_fully_txt_start_time"
+            app:layout_constraintStart_toStartOf="@+id/booking_item_fully_txt_start_time"
+            app:layout_constraintTop_toBottomOf="@+id/booking_item_fully_txt_start_time" />
+
+        <TextView
+            android:id="@+id/booking_item_fully_txt_offer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:layout_marginBottom="15dp"
+            android:drawablePadding="10dp"
+            android:textAppearance="?attr/textAppearanceBody1"
+            app:drawableStartCompat="@drawable/ic_offer"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/booking_item_fully_txt_date"
+            app:layout_constraintStart_toStartOf="@+id/booking_item_fully_txt_date"
+            app:layout_constraintTop_toBottomOf="@+id/booking_item_fully_txt_start_time" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

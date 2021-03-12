@@ -56,6 +56,21 @@
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit"
             app:popUpTo="@id/nav_home" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_booking_details_fragment"
+            app:destination="@id/nav_booking_details_fragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_home">
+
+            <argument
+                android:name="selected_booking"
+                app:argType="io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking"
+                app:nullable="false" />
+
+        </action>
     </fragment>
 
     <fragment

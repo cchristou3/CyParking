@@ -5,7 +5,6 @@ package io.github.cchristou3.CyParking.utilities
 
 import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
@@ -13,6 +12,8 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.cardview.widget.CardView
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.scale
@@ -80,10 +81,8 @@ fun getCardViewColor(cardView: CardView): ColorDrawable {
  * @param color colorInt obtained by [Resources.getColor]
  */
 fun Drawable.setColor(@ColorInt color: Int) {
-    this.setColorFilter(
-            color,
-            // Source = Drawable, Destination = given color
+    this.colorFilter =    // Source = Drawable, Destination = given color
             // Thus, the drawable shape will remain unchanged
             // and its color will be blended with the given color.
-            PorterDuff.Mode.SRC_IN)
+            BlendModeColorFilterCompat.createBlendModeColorFilterCompat(color, BlendModeCompat.SRC_IN)
 }

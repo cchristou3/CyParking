@@ -72,14 +72,14 @@ import static android.app.Activity.RESULT_OK;
  * <p>
  *
  * @author Charalambos Christou
- * @version 8.0 27/02/21
+ * @version 9.0 12/03/21
  */
 public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding>
         implements Navigable, LocationHandler, TextWatcher, View.OnClickListener {
 
     // Fragment's constants
     public static final String TAG = RegisterLotFragment.class.getName() + "UniqueTag";
-    private static final int EXTERNAL_STORAGE_CODE = 400;
+    private static final int RC_EXTERNAL_STORAGE_CODE = 400;
     private static final int RC_PHOTO_PICKER = 730;
 
     // Fragment's members
@@ -132,15 +132,6 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         addObserversToStates();
         initializeUi();
         slotOfferCounter = mRegisterLotViewModel.getSlotOfferList().size();
-        // TODO: 27/02/2021 Move to a more appropriate position
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, EXTERNAL_STORAGE_CODE);
-        } else {
-            // no need to ask for permission
-            // Do something... fetch position
-        }
     }
 
     /**
@@ -153,8 +144,15 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
-        if (mLocationManager != null) {
-            mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
+        switch (requestCode) {
+            case RC_EXTERNAL_STORAGE_CODE:
+                openPhotoGallery();
+                break;
+            case LocationManager.RC_LOCATION_PERMISSION:
+                if (mLocationManager != null) {
+                    mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
+                }
+                break;
         }
     }
 
@@ -175,6 +173,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         );
         // Remove TextWatchers
         super.removeTextWatchers(
+                this,
                 getBinding().registerLotFragmentEtPhoneBody,
                 getBinding().registerLotFragmentEtLotName,
                 getBinding().registerLotFragmentEtCapacity,
@@ -412,9 +411,11 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
                 getUser().getEmail()
         );
 
+        // TODO: 12/03/2021 Stripe does not allow prices below 1.00. Add security rule to validate it
+
         // Set up both spinners
         setUpSpinner(getBinding().registerLotFragmentSDuration, this::setSelectedDuration, 1.0f);
-        setUpSpinner(getBinding().registerLotFragmentSPrice, this::setSelectedPrice, 0.5f);
+        setUpSpinner(getBinding().registerLotFragmentSPrice, this::setSelectedPrice, 1.0f);
 
         preparePhotoPickerButton();
         prepareGetLocationButton();
@@ -438,14 +439,30 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
      */
     private void preparePhotoPickerButton() {
         getBinding().registerLotFragmentIvPickPhoto
-                .setOnClickListener(v -> openPhotoGallery());
+                .setOnClickListener(v -> requestPhotoGallery());
+    }
+
+    /**
+     * Request from the android framework access to the photo gallery.
+     * If permission is not granted, then the user is prompt.
+     */
+    private void requestPhotoGallery() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, RC_EXTERNAL_STORAGE_CODE);
+        } else {
+            // no need to ask for permission
+            // Do something... fetch position
+            // Create an intent for accessing the device's content (gallery)
+            openPhotoGallery();
+        }
     }
 
     /**
      * Open up the device photo gallery.
      */
     private void openPhotoGallery() {
-        // Create an intent for accessing the device's content (gallery)
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/jpeg");
         intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);

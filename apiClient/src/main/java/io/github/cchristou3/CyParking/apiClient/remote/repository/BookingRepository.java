@@ -18,17 +18,14 @@ import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booki
 public class BookingRepository implements DataSourceRepository.BookingHandler, DataSourceRepository.ParkingLotHandler {
 
     /**
-     * Returns the bookings of the specified userId,
-     * starting from the "Pending" ones and finishing with the "Completed" ones
+     * Returns the pending bookings of the user with the specified userId.
      *
      * @param userId The is of the Firebase user
      * @return A query which returns all the bookings of the specified userId
      */
     @NotNull
     public Query getUserBookings(String userId) {
-        return getBookingsRef()
-                .whereEqualTo(BOOKING_USER_ID, userId)
-                .whereEqualTo(BOOKING_DETAILS + "." + COMPLETED, false);
+        return getUserUpcomingBookings(userId);
     }
 
     /**

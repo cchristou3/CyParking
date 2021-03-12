@@ -19,6 +19,7 @@ import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorRepository;
 import io.github.cchristou3.CyParking.data.pojo.form.FormState;
+import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormBuilder;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormState;
 
 import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.Availability.isCapacityValid;
@@ -105,23 +106,17 @@ public class RegisterLotViewModel extends ViewModel {
                                               final List<SlotOffer> slotOfferList) {
         // Validate the input and set the RegisterLotFormState accordingly
         if (!isValidPhoneNumber(operatorMobileNumber)) {
-            return new RegisterLotFormState(R.string.mobile_phone_error,
-                    null, null, null, null, null);
+            return new RegisterLotFormBuilder().setMobileNumberError(R.string.mobile_phone_error).build();
         } else if (!isNameValid(lotName)) {
-            return new RegisterLotFormState(null,
-                    R.string.lot_name_error, null, null, null, null);
+            return new RegisterLotFormBuilder().setLotNameError(R.string.lot_name_error).build();
         } else if (!isCapacityValid(lotCapacity)) {
-            return new RegisterLotFormState(null,
-                    null, R.string.lot_capacity_error, null, null, null);
+            return new RegisterLotFormBuilder().setLotCapacityError(R.string.lot_capacity_error).build();
         } else if (!isLotLatLngValid(lotLatLng)) {
-            return new RegisterLotFormState(null,
-                    null, null, null, R.string.lot_lat_lng_error, null);
+            return new RegisterLotFormBuilder().setLatLngError(R.string.lot_lat_lng_error).build();
         } else if (!isImageUriValid()) {
-            return new RegisterLotFormState(null,
-                    null, null, null, null, 0);
+            return new RegisterLotFormBuilder().setPhotoError(0).build();
         } else if (!areSlotOffersValid(slotOfferList)) {
-            return new RegisterLotFormState(null,
-                    null, null, R.string.lot_slot_offer_error, null, null);
+            return new RegisterLotFormBuilder().setSlotOfferError(R.string.lot_slot_offer_error).build();
         }
         return new RegisterLotFormState(true);
     }

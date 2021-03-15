@@ -4,7 +4,6 @@ import android.net.Uri;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
@@ -15,18 +14,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorRepository;
 import io.github.cchristou3.CyParking.data.pojo.form.FormState;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormBuilder;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormState;
+import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
+import io.github.cchristou3.CyParking.utils.Utility;
 
-import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.Availability.isCapacityValid;
-import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.areSlotOffersValid;
-import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.isLotLatLngValid;
-import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.isNameValid;
-import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.isValidPhoneNumber;
+import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.Availability.isCapacityValid;
+import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.areSlotOffersValid;
+import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.isLotLatLngValid;
+import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.isNameValid;
+import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.isValidPhoneNumber;
 
 /**
  * Purpose: <p>Data persistence when configuration changes.
@@ -34,9 +35,9 @@ import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.Parking
  * their parking lot onto the system.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 24/01/21
+ * @version 3.0 13/03/21
  */
-public class RegisterLotViewModel extends ViewModel {
+public class RegisterLotViewModel extends ToastViewModel {
 
     // Data members
     private final MutableLiveData<String> mOperatorMobileNumber = new MutableLiveData<>();
@@ -45,8 +46,10 @@ public class RegisterLotViewModel extends ViewModel {
     private final MutableLiveData<LatLng> mLotLatLng = new MutableLiveData<>();
     private final MutableLiveData<List<SlotOffer>> mSlotOfferList = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<RegisterLotFormState> mRegisterLotFormState = new MutableLiveData<>();
-    private final MutableLiveData<FormState> mSelectedSlotOfferArguments = new MutableLiveData<>(new FormState(false));
+    private final MutableLiveData<FormState> mAreSlotOfferArgumentsSelected = new MutableLiveData<>(new FormState(false));
     private final MutableLiveData<Uri> mImageUri = new MutableLiveData<>();
+    private final MutableLiveData<Float> mSelectedPrice = new MutableLiveData<>(null); // Initially null
+    private final MutableLiveData<Float> mSelectedDuration = new MutableLiveData<>(null); // Initially null
 
     private final OperatorRepository mOperatorRepository;
 
@@ -155,7 +158,7 @@ public class RegisterLotViewModel extends ViewModel {
      * @return the LiveData instance of it, to limit any direct changes to it outside of the ViewModel.
      */
     public LiveData<FormState> getSelectedSlotOfferArgumentsState() {
-        return mSelectedSlotOfferArguments;
+        return mAreSlotOfferArgumentsSelected;
     }
 
     /**
@@ -203,6 +206,32 @@ public class RegisterLotViewModel extends ViewModel {
     }
 
     /**
+     * Updates the value of {@link #mSelectedDuration}
+     * with the given argument. Also, updates the value
+     * of {@link #mAreSlotOfferArgumentsSelected} that indicates
+     * whether both the price and the duration were selected.
+     *
+     * @param selectedDuration the new value of {@link #mSelectedDuration}.
+     */
+    public void updateSelectedDuration(Float selectedDuration) {
+        mSelectedDuration.setValue(selectedDuration);
+        updateSelectedSlotOfferArguments(selectedDuration, mSelectedPrice.getValue());
+    }
+
+    /**
+     * Updates the value of {@link #mSelectedPrice}
+     * with the given argument. Also, updates the value
+     * of {@link #mAreSlotOfferArgumentsSelected} that indicates
+     * whether both the price and the duration were selected.
+     *
+     * @param selectedPrice the new value of {@link #mSelectedPrice}.
+     */
+    public void updateSelectedPrice(Float selectedPrice) {
+        mSelectedPrice.setValue(selectedPrice);
+        updateSelectedSlotOfferArguments(mSelectedDuration.getValue(), selectedPrice);
+    }
+
+    /**
      * Updates the value of {@link #mSlotOfferList}
      * with the given argument.
      *
@@ -213,19 +242,24 @@ public class RegisterLotViewModel extends ViewModel {
     }
 
     /**
-     * Updates the value of {@link #mSelectedSlotOfferArguments}
+     * Updates the value of {@link #mAreSlotOfferArgumentsSelected}
      * with the given argument.
      *
      * @param duration the duration of a potential new slot offer.
      * @param price    the price of a potential new slot offer.
      */
     public void updateSelectedSlotOfferArguments(Float duration, Float price) {
-        if (mSelectedSlotOfferArguments.getValue().isDataValid()) return;
-
+        if (mAreSlotOfferArgumentsSelected.getValue() != null && mAreSlotOfferArgumentsSelected.getValue().isDataValid()) {
+            // If valid then both attributes have been set.
+            mSelectedPrice.setValue(price);
+            mSelectedDuration.setValue(duration);
+            return;
+        }
+        // Otherwise, check which if both were selected.
         if (duration == null || price == null) {
-            mSelectedSlotOfferArguments.setValue(new FormState(false));
+            mAreSlotOfferArgumentsSelected.setValue(new FormState(false));
         } else {
-            mSelectedSlotOfferArguments.setValue(new FormState(true));
+            mAreSlotOfferArgumentsSelected.setValue(new FormState(true));
         }
     }
 
@@ -237,5 +271,32 @@ public class RegisterLotViewModel extends ViewModel {
      */
     private boolean isImageUriValid() {
         return getImageUri() != null;
+    }
+
+    /**
+     * Create a {@link SlotOffer} object based on the selected price and duration,
+     * validate it, and if valid add it to the list.
+     */
+    public void addToList() {
+        // Add to the adapter's list
+        List<SlotOffer> newSlotOfferList = getSlotOfferList();
+        if (newSlotOfferList == null) {
+            newSlotOfferList = new ArrayList<>();
+        } else {
+            newSlotOfferList = Utility.cloneList(newSlotOfferList);
+        }
+
+        // Terminate method if either is null
+        if (mSelectedDuration.getValue() == null || mSelectedPrice.getValue() == null) return;
+
+        final SlotOffer newSlotOffer = new SlotOffer(mSelectedDuration.getValue(), mSelectedPrice.getValue());
+
+        if (Utility.contains(newSlotOfferList, newSlotOffer)) {
+            updateToastMessage(R.string.slot_offer_already_exist);
+            // TODO: 24/01/2021 Animate color to that item
+            return;
+        }
+        newSlotOfferList.add(newSlotOffer);
+        updateSlotOfferList(newSlotOfferList);
     }
 }

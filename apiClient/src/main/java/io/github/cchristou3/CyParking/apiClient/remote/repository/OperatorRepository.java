@@ -8,7 +8,7 @@ import com.google.firebase.firestore.Query;
 
 import org.jetbrains.annotations.NotNull;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
 
 /**
  * Purpose: provide the OperatorViewModel
@@ -29,7 +29,7 @@ public interface OperatorRepository {
      * @param parkingLotToBeStored Stores all necessary info about the private parking
      * @return The task to be handled in the active fragment
      * @throws NullPointerException in case the continuation returns null
-     * @see ParkingLot#generateUniqueId()
+     * @see ParkingLot#generateDocumentId()
      * @see Task#getException()
      */
     @NotNull

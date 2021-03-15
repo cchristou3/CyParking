@@ -21,13 +21,14 @@ class StripeRepository : DataSourceRepository.StripeCustomerHandler,
      * Note: observe the node to receive the payment intent's details.
      *
      * @param userUid the id of the issuer.
-     * @param amount the amount to charge.
+     * @param slotOfferIndex the index of the selected offer.
+     * @param lotDocId the document id of the lot in Firestore.
      * @param currency the currency of the payment.
      * @return a [Task] to the user's payment request.
      */
-    fun createPaymentIntent(userUid: String, amount: Int, currency: String): Task<DocumentReference> {
+    fun createPaymentIntent(userUid: String, lotDocId: String, slotOfferIndex: Int, currency: String): Task<DocumentReference> {
         return stripeCustomerRef.document(userUid).collection(PAYMENTS)
-                .add(preparePaymentDetails(amount, currency))
+                .add(preparePaymentDetails(lotDocId, slotOfferIndex, currency))
     }
 
     /**

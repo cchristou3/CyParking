@@ -12,6 +12,7 @@ const stripe = require('stripe')(functions.config().stripe.secret, {
 
 const STRIPE_CUSTOMERS = require('../constants').STRIPE_CUSTOMERS
 const PAYMENTS = require('../constants').PAYMENTS
+const PARKING_LOTS = require('../constants').PARKING_LOTS
 
 /**
  * When a user is created, create a Stripe customer object for them.
@@ -55,8 +56,6 @@ exports.createEphemeralKey = functions.https.onCall(async (data, context) => {
       { customer },
       { apiVersion: data.api_version }
     );
-    // TODO: pass in the functions.config().stripe.secret as well 
-    // to supply the client side the publishable key.
     return key;
   } catch (error) {
     throw new functions.https.HttpsError('internal', error.message);
@@ -72,10 +71,51 @@ exports.createEphemeralKey = functions.https.onCall(async (data, context) => {
 exports.createStripePayment = functions.firestore
   .document(STRIPE_CUSTOMERS + '/{userId}/' + PAYMENTS + '/{pushId}')
   .onCreate(async (snap, context) => {
-    // TODO: Get the price from the server side
-    // so that malicious user won't be able to
-    // trick the system.
-    const { amount, currency } = snap.data();
+
+    const { slotOfferIndex, lotDocId, currency } = snap.data();
+    var slotOfferList;
+    try {
+      // Check the request parameters' values
+      if (lotDocId === null || lotDocId === '' || currency == null || currency === '') {
+        throw new functions.https.HttpsError(
+          'failed-precondition',
+          'Missing one or both of the following parameters: lotDocId, currency.'
+        );
+      }
+
+      // Access the lot's offers
+      slotOfferList =
+        (await admin.firestore().collection(PARKING_LOTS).doc(lotDocId).get()).get('slotOfferList')
+
+      if (!(slotOfferIndex >= 0 && slotOfferIndex < slotOfferList.length)) {
+        // This should never be the case, assuming the client side is sending the right index.
+        // Otherwise, a malicious user might have tried to call the function outstside 
+        // of the client's scope.                   
+        // Throwing an HttpsError so that the client gets the error details.
+        throw new functions.https.HttpsError(
+          'failed-precondition',
+          'The index must be a valid position in the list of offers that the lot provides.'
+        );
+      }
+    } catch (error) {
+      // We want to capture errors and render them in a user-friendly way, while
+      // still logging an exception with StackDriver
+      console.log(error);
+      await snap.ref.set({ validation_error: userFacingMessage(error) }, { merge: true });
+      await reportError(error, { user: context.params.userId });
+      // Do not continue any further
+      return;
+    }
+
+
+    // Sort the list in ascending order based on the offer's price.
+    slotOfferList = slotOfferList.sort(function (a, b) { return a.price - b.price });
+
+    console.error(JSON.stringify(slotOfferList))
+
+    // e.g. before: 1.0 to 100 cents as the stripe API states
+    const amount = Math.floor(slotOfferList[slotOfferIndex].price * 100);
+
     try {
       // Look up the Stripe customer id.
       const customer = (await snap.ref.parent.parent.get()).data().customer_id;
@@ -96,7 +136,7 @@ exports.createStripePayment = functions.firestore
       // We want to capture errors and render them in a user-friendly way, while
       // still logging an exception with StackDriver
       console.log(error);
-      await snap.ref.set({ error: userFacingMessage(error) }, { merge: true });
+      await snap.ref.set({ stripe_error: userFacingMessage(error) }, { merge: true });
       await reportError(error, { user: context.params.userId });
     }
   });

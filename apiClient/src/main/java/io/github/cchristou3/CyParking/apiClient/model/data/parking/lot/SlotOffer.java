@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.apiClient.model.parking.lot;
+package io.github.cchristou3.CyParking.apiClient.model.data.parking.lot;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+
+import io.github.cchristou3.CyParking.utils.Utility;
 
 /**
  * Purpose: <p>POJO to be used to transfer and receive data
@@ -192,7 +194,7 @@ public class SlotOffer implements Parcelable, Comparable<SlotOffer> {
     @NonNull
     @Override
     public String toString() {
-        return "€" + this.price + " for " + this.durationInHours + " hours";
+        return Utility.getCurrency().getSymbol() + this.price + " for " + this.durationInHours + " hours";
     }
 
     /**

@@ -16,6 +16,7 @@ open class StripeApp : Application() {
      */
     override fun onCreate() {
         super.onCreate()
+        // Initialize the Payment Configuration
         PaymentConfiguration.init(applicationContext,
                 BuildConfig.PUBLISHABLE_KEY)
     }

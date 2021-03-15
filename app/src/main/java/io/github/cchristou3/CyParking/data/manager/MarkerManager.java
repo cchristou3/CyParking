@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Set;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.ui.views.parking.lots.map.ParkingMapFragment;
 import io.github.cchristou3.CyParking.utilities.DrawableUtility;
 

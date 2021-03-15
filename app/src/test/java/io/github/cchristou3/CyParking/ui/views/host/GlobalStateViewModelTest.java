@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.ui.InstantTaskRuler;
 

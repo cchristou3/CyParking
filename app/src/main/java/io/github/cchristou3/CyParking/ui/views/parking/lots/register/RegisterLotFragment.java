@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.app.ActivityCompat;
+import androidx.core.util.Consumer;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -40,15 +41,12 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
-import java.util.Locale;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.apiClient.model.parking.Parking;
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.Parking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
@@ -84,8 +82,6 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
 
     // Fragment's members
     private RegisterLotViewModel mRegisterLotViewModel;
-    private Float mSelectedDuration = null;
-    private Float mSelectedPrice = null;
     private SingleUpdateHelper mLocationManager;
     private SlotOfferAdapter mSlotOfferAdapter;
     private int slotOfferCounter;
@@ -131,6 +127,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         super.onViewCreated(view, savedInstanceState);
         addObserversToStates();
         initializeUi();
+        // Keep track of the slot offer list's size
         slotOfferCounter = mRegisterLotViewModel.getSlotOfferList().size();
     }
 
@@ -225,6 +222,16 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         addObserverToPickedPhoto();
         addObserverToForm();
         addObserverToSlotOfferArguments();
+        addObserverToToasts();
+    }
+
+    /**
+     * Observe for messages and display them in a toast if received.
+     */
+    private void addObserverToToasts() {
+        mRegisterLotViewModel.getToastMessage().observe(getViewLifecycleOwner(), toastMessage -> {
+            Toast.makeText(requireContext(), toastMessage, Toast.LENGTH_SHORT).show();
+        });
     }
 
     /**
@@ -404,18 +411,17 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         // Initially the button is disabled
         getBinding().registerLotFragmentBtnRegisterLot.setEnabled(false);
 
-        getBinding().registerLotFragmentTxtPrice.setText("Price (" + Currency.getInstance(Locale.getDefault()).getCurrencyCode() + ")");
+        getBinding().registerLotFragmentTxtPrice.setText(getString(R.string.price) + " (" + Utility.getCurrency().getSymbol() + ")");
 
         // Set the user's current email
         getBinding().registerLotFragmentTxtEmail.setText(
                 getUser().getEmail()
         );
 
-        // TODO: 12/03/2021 Stripe does not allow prices below 1.00. Add security rule to validate it
-
         // Set up both spinners
-        setUpSpinner(getBinding().registerLotFragmentSDuration, this::setSelectedDuration, 1.0f);
-        setUpSpinner(getBinding().registerLotFragmentSPrice, this::setSelectedPrice, 1.0f);
+        setUpSpinner(getBinding().registerLotFragmentSDuration, mRegisterLotViewModel::updateSelectedDuration, 1.0f);
+        // Minimum charge amount: 0.50 cents in euros: https://stripe.com/docs/currencies#minimum-and-maximum-charge-amounts
+        setUpSpinner(getBinding().registerLotFragmentSPrice, mRegisterLotViewModel::updateSelectedPrice, 0.5f);
 
         preparePhotoPickerButton();
         prepareGetLocationButton();
@@ -476,24 +482,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
      */
     private void prepareAddButton() {
         // Hook up a listener to the "add" button
-        getBinding().registerLotFragmentBtnAdd.setOnClickListener(v -> {
-            // Add to the adapter's list
-            List<SlotOffer> newSlotOfferList = mRegisterLotViewModel.getSlotOfferList();
-            if (newSlotOfferList == null) {
-                newSlotOfferList = new ArrayList<>();
-            } else {
-                newSlotOfferList = Utility.cloneList(newSlotOfferList);
-            }
-            SlotOffer newSlotOffer = new SlotOffer(mSelectedDuration, mSelectedPrice);
-
-            if (Utility.contains(newSlotOfferList, newSlotOffer)) {
-                Toast.makeText(requireContext(), "This offer already exists on the list.", Toast.LENGTH_SHORT).show();
-                // TODO: 24/01/2021 Animate color to that item
-                return;
-            }
-            newSlotOfferList.add(newSlotOffer);
-            mRegisterLotViewModel.updateSlotOfferList(newSlotOfferList);
-        });
+        getBinding().registerLotFragmentBtnAdd.setOnClickListener(v -> mRegisterLotViewModel.addToList());
     }
 
     /**
@@ -638,13 +627,14 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
      * Based on the given view find the {@link Spinner} with the given spinnerId
      * and initialize its values. Also, hook it up with an {@link AdapterView.OnItemSelectedListener}.
      * Whenever the listener gets triggered, set the value of the current spinner to the value of the
-     * fragment's corresponding data member ({@link #mSelectedDuration}/{@link #mSelectedPrice}).
+     * {@link #mRegisterLotViewModel}'s corresponding LiveData member
+     * ({@link RegisterLotViewModel#updateSelectedDuration(Float)}/{@link RegisterLotViewModel#updateSelectedPrice(Float)}).
      *
      * @param textInputLayout    A reference of the spinner to be set up.
-     * @param settable           The interface's method to act as a callback inside the listener.
+     * @param consumer           The interface's method to act as a callback inside the listener.
      * @param volumeMultiplicand A float determining the sequence of values of the spinner.
      */
-    private void setUpSpinner(@NotNull TextInputLayout textInputLayout, Settable settable, float volumeMultiplicand) {
+    private void setUpSpinner(@NotNull TextInputLayout textInputLayout, Consumer<Float> consumer, float volumeMultiplicand) {
         // Create an array that will hold all the values of the spinner, based on a multiplicand
         final String[] volume = Utility.getVolume(volumeMultiplicand, 1, 10);
         DropDownMenuHelper.setUpSlotOfferDropDownMenu(requireContext(), textInputLayout, volume,
@@ -656,34 +646,10 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
 
                     @Override
                     public void onItemSelected(String item) {
-                        // Convert the spinner's value into a float and pass it in, to the settable's method.
-                        settable.setVolume(Float.parseFloat(item));
+                        // Convert the spinner's value into a float and pass it in, to the consumer's method.
+                        consumer.accept(Float.parseFloat(item));
                     }
                 });
-    }
-
-    /**
-     * Setter for {@link #mSelectedDuration}
-     * Used to substitute {@link Settable#setVolume(float)}
-     * in {@link #setUpSpinner(TextInputLayout, Settable, float)}
-     *
-     * @param mSelectedDuration The latest selected duration of our duration spinner.
-     */
-    public void setSelectedDuration(float mSelectedDuration) {
-        this.mSelectedDuration = mSelectedDuration;
-        mRegisterLotViewModel.updateSelectedSlotOfferArguments(mSelectedDuration, mSelectedPrice);
-    }
-
-    /**
-     * Setter for {@link #mSelectedPrice}
-     * Used to substitute {@link Settable#setVolume(float)}
-     * in {@link #setUpSpinner(TextInputLayout, Settable, float)}
-     *
-     * @param mSelectedPrice The latest selected price of our price spinner.
-     */
-    public void setSelectedPrice(float mSelectedPrice) {
-        this.mSelectedPrice = mSelectedPrice;
-        mRegisterLotViewModel.updateSelectedSlotOfferArguments(mSelectedDuration, mSelectedPrice);
     }
 
     /**
@@ -707,15 +673,13 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
                         boolean wasRegistrationSuccessful = task.getResult();
                         if (wasRegistrationSuccessful) {
                             // Display message to user.
-                            Toast.makeText(RegisterLotFragment.this.requireContext(),
-                                    getString(R.string.success_lot_registration), Toast.LENGTH_SHORT).show();
+                            mRegisterLotViewModel.updateToastMessage(R.string.success_lot_registration);
                             // Navigate back to home screen
                             getNavController(requireActivity())
                                     .popBackStack();
                         } else {
                             // Display error message to user that the parking lot already exists
-                            Toast.makeText(RegisterLotFragment.this.requireContext(),
-                                    getString(R.string.error_lot_already_exists), Toast.LENGTH_SHORT).show();
+                            mRegisterLotViewModel.updateToastMessage(R.string.error_lot_already_exists);
                         }
                     }
                 });
@@ -817,12 +781,5 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
                 .navigate(
                         RegisterLotFragmentDirections.actionNavRegisterLotFragmentToNavHome()
                 );
-    }
-
-    /**
-     * Interface used in {@link #setUpSpinner(TextInputLayout, Settable, float)}.
-     */
-    private interface Settable {
-        void setVolume(float selectedVolume);
     }
 }

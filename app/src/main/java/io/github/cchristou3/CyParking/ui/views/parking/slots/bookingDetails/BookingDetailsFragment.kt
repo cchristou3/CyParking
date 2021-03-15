@@ -17,9 +17,9 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import io.github.cchristou3.CyParking.R
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.BookingDetails
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.BookingDetails
 import io.github.cchristou3.CyParking.data.interfaces.Navigable
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager
 import io.github.cchristou3.CyParking.databinding.BookingDetailsFragmentBinding
@@ -34,7 +34,7 @@ import io.github.cchristou3.CyParking.utilities.scaleToMatchParent
  * Details include the booking's QR Code, the lot's location (directions), etc.
  *
  * @author Charalambos Christou
- * @since 12/03/21
+ * @since 1.0 12/03/21
  */
 class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Navigable {
 
@@ -49,7 +49,9 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
     /**
      * Called to do initial creation of a fragment.
      * @see <a href='https://jtmuller5-98869.medium.com/fragment-transitions-with-shared-elements-using-android-navigation-7dcfe01aacd'>
-     * source</a>
+     * Using Navigation Component</a>
+     * @see <a href='https://medium.com/androiddevelopers/fragment-transitions-ea2726c3f36f'>
+     * Using FragmentManager and transactions</a>
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

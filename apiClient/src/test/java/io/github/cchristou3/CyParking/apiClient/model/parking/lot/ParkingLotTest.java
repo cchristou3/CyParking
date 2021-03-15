@@ -16,13 +16,15 @@ import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.Random;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.Parking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.Parking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
 
-import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.Availability.isCapacityValid;
-import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.areSlotOffersValid;
-import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.isLotLatLngValid;
-import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.isNameValid;
-import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.isValidPhoneNumber;
+import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.Availability.isCapacityValid;
+import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.areSlotOffersValid;
+import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.isLotLatLngValid;
+import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.isNameValid;
+import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.isValidPhoneNumber;
 
 /*
  * Unit tests for the {@link ParkingLot} class.

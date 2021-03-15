@@ -6,8 +6,8 @@ import com.google.firebase.firestore.Query;
 
 import org.jetbrains.annotations.NotNull;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking;
 
 /**
  * Purpose: <p>contain all methods to access the (cloud / local) database's booking node.</p>
@@ -38,7 +38,7 @@ public class BookingRepository implements DataSourceRepository.BookingHandler, D
     @NotNull
     public DocumentReference getParkingLot(@NotNull ParkingLot selectedParking) {
         return getParkingLotsRef()
-                .document(selectedParking.generateUniqueId());
+                .document(selectedParking.generateDocumentId());
     }
 
     /**
@@ -51,7 +51,7 @@ public class BookingRepository implements DataSourceRepository.BookingHandler, D
     public Task<Void> storeToDatabase(@NotNull Booking bookingToBeStored) {
         // Add the booking info to the database
         return getBookingsRef()
-                .document(bookingToBeStored.generateUniqueId())
+                .document(bookingToBeStored.generateDocumentId())
                 .set(bookingToBeStored);
     }
 
@@ -71,7 +71,7 @@ public class BookingRepository implements DataSourceRepository.BookingHandler, D
      */
     public Task<Boolean> checkIfAlreadyBookedBySameUser(@NotNull Booking booking) {
         return getBookingsRef()
-                .document(booking.generateUniqueId()).get()
+                .document(booking.generateDocumentId()).get()
                 .continueWith(task -> {
                     if (task.isSuccessful()) {
                         // If it does not already exist

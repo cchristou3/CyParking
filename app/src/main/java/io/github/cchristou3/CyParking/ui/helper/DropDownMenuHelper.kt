@@ -1,7 +1,6 @@
 package io.github.cchristou3.CyParking.ui.helper
 
 import android.content.Context
-import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
@@ -14,7 +13,7 @@ import io.github.cchristou3.CyParking.R
  * that consist of [TextInputLayout] - [AutoCompleteTextView]'s.
  *
  * @author Charalambos Christou
- * @version 1.0 08/02/21
+ * @version 2.0 13/03/21
  */
 class DropDownMenuHelper {
 
@@ -27,6 +26,11 @@ class DropDownMenuHelper {
          * an [AdapterView.OnItemSelectedListener].
          * Whenever an item gets selected, trigger the
          * [ItemHandler.onItemSelected] method.
+         *
+         * @param context the context to make use of.
+         * @param textInputLayout the input layout to set up as a drop-down-menu widget.
+         * @param array a collection of [T] items.
+         * @param itemHandler An interface that allows the manipulation of selected items.
          */
         @JvmStatic
         fun <T> setUpSlotOfferDropDownMenu(
@@ -37,28 +41,11 @@ class DropDownMenuHelper {
 
             val autoCompleteTextView = textInputLayout.editText as AutoCompleteTextView
 
-            autoCompleteTextView // Add an on item selected listener
-                    .onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                /**
-                 *
-                 * Callback method to be invoked when an item in this view has been
-                 * selected.
-                 *
-                 * @param parent The AdapterView where the selection happened
-                 * @param view The view within the AdapterView that was clicked
-                 * @param position The position of the view in the adapter
-                 * @param id The row id of the item that is selected
-                 */
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    // Cast the selected object to a T object
-                    val item = itemHandler.castItem(autoCompleteTextView.adapter, position)
-                    itemHandler.onItemSelected(item)
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) { /* ignore */
-                }
-
-            }
+            autoCompleteTextView // Add an on item click listener
+                    .setOnItemClickListener { _, _, position, _ -> // Cast the selected object to a T object
+                        val item = itemHandler.castItem(autoCompleteTextView.adapter, position)
+                        itemHandler.onItemSelected(item)
+                    }
 
             // Initialize an ArrayAdapter
             val arrayAdapter = ArrayAdapter(context, R.layout.slot_offer_drop_down_item, array)
@@ -79,6 +66,7 @@ class DropDownMenuHelper {
          *
          * @param autoCompleteTextView The [AutoCompleteTextView] instance to be attached the
          *                             onFocusChangeListener.
+         * @param itemHandler An interface that allows the manipulation of selected items.
          */
         @JvmStatic
         private fun <T> setDropDownMenuDefaultItem(
@@ -93,6 +81,22 @@ class DropDownMenuHelper {
                 )
                 itemHandler.onItemSelected(item)
                 autoCompleteTextView.onFocusChangeListener = null // remove listener
+            }
+        }
+
+        /**
+         * Perform any necessary clean up on the given [TextInputLayout]'s
+         * [AutoCompleteTextView] child.
+         *
+         * @param textInputLayout an input layout that acts as a drop-down-menu.
+         */
+        @JvmStatic
+        fun cleanUp(textInputLayout: TextInputLayout) {
+            val autoCompleteTextView = textInputLayout.editText
+            if (autoCompleteTextView is AutoCompleteTextView) {
+                autoCompleteTextView.setAdapter(null)
+                autoCompleteTextView.onItemClickListener = null
+                autoCompleteTextView.isClickable = false
             }
         }
     }

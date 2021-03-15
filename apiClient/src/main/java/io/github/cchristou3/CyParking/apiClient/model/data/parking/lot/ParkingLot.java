@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.apiClient.model.parking.lot;
+package io.github.cchristou3.CyParking.apiClient.model.data.parking.lot;
 
 import android.content.Context;
 import android.os.Parcel;
@@ -23,8 +23,8 @@ import java.util.Random;
 import java.util.regex.Pattern;
 
 import io.github.cchristou3.CyParking.apiClient.R;
-import io.github.cchristou3.CyParking.apiClient.model.parking.Parking;
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.Parking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.BookingRepository;
 import io.github.cchristou3.CyParking.utils.ShaUtility;
 
@@ -41,7 +41,7 @@ import io.github.cchristou3.CyParking.utils.ShaUtility;
  * A ParkingLot object stored inside the FirebaseFirestore database
  * is uniquely identified by its
  * {@link #coordinates}, its {@link #parkingId} and its {@link #lotName}.
- * The inherited method {@link Parking#generateUniqueId()} is implemented
+ * The inherited method {@link Parking#generateDocumentId()} is implemented
  * to generate the {@link DocumentReference#getId()} for the parking lot
  * in the database.
  *
@@ -288,10 +288,10 @@ public class ParkingLot extends Parking implements Parcelable {
      *
      * @return A digest unique to each object
      * @see BookingRepository
-     * @see Booking#generateUniqueId()
+     * @see Booking#generateDocumentId()
      */
     @Override
-    public String generateUniqueId() {
+    public String generateDocumentId() {
         // Create a long and unique id
         String id = super.toString() + lotName;
         // Hash (SHA256) it to has a fixed length of 32 characters and return its value

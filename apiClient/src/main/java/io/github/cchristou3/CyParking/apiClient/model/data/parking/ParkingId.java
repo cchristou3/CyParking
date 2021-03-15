@@ -1,15 +1,15 @@
-package io.github.cchristou3.CyParking.apiClient.model.parking;
+package io.github.cchristou3.CyParking.apiClient.model.data.parking;
 
 import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking;
 
 /**
  * Purpose: abstract common attributes ({@link #parkingId})
- * and methods ({@link #generateUniqueId()}) from Parking
+ * and methods ({@link #generateDocumentId()}) from Parking
  * related classes.
  * {@link Booking}s have the parkingId of the lot they were issued for.
  * {@link ParkingLot}'s have a parkingId that uniquely identifies them.
@@ -67,5 +67,5 @@ public abstract class ParkingId {
      * To be overridden by its subclasses
      * It should combine the class' attribute values to create a unique id for the object.
      */
-    public abstract String generateUniqueId();
+    public abstract String generateDocumentId();
 }

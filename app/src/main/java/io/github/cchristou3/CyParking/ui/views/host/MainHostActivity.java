@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.PaymentSessionHelper;
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.databinding.ActivityMainHostBinding;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;

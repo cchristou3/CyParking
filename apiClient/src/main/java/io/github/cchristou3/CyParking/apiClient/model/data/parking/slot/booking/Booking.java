@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking;
+package io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking;
 
 import android.content.Context;
 import android.os.Parcel;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.apiClient.R;
-import io.github.cchristou3.CyParking.apiClient.model.parking.ParkingId;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.ParkingId;
 import io.github.cchristou3.CyParking.utils.ShaUtility;
 
 /**
@@ -22,7 +22,7 @@ import io.github.cchristou3.CyParking.utils.ShaUtility;
  * info to execute a "booking transaction" in ParkingBookingFragment.
  * This is a Subclass of ParkingId - A booking
  * contains the parkingId of the lot it is booked for.
- * It also inherits its {@link ParkingId#generateUniqueId()} method
+ * It also inherits its {@link ParkingId#generateDocumentId()} method
  * that is used to generate the {@link DocumentReference#getId()}
  * for the booking in the database.</p>
  *
@@ -180,7 +180,7 @@ public class Booking extends ParkingId implements Parcelable, Comparable<Booking
      * The string contains the attributes of the object separated by ',' ({@link #REG_EX}).
      *
      * @return a string representation of the object.
-     * @see Booking#generateUniqueId()
+     * @see Booking#generateDocumentId()
      * @see #toBooking(String)
      */
     @NonNull
@@ -214,7 +214,7 @@ public class Booking extends ParkingId implements Parcelable, Comparable<Booking
      */
     @SuppressWarnings("JavadocReference")
     @Override
-    public String generateUniqueId() {
+    public String generateDocumentId() {
         // Hash (SHA256) it to has a fixed length of 32 characters
         return ShaUtility.digest(toString());
     }

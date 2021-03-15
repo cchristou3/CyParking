@@ -3,8 +3,8 @@ package io.github.cchristou3.CyParking.ui.views.parking.slots.bookingDetails
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking
 import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorRepository
 
 /**

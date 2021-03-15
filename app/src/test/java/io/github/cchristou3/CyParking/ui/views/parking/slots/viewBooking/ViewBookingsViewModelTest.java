@@ -10,7 +10,7 @@ import org.mockito.Mockito;
 import java.util.Collections;
 import java.util.List;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.BookingRepository;
 import io.github.cchristou3.CyParking.ui.InstantTaskRuler;
 

@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.apiClient.local.SharedPreferencesManager;
-import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 
 /**
  * Purpose: <p>Class that handles authentication w/ login credentials and retrieves user information.

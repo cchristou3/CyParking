@@ -10,8 +10,8 @@ import org.mockito.Mockito;
 import java.util.Random;
 
 import io.github.cchristou3.CyParking.PaymentSessionHelper;
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.BookingDetails;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.BookingDetails;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.BookingRepository;
 import io.github.cchristou3.CyParking.ui.InstantTaskRuler;
 import io.github.cchristou3.CyParking.utils.DateTimeUtility;

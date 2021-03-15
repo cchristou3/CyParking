@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking;
+package io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.Date;
 import java.util.Random;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -48,7 +48,7 @@ public class BookingDetailsTest {
         // When a BookingDetails instance gets initialized
         BookingDetails details = new BookingDetails(DATE, TIME, OFFER);
         // Then
-        assertEquals(details.toString(), DATE.getTime() + "," + TIME.hour + "," + TIME.minute + "," + OFFER.getDuration() + "," + OFFER.getPrice());
+        assertEquals(details.toString(), DATE.getTime() + "," + TIME.getHour() + "," + TIME.getMinute() + "," + OFFER.getDuration() + "," + OFFER.getPrice());
 
     }
 
@@ -87,7 +87,7 @@ public class BookingDetailsTest {
         SlotOffer offer = new SlotOffer(2, 1);
         BookingDetails.Time time = new BookingDetails.Time(13, 0);
         assertEquals(BookingDetails.Time.getEndTime(new BookingDetails(new Date(), time, offer))
-                .hour, (int) (offer.getDuration() + time.hour));
+                .getHour(), (int) (offer.getDuration() + time.getHour()));
     }
 
 
@@ -96,7 +96,7 @@ public class BookingDetailsTest {
         SlotOffer offer = new SlotOffer(1, 1);
         BookingDetails.Time time = new BookingDetails.Time(0, 0);
         assertEquals(BookingDetails.Time.getEndTime(new BookingDetails(new Date(), time, offer))
-                .hour, (int) (offer.getDuration() + time.hour));
+                .getHour(), (int) (offer.getDuration() + time.getHour()));
     }
 
 

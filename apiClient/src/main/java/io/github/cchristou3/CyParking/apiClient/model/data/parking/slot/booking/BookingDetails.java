@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking;
+package io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -15,7 +15,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
 
 /**
  * Purpose: contain details related the a booking.
@@ -246,7 +246,7 @@ public class BookingDetails implements Parcelable, Comparable<BookingDetails> {
      * The string contains the attributes of the object separated by ','.
      *
      * @return a string representation of the object.
-     * @see Booking#generateUniqueId()
+     * @see Booking#generateDocumentId()
      * @see #toBookingDetails(String)
      */
     @NonNull
@@ -400,7 +400,7 @@ public class BookingDetails implements Parcelable, Comparable<BookingDetails> {
          * Returns a string representation of the object.
          *
          * @return a string representation of the object.
-         * @see Booking#generateUniqueId()
+         * @see Booking#generateDocumentId()
          */
         @NonNull
         @Override

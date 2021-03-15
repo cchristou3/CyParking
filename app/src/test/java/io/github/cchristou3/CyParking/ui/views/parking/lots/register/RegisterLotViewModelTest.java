@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.DefaultOperatorRepository;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormState;
 import io.github.cchristou3.CyParking.ui.InstantTaskRuler;

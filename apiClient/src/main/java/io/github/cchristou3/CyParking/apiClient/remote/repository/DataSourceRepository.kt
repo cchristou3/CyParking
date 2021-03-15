@@ -176,16 +176,26 @@ internal object DataSourceRepository {
         val stripeCustomerRef: CollectionReference
             get() = getDatabaseNodeByName(STRIPE_CUSTOMERS)
 
-        fun preparePaymentDetails(amount: Int, currency: String): HashMap<String, Any> {
+        /**
+         * Prepare the data that will be sent to the server to
+         * create a payment intent.
+         * @param slotOfferIndex the index of the selected offer.
+         * @param lotDocId the document id of the lot in Firestore.
+         * @param currency the currency of the payment.
+         * @return a [HashMap] of the arguments.
+         */
+        fun preparePaymentDetails(lotDocId: String, slotOfferIndex: Int, currency: String): HashMap<String, Any> {
             return hashMapOf(
-                    AMOUNT to amount, // The amount should be calculated in the server side for security reasons.
+                    LOT_DOC_ID to lotDocId,
+                    SLOT_OFFER_INDEX to slotOfferIndex,
                     CURRENCY to currency)
         }
 
         companion object {
             const val PAYMENTS = "payments"
-            const val AMOUNT = "amount"
+            const val SLOT_OFFER_INDEX = "slotOfferIndex"
             const val CURRENCY = "currency"
+            const val LOT_DOC_ID = "lotDocId"
         }
     }
 

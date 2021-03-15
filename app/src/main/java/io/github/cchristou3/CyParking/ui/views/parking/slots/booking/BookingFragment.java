@@ -29,8 +29,8 @@ import java.util.Objects;
 
 import io.github.cchristou3.CyParking.PaymentSessionHelper;
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.databinding.FragmentBookingBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
@@ -46,6 +46,7 @@ import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.ui.widgets.QRCodeDialog;
 import io.github.cchristou3.CyParking.utilities.AnimationUtility;
+import io.github.cchristou3.CyParking.utils.Utility;
 import io.github.cchristou3.CyParking.utils.ViewUtility;
 
 /**
@@ -59,7 +60,7 @@ import io.github.cchristou3.CyParking.utils.ViewUtility;
  * <p>
  *
  * @author Charalambos Christou
- * @version 11.0 11/03/2021
+ * @version 21.0 13/03/2021
  */
 public class BookingFragment extends BaseFragment<FragmentBookingBinding> implements Navigable {
 
@@ -211,7 +212,10 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
         // Listen for the payment confirmation state
         mBookingViewModel.getPaymentFlow().observe(getViewLifecycleOwner(), shouldInitiatePayment -> {
             if (shouldInitiatePayment != null && shouldInitiatePayment) {
-                mBookingViewModel.confirmPayment(BookingFragment.this, getUser());
+                mBookingViewModel.confirmPayment(
+                        BookingFragment.this, getUser(), this.mSelectedParking,
+                        Utility.getCurrency().getCurrencyCode()
+                );
             }
         });
 
@@ -303,12 +307,10 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
                 .setOnClickListener(buildTimePickerListener());
 
         // Set up date picker listener
-        getBinding().fragmentParkingBookingBtnDateButton.setOnClickListener(v -> {
-            DateTimePicker.getDatePicker(
-                    mBookingViewModel::updatePickedDate // On date selected callback
-            )
-                    .show(getChildFragmentManager(), MaterialDatePicker.class.getCanonicalName());
-        });
+        getBinding().fragmentParkingBookingBtnDateButton.setOnClickListener(v -> DateTimePicker.getDatePicker(
+                mBookingViewModel::updatePickedDate // On date selected callback
+        )
+                .show(getChildFragmentManager(), MaterialDatePicker.class.getCanonicalName()));
 
         // Set listener to "BOOK" button
         getBinding().fragmentParkingBtnBookingButton.setOnClickListener(v -> bookParking());
@@ -331,7 +333,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
                 slotOffers, new DropDownMenuHelper.ItemHandler<SlotOffer>() {
                     @Override
                     public SlotOffer castItem(@NotNull ListAdapter parent, int position) {
-                        return (SlotOffer) parent.getItem(0);
+                        return (SlotOffer) parent.getItem(position);
                     }
 
                     @Override
@@ -358,6 +360,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
 
     /**
      * Display a temporary Snackbar allowing the user to undo the booking.
+     * Also, disable any relevant input components.
      *
      * @param bookingId The id of the booking to be potentially cancelled.
      */
@@ -366,7 +369,20 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
             Snackbar.make(requireView(), getString(R.string.booking_success), Snackbar.LENGTH_LONG)
                     .setAction(R.string.undo,
                             v -> mBookingViewModel.cancelBooking(bookingId)).show();
+            disableUiInput();
         }
+    }
+
+    /**
+     * Disable any input Ui.
+     */
+    private void disableUiInput() {
+        getBinding().fragmentParkingBookingBtnStartingTimeButton.setClickable(false);
+        getBinding().fragmentParkingBookingBtnSelectPaymentMethod.setClickable(false);
+        getBinding().fragmentParkingBookingBtnDateButton.setClickable(false);
+        getBinding().fragmentParkingBtnBookingButton.setClickable(false);
+        getBinding().fragmentParkingBookingDropDown.setClickable(false);
+        DropDownMenuHelper.cleanUp(getBinding().fragmentParkingBookingDropDown);
     }
 
     /**
@@ -379,13 +395,11 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
     @NotNull
     @Contract(pure = true)
     private View.OnClickListener buildTimePickerListener() {
-        return v -> {
-            DateTimePicker.getTimePicker(
-                    requireContext(),
-                    mBookingViewModel::updateStartingTime) // On time selected listener
-                    // Display it
-                    .show(getChildFragmentManager(), MaterialTimePicker.class.getCanonicalName());
-        };
+        return v -> DateTimePicker.getTimePicker(
+                requireContext(),
+                mBookingViewModel::updateStartingTime) // On time selected listener
+                // Display it
+                .show(getChildFragmentManager(), MaterialTimePicker.class.getCanonicalName());
     }
 
     /**

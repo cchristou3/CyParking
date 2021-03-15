@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
-import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 
 /**
  * Purpose: <p>Class that offers to the user the following services:

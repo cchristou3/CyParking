@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.databinding.FragmentAuthenticatorHosteeBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;

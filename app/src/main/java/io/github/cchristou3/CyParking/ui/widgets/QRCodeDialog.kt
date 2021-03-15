@@ -31,7 +31,6 @@ class QRCodeDialog(context: Context, parent: ConstraintLayout, message: String) 
      * host our custom view.
      */
     init {
-        // TODO: 01/03/2021 Test
         // inflate our custom view
         val qrCodeViewBinding = DialogQrCodeBinding.inflate(LayoutInflater.from(context), null, false)
         // Generate QR Code

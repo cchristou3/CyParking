@@ -17,8 +17,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking;
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.BookingDetails;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.BookingDetails;
 import io.github.cchristou3.CyParking.ui.components.SwipeableAdapter;
 
 /**

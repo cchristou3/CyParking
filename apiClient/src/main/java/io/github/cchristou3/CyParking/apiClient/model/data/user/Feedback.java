@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.apiClient.model.user;
+package io.github.cchristou3.CyParking.apiClient.model.data.user;
 
 import android.os.Parcel;
 import android.os.Parcelable;

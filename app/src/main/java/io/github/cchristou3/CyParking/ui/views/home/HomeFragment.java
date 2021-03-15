@@ -28,10 +28,10 @@ import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking;
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.BookingDetails;
-import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.BookingDetails;
+import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
@@ -184,7 +184,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
                             // Access the previously stored lot reference
                             (DocumentReference) getIntentIntegrator().getMoreExtras().get("ref"),
                             // Convert the string into a Booking object and access its unique id
-                            Booking.toBooking(decodedWithHex).generateUniqueId()
+                            Booking.toBooking(decodedWithHex).generateDocumentId()
                     );
                 } catch (Exception ignored) {
                 }
@@ -237,7 +237,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         }
 
         // TODO: 10/02/2021 Display QR Code scanner button:
-        //  users use it to can scan the QR Code of an operator nad
+        //  users use it to can scan the QR Code of an operator and
         //  they will be navigated to the payment screen (see Instant App)
 
         if (loggedInUser.isOperator()) {
@@ -298,13 +298,19 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         sharedView.addSharedElement(getBinding().fragmentHomeBookingItem.bookingItemFullyCv, getString(R.string.shared_booking_card_view));
         sharedView.addSharedElement(getBinding().fragmentHomeCvUserBooking, getString(R.string.shared_parent));
 
+        // Make the booking clickable
+        getBinding().fragmentHomeBookingItem.bookingItemFullyCv.setClickable(true);
         // Hook up the whole card view with an on click listener
         // on-click: navigate to booking details.
         getBinding().fragmentHomeBookingItem.bookingItemFullyCv
-                .setOnClickListener(v ->
-                        getNavController(requireActivity())
-                                .navigate(HomeFragmentDirections.actionNavHomeToNavBookingDetailsFragment(upcomingBooking),
-                                        sharedView.build())
+                .setOnClickListener(v -> {
+                            // Do not allow the user from clicking the booking again
+                            // Otherwise, it would trigger unexpected behaviour.
+                            getBinding().fragmentHomeBookingItem.bookingItemFullyCv.setClickable(false);
+                            getNavController(requireActivity())
+                                    .navigate(HomeFragmentDirections.actionNavHomeToNavBookingDetailsFragment(upcomingBooking),
+                                            sharedView.build());
+                        }
                 );
     }
 

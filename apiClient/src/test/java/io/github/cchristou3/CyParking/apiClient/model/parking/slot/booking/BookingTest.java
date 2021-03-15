@@ -5,8 +5,10 @@ import org.junit.Test;
 
 import java.util.Date;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.Parking;
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.Parking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.BookingDetails;
 
 /**
  * Unit tests for the {@link Booking} class.
@@ -39,9 +41,9 @@ public class BookingTest {
         // When
         String a2 = a.toString();
         String b2 = b.toString();
-        String aS = a.generateUniqueId();
-        String bS = b.generateUniqueId();
-        boolean areSame = a.generateUniqueId().equals(b.generateUniqueId());
+        String aS = a.generateDocumentId();
+        String bS = b.generateDocumentId();
+        boolean areSame = a.generateDocumentId().equals(b.generateDocumentId());
         // Then
         Assert.assertTrue(areSame);
     }

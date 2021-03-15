@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.apiClient.model.parking;
+package io.github.cchristou3.CyParking.apiClient.model.data.parking;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
 
 /**
  * Purpose: <p>POJO to be used to transfer and receive data

@@ -19,8 +19,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking;
-import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.databinding.FragmentViewBookingsBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
@@ -154,7 +154,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
                     // Access the current list - with a new reference
                     List<Booking> newBookings = Utility.cloneList(mViewBookingsViewModel.getBookingList());
                     // Remove the booking fro the list and store its id in a variable
-                    String bookingToBeCancelledId = newBookings.remove((int) itemPosition).generateUniqueId();
+                    String bookingToBeCancelledId = newBookings.remove((int) itemPosition).generateDocumentId();
                     // Remove specific booking from the database.
                     mViewBookingsViewModel.cancelParkingBooking(bookingToBeCancelledId);
                     // Update the adapter's list

@@ -112,7 +112,7 @@ import com.stripe.android.view.BillingAddressFields
  * @see PaymentSessionHelper.handlePaymentData(requestCode, resultCode, data)</p>
  *
  * <p> Step 5 - Initiate a payment charge.
- * @see PaymentSessionHelper.confirmPayment(activity, currentUser)</p>
+ * @see PaymentSessionHelper.confirmPayment</p>
  *
  * <p> Step 6 - Create a payment intent and confirm the payment.
  * By creating a new payment object in the
@@ -144,7 +144,7 @@ import com.stripe.android.view.BillingAddressFields
  *</p>
  *
  * @author Charalambos Christou
- * @since 2.0 12/03/21
+ * @since 3.0 13/03/21
  * @param mUiPaymentSessionListener A Ui handler for payment session updates.
  */
 open class PaymentSessionHelper(context: Context, val mUiPaymentSessionListener: UiPaymentSessionListener) {
@@ -279,7 +279,7 @@ open class PaymentSessionHelper(context: Context, val mUiPaymentSessionListener:
                     .setShippingInfoRequired(false)
                     .setShippingMethodsRequired(false)
                     .setBillingAddressFields(BillingAddressFields.None)
-                    .setShouldPrefetchCustomer(false)
+                    .setShouldPrefetchCustomer(true)
                     .build())
 
     /**
@@ -290,15 +290,19 @@ open class PaymentSessionHelper(context: Context, val mUiPaymentSessionListener:
      *
      * @param currentUserUid The UID of current user.
      * @param fragment The current active fragment.
+     * @param slotOfferIndex the index of the selected offer from the lot's slot offer list sorted in ascending order.
+     * @param lotDocId the document id of the lot in Firestore.
+     * @param currency the currency of the payment.
      */
-    fun confirmPayment(fragment: Fragment, currentUserUid: String?) {
+    fun confirmPayment(fragment: Fragment, currentUserUid: String?, lotDocId: String, slotOfferIndex: Int, currency: String) {
         // Step 5 - Initiate a payment charge.
         repository.createPaymentIntent(
-                userUid = currentUserUid ?: "", amount = 8800, currency = "hkd"
+                userUid = currentUserUid
+                        ?: "", slotOfferIndex = slotOfferIndex, currency = currency, lotDocId = lotDocId
         )
                 // Step 6 - Create a payment intent (via cloud function) in the server side
                 // and confirm the payment from the client side.
-                ?.addOnSuccessListener { documentReference ->
+                .addOnSuccessListener { documentReference ->
                     Log.d("payment", "DocumentSnapshot added with ID: ${documentReference.id}")
                     mListenerForPaymentIntent = documentReference.addSnapshotListener { snapshot, e ->
                         if (e != null) {
@@ -307,6 +311,19 @@ open class PaymentSessionHelper(context: Context, val mUiPaymentSessionListener:
                         }
                         // If we come till this way then the payment intent has been established
                         if (snapshot != null && snapshot.exists()) {
+                            if (snapshot.data?.get("validation_error") != null) {
+                                // If an error was received then,
+                                // the document ref will be deleted from the server side
+                                mPaymentHandler.onPaymentFailure(R.string.payment_processing_error)
+                                stopListeningForUpdates()
+                                return@addSnapshotListener
+                            } else if (snapshot.data?.get("stripe_error") != null) {
+                                // TODO: 14/03/2021 Display stripe messages - remove deffault message
+                                mPaymentHandler.onPaymentFailure(R.string.payment_processing_error)
+                                stopListeningForUpdates()
+                                return@addSnapshotListener
+                            }
+
                             Log.d("payment", "Current data: ${snapshot.data}")
                             val clientSecret = snapshot.data?.get("client_secret")
                             Log.d("payment", "Create paymentIntent returns $clientSecret")
@@ -316,18 +333,29 @@ open class PaymentSessionHelper(context: Context, val mUiPaymentSessionListener:
                                         (it as String)
                                 ))
                                 mPaymentHandler.onPaymentSuccess()
-                                mListenerForPaymentIntent?.remove() // Do not listen to further updates
+                                stopListeningForUpdates()
                             }
                         } else {
-                            mPaymentHandler.onPaymentFailure()
-                            Log.e("payment", "Current payment intent : null")
+                            // Document/Request got deleted
+                            mPaymentHandler.onPaymentFailure(R.string.slot_already_booked)
+                            stopListeningForUpdates()
+                            Log.e("payment", "Current payment intent : null, also document got deleted!")
                         }
                     }
                 }
-                ?.addOnFailureListener { e ->
-                    mPaymentHandler.onPaymentFailure()
+                .addOnFailureListener { e ->
+                    mPaymentHandler.onPaymentFailure(R.string.slot_already_booked)
+                    stopListeningForUpdates()
                     Log.w("payment", "Error adding document", e)
                 }
+    }
+
+    /**
+     * Remove the [EventListener] of the document reference
+     * that is being observed.
+     */
+    private fun stopListeningForUpdates() {
+        mListenerForPaymentIntent?.remove() // Do not listen to further updates
     }
 
     /**
@@ -370,9 +398,10 @@ open class PaymentSessionHelper(context: Context, val mUiPaymentSessionListener:
         /**
          * Invoked once the server failed to create a [PaymentIntent]
          * or when the server failed to handle the initial request.
+         * @param error the error message resource id.
          * @see Step_5
          */
-        fun onPaymentFailure()
+        fun onPaymentFailure(error: Int)
     }
 
     /**

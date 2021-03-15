@@ -36,7 +36,7 @@ import java.util.Objects;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.apiClient.interfaces.HttpsCallHandler;
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.apiClient.utils.Utils;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;

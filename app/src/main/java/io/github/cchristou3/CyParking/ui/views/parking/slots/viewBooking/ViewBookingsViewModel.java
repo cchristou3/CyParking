@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.BookingRepository;
 import io.github.cchristou3.CyParking.apiClient.utils.Utils;
 import io.github.cchristou3.CyParking.ui.components.ToastViewModel;

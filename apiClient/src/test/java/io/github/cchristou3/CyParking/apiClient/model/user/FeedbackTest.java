@@ -2,6 +2,8 @@ package io.github.cchristou3.CyParking.apiClient.model.user;
 
 import org.junit.Test;
 
+import io.github.cchristou3.CyParking.apiClient.model.data.user.Feedback;
+
 import static org.junit.Assert.assertTrue;
 
 /**

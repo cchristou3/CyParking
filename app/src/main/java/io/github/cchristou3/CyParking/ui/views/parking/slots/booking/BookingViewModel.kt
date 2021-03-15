@@ -11,17 +11,18 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
 import io.github.cchristou3.CyParking.PaymentSessionHelper
 import io.github.cchristou3.CyParking.R
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.SlotOffer
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking
-import io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.BookingDetails
-import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.BookingDetails
+import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser
 import io.github.cchristou3.CyParking.apiClient.remote.repository.BookingRepository
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver
 import io.github.cchristou3.CyParking.data.manager.EncryptionManager
 import io.github.cchristou3.CyParking.data.manager.EncryptionManager.Companion.hex
 import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent
 import io.github.cchristou3.CyParking.ui.components.ToastViewModel
+import io.github.cchristou3.CyParking.utils.Utility
 import org.jetbrains.annotations.Contract
 import java.text.ParseException
 import java.util.*
@@ -40,7 +41,9 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
     : ToastViewModel() {
 
     // Data members
-    private val mPickedDate = MutableLiveData(io.github.cchristou3.CyParking.utils.DateTimeUtility.dateToString(io.github.cchristou3.CyParking.utils.DateTimeUtility.getCurrentDate()))
+    private val mPickedDate = MutableLiveData(
+            io.github.cchristou3.CyParking.utils.DateTimeUtility.dateToString(io.github.cchristou3.CyParking.utils.DateTimeUtility.getCurrentDate())
+    )
     private val pickedStartingTimeState = MutableLiveData(BookingDetails.Time.getCurrentTime())
     private val mPickedSlotOffer = MutableLiveData<SlotOffer?>()
     private val mBookingButtonState = MutableLiveData(false) // Initially disabled
@@ -324,7 +327,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
                     if (task.isSuccessful && task.exception == null) {
                         val wasAlreadyBooked = task.result
                         if (wasAlreadyBooked) {
-                            onFlowFailure(hideLoadingBar)
+                            onFlowFailure(hideLoadingBar, R.string.slot_already_booked)
                             return@addOnCompleteListener
                         }
 
@@ -335,8 +338,8 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
                                 onPaymentSuccess(booking, hideLoadingBar)
                             }
 
-                            override fun onPaymentFailure() {
-                                onFlowFailure(hideLoadingBar)
+                            override fun onPaymentFailure(error: Int) {
+                                onFlowFailure(hideLoadingBar, error)
                             }
                         })
                         // Trigger payment flow
@@ -345,7 +348,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
                         return@addOnCompleteListener
                     }
                     // Otherwise, display an error message to the user
-                    onFlowFailure(hideLoadingBar)
+                    onFlowFailure(hideLoadingBar, R.string.slot_already_booked)
                 }
     }
 
@@ -357,7 +360,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      *
      * @param hideLoadingBar a [Runnable] responsible for hiding the Ui's loading bar.
      */
-    fun onFlowFailure(hideLoadingBar: Runnable): Unit {
+    fun onFlowFailure(hideLoadingBar: Runnable, error: Int): Unit {
         updateToastMessage(R.string.slot_already_booked)
         mBookingButtonState.value = true
         hideLoadingBar.run() // hide loading bar
@@ -384,7 +387,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
                     qRCodeMessage = booking.qrCode
 
                     // Display undo option
-                    updateSnackBarState(booking.generateUniqueId())
+                    updateSnackBarState(booking.generateDocumentId())
 
                     // Display the 'View QR Code' button
                     updateQRCodeButtonState(true)
@@ -400,9 +403,12 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      *
      * @param fragment the hosted fragment.
      * @param currentUser the current [LoggedInUser] object.
+     * @param lot the lot that the booking will be issued for.
+     * @param currency the currency of the payment.
      */
-    fun confirmPayment(fragment: Fragment, currentUser: LoggedInUser?) {
-        mPaymentSessionHelper.confirmPayment(fragment, currentUser?.userId)
+    fun confirmPayment(fragment: Fragment, currentUser: LoggedInUser?, lot: ParkingLot, currency: String) {
+        mPaymentSessionHelper.confirmPayment(fragment, currentUser?.userId, lot.generateDocumentId(),
+                Utility.indexOf(lot.slotOfferList, slotOffer), currency)
     }
 
     /**

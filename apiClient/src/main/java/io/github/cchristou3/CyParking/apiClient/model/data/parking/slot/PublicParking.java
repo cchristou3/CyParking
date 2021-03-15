@@ -1,6 +1,6 @@
-package io.github.cchristou3.CyParking.apiClient.model.parking.slot;
+package io.github.cchristou3.CyParking.apiClient.model.data.parking.slot;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.Parking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.Parking;
 
 /**
  * Purpose:<p> POJO to be used to transfer and receive data
@@ -31,7 +31,7 @@ public class PublicParking extends Parking {
      * It should combine the class' attribute values to create a unique id for the object.
      */
     @Override
-    public String generateUniqueId() {
+    public String generateDocumentId() {
         return null;
     }
 }

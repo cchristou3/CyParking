@@ -2,7 +2,7 @@ package io.github.cchristou3.CyParking.apiClient.model.parking.slot;
 
 import org.junit.Test;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.Parking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.Parking;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -19,7 +19,7 @@ public class ParkingTest {
     public void Parking_initializesCorrectAttributes() {
         // When parking object gets initialized
         Parking parking = new Parking(COORDS, ID) {
-            public String generateUniqueId() {
+            public String generateDocumentId() {
                 return null;
             }
         };
@@ -36,7 +36,7 @@ public class ParkingTest {
     public void toString_returnsExpectedString() {
         // When parking object gets initialized
         Parking parking = new Parking(COORDS, ID) {
-            public String generateUniqueId() {
+            public String generateDocumentId() {
                 return null;
             }
         };

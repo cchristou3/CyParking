@@ -67,7 +67,7 @@
 
             <argument
                 android:name="selected_booking"
-                app:argType="io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking"
+                app:argType="io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking"
                 app:nullable="false" />
 
         </action>
@@ -121,7 +121,7 @@
 
             <argument
                 android:name="selected_booking"
-                app:argType="io.github.cchristou3.CyParking.apiClient.model.parking.slot.booking.Booking"
+                app:argType="io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking"
                 app:nullable="false" />
 
         </action>

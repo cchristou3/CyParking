@@ -4,7 +4,9 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Purpose: <p>Contain all helper / utility methods that the application needs.</p>
@@ -19,20 +21,47 @@ public class Utility {
     }
 
     /**
+     * Access the currency of the {@link Locale#GERMANY} (Euro).
+     *
+     * @return the currency instance of Euro.
+     */
+    public static Currency getCurrency() {
+        return Currency.getInstance(Currency.getInstance(Locale.GERMANY).getCurrencyCode());
+    }
+
+    /**
      * Checks whether the given list contains the given element
      * via the use of {@link Comparable#compareTo(Object)}.
      *
      * @param aList A list containing elements of type {@link T}.
      * @param elem  The element to look for
-     * @param <T>   any type
-     * @return True, if an element was found in the list with the same contents
-     * of the given element. Otherwise, false.
+     * @param <T>   any type that implements {@link Comparable}.
+     * @return The index of the element in the list if found. Otherwise, -1.
      */
     public static <T extends Comparable<T>> boolean contains(@NotNull List<T> aList, T elem) {
         for (T e : aList)
             if (e.compareTo(elem) == 0)
                 return true;
         return false;
+    }
+
+    /**
+     * Find the index of the given element within the specified list
+     * via the use of {@link Comparable#compareTo(Object)}.
+     *
+     * @param aList A list containing elements of type {@link T}.
+     * @param elem  The element to look for
+     * @param <T>   any type that implements {@link Comparable}.
+     * @return True, if an element was found in the list with the same contents
+     * of the given element. Otherwise, false.
+     */
+    public static <T extends Comparable<T>> int indexOf(@NotNull List<T> aList, T elem) {
+        for (int i = 0; i < aList.size(); i++) {
+            T a = aList.get(i);
+            if (a.compareTo(elem) == 0)
+                return i;
+        }
+        return -1;
     }
 
     /**

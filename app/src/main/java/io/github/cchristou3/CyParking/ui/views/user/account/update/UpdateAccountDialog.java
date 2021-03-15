@@ -30,7 +30,7 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.databinding.DialogAccountUpdateBinding;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;

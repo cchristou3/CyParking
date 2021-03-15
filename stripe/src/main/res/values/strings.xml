@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="payment_processing_error">There was an error processing your payment. Your credit card was not charged. Please contact support.</string>
+    <string name="slot_already_booked">You have already booked this lot.</string>
+</resources>

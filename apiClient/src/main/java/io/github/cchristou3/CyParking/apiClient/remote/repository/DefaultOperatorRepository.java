@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import io.github.cchristou3.CyParking.apiClient.model.parking.Parking;
-import io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.Parking;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
 
 /**
  * Purpose: contain operator-related methods.
@@ -46,7 +46,7 @@ public class DefaultOperatorRepository implements OperatorRepository,
      * @param parkingLotToBeStored Stores all necessary info about the private parking
      * @return The task to be handled in the active fragment
      * @throws NullPointerException in case the continuation returns null
-     * @see ParkingLot#generateUniqueId()
+     * @see ParkingLot#generateDocumentId()
      * @see Task#getException()
      */
     @NotNull
@@ -97,7 +97,7 @@ public class DefaultOperatorRepository implements OperatorRepository,
     @Contract("_ -> !null")
     private Task<Boolean> checkIfAlreadyExists(@NotNull ParkingLot parkingLotToBeStored) {
         return getParkingLotsRef()
-                .document(parkingLotToBeStored.generateUniqueId())
+                .document(parkingLotToBeStored.generateDocumentId())
                 .get()
                 .continueWith(checkIfAlreadyExistTask -> {
                     // If the task was successful, then the document already exists
@@ -121,13 +121,13 @@ public class DefaultOperatorRepository implements OperatorRepository,
      * @param parkingLotToBeStored Stores all necessary info about the private parking
      * @return The task to be handled in the active fragment
      * @throws NullPointerException in case the continuation returns null
-     * @see ParkingLot#generateUniqueId()
+     * @see ParkingLot#generateDocumentId()
      * @see Task#getException()
      */
     @NotNull
     private Task<Void> registerParkingLot(@NotNull ParkingLot parkingLotToBeStored) {
         return getParkingLotsRef()
-                .document(parkingLotToBeStored.generateUniqueId())
+                .document(parkingLotToBeStored.generateDocumentId())
                 .set(parkingLotToBeStored);
     }
 

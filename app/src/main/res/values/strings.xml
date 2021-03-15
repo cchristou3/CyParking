@@ -129,6 +129,7 @@
     <string name="no_payment_method_selected">Please choose a payment method.</string>
     <string name="no_space_msg">Unfortunately, the lot is out of available spaces. Please try again later.</string>
     <string name="no_lot_found_title">Couldn\'t load the parking lot\'s info</string>
+    <string name="no_index_slot_offer">There was an error whilst analysing the selected Slot offer. Please choose another one and try again.</string>
     <string name="navigate_back_msg">You will now be navigated back to the map.</string>
 
     <!-- Strings related to when the user logs out, while being at a screen that requires authentication -->
@@ -200,5 +201,6 @@
     <string name="loading_map">Please wait while the map is loading.</string>
     <string name="parking_got_removed">Unfortunately, the parking got removed!</string>
     <string name="select_payment_method">Select payment method</string>
+    <string name="slot_offer_already_exist">This offer already exists on the list.</string>
 
 </resources>

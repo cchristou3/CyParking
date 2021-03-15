@@ -57,12 +57,11 @@ public class BaseItemTouchHelper extends ItemTouchHelper.SimpleCallback {
     public BaseItemTouchHelper(Swipeable<Integer> swipeable, Resources resources, int cardViewId) {
         super(0, ItemTouchHelper.LEFT);
         this.mSwipeable = swipeable;
-        // TODO: 08/02/2021 Get colour as well
         mBitmap = drawableToBitmap(ResourcesCompat.getDrawable(resources, R.drawable.ic_delete, null));
         mPaint = new Paint();
         mCardViewId = cardViewId;
         // Set the color that will be drawn on the canvas
-        mPaint.setColor(resources.getColor(R.color.light_red));
+        mPaint.setColor(resources.getColor(R.color.light_red, null));
     }
 
     /**

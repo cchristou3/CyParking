@@ -5,7 +5,7 @@ import com.google.firebase.firestore.DocumentReference;
 
 import org.jetbrains.annotations.NotNull;
 
-import io.github.cchristou3.CyParking.apiClient.model.user.Feedback;
+import io.github.cchristou3.CyParking.apiClient.model.data.user.Feedback;
 
 /**
  * Purpose: <p>contain methods to send feedback or error

@@ -21,13 +21,13 @@ import java.util.List;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.apiClient.local.SharedPreferencesManager;
-import io.github.cchristou3.CyParking.apiClient.model.user.LoggedInUser;
+import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.AccountRepository;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.AuthenticatorRepository;
 import io.github.cchristou3.CyParking.data.pojo.form.login.AuthFormState;
 import io.github.cchristou3.CyParking.data.pojo.form.login.AuthResult;
 
-import static io.github.cchristou3.CyParking.apiClient.model.parking.lot.ParkingLot.isNameValid;
+import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.isNameValid;
 
 /**
  * Purpose: <p>Data persistence when configuration changes. Shared amongst all tab fragments.

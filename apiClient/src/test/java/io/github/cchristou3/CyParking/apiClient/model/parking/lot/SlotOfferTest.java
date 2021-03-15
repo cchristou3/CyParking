@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import java.util.Random;
 
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
+
 /**
  * Unit tests for the {@link SlotOffer} class.
  */

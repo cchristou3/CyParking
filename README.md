@@ -68,7 +68,7 @@ Of course, the application cannot be deployed yet. So I'll be adding more featur
 
 ### Features
 The application has the following features so far:
-* Book a parking slot for a specific period [User]
+* Book a parking slot (and pay via credit card) for a specific period [User]
 * View the details of a booking [User]
 * Cancel a booking [User]
 * View all available private parking locations within a range [User]

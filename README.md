@@ -113,6 +113,8 @@ npm install -g firebase-tools
 firebase login
 ```
 
+* Creating a new Stripe Account by clicking on the following link [https://stripe.com/en-gb-cy](https://stripe.com/en-gb-cy)
+
 ### Installation
 
 1. Get a free Google Maps API Key by following the guidelines in [https://developers.google.com/maps/documentation/android-sdk/start](https://developers.google.com/maps/documentation/android-sdk/start)
@@ -129,6 +131,55 @@ git clone https://github.com/cchristou3/CyParking.git
 <string name="google_maps_key"...>[Put your api key here]</string>
 ```
 
+5. Clean and Rebuild the project using the following command to create the project's ViewBinding classes
+```sh
+./gradlew clean :assembleDebug
+```
+
+6. Initialize the Firebase Cloud Functions via
+```sh
+firebase init functions
+```
+
+7. Install dependencies locally by running 
+```sh
+cd functions; npm install; cd -
+```
+
+8. Ensure that there is only one top-level index.js (this project's one)
+
+
+9. Deploy your project using 
+```sh 
+cd functions; npm run deploy; cd - 
+```
+
+10. Add your Stripe API Secret Key to your Cloud Functions environment configuration:
+```sh
+firebase functions:config:set stripe.secret=<YOUR STRIPE SECRET KEY>
+```
+
+11. Run the following command to open the Firebase console
+```sh 
+firebase open functions
+```
+
+12. Copy the URL for the handleWebhookEvents functions (e.g. https://region-project-name.cloudfunctions.net/handleWebhookEvents)
+
+13. Create a new webhook endpoint with the URL in the [Stripe Dashboard](https://dashboard.stripe.com/dashboard)
+
+14. Copy the signing secret (whsec_xxx) and add it to Firebase config:
+```sh 
+firebase functions:config:set stripe.webhooksecret=<YOUR WEBHOOK SECRET>
+```
+
+15. Redeploy the handleWebhookEvents function: 
+```sh 
+firebase deploy --only functions:handleWebhookEvents
+```
+
+_For any difficulties in setting up the webhook please refer to [Firebase mobile payments: Android](https://www.youtube.com/watch?v=nw7rOijQKo8&t=120s) at 45:35
+and [Firebase mobile payments: Android & iOS with Cloud Functions for Firebase](https://github.com/stripe-samples/firebase-mobile-payments)_
 <!-- USAGE EXAMPLES -->
 ## Usage
 

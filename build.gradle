@@ -13,10 +13,11 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:' + gradleVersion
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:' + kotlinVersion
-        classpath 'com.google.gms:google-services:' + googleServicesVersion
         // Google Services plugin
-        classpath 'androidx.navigation:navigation-safe-args-gradle-plugin:' + argsVersion
+        classpath 'com.google.gms:google-services:' + googleServicesVersion
         // Safe args - navigation plugin
+        classpath 'androidx.navigation:navigation-safe-args-gradle-plugin:' + argsVersion
+
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

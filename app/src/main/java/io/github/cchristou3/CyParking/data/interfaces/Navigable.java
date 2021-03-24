@@ -33,7 +33,7 @@ public interface Navigable {
      * Creates an instance of the Navigable interface
      * with no method implementations.
      *
-     * @return An non-logic Navigable instance.
+     * @return An non-logic Navigable implementation.
      */
     @NotNull
     @Contract(value = " -> new", pure = true)

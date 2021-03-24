@@ -34,7 +34,7 @@ import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.Pa
  * Used when the user tries to login/register.</p>
  *
  * @author Charalambos Christou
- * @version 3.0 3.0 10/02/21
+ * @version 4.0 24/03/21
  */
 public class AuthenticatorViewModel extends ViewModel {
 
@@ -68,7 +68,6 @@ public class AuthenticatorViewModel extends ViewModel {
      */
     public static boolean isEmailValid(String email) {
         if (email == null || email.trim().isEmpty()) return false;
-
         return Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
@@ -153,8 +152,7 @@ public class AuthenticatorViewModel extends ViewModel {
                             // Save the user's roles locally via SharedPreferences
                             // Each user in the database has a unique Uid. Thus, to be used as the key.
                             storeRolesLocally(context, task.getResult().getUser().getUid(), roles);
-                            new SharedPreferencesManager(context.getApplicationContext())
-                                    .setValue(task.getResult().getUser().getUid(), roles);
+
                             final LoggedInUser loggedInUser = new LoggedInUser(task.getResult().getUser(), roles);
                             loggedInUser.setDisplayName(mNameState.getValue());
 
@@ -175,8 +173,16 @@ public class AuthenticatorViewModel extends ViewModel {
         }
     }
 
-    private void storeRolesLocally(Context context, String uid, List<String> roles) {
-
+    /**
+     * Store the given list of rules locally using the user user's uid as key.
+     *
+     * @param context The context to make use of.
+     * @param uid     The user's uid.
+     * @param roles   The user's roles.
+     */
+    private void storeRolesLocally(@NotNull Context context, String uid, List<String> roles) {
+        new SharedPreferencesManager(context.getApplicationContext())
+                .setValue(uid, roles);
     }
 
     /**
@@ -185,7 +191,7 @@ public class AuthenticatorViewModel extends ViewModel {
      * @return True if it was checked. Otherwise, false.
      */
     private boolean isOperatorChecked() {
-        return mOperatorCheckedState.getValue();
+        return mOperatorCheckedState.getValue() != null && mOperatorCheckedState.getValue();
     }
 
     /**
@@ -200,17 +206,6 @@ public class AuthenticatorViewModel extends ViewModel {
     }
 
     /**
-     * Validates whether the user picked any of the roles.
-     *
-     * @param isUser     true if the user selected the checkbox which corresponds to the user. Otherwise, false.
-     * @param isOperator true if the user selected the checkbox which corresponds to the operator. Otherwise, false.
-     * @return True if the user picked any of the roles. Otherwise, false.
-     */
-    private boolean areAnyRolesSelected(boolean isUser, boolean isOperator) {
-        return isUser || isOperator;
-    }
-
-    /**
      * Validates all elements our our login / registration form.
      *
      * @param email    The email of the user.
@@ -218,7 +213,8 @@ public class AuthenticatorViewModel extends ViewModel {
      */
     public void dataChanged(String email, String name, String password) {
         mPasswordState.setValue(password);
-        updateEmail(email);
+        if (!isUserSigningIn()) mNameState.setValue(name);
+        mEmailState.setValue(email);
         if (!isEmailValid(email)) {
             updateFromState(R.string.invalid_email, null, null);
         } else if (!isUserSigningIn() && !isNameValid(name)) {
@@ -378,6 +374,25 @@ public class AuthenticatorViewModel extends ViewModel {
     }
 
     /**
+     * Access the value of {@link #mEmailState}.
+     *
+     * @return the value of {@link #mEmailState}.
+     */
+    public String getEmail() {
+        return mEmailState.getValue();
+    }
+
+    /**
+     * Access the value of {@link #mNameState}.
+     *
+     * @return the value of {@link #mNameState}.
+     */
+    public String getName() {
+        return mNameState.getValue();
+    }
+
+
+    /**
      * Access the {@link #mPasswordState}
      * in its LiveData form.
      *
@@ -385,6 +400,15 @@ public class AuthenticatorViewModel extends ViewModel {
      */
     public LiveData<String> getPasswordState() {
         return mPasswordState;
+    }
+
+    /**
+     * Access the value of {@link #mPasswordState}.
+     *
+     * @return the value of {@link #mPasswordState}.
+     */
+    public String getPassword() {
+        return mPasswordState.getValue();
     }
 
     /**

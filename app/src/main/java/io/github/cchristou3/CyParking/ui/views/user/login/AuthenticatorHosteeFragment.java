@@ -15,8 +15,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.core.util.Consumer;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewbinding.ViewBinding;
 
@@ -38,7 +40,7 @@ import io.github.cchristou3.CyParking.utils.ViewUtility;
  * <p>
  *
  * @author Charalambos Christou
- * @version 7.0 10/02/21
+ * @version 8.0 24/03/21
  */
 public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthenticatorHosteeBinding> implements TextWatcher {
 
@@ -114,9 +116,18 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
                 .get(AuthenticatorViewModel.class);
 
         checkIfUserReAuthenticating();
-        initializeFragment();
+
+        addObserverToForm();
+        addObserverToResult();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: " + mAuthenticatorViewModel.getEmailState().getValue());
+        initializeFragment();
+
+    }
 
     /**
      * Callback invoked of the current fragment when we swap tabs.
@@ -127,8 +138,7 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
     @Override
     public void onPause() {
         super.onPause();
-        // Reverse the ViewModel's isUserSigningIn attribute as we move to the other tab
-        mAuthenticatorViewModel.isUserSigningIn(!mAuthenticatorViewModel.isUserSigningIn());
+        cleanUpListeners();
     }
 
     /**
@@ -139,6 +149,13 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
      */
     @Override
     public void onDestroyView() {
+        super.onDestroyView();
+    }
+
+    /**
+     * Remove all set listeners.
+     */
+    private void cleanUpListeners() {
         if (!mAuthenticatorViewModel.isUserSigningIn()) {
             super.removeOnClickListeners(
                     getBinding().fragmentHosteeAuthBtnDialogOperatorButton,
@@ -153,9 +170,18 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
                 getBinding().fragmentHosteeAuthEtEmail,
                 getBinding().fragmentHosteeAuthEtPassword
         );
-        super.onDestroyView();
     }
 
+    /**
+     * Access the text of the given state that was inputted on the previous tab.
+     *
+     * @param state  the state that contains info about the user's input.
+     * @param action how to deal with the input.
+     */
+    private void getTextFromPreviousTab(@NotNull LiveData<String> state, Consumer<String> action) {
+        if (state.getValue() == null) return;
+        action.accept(state.getValue());
+    }
 
     /**
      * Access the parent's arguments. If an email was found
@@ -165,7 +191,8 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
     public void checkIfUserReAuthenticating() {
         if (getParentFragment() != null && getParentFragment().getArguments() != null) {
             String email = getParentFragment().getArguments().getString(getString(R.string.email_low));
-            Log.d(TAG, "onViewCreated: " + email);
+            if (email == null || email.isEmpty()) return;
+            Log.d(TAG, "checkIfUserReAuthenticating: " + email);
             mAuthenticatorViewModel.updateEmail(email);
             mIsReauthenticating = true;
         }
@@ -179,39 +206,26 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
         final EditText emailEditText = getBinding().fragmentHosteeAuthEtEmail;
         final EditText passwordEditText = getBinding().fragmentHosteeAuthEtPassword;
 
-        if (mAuthenticatorViewModel != null) {
-            addObserverToForm();
-            addObserverToResult();
+        getTextFromPreviousTab(mAuthenticatorViewModel.getEmailState(), emailEditText::setText);
+        getTextFromPreviousTab(mAuthenticatorViewModel.getPasswordState(), passwordEditText::setText);
 
-            // Add text listeners to both the user name and the password fields.
-            emailEditText.addTextChangedListener(this);
-            passwordEditText.addTextChangedListener(this);
+        // Add text listeners to both the user name and the password fields.
+        emailEditText.addTextChangedListener(this);
+        passwordEditText.addTextChangedListener(this);
 
-            switch (mPageType) {
-                case AuthenticatorAdapter.LOGIN_TAB:
-                    updateUiForLoggingIn();
-                    break;
-                case AuthenticatorAdapter.REGISTRATION_TAB:
-                    updateUiForRegistration();
-                    break;
-                default:
-                    throw new IllegalStateException("The page type must be one of those:\n"
-                            + "LOGIN_PAGE\n"
-                            + "REGISTRATION_PAGE");
-            }
-
-            // Observe any tab changes
-            mAuthenticatorViewModel.getTabState().observe(getViewLifecycleOwner(), state -> {
-                // Set the current tab's EditTexts' values with the values of the previous tab
-                final String emailText = mAuthenticatorViewModel.getEmailState().getValue();
-                final String passwordText = mAuthenticatorViewModel.getPasswordState().getValue();
-                emailEditText.setText(emailText);
-                passwordEditText.setText(passwordText);
-                // Call notifyDataChanged to refresh the form's error messages of the current tab,
-                // after receiving the inputs from the previous tab.
-                notifyDataChanged();
-            });
+        switch (mPageType) {
+            case AuthenticatorAdapter.LOGIN_TAB:
+                updateUiForLoggingIn();
+                break;
+            case AuthenticatorAdapter.REGISTRATION_TAB:
+                updateUiForRegistration();
+                break;
+            default:
+                throw new IllegalStateException("The page type must be one of those:\n"
+                        + "LOGIN_PAGE\n"
+                        + "REGISTRATION_PAGE");
         }
+
     }
 
     /**
@@ -219,10 +233,24 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
      */
     private void notifyDataChanged() {
         mAuthenticatorViewModel.dataChanged(
-                getBinding().fragmentHosteeAuthEtEmail.getText().toString(), // Inputted email
-                getBinding().fragmentHosteeAuthEtName.getText().toString(), // Inputted name
-                getBinding().fragmentHosteeAuthEtPassword.getText().toString() // Inputted password
+                getStringOrDefault(getBinding().fragmentHosteeAuthEtEmail), // Inputted email
+                getStringOrDefault(getBinding().fragmentHosteeAuthEtName), // Inputted name
+                getStringOrDefault(getBinding().fragmentHosteeAuthEtPassword) // Inputted password
         ); // operator got checked
+    }
+
+    /**
+     * Access the string object of the given editText, if there is one. Otherwise
+     * return an empty string.
+     *
+     * @param editText the edittext to extract its string from
+     */
+    @NotNull
+    private String getStringOrDefault(@NotNull EditText editText) {
+        if (editText.getText() != null) {
+            return editText.getText().toString();
+        }
+        return "";
     }
 
     /**
@@ -307,8 +335,8 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
         getGlobalStateViewModel().showLoadingBar();
         ViewUtility.hideKeyboard(requireActivity(), view);
         mAuthenticatorViewModel.login(requireContext(),
-                getBinding().fragmentHosteeAuthEtEmail.getText().toString(),
-                getBinding().fragmentHosteeAuthEtPassword.getText().toString());
+                getStringOrDefault(getBinding().fragmentHosteeAuthEtEmail),
+                getStringOrDefault(getBinding().fragmentHosteeAuthEtPassword));
     }
 
     /**
@@ -325,7 +353,6 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
             // onCreateView till onResume). Thus, as the observer is set on the onViewCreated callback it
             // will trigger immediately with the user's data.
             if (authResult == null || !this.isResumed()) return;
-            getGlobalStateViewModel().hideLoadingBar();
             if (authResult.getError() != null) showLoginFailed(authResult.getError());
             if (authResult.getSuccess() != null) {
                 if (this.mIsReauthenticating) {
@@ -402,6 +429,8 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
         // Check if the current fragment is onResume state
         // Without this check, this method would get triggered twice, (by each tab) causing unexpected navigation behaviour.
         if (this.isResumed()) {
+            // Hide the loading bar
+            getGlobalStateViewModel().hideLoadingBar();
 
             // Update the UserState - trigger observer update in MainHostActivity to update the drawer
             getGlobalStateViewModel().updateAuthState(model);
@@ -433,6 +462,7 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
                     getContext().getApplicationContext(),
                     errorString,
                     Toast.LENGTH_LONG).show();
+            getGlobalStateViewModel().hideLoadingBar();
         }
     }
 

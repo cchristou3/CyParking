@@ -24,7 +24,7 @@ class UserViewModel(private val mUserRepository: UserRepository) : ViewModel() {
 
     fun getUpcomingBooking(userId: String): Unit {
         mUserRepository.getUpcomingBooking(userId)
-                .addSnapshotListener { value, error ->
+                .addSnapshotListener { value, _ ->
                     value?.let { querySnapshot ->
                         if (querySnapshot.documents.isNotEmpty()) {
                             querySnapshot.documents[0]

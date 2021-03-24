@@ -27,7 +27,7 @@ import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorHosteeFra
  * Purpose: <p>Allow logged in users to change their private data.</p>
  *
  * @author Charalambos Christou
- * @version 7.0 11/02/21
+ * @version 8.0 24/03/21
  */
 public class AccountFragment extends BaseFragment<FragmentAccountBinding> implements Navigable {
 
@@ -38,13 +38,13 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding> implem
     /**
      * Called to have the fragment instantiate its user interface view.
      *
-     * @see BaseFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding, int)
      */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        return super.onCreateView(FragmentAccountBinding.inflate(inflater));
+        return super.onCreateView(FragmentAccountBinding.inflate(inflater), R.string.menu_account);
     }
 
     /**

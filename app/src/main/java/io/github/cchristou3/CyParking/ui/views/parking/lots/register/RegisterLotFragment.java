@@ -69,7 +69,7 @@ import static android.app.Activity.RESULT_OK;
  * <p>
  *
  * @author Charalambos Christou
- * @version 9.0 12/03/21
+ * @version 10.0 24/03/21
  */
 public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding>
         implements Navigable, LocationHandler, TextWatcher, View.OnClickListener {
@@ -101,12 +101,12 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     /**
      * Called to have the fragment instantiate its user interface view.
      *
-     * @see BaseFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding, int)
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return super.onCreateView(RegisterLotFragmentBinding.inflate(inflater));
+        return super.onCreateView(RegisterLotFragmentBinding.inflate(inflater), R.string.register_lot_label);
     }
 
     /**

@@ -60,7 +60,7 @@ import io.github.cchristou3.CyParking.utils.ViewUtility;
  * <p>
  *
  * @author Charalambos Christou
- * @version 21.0 13/03/2021
+ * @version 22.0 24/03/21
  */
 public class BookingFragment extends BaseFragment<FragmentBookingBinding> implements Navigable {
 
@@ -94,12 +94,12 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      * @param container          The parent view
      * @param savedInstanceState A bundle which contains info about previously stored data
      * @return The view of the fragment
-     * @see BaseFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding, int)
      */
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return super.onCreateView(FragmentBookingBinding.inflate(inflater));
+        return super.onCreateView(FragmentBookingBinding.inflate(inflater), R.string.booking_label);
     }
 
     /**

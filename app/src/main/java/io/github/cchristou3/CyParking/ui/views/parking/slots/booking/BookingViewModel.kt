@@ -327,7 +327,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
                     if (task.isSuccessful && task.exception == null) {
                         val wasAlreadyBooked = task.result
                         if (wasAlreadyBooked) {
-                            onFlowFailure(hideLoadingBar, R.string.slot_already_booked)
+                            onFlowFailure(hideLoadingBar)
                             return@addOnCompleteListener
                         }
 
@@ -339,7 +339,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
                             }
 
                             override fun onPaymentFailure(error: Int) {
-                                onFlowFailure(hideLoadingBar, error)
+                                onFlowFailure(hideLoadingBar)
                             }
                         })
                         // Trigger payment flow
@@ -348,7 +348,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
                         return@addOnCompleteListener
                     }
                     // Otherwise, display an error message to the user
-                    onFlowFailure(hideLoadingBar, R.string.slot_already_booked)
+                    onFlowFailure(hideLoadingBar)
                 }
     }
 
@@ -360,7 +360,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      *
      * @param hideLoadingBar a [Runnable] responsible for hiding the Ui's loading bar.
      */
-    fun onFlowFailure(hideLoadingBar: Runnable, error: Int): Unit {
+    fun onFlowFailure(hideLoadingBar: Runnable): Unit {
         updateToastMessage(R.string.slot_already_booked)
         mBookingButtonState.value = true
         hideLoadingBar.run() // hide loading bar

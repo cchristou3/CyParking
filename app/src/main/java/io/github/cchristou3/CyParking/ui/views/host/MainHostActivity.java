@@ -159,6 +159,11 @@ public class MainHostActivity extends AppCompatActivity {
 
         // Loading Bar state //
         mGlobalStateViewModel.getLoadingBarState().observe(this, this::updateLoadingBarVisibility);
+
+        // The current screen's label //
+        mGlobalStateViewModel.getLabelState().observe(this, s -> {
+            getSupportActionBar().setTitle(s);
+        });
     }
 
     /**

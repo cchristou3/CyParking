@@ -36,7 +36,7 @@ import io.github.cchristou3.CyParking.utils.ViewUtility;
  * </p>
  *
  * @author Charalambos Christou
- * @version 8.0 11/02/21
+ * @version 9.0 24/03/21
  */
 public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> implements Navigable, TextWatcher {
 
@@ -46,12 +46,12 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
     /**
      * Called to have the fragment instantiate its user interface view.
      *
-     * @see BaseFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding, int)
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return super.onCreateView(FeedbackFragmentBinding.inflate(inflater));
+        return super.onCreateView(FeedbackFragmentBinding.inflate(inflater), R.string.feedback_label);
     }
 
     /**

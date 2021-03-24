@@ -46,6 +46,8 @@ public class GlobalStateViewModel extends LoadingBarViewModel {
     private final ConnectionLiveData mConnectionState;
     // no connection layout state
     private final MutableLiveData<Integer> mNoConnectionWarningState = new MutableLiveData<>();
+    // The label of the screen
+    private final MutableLiveData<Integer> mLabel = new MutableLiveData<>();
     // ViewModel's API
     private final AuthenticatorRepository mAuthenticatorRepository;
 
@@ -88,6 +90,25 @@ public class GlobalStateViewModel extends LoadingBarViewModel {
      */
     public LiveData<Boolean> getConnectionState() {
         return this.mConnectionState;
+    }
+
+    /**
+     * Assign the value of {@link #mLabel}
+     * the given argument.
+     *
+     * @param label the new value of {@link #mLabel}.
+     */
+    public void updateLabel(Integer label) {
+        mLabel.setValue(label);
+    }
+
+    /**
+     * Return the {@link #mLabel} as a {@link LiveData} instance.
+     *
+     * @return A {@link LiveData} reference of {@link #mLabel}.
+     */
+    public LiveData<Integer> getLabelState() {
+        return this.mLabel;
     }
 
     /**

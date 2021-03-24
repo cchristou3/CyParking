@@ -43,7 +43,7 @@ import io.github.cchristou3.CyParking.utils.ViewUtility;
  * </p>
  *
  * @author Charalambos Christou
- * @version 8.0 11/02/21
+ * @version 9.0 24/03/21
  */
 public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBinding>
         implements Navigable, BaseFragment.UserStateUiHandler {
@@ -67,12 +67,12 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
     /**
      * Called to have the fragment instantiate its user interface view.
      *
-     * @see BaseFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding, int)
      */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return super.onCreateView(FragmentViewBookingsBinding.inflate(inflater));
+        return super.onCreateView(FragmentViewBookingsBinding.inflate(inflater), R.string.menu_bookings);
     }
 
     /**

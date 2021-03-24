@@ -1,6 +1,5 @@
 package io.github.cchristou3.CyParking.ui.views.parking.slots.bookingDetails
 
-import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -27,6 +26,7 @@ import io.github.cchristou3.CyParking.ui.components.BaseFragment
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder
 import io.github.cchristou3.CyParking.ui.widgets.QRCodeDialog
 import io.github.cchristou3.CyParking.utilities.scaleToMatchParent
+import io.github.cchristou3.CyParking.utilities.setColor
 
 
 /**
@@ -34,7 +34,7 @@ import io.github.cchristou3.CyParking.utilities.scaleToMatchParent
  * Details include the booking's QR Code, the lot's location (directions), etc.
  *
  * @author Charalambos Christou
- * @since 1.0 12/03/21
+ * @since 2.0 24/03/21
  */
 class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Navigable {
 
@@ -71,7 +71,7 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
                               savedInstanceState: Bundle?): View? {
         // Postpone enter transition till fragment's data has loaded.
         postponeEnterTransition()
-        return super.onCreateView(BookingDetailsFragmentBinding.inflate(inflater))
+        return super.onCreateView(BookingDetailsFragmentBinding.inflate(inflater), R.string.booking_label)
     }
 
     /**
@@ -151,12 +151,8 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
      * @param lot The lot associated with the selected booking.
      */
     private fun setListenerToDirectionsButton(lot: ParkingLot) {
-        binding.bookingDetailsFragmentFabDirections.drawable.setColorFilter(
-                resources.getColor(R.color.purple_700),
-                // Source = Drawable, Destination = purple_700
-                // Thus, the drawable shape will remain unchanged
-                // and its color will be blended with purple_700.
-                PorterDuff.Mode.SRC_IN)
+        binding.bookingDetailsFragmentFabDirections.drawable.setColor(
+                resources.getColor(R.color.purple_700, activity?.theme))
         binding.bookingDetailsFragmentFabDirections.setOnClickListener {
             LocationManager.launchGoogleMaps(
                     requireContext(),

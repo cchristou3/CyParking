@@ -57,7 +57,7 @@ import io.github.cchristou3.CyParking.utilities.AnimationUtility;
  * </p>
  *
  * @author Charalambos Christou
- * @version 12.0 12/03/21
+ * @version 13.0 24/03/21
  */
 public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements Navigable, LocationHandler {
 
@@ -69,7 +69,6 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
     private IntentIntegrator mIntentIntegrator;
 
-
     /**
      * Inflates our fragment's view.
      *
@@ -77,11 +76,11 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      * @param container          The parent view
      * @param savedInstanceState A bundle which contains info about previously stored data
      * @return The view of the fragment
-     * @see BaseFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding, int)
      */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        return super.onCreateView(FragmentHomeBinding.inflate(inflater));
+        return super.onCreateView(FragmentHomeBinding.inflate(inflater), R.string.menu_home);
     }
 
     /**
@@ -96,7 +95,6 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         super.onViewCreated(view, savedInstanceState);
         observeUserState(this::updateUi);
         initializeButtonListeners();
-
         // TODO: Add splash screen till the app has been initialized (FirebaseApp, Network broadcasters, validating user's data, etc.).
     }
 
@@ -283,8 +281,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      * @param upcomingBooking The upcoming booking.
      */
     private void displayBooking(@NotNull Booking upcomingBooking) {
-        // Make the user related CardView visible
-        AnimationUtility.slideVerticallyToBottom(getBinding().getRoot(), getBinding().fragmentHomeCvUserBooking, false, 1000L);
+        // Make the user related CardView visible if it is not already
+        if (!getBinding().fragmentHomeCvUserBooking.isShown())
+            AnimationUtility.slideVerticallyToBottom(getBinding().getRoot(), getBinding().fragmentHomeCvUserBooking, false, 1000L);
 
         // Update the contents if its children.
         getBinding().fragmentHomeBookingItem.bookingItemFullyTxtDate
@@ -304,6 +303,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         FragmentNavigator.Extras.Builder sharedView = new FragmentNavigator.Extras.Builder();
         sharedView.addSharedElement(getBinding().fragmentHomeBookingItem.bookingItemFullyCv, getString(R.string.shared_booking_card_view));
         sharedView.addSharedElement(getBinding().fragmentHomeCvUserBooking, getString(R.string.shared_parent));
+        sharedView.addSharedElement(getBinding().getRoot(), "Another parent");
 
         // Make the booking clickable
         getBinding().fragmentHomeBookingItem.bookingItemFullyCv.setClickable(true);

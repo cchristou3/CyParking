@@ -44,7 +44,6 @@
     <!-- Strings related to the description dialog -->
     <string name="dial_intro">Privileges</string>
     <string name="dismiss">Dismiss</string>
-    <string name="feedback_disclaimer">Your feedback is important and helps improve our products. While we cannot reply to all feedback, all comments are taken into consideration.</string>
     <string name="name">Name</string>
     <string name="email">Email</string>
     <string name="email_low">email</string>
@@ -56,9 +55,14 @@
     <string name="name_not_found">Unavailable</string>
 
     <!-- Strings related to the feedback -->
+    <string name="feedback_label">Feedback</string>
     <string name="invalid_feedback">Cannot be empty</string>
+    <string name="feedback_success">Feedback has been sent to the CyParking Team.</string>
+    <string name="feedback_failed">Feedback failed to be sent to the CyParking Team. Please try again later.</string>
+    <string name="feedback_disclaimer">Your feedback is important and helps improve our products. While we cannot reply to all feedback, all comments are taken into consideration.</string>
 
     <!-- Strings related to the registering a parking lot -->
+    <string name="register_lot_label">Lot details</string>
     <string name="hint_mobile_number">Mobile number</string>
     <string name="hint_capacity">Capacity</string>
     <string name="hint_parking_lot_name">Lot name</string>
@@ -101,6 +105,7 @@
 
     <!-- Strings related to the HomeFragment -->
     <string name="parking_map">Parking Map</string>
+    <string name="parking_map_label">Nearby Parking Lots</string>
     <string name="upcoming_booking">Upcoming booking</string>
 
     <!-- Strings related to the shared Views of HomeFragment and BookingDetailsFragment -->
@@ -121,6 +126,7 @@
     <string name="swipe_left_to_use_options">Swipe left to use options</string>
 
     <!-- Strings related to the BookingFragment -->
+    <string name="booking_label">Booking details</string>
     <string name="please_choose_an_offer">Please choose an offer</string>
     <string name="selected_offer">Selected offer: </string>
     <string name="slot_already_booked">You have already booked this lot.</string>
@@ -167,8 +173,6 @@
     <string name="updating_password">Updating password</string>
     <string name="update">Update</string>
     <string name="invalid_user_exception_msg">It looks like you signed out of your app. You should sign in again and re-perform this action.</string>
-    <string name="feedback_success">Feedback has been sent to the CyParking Team.</string>
-    <string name="feedback_failed">Feedback failed to be sent to the CyParking Team. Please try again later.</string>
     <string name="login_required_exception">This operation is sensitive and requires recent
         authentication. Log in again before retrying this request.</string>
     <string name="directions">directions</string>

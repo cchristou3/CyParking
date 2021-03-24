@@ -42,7 +42,7 @@ import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModelFactory;
  *
  * @param <T> Any type that implements the {@link ViewBinding} interface.
  * @author Charalambos Christou
- * @version 2.0 28/01/21
+ * @version 3.0 24/03/21
  * @see ViewBinding
  * @see GlobalStateViewModel
  */
@@ -68,10 +68,12 @@ public class BaseFragment<T extends ViewBinding> extends Fragment {
     /**
      * Called to have the fragment instantiate its user interface view.
      */
-    public View onCreateView(T mViewBinding) {
+    public View onCreateView(T mViewBinding, int label) {
+        mGlobalStateViewModel.updateLabel(label);
         // Return the root view from the onCreateView() method to make it the active view on the screen.
         return setBinding(mViewBinding).getRoot();
     }
+
 
     /**
      * Called when the view previously created by {@link #onCreateView} has

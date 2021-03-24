@@ -78,7 +78,7 @@ import static io.github.cchristou3.CyParking.utils.ViewUtility.showToast;
  * </p>
  *
  * @author Charalambos Christou
- * @version 14.0 28/02/21
+ * @version 15.0 24/03/21
  * <p>
  * New changes:
  * <p><b>On server</b>: via a cloud function retrieve the document ids of all
@@ -161,14 +161,14 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      * @param savedInstanceState A bundle which contains info about previously stored data
      * @param inflater           The object which will inflate (create) our layout
      * @param container          ViewGroup container
-     * @see BaseFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding, int)
      */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return super.onCreateView(FragmentParkingMapBinding.inflate(inflater));
+        return super.onCreateView(FragmentParkingMapBinding.inflate(inflater), R.string.parking_map_label);
     }
 
     /**

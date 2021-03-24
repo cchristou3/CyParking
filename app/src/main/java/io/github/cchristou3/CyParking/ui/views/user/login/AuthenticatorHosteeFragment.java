@@ -90,12 +90,12 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
      * @param container          The parent view
      * @param savedInstanceState A bundle which contains info about previously stored data
      * @return The view of the fragment
-     * @see BaseFragment#onCreateView(ViewBinding)
+     * @see BaseFragment#onCreateView(ViewBinding, int)
      */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return super.onCreateView(FragmentAuthenticatorHosteeBinding.inflate(inflater));
+        return super.onCreateView(FragmentAuthenticatorHosteeBinding.inflate(inflater), R.string.app_name);
     }
 
     /**

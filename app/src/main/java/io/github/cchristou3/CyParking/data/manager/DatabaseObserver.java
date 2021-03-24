@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
 
@@ -51,6 +52,7 @@ public abstract class DatabaseObserver<T, S> implements DefaultLifecycleObserver
     private T mDatabaseReference;
     private WeakReference<Lifecycle> mWeakLifecycle;
     private ListenerRegistration mListenerRegistration;
+    private AtomicBoolean isRegistered = new AtomicBoolean(false);
 
     /**
      * Public Constructor.
@@ -173,6 +175,7 @@ public abstract class DatabaseObserver<T, S> implements DefaultLifecycleObserver
         // Subscribe LifeCycleOwner to lifecycle changes
         mWeakLifecycle.get().addObserver(this);
         updateDatabaseReference(this.mDatabaseReference);
+        isRegistered.set(true);
     }
 
     /**
@@ -182,6 +185,7 @@ public abstract class DatabaseObserver<T, S> implements DefaultLifecycleObserver
      */
     public void unregisterLifecycleObserver() {
         Log.d(TAG, "Lifecycle observer removed!");
+        isRegistered.set(false);
         mWeakLifecycle.get().removeObserver(this);
         removeSnapshotListenerFromDatabaseQuery();
     }
@@ -211,7 +215,7 @@ public abstract class DatabaseObserver<T, S> implements DefaultLifecycleObserver
      */
     @Override
     public void onResume(@NonNull LifecycleOwner owner) {
-        if (this.mListenerRegistration == null) {
+        if (this.mListenerRegistration == null && isRegistered.get()) {
             addSnapshotListenerToDatabaseReference(this.mDatabaseReference);
         }
     }

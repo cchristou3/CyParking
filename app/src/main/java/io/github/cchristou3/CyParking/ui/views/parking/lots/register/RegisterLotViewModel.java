@@ -20,6 +20,7 @@ import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorReposi
 import io.github.cchristou3.CyParking.data.pojo.form.FormState;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormBuilder;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormState;
+import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent;
 import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
 import io.github.cchristou3.CyParking.utils.Utility;
 
@@ -50,6 +51,7 @@ public class RegisterLotViewModel extends ToastViewModel {
     private final MutableLiveData<Uri> mImageUri = new MutableLiveData<>();
     private final MutableLiveData<Float> mSelectedPrice = new MutableLiveData<>(null); // Initially null
     private final MutableLiveData<Float> mSelectedDuration = new MutableLiveData<>(null); // Initially null
+    private final MutableLiveData<Object> mNavigateBack = new SingleLiveEvent<>();
 
     private final OperatorRepository mOperatorRepository;
 
@@ -127,11 +129,43 @@ public class RegisterLotViewModel extends ToastViewModel {
     /**
      * Stores the specified {@link ParkingLot} instance to the database.
      *
-     * @param parkingLot The lot to be added to the database.
-     * @return A {@link Task<Void>} object to be handled by the view.
+     * @param parkingLot     The lot to be added to the database.
+     * @param hideLoadingBar a runnable responsible for hiding the loading bar.
      */
-    public Task<Boolean> registerParkingLot(ParkingLot parkingLot) {
-        return mOperatorRepository.registerParkingLot(getImageUri(), parkingLot);
+    public void registerParkingLot(ParkingLot parkingLot, Runnable hideLoadingBar) {
+        mOperatorRepository.registerParkingLot(getImageUri(), parkingLot)
+                .addOnCompleteListener((Task<Boolean> task) -> {
+                    if (task.isSuccessful()) {
+                        boolean wasRegistrationSuccessful = task.getResult();
+                        if (wasRegistrationSuccessful) {
+                            // Display message to user.
+                            updateToastMessage(R.string.success_lot_registration);
+                            // Navigate back to home screen
+                            navigateBack();
+                        } else {
+                            // Display error message to user that the parking lot already exists
+                            updateToastMessage(R.string.error_lot_already_exists);
+                        }
+                    }
+                    hideLoadingBar.run();
+                });
+        ;
+    }
+
+    /**
+     * Set the value of {@link #mNavigateBack} to null to trigger the observer callback.
+     */
+    void navigateBack() {
+        mNavigateBack.setValue(null);
+    }
+
+    /**
+     * Getter of the {@link RegisterLotViewModel#mNavigateBack}.
+     *
+     * @return the LiveData instance of it, to limit any direct changes to it outside of the ViewModel.
+     */
+    public LiveData<Object> getNavigateBackState() {
+        return mNavigateBack;
     }
 
     /**

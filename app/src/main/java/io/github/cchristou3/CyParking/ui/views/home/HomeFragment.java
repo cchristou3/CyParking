@@ -43,6 +43,7 @@ import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
+import io.github.cchristou3.CyParking.utilities.AnimationUtility;
 
 /**
  * Purpose: <p>Show to the user all available action options</p>
@@ -232,7 +233,13 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
             // If operator logged out, remove observer to its parking lot
             if (mDatabaseObserver != null) mDatabaseObserver.unregisterLifecycleObserver();
             // Hide anything related to parking lot from the user
-            getBinding().fragmentHomeCvLotInfo.setVisibility(View.GONE);
+            if (getBinding().fragmentHomeCvLotInfo.isShown()) {
+                AnimationUtility.slideVerticallyToBottom(getBinding().getRoot(), getBinding().fragmentHomeCvLotInfo, true, 1000L);
+            }
+            // Hide Ui related layout related to logged in users
+            if (getBinding().fragmentHomeCvUserBooking.isShown()) {
+                AnimationUtility.slideVerticallyToBottom(getBinding().getRoot(), getBinding().fragmentHomeCvUserBooking, true, 1000L);
+            }
             return;
         }
 
@@ -277,7 +284,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      */
     private void displayBooking(@NotNull Booking upcomingBooking) {
         // Make the user related CardView visible
-        getBinding().fragmentHomeCvUserBooking.setVisibility(View.VISIBLE);
+        AnimationUtility.slideVerticallyToBottom(getBinding().getRoot(), getBinding().fragmentHomeCvUserBooking, false, 1000L);
 
         // Update the contents if its children.
         getBinding().fragmentHomeBookingItem.bookingItemFullyTxtDate
@@ -319,10 +326,8 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      *
      * @param loggedInUser current user.
      */
-    private void initializeOperator(LoggedInUser loggedInUser) {
+    private void initializeOperator(@NotNull LoggedInUser loggedInUser) {
         // TODO: 19/01/2021 Encapsulate all operator logic to a fragment and simply inflate it
-        // Set up the Ui for the operator
-        getBinding().fragmentHomeCvLotInfo.setVisibility(View.VISIBLE);
         // Initialize the OperatorViewModel
         mOperatorViewModel = new ViewModelProvider(this,
                 new OperatorViewModelFactory()).get(OperatorViewModel.class);
@@ -418,11 +423,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     private void updateLotContents(@NotNull ParkingLot userParkingLot) {
         checkVisibilityOfAppropriateLayout(View.VISIBLE, View.GONE);
         // Compose the TextViews' text that display the lot's name and capacity.
-        final String availability = userParkingLot.getLotAvailability(requireContext());
-        final String name = HomeFragment.this.getString(R.string.lot_name) + " " + userParkingLot.getLotName();
         // Update their texts with the above ones
-        getBinding().fragmentHomeTxtLotCapacity.setText(availability);
-        getBinding().fragmentHomeTxtLotName.setText(name);
+        getBinding().fragmentHomeTxtLotCapacity.setText(userParkingLot.getLotAvailability(requireContext()));
+        getBinding().fragmentHomeTxtLotName.setText(String.format(getString(R.string.lot_name), userParkingLot.getLotName()));
     }
 
     /**
@@ -431,8 +434,6 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      */
     private void displayLotRegistrationLayout() {
         checkVisibilityOfAppropriateLayout(View.GONE, View.VISIBLE);
-        getBinding().fragmentHomeClShowLotInfo.setVisibility(View.GONE); // Hide showLotInfo
-        getBinding().fragmentHomeClRegisterLotInfo.setVisibility(View.VISIBLE); // Show registerLotInfo
         // Attach listener to "Register Parking lot" button
         getBinding().fragmentHomeMbtnRegisterParkingLot
                 .setOnClickListener(v ->
@@ -446,6 +447,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     /**
      * Changes the visibility of "lot info" layout and "register lot" layout,
      * according to the specified arguments.
+     * If the above layouts' parent is not visible, then animate it to the UI.
      *
      * @param lotInfoVisibility     The new visibility of the lot info layout.
      * @param registerLotVisibility The new visibility of register lot layout.
@@ -453,6 +455,10 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     private void checkVisibilityOfAppropriateLayout(int lotInfoVisibility, int registerLotVisibility) {
         updateVisibilityOf(getBinding().fragmentHomeClShowLotInfo, lotInfoVisibility); // showLotInfo
         updateVisibilityOf(getBinding().fragmentHomeClRegisterLotInfo, registerLotVisibility); // registerLotInfo
+
+        if (!getBinding().fragmentHomeCvLotInfo.isShown()) {
+            AnimationUtility.slideVerticallyToBottom(getBinding().getRoot(), getBinding().fragmentHomeCvLotInfo, false, 1000L);
+        }
     }
 
     /**

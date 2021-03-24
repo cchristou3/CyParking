@@ -35,7 +35,6 @@ import androidx.viewbinding.ViewBinding;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.jetbrains.annotations.Contract;
@@ -223,6 +222,15 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         addObserverToForm();
         addObserverToSlotOfferArguments();
         addObserverToToasts();
+        addObserverToNavigatingBack();
+    }
+
+    /**
+     * Observe for when the user should be navigated to the previous screen.
+     */
+    private void addObserverToNavigatingBack() {
+        mRegisterLotViewModel.getNavigateBackState().observe(getViewLifecycleOwner(),
+                timeToNavigateBack -> goBack(requireActivity()));
     }
 
     /**
@@ -666,23 +674,8 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         // Callback added on addObserverToUserState should kick in.
         // Otherwise, finish registration
         getGlobalStateViewModel().showLoadingBar();
-        mRegisterLotViewModel.registerParkingLot(lotToBeRegistered)
-                .addOnCompleteListener((Task<Boolean> task) -> {
-                    getGlobalStateViewModel().hideLoadingBar();
-                    if (task.isSuccessful()) {
-                        boolean wasRegistrationSuccessful = task.getResult();
-                        if (wasRegistrationSuccessful) {
-                            // Display message to user.
-                            mRegisterLotViewModel.updateToastMessage(R.string.success_lot_registration);
-                            // Navigate back to home screen
-                            getNavController(requireActivity())
-                                    .popBackStack();
-                        } else {
-                            // Display error message to user that the parking lot already exists
-                            mRegisterLotViewModel.updateToastMessage(R.string.error_lot_already_exists);
-                        }
-                    }
-                });
+        mRegisterLotViewModel.registerParkingLot(lotToBeRegistered, () -> getGlobalStateViewModel().hideLoadingBar());
+
     }
 
     /**

@@ -222,4 +222,11 @@ public class RegisterLotViewModelTest extends InstantTaskRuler {
         assertThat(registerLotViewModel.getImageUri(),
                 is(nullValue()));
     }
+
+    @Test
+    public void navigateBack_setsValueToNull() throws InterruptedException {
+        registerLotViewModel.navigateBack();
+        assertThat(getOrAwaitValue(registerLotViewModel.getNavigateBackState()),
+                is(nullValue()));
+    }
 }

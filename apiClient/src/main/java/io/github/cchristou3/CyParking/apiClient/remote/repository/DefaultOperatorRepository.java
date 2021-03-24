@@ -184,6 +184,8 @@ public class DefaultOperatorRepository implements OperatorRepository,
      */
     @Override
     public Task<Uri> uploadPhoto(@NotNull Uri selectedImageUri) {
+        // TODO: 24/03/2021 Avoid using the photo's last path segment as it might confli ct with other users
+        //  use instead the user's uid.
         // Get a reference to store file at LOT_PHOTOS/<FILENAME>
         StorageReference photoRef = getLotPhotosStorageRef().child(selectedImageUri.getLastPathSegment());
 

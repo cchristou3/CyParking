@@ -62,7 +62,7 @@
     <string name="hint_mobile_number">Mobile number</string>
     <string name="hint_capacity">Capacity</string>
     <string name="hint_parking_lot_name">Lot name</string>
-    <string name="lot_name">Lot Name: </string>
+    <string name="lot_name">Lot Name: %1$s</string>
     <string name="parking_lot_info">Parking Lot Info</string>
     <string name="mobile_phone">Mobile phone: </string>
     <string name="basic_info">Basic Info</string>

@@ -101,8 +101,9 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
      * method.
      */
     override fun onDestroyView() {
-        binding.bookingDetailsFragmentBtnQrCode.setOnClickListener(null)
-        binding.bookingDetailsFragmentFabDirections.setOnClickListener(null)
+        super.removeOnClickListeners(
+                binding.bookingDetailsFragmentBtnQrCode,
+                binding.bookingDetailsFragmentFabDirections)
         super.onDestroyView()
     }
 

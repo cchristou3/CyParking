@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.util.Consumer;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewbinding.ViewBinding;
@@ -24,18 +25,13 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.gson.Gson;
 
-import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import io.github.cchristou3.CyParking.R;
-import io.github.cchristou3.CyParking.apiClient.interfaces.HttpsCallHandler;
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.apiClient.utils.Utils;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
@@ -50,7 +46,6 @@ import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
-import io.github.cchristou3.CyParking.ui.views.parking.slots.booking.BookingFragment;
 import io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking.ViewBookingsFragment;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
@@ -71,14 +66,14 @@ import static io.github.cchristou3.CyParking.utils.ViewUtility.showToast;
  * the user's location and managing the markers on the Google Map.
  * </p>
  * <p>The fragment receives the user's location from {@link HomeFragment}
- * via the {@link EventBus}</p> class.
+ * via the {@link #getArguments()}</p>.
  * <p>
  * In terms of Authentication, this is achieved by communicating with the hosting
  * activity {@link MainHostActivity} via the {@link GlobalStateViewModel}.
  * </p>
  *
  * @author Charalambos Christou
- * @version 15.0 24/03/21
+ * @version 16.0 25/03/21
  * <p>
  * New changes:
  * <p><b>On server</b>: via a cloud function retrieve the document ids of all
@@ -134,7 +129,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
 
     /**
      * Initialises the fragment and its {@link MarkerManager} instance.
-     * Uses the EventBus, to get access to data send by the previous fragment.
+     * Access to data send by the previous fragment via {@link #getArguments()}.
      * <p>-> Retrieves the location of the user from previous activity.
      *
      * @param savedInstanceState A bundle which contains info about previously stored data
@@ -142,16 +137,14 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try {
-            mUserCurrentLatLng = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(LatLng.class));
-        } catch (ClassCastException | NullPointerException e) {
-            Log.e(TAG, "onCreateView: ", e); // TODO: Plan B
+
+        if (getArguments() != null) {
+            mUserCurrentLatLng = getArguments().getParcelable(getString(R.string.user_latlng_arg));
         }
         // Initialize MarkerManager and provide it with the icon to be used to display the user's location on the map.
         mMarkerManager = new MarkerManager(
-                ResourcesCompat.getDrawable(getResources(), R.drawable.ic_user_location, null)
+                ResourcesCompat.getDrawable(getResources(), R.drawable.ic_user_location, requireActivity().getTheme())
         );
-
         initializeViewModel();
     }
 
@@ -183,14 +176,9 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initializeGoogleMaps(); // Map
-        try {
-            attachStateObservers(); // LiveData state objects
-        } catch (IllegalArgumentException e) {
-            return;
-            // TODO: 03/02/2021 Inform user there were no nearby lots.
-        }
+        attachStateObservers(); // LiveData state objects
         attachButtonListeners(); // Ui listeners
-        // The fetching lots initially
+        // Check if the anything was fetched already
         if (!mParkingMapViewModel.didPreviouslyRetrieveDocumentIds()) {
             fetchParkingLots(mUserCurrentLatLng); // HTTPS call
         }
@@ -292,6 +280,8 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        startPostponedEnterTransition();
+
         mGoogleMap = googleMap; // Save a reference of the GoogleMap instance
         mGoogleMap.setMinZoomPreference(MIN_ZOOM_LEVEL);
         // Start listening to the user's location updates
@@ -312,8 +302,6 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     public void onLocationResult(LocationResult locationResult) {
         Log.d(TAG, "onLocationResult: From Map");
         if (locationResult == null) return;
-
-        mLocationUpdatesCounter++; // Increment the counter
 
         // Access the user's new location.
         final LatLng updatedPosition = new LatLng(locationResult.getLastLocation().getLatitude(),
@@ -340,6 +328,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      * @param updatedPosition The new position of the user.
      */
     private void checkIntervalForUpdates(LatLng updatedPosition) {
+        mLocationUpdatesCounter++; // Increment the counter
         if (mLocationUpdatesCounter % 4 == 0) { // Every 4 location updates (20 seconds)
             if (shouldFetchParkingDocs(mInitialUserLatLng, updatedPosition)) {
                 // Fetch the ids of parking lots based on the user's new position.
@@ -441,6 +430,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
+        postponeEnterTransition();
     }
 
 
@@ -573,7 +563,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      * @param receivedParkingLot The Lot to be updated.
      * @param updatable          The interface to update the lot once found.
      */
-    private void updateMarkerContents(ParkingLot receivedParkingLot, MarkerUpdatable updatable) {
+    private void updateMarkerContents(ParkingLot receivedParkingLot, Consumer<Marker> updatable) {
         // Traverse the markers
         for (Marker markerOfParking : mMarkerManager.getKeySets()) { // the key is of type Marker
             // Check whether the marker is associated with a ParkingLot object (marker -> null)
@@ -583,7 +573,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
                 continue;
 
             // then update the private parking's content according to its DocumentChange.Type
-            updatable.update(markerOfParking);
+            updatable.accept(markerOfParking);
         }
     }
 
@@ -613,36 +603,9 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     public void fetchParkingLots(@NotNull LatLng latLng) {
         getGlobalStateViewModel().showLoadingBar();
         Log.d(TAG, "fetchParkingLots: Loading Bar ON");
-        mParkingMapViewModel.fetchParkingLots(latLng.latitude, latLng.longitude, new HttpsCallHandler() {
-            @Override
-            public void onSuccess(String rawJsonResponse) {
-                // Zoom in
-                Log.d(TAG, "Before parsing: " + rawJsonResponse);
-                // Convert json object into an array of ParkingLot objects and add for each a marker to the map.
-                String[] result = new Gson().fromJson(rawJsonResponse, String[].class);
-                mParkingMapViewModel.updateIdsState(result);
-                Log.d(TAG, "Parsed: " + Arrays.toString(result));
-            }
-
-            @Override
-            public void onFailure(Exception exception) {
-                if (exception == null) return;
-                // TODO: What if user had internet initially and then
-                // it got lost? Should we navigate the user back to the home screen
-                // or keep him?
-                AlertBuilder.showSingleActionAlert(
-                        getChildFragmentManager(),
-                        R.string.volley_error_title,
-                        R.string.volley_error_body,
-                        (v) -> goBack(requireActivity()) // go back to home screen
-                );
-            }
-
-            @Override
-            public void onComplete() {
-                getGlobalStateViewModel().hideLoadingBar();
-            }
-        });
+        mParkingMapViewModel.fetchParkingLots(latLng.latitude, latLng.longitude,
+                () -> getGlobalStateViewModel().hideLoadingBar() // when complete do this
+        );
     }
 
     /**
@@ -719,6 +682,21 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
         // Display Toast messages whenever a message is set
         mParkingMapViewModel.getToastMessage().observe(getViewLifecycleOwner(),
                 messageResId -> showToast(requireContext(), messageResId));
+
+        mParkingMapViewModel.getPromptingState().observe(getViewLifecycleOwner(), timeToPromptTheUser -> {
+            AlertBuilder.showSingleActionAlert(
+                    getChildFragmentManager(),
+                    R.string.volley_error_title,
+                    R.string.volley_error_body,
+                    (v) -> goBack(requireActivity())); // go back to home screen
+        });
+
+        mParkingMapViewModel.getNavigationToBookingState().observe(getViewLifecycleOwner(), selectedLot -> {
+            getNavController(requireActivity())
+                    .navigate(
+                            ParkingMapFragmentDirections.actionNavParkingMapFragmentToParkingBookingFragment(selectedLot)
+                    );
+        });
     }
 
     /**
@@ -756,44 +734,9 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     }
 
     /**
-     * If the user is not logged in, a Toast message is displayed.
-     * Otherwise, the user is navigated to {@link BookingFragment}.
-     * The {@link EventBus} instance is used to pass the selected {@link ParkingLot}
-     * object to {@link BookingFragment}.
+     * Navigate the user to the booking screen.
      */
     private void navigateToBookingScreen() {
-        // If the user is not logged in, display a Toast msg
-        if (getUser() == null) {
-            mParkingMapViewModel.updateToastMessage(R.string.no_booking_allowed_to_non_logged_in_users);
-            return;
-        }
-        if (mMarkerManager.getSelectedParkingLot() != null) {
-            // Navigate to the ParkingBookingFragment
-            Log.d(TAG, "onViewCreated: sending over: " + mMarkerManager.getSelectedParkingLot());
-            EventBus.getDefault().postSticky(mMarkerManager.getSelectedParkingLot()); // TODO: 21/01/2021 Convert to bundle - getArguments
-            getNavController(requireActivity())
-                    .navigate(
-                            ParkingMapFragmentDirections.actionNavParkingMapFragmentToParkingBookingFragment()
-                    );
-        } else {
-            mParkingMapViewModel.updateToastMessage(R.string.unknown_error);
-        }
-    }
-
-    /**
-     * Purpose: provide handler in the marker-lot look-up method
-     * {@link #updateMarkerContents(ParkingLot, MarkerUpdatable)}.
-     * The term update concerns both removals ({@link DocumentChange.Type#REMOVED})
-     * and modifications ({@link DocumentChange.Type#MODIFIED}).
-     */
-    private interface MarkerUpdatable {
-        /**
-         * Performs an action on the given
-         * {@link Marker} and its linked
-         * {@link ParkingLot}.
-         *
-         * @param markerOfParking A {@link Marker} to be updated.
-         */
-        void update(Marker markerOfParking);
+        mParkingMapViewModel.navigateToBookingScreen(getUser(), mMarkerManager.getSelectedParkingLot());
     }
 }

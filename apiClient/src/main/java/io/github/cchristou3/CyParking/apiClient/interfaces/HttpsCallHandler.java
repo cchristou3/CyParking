@@ -27,6 +27,8 @@ public interface HttpsCallHandler {
     /**
      * Gets triggered when the task has been completed with a <u>failure</u>.
      * E.g. if {@link Task#isSuccessful()} returned <u>false</u>.
+     * or when the device has lost internet connection before the request
+     * could be handled by the server side.
      *
      * @param exception The exception as thrown from the backend.
      */

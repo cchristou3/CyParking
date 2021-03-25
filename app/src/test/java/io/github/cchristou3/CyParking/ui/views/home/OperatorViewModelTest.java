@@ -51,11 +51,6 @@ public class OperatorViewModelTest extends InstantTaskRuler {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void observeParkingLot_inputNull_throwsException() {
-        assertThat(operatorViewModel.observeParkingLot(null), not(nullValue()));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void observeParkingLot_inputEmpty_throwsException() {
         assertThat(operatorViewModel.observeParkingLot(""), not(nullValue()));
     }

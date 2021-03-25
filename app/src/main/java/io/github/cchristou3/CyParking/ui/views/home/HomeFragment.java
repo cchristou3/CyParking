@@ -24,7 +24,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
@@ -57,7 +56,7 @@ import io.github.cchristou3.CyParking.utilities.AnimationUtility;
  * </p>
  *
  * @author Charalambos Christou
- * @version 13.0 24/03/21
+ * @version 14.0 25/03/21
  */
 public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements Navigable, LocationHandler {
 
@@ -303,7 +302,6 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         FragmentNavigator.Extras.Builder sharedView = new FragmentNavigator.Extras.Builder();
         sharedView.addSharedElement(getBinding().fragmentHomeBookingItem.bookingItemFullyCv, getString(R.string.shared_booking_card_view));
         sharedView.addSharedElement(getBinding().fragmentHomeCvUserBooking, getString(R.string.shared_parent));
-        sharedView.addSharedElement(getBinding().getRoot(), "Another parent");
 
         // Make the booking clickable
         getBinding().fragmentHomeBookingItem.bookingItemFullyCv.setClickable(true);
@@ -454,6 +452,10 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      */
     private void checkVisibilityOfAppropriateLayout(int lotInfoVisibility, int registerLotVisibility) {
         updateVisibilityOf(getBinding().fragmentHomeClShowLotInfo, lotInfoVisibility); // showLotInfo
+        // Display the QR Code scanner to be used to scan bookings
+        // TODO: 25/03/2021 Animate it from the top
+        updateVisibilityOf(getBinding().fragmentHomeBtnScanBooking, lotInfoVisibility); // showLotInfo
+
         updateVisibilityOf(getBinding().fragmentHomeClRegisterLotInfo, registerLotVisibility); // registerLotInfo
 
         if (!getBinding().fragmentHomeCvLotInfo.isShown()) {
@@ -571,12 +573,14 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
             Location userLatestLocation = locationResult.getLastLocation();
             Toast.makeText(requireContext(), userLatestLocation.toString(), Toast.LENGTH_SHORT).show();
 
-            // Pass it to the ParkingMapFragment
-            EventBus.getDefault().postSticky(new LatLng(userLatestLocation.getLatitude(), userLatestLocation.getLongitude()));
             // Navigate to the ParkingMapFragment
             getNavController(requireActivity())
                     .navigate(
-                            HomeFragmentDirections.actionHomeToParkingMap()
+                            HomeFragmentDirections.actionHomeToParkingMap(
+                                    new LatLng(
+                                            userLatestLocation.getLatitude(),
+                                            userLatestLocation.getLongitude())
+                            )
                     );
         } else {
             // Inform the user something wrong happened

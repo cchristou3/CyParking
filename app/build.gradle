@@ -86,9 +86,8 @@ dependencies {
     // Mockito framework
     testImplementation 'org.mockito:mockito-core:' + mockitoVersion
 
-    // Dependencies for using GSON (JSON converter) and EventBus (Publisher/subscriber)
+    // Dependency for using GSON (JSON converter)
     implementation 'com.google.code.gson:gson:' + gsonVersion
-    implementation 'org.greenrobot:eventbus:' + eventbusVersion
 
     // Shared Preference dependency
     implementation 'androidx.preference:preference:' + sharedPrefVersion

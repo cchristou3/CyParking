@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.ui.views.parking.lots.map;
 
+import android.util.Log;
 import android.view.View;
 
 import androidx.lifecycle.LiveData;
@@ -8,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.Query;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,17 +17,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.apiClient.interfaces.HttpsCallHandler;
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.ParkingMapRepository;
+import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent;
 import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
+import io.github.cchristou3.CyParking.ui.views.parking.slots.booking.BookingFragment;
 
 /**
  * <p>A ViewModel implementation, adopted to the ParkingMapFragment fragment.
  * Purpose: Data persistence during configuration changes.</p>
  *
  * @author Charalambos Christou
- * @version 2.0 06/03/21
+ * @version 3.0 25/03/21
  */
 public class ParkingMapViewModel extends ToastViewModel {
 
@@ -36,6 +42,8 @@ public class ParkingMapViewModel extends ToastViewModel {
     private final MutableLiveData<Set<String>> mDocumentIdsOfNearbyLots = new MutableLiveData<>();
     private final MutableLiveData<ParkingLot> mSelectedLotState = new MutableLiveData<>(null);
     private final MutableLiveData<Integer> mInfoLayoutState = new MutableLiveData<>(View.GONE);
+    private final MutableLiveData<Object> mPromptUser = new SingleLiveEvent<>();
+    private final MutableLiveData<ParkingLot> mNavigateToBooking = new SingleLiveEvent<>();
 
     // Its repository
     private final ParkingMapRepository mParkingMapRepository;
@@ -48,6 +56,24 @@ public class ParkingMapViewModel extends ToastViewModel {
      */
     public ParkingMapViewModel(ParkingMapRepository parkingMapRepository) {
         this.mParkingMapRepository = parkingMapRepository;
+    }
+
+    /**
+     * Access the {@link #mNavigateToBooking}.
+     *
+     * @return A reference to {@link #mNavigateToBooking}.
+     */
+    public LiveData<ParkingLot> getNavigationToBookingState() {
+        return mNavigateToBooking;
+    }
+
+    /**
+     * Access the {@link #mDocumentChangesState}.
+     *
+     * @return A reference to {@link #mDocumentChangesState}.
+     */
+    public LiveData<Object> getPromptingState() {
+        return mPromptUser;
     }
 
     /**
@@ -202,13 +228,48 @@ public class ParkingMapViewModel extends ToastViewModel {
      * The response contains all the parking lots
      * that are nearby the given coordinates
      *
-     * @param userLatitude  The user's latest retrieved latitude.
-     * @param userLongitude The user's latest retrieved longitude.
-     * @param handler       The handler for the cloud function's HTTPS request.
+     * @param userLatitude   The user's latest retrieved latitude.
+     * @param userLongitude  The user's latest retrieved longitude.
+     * @param hideLoadingBar A runnable responsible for hiding the current displaying loading bar.
      */
     public void fetchParkingLots(double userLatitude, double userLongitude,
-                                 HttpsCallHandler handler) {
-        mParkingMapRepository.fetchParkingLots(userLatitude, userLongitude, handler);
+                                 Runnable hideLoadingBar) {
+        mParkingMapRepository.fetchParkingLots(userLatitude, userLongitude, new HttpsCallHandler() {
+            @Override
+            public void onSuccess(String rawJsonResponse) {
+                Log.d(TAG, "Before parsing: " + rawJsonResponse);
+                // Convert json object into an array of ParkingLot objects and update the Doc Ids state
+                updateIdsState(new Gson().fromJson(rawJsonResponse, String[].class));
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                if (exception == null) return;
+                // If there are no document ids on the cache then prompt the user
+                // about his/her internet connection
+                if (getCurrentParkingLotDocIds().isEmpty()) {
+                    promptUser();
+                }
+            }
+
+            @Override
+            public void onComplete() {
+                hideLoadingBar.run();
+            }
+        });
+    }
+
+    public void promptUser() {
+        mPromptUser.setValue(null);
+    }
+
+    /**
+     * Access the value of {@link #mPromptUser}.
+     *
+     * @return the value of {@link #mPromptUser}.
+     */
+    public Set<String> getCurrentParkingLotDocIds() {
+        return getDocumentIdsOfNearbyLots().getValue();
     }
 
     /**
@@ -218,5 +279,23 @@ public class ParkingMapViewModel extends ToastViewModel {
      */
     private void logError(Exception exception) {
         mParkingMapRepository.logError(exception);
+    }
+
+    /**
+     * If the user is not logged in, a Toast message is displayed.
+     * Otherwise, the user is navigated to {@link BookingFragment}.
+     */
+    public void navigateToBookingScreen(LoggedInUser currentUser, ParkingLot selectedLot) {
+        // If the user is not logged in, display a Toast msg
+        if (currentUser == null) {
+            updateToastMessage(R.string.no_booking_allowed_to_non_logged_in_users);
+            return;
+        }
+        if (selectedLot != null) {
+            // Navigate to the Booking Fragment
+            mNavigateToBooking.setValue(selectedLot);
+        } else { // Otherwise, display a message
+            updateToastMessage(R.string.unknown_error);
+        }
     }
 }

@@ -3,7 +3,6 @@ package io.github.cchristou3.CyParking.ui.views.parking.slots.booking;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +20,8 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.timepicker.MaterialTimePicker;
 
-import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
 
 import io.github.cchristou3.CyParking.PaymentSessionHelper;
 import io.github.cchristou3.CyParking.R;
@@ -60,7 +56,7 @@ import io.github.cchristou3.CyParking.utils.ViewUtility;
  * <p>
  *
  * @author Charalambos Christou
- * @version 22.0 24/03/21
+ * @version 23.0 25/03/21
  */
 public class BookingFragment extends BaseFragment<FragmentBookingBinding> implements Navigable {
 
@@ -70,7 +66,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
     private ParkingLot mSelectedParking;
 
     /**
-     * Initialises the fragment. Uses the EventBus, to get access to data send by the previous fragment.
+     * Initialises the fragment. Access to data send by the previous fragment.
      * Also sets up the Customer Session related to the payment flow.
      *
      * @param savedInstanceState A bundle which contains info about previously stored data
@@ -80,10 +76,9 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
         super.onCreate(savedInstanceState);
         // Initialize a Customer Session
         PaymentSessionHelper.initCustomerSession(requireContext());
-        try {
-            mSelectedParking = Objects.requireNonNull(EventBus.getDefault().getStickyEvent(ParkingLot.class));
-        } catch (ClassCastException | NullPointerException e) {
-            Log.e(TAG, "onCreateView: ", e); // TODO: Plan B
+        // Access the parking that was selected from the previous screen
+        if (getArguments() != null) {
+            mSelectedParking = getArguments().getParcelable(getString(R.string.selected_lot_arg));
         }
     }
 

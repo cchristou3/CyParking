@@ -180,8 +180,10 @@
     <string name="sign_up_arg">sign_up</string>
     <string name="email_arg">email</string>
 
-    <!-- String related to BookingDetailsFragment   -->
+    <!-- String related to Navigation Arguments   -->
     <string name="selected_booking_arg">selected_booking</string>
+    <string name="selected_lot_arg">selected_lot</string>
+    <string name="user_latlng_arg">user_latlng</string>
 
     <!-- String related to test cases   -->
     <string name="any_error">Error</string>

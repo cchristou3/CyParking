@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.Random;
 
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.utils.Utility;
 
 /**
  * Unit tests for the {@link SlotOffer} class.
@@ -63,7 +64,7 @@ public class SlotOfferTest {
         // When
         String offer = slotOffer.toString();
         // Then
-        Assert.assertEquals("€" + slotOffer.getPrice() + " for " + slotOffer.getDuration() + " hours", offer);
+        Assert.assertEquals(Utility.getCurrency().getSymbol() + slotOffer.getPrice() + " for " + slotOffer.getDuration() + " hours", offer);
     }
     ///////////////////////////////////////////////////////////////////////////
     // toString - END

@@ -226,7 +226,7 @@ exports.handleWebhookEvents = functions.https.onRequest(async (req, resp) => {
 /**
  * When a user deletes their account, clean up after them.
  */
-exports.cleanupUser = functions.auth.user().onDelete(async (user) => {
+exports.cleanupUser = async (user) => {
   const dbRef = admin.firestore().collection(STRIPE_CUSTOMERS);
   const customer = (await dbRef.doc(user.uid).get()).data();
   await stripe.customers.del(customer.customer_id);
@@ -238,7 +238,7 @@ exports.cleanupUser = functions.auth.user().onDelete(async (user) => {
   snapshot.forEach((snap) => snap.ref.delete());
   await dbRef.doc(user.uid).delete();
   return;
-});
+};
 
 /**
  * To keep on top of errors, we should raise a verbose error report with Stackdriver rather

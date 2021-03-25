@@ -11,8 +11,8 @@ const constants = require('../constants');
 /**
  * When a user deletes their account, clean up after them.
  */
-exports.cleanupUser = functions.auth.user().onDelete(async (user) => {
-    console.log(user.email + ' is about to get deleted')    
+exports.cleanupUser = async (user) => {
+    console.log(user.email + ' is about to get deleted')
 
     var batch = admin.firestore().batch();
 
@@ -45,4 +45,4 @@ exports.cleanupUser = functions.auth.user().onDelete(async (user) => {
         console.log(user.email + ' got deleted from ' + result.toString())
     })
     return;
-});
+};

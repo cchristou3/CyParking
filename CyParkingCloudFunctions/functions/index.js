@@ -1,3 +1,6 @@
+// The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
+const functions = require('firebase-functions');
+
 // The Firebase Admin SDK to access Cloud Firestore.
 const admin = require('firebase-admin');
 admin.initializeApp();
@@ -13,16 +16,21 @@ const stripeFunctions = require('./stripe/index');
 
 // Functions related to the application's data, exluding payments.
 exports.getNearbyParkingLots = getNearbyParkingLots.getNearbyParkingLots;
-exports.cleanupUserFromApplication = cleanupUser.cleanupUser;
+const cleanupUserFromApplication = cleanupUser.cleanupUser;
 exports.updateEmail = updateEmail.updateEmail;
 
 // Functions related to Stripe
-exports.cleanupUserFromStripe = stripeFunctions.cleanupUser;
+const cleanupUserFromStripe = stripeFunctions.cleanupUser;
 exports.createEphemeralKey = stripeFunctions.createEphemeralKey;
 exports.createStripeCustomer = stripeFunctions.createStripeCustomer;
 exports.createStripePayment = stripeFunctions.createStripePayment;
 exports.handleWebhookEvents = stripeFunctions.handleWebhookEvents;
 
+exports.cleanUpUser = functions.auth.user().onDelete(async (user) => {
+    cleanupUserFromApplication(user);
+    cleanupUserFromStripe(user);
+    return;
+});
 
 
 /* TODO: Complete after administrator's front-end is done.

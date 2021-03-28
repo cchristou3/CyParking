@@ -342,7 +342,7 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
             // will trigger immediately with the user's data.
             if (authResult == null || !this.isResumed()) return;
             if (authResult.getError() != null) showLoginFailed(authResult.getError());
-            if (authResult.getSuccess() == null) {
+            if (authResult.getSuccess() != null) {
                 if (this.mIsReauthenticating) {
                     mAuthenticatorViewModel.reauthenticateUser(getStringOrEmpty(getBinding().fragmentHosteeAuthEtPassword))
                             .addOnCompleteListener(task -> {

@@ -12,8 +12,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.ui.views.parking.lots.map.ParkingMapFragment;
@@ -33,7 +33,7 @@ import io.github.cchristou3.CyParking.utilities.DrawableUtility;
 public class MarkerManager {
 
     // Holds all Marker - ParkingLot pairs. Used for look up: Marker -> ParkingLot
-    final private HashMap<Marker, ParkingLot> mMarkerToValueMap;
+    final private ConcurrentHashMap<Marker, ParkingLot> mMarkerToValueMap;
     private final Drawable mUserMapIcon;
     private ParkingLot mSelectedParkingLot;
     private Marker mUserMarker;
@@ -49,7 +49,7 @@ public class MarkerManager {
     public MarkerManager(Drawable drawable) {
         this.mUserMapIcon = drawable;
         mUserMapIcon.setAlpha(95); // = Opacity
-        this.mMarkerToValueMap = new HashMap<>();
+        this.mMarkerToValueMap = new ConcurrentHashMap<>();
     }
 
     /**

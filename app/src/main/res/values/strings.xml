@@ -1,11 +1,6 @@
 <resources>
     <!-- Strings related to the application itself -->
     <string name="app_name" translatable="false">CyParking</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
 
     <!-- Strings related to the action bar -->
     <string name="action_settings">Settings</string>
@@ -18,7 +13,7 @@
     <string name="menu_feedback">Feedback</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
+    <string name="email">Email</string>
     <string name="name_surname">Name &amp; Surname</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Register</string>
@@ -27,13 +22,10 @@
     <string name="invalid_email">Not a valid email</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be > 5 characters</string>
-    <string name="invalid_role_choice">At least of role must be selected</string>
     <string name="invalid_name">This field must not be left empty</string>
     <string name="login_failed">Login failed</string>
-    <string name="sign_in">Sign in</string>
     <string name="sign_up">Sign up</string>
     <string name="cancel">Cancel</string>
-    <string name="user_desc">- Book a parking \n- Pay via card</string>
     <string name="op_desc">An operator is responsible for managing his/her own parking area such as: </string>
     <string name="op_item1">Offer parking slots to other users</string>
     <string name="op_item2">Handle payments</string>
@@ -45,17 +37,15 @@
     <string name="dial_intro">Privileges</string>
     <string name="dismiss">Dismiss</string>
     <string name="name">Name</string>
-    <string name="email">Email</string>
     <string name="email_low">email</string>
     <string name="email_hint">Enter email here…</string>
     <string name="give_feedback">Give Feedback</string>
     <string name="required">Required</string>
-    <string name="send_feedback">Send feedback</string>
+    <string name="send_feedback">Send Feedback</string>
     <string name="diagnostic_info_disclaimer">In order to understand your feedback, we may receive diagnostic information from your device. While we cannot reply to feedback, all comments are taken into consideration.</string>
-    <string name="name_not_found">Unavailable</string>
+    <string name="unavailable">Unavailable</string>
 
     <!-- Strings related to the feedback -->
-    <string name="feedback_label">Feedback</string>
     <string name="invalid_feedback">Cannot be empty</string>
     <string name="feedback_success">Feedback has been sent to the CyParking Team.</string>
     <string name="feedback_failed">Feedback failed to be sent to the CyParking Team. Please try again later.</string>
@@ -88,8 +78,6 @@
     <string name="pricing">Pricing</string>
     <string name="price_eur">Price(eur)</string>
     <string name="duration_hours">Duration(hours)</string>
-    <string name="remove">Remove</string>
-    <string name="register">Register</string>
     <string name="done">Done</string>
     <string name="disclaimer">Disclaimer:</string>
     <string name="charges_disclaimer">Around 1.5% of all the credit card transaction fees will be contributed towards the CyParking Application.</string>
@@ -115,13 +103,13 @@
     <string name="invalid_qr_code">The given QR Code has wrong format. Please use the provided QR Code scanner for this application exclusively.</string>
 
     <!-- Strings related to the shared Views of HomeFragment and BookingDetailsFragment -->
-    <string name="shared_booking_card_view">bookingCardView</string>
-    <string name="shared_parent">sharedParent</string>
+    <string name="shared_booking_card_view" translatable="false">bookingCardView</string>
+    <string name="shared_parent" translatable="false">sharedParent</string>
 
     <!-- Strings related to the HomeFragment's lot section -->
     <string name="increment_by_one">Increment by one</string>
     <string name="decrement_by_one">Decrement by one</string>
-    <string name="no_parking_lots_text">No parking lots registered yet</string>
+    <string name="no_parking_lots_text">No parking lot was registered yet</string>
 
     <!-- Strings related to the ParkingMapFragment -->
     <string name="volley_error_title">No Internet connection</string>
@@ -177,28 +165,27 @@
     <string name="updating_name">Updating name</string>
     <string name="updating_email">Updating email</string>
     <string name="updating_password">Updating password</string>
-    <string name="update">Update</string>
     <string name="invalid_user_exception_msg">It looks like you signed out of your app. You should sign in again and re-perform this action.</string>
     <string name="login_required_exception">This operation is sensitive and requires recent
         authentication. Log in again before retrying this request.</string>
     <string name="directions">directions</string>
     <string name="book">Book</string>
-    <string name="sign_up_arg">sign_up</string>
-    <string name="email_arg">email</string>
+    <string name="sign_up_arg" translatable="false">sign_up</string>
+    <string name="email_arg" translatable="false">email</string>
 
     <!-- String related to Navigation Arguments   -->
-    <string name="selected_booking_arg">selected_booking</string>
-    <string name="selected_lot_arg">selected_lot</string>
-    <string name="user_latlng_arg">user_latlng</string>
+    <string name="selected_booking_arg" translatable="false">selected_booking</string>
+    <string name="selected_lot_arg" translatable="false">selected_lot</string>
+    <string name="user_latlng_arg" translatable="false">user_latlng</string>
 
     <!-- String related to test cases   -->
-    <string name="any_error">Error</string>
-    <string name="any">Any</string>
+    <string name="any_error" translatable="false">Error</string>
     <string name="no_connection">No connection</string>
-    <string name="error">Error</string>
+
+
     <string name="operator_question">Would you like to be an operator?</string>
     <string name="view_description">View Description</string>
-    <string name="scan_a_lot">Scan a lot</string>
+    <string name="scan_a_lot">Scan a parking lot</string>
     <string name="scan_a_booking">Scan a booking</string>
     <string name="view_qr_code">View QR Code</string>
     <string name="fill_in_details">Fill In Details</string>
@@ -207,7 +194,7 @@
     <string name="selected_photo">Selected Photo</string>
     <string name="parking_lot_photo">Parking Lot Photo</string>
     <string name="no_google_maps_app_found">No apps installed that support this kind of action.</string>
-    <string name="load_booking_failed">Unfortunately, couldn\'t load your bookings. Check you Internet connection and try again.</string>
+    <string name="load_booking_failed">Unfortunately, couldn\'t load your bookings. Check your Internet connection and try again.</string>
     <string name="no_booking_allowed_to_non_logged_in_users">You need to be logged in to book a parking slot!</string>
     <string name="unknown_error">Oops something went wrong!</string>
     <string name="loading_map">Please wait while the map is loading.</string>
@@ -227,7 +214,5 @@
     <string name="log_out_text">You have been logged out!</string>
     <string name="nav_to_log_fail">Failed to navigate to login screen!</string>
     <string name="best_offer">Best offer:</string>
-    <string name="unavailable">Unavailable</string>
-
 
 </resources>

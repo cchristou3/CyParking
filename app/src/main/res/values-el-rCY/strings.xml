@@ -13,8 +13,8 @@
     <string name="action_sign_in_short">Σύνδεση</string>
     <string name="welcome">Καλωσήρθατε!</string>
     <string name="invalid_email">Η ηλεκτρονική διεύθυνση είναι μη έγκυρη</string>
-    <string name="invalid_username">Δεν είναι έγκυρο όνομα χρήστη </string>
-    <string name="invalid_password">Ο κωδικός πρόσβασης πρέπει να είναι> 5 χαρακτήρες </string>
+    <string name="invalid_username">"Δεν είναι έγκυρο όνομα χρήστη "</string>
+    <string name="invalid_password">Ο κωδικός πρόσβασης πρέπει να είναι > 5 χαρακτήρες</string>
     <string name="invalid_name">Αυτό το πεδίο δεν πρέπει να είναι κενό</string>
     <string name="login_failed">Η σύνδεση απέτυχε</string>
     <string name="sign_up">Εγγραφείτε</string>

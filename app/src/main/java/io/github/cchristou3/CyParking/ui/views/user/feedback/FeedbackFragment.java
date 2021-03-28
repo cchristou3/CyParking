@@ -53,7 +53,7 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return super.onCreateView(FeedbackFragmentBinding.inflate(inflater), R.string.feedback_label);
+        return super.onCreateView(FeedbackFragmentBinding.inflate(inflater), R.string.menu_feedback);
     }
 
     /**

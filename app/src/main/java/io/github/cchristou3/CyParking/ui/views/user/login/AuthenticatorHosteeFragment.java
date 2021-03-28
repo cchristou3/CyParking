@@ -304,7 +304,7 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
             }
             return false;
         });
-        setUpAuthButton(R.string.sign_in, this::login);
+        setUpAuthButton(R.string.action_sign_in, this::login);
     }
 
     /**

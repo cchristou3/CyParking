@@ -227,7 +227,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
 
         final String hint = getDialogAttribute(dialogAction,
                 R.string.prompt_name,
-                R.string.prompt_email,
+                R.string.email,
                 R.string.prompt_password);
 
         getBinding().dialogAccountUpdateTilInput.setHintEnabled(true);

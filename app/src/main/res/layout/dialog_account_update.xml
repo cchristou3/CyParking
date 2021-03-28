@@ -70,7 +70,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:maxLines="1"
-            android:text="@string/update"
+            android:text="@string/action_update"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/dialog_account_update_til_input"
             app:layout_constraintTop_toBottomOf="@+id/dialog_account_update_til_input" />

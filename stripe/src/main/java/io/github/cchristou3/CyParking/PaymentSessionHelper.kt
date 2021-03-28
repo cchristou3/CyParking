@@ -189,6 +189,7 @@ open class PaymentSessionHelper(context: Context, val mUiPaymentSessionListener:
     }
 
     // Data members
+    private val cardText by lazy { context.getString(R.string.card_ends_with) }
     private lateinit var mPaymentSession: PaymentSession
     private var mListenerForPaymentIntent: ListenerRegistration? = null
     private var mSelectedPaymentMethod: PaymentMethod? = null
@@ -262,7 +263,7 @@ open class PaymentSessionHelper(context: Context, val mUiPaymentSessionListener:
                             Log.d("PaymentSession", "PaymentMethod $it selected")
                             // Display the payment method to the user
                             mUiPaymentSessionListener.onPaymentMethodSelected(
-                                    "${it.card?.brand} card ends with ${it.card?.last4}")
+                                    it.card?.brand.toString() + cardText + it.card?.last4)
                             mSelectedPaymentMethod = it
                         }
                     }

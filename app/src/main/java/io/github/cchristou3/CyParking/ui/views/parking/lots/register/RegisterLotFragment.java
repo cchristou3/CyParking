@@ -651,13 +651,20 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         final String[] volume = Utility.getVolume(volumeMultiplicand, 1, 10);
         DropDownMenuHelper.setUpSlotOfferDropDownMenu(requireContext(), textInputLayout, volume,
                 new DropDownMenuHelper.ItemHandler<String>() {
+                    @NotNull
+                    @Override
+                    public String onOutput(String item) {
+                        return item;
+                    }
+
+                    @NotNull
                     @Override
                     public String castItem(@NotNull ListAdapter parent, int position) {
                         return parent.getItem(position).toString();
                     }
 
                     @Override
-                    public void onItemSelected(String item) {
+                    public void onItemSelected(@NotNull String item) {
                         // Convert the spinner's value into a float and pass it in, to the consumer's method.
                         consumer.accept(Float.parseFloat(item));
                     }

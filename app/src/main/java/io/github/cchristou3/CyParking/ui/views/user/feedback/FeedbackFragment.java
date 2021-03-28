@@ -28,6 +28,8 @@ import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.utils.ViewUtility;
 
+import static io.github.cchristou3.CyParking.utils.ViewUtility.getStringOrEmpty;
+
 /**
  * Purpose: <p>Allow the user to send feedback to the development team. </p>
  * <p>
@@ -227,7 +229,7 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
         final LoggedInUser user = getUser();
         final String email = (user != null)
                 ? getUser().getEmail()
-                : getBinding().feedbackFragmentEtEmailInput.getText().toString();
+                : getStringOrEmpty(getBinding().feedbackFragmentEtEmailInput);
         mFeedbackViewModel.formDataChanged(user, textFromFeedbackArea.toString(), email);
     }
 

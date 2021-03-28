@@ -109,7 +109,7 @@ public class BookingAdapter extends SwipeableAdapter<Booking, BookingAdapter.Boo
         // - get element of the booking list at this position
         final Booking booking = getItem(position);
 
-        final String offer = booking.getBookingDetails().getSlotOffer().toString();
+        final String offer = booking.getBookingDetails().getSlotOffer().toString(holder.itemView.getContext());
         final String date = BookingDetails.getDateText(booking.getBookingDetails().getDateOfBooking());
         final BookingDetails.Time time = booking.getBookingDetails().getStartingTime();
         final String status = Booking.getStatusText(holder.itemView.getContext(), booking.isCompleted());

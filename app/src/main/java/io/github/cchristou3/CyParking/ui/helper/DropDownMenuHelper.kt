@@ -1,10 +1,11 @@
 package io.github.cchristou3.CyParking.ui.helper
 
 import android.content.Context
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.ListAdapter
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import androidx.annotation.LayoutRes
 import com.google.android.material.textfield.TextInputLayout
 import io.github.cchristou3.CyParking.R
 
@@ -13,7 +14,7 @@ import io.github.cchristou3.CyParking.R
  * that consist of [TextInputLayout] - [AutoCompleteTextView]'s.
  *
  * @author Charalambos Christou
- * @version 3.0 27/03/21
+ * @version 4.0 27/03/21
  */
 class DropDownMenuHelper {
 
@@ -35,7 +36,7 @@ class DropDownMenuHelper {
         @JvmStatic
         fun <T> setUpSlotOfferDropDownMenu(
                 context: Context, textInputLayout: TextInputLayout,
-                array: Array<T>, itemHandler: ItemHandler<T>
+                array: Array<T?>, itemHandler: ItemHandler<T>
         ) {
             if (textInputLayout.editText !is AutoCompleteTextView) return
 
@@ -48,7 +49,7 @@ class DropDownMenuHelper {
                     }
 
             // Initialize an ArrayAdapter
-            val arrayAdapter = ArrayAdapter(context, R.layout.slot_offer_drop_down_item, array)
+            val arrayAdapter = DropDownItemAdapter<T>(context, R.layout.slot_offer_drop_down_item, array, itemHandler)
             // bind the autoCompleteTextView with the above adapter
             autoCompleteTextView.setAdapter(arrayAdapter)
             // Set its default value
@@ -77,7 +78,7 @@ class DropDownMenuHelper {
                 val item = itemHandler.castItem(autoCompleteTextView.adapter, 0)
                 autoCompleteTextView.setText( // set the text of the view to
                         // the given item's content
-                        item.toString(), false
+                        itemHandler.onOutput(item), false
                 )
                 itemHandler.onItemSelected(item)
                 autoCompleteTextView.onFocusChangeListener = null // remove listener
@@ -121,5 +122,28 @@ class DropDownMenuHelper {
          * @param item The selected item.
          */
         fun onItemSelected(item: T)
+
+        /**
+         * Callback triggered for each item in the adapter, to represent it in the View.
+         */
+        fun onOutput(item: T): String
+    }
+
+    class DropDownItemAdapter<T>(context: Context, @LayoutRes resource: Int, objects: Array<T?>, private val itemHandler: ItemHandler<T>)
+        : ArrayAdapter<T>(context, resource, objects) {
+
+        /**
+         * Inflates the view if not already inflated and update its content using the [itemHandler].
+         */
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            var view = convertView
+            if (view == null) {
+                view = LayoutInflater.from(parent.context).inflate(R.layout.slot_offer_drop_down_item, parent, false)
+            }
+            if (view is TextView) {
+                getItem(position)?.let { view.text = itemHandler.onOutput(it) }
+            }
+            return view!!
+        }
     }
 }

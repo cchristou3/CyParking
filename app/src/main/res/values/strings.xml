@@ -1,6 +1,6 @@
 <resources>
     <!-- Strings related to the application itself -->
-    <string name="app_name">CyParking</string>
+    <string name="app_name" translatable="false">CyParking</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -223,6 +223,11 @@
         Please, ensure that the location permission is granted via the settings and restart the application.</string>
     <string name="go_to_settings">Go to Settings</string>
     <string name="in_flight_mode_message">Cannot calculate position whilst in Flight mode. Turn Flight mode off and try again.</string>
+    <string name="qr_code_scanner_bottom_text">Please place the scanner on a booking generated QR Code.</string>
+    <string name="log_out_text">You have been logged out!</string>
+    <string name="nav_to_log_fail">Failed to navigate to login screen!</string>
+    <string name="best_offer">Best offer:</string>
+    <string name="unavailable">Unavailable</string>
 
 
 </resources>

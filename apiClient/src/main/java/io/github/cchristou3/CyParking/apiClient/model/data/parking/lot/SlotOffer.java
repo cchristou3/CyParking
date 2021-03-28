@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.apiClient.model.data.parking.lot;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -14,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import io.github.cchristou3.CyParking.apiClient.R;
 import io.github.cchristou3.CyParking.utils.Utility;
 
 /**
@@ -188,6 +190,19 @@ public class SlotOffer implements Parcelable, Comparable<SlotOffer> {
 
     /**
      * Returns a string representation of the object.
+     *
+     * @return a string representation of the object.
+     */
+    @NonNull
+    public String toString(@NotNull Context context) {
+        return Utility.getCurrency().getSymbol() + this.price + " " + context.getString(R.string.for_res) + " "
+                + this.durationInHours + " "
+                + (this.durationInHours > 1.0 ? context.getString(R.string.hours) : context.getString(R.string.hour));
+    }
+
+    /**
+     * Returns a default string representation of the object.
+     * Note: Internationalization is not taken into account.
      *
      * @return a string representation of the object.
      */

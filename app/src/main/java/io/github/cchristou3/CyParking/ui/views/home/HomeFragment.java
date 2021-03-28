@@ -353,7 +353,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         getBinding().fragmentHomeBookingItem.bookingItemFullyTxtDate
                 .setText(BookingDetails.getDateText(upcomingBooking.getBookingDetails().getDateOfBooking()));
         getBinding().fragmentHomeBookingItem.bookingItemFullyTxtOffer
-                .setText(upcomingBooking.getBookingDetails().getSlotOffer().toString());
+                .setText(upcomingBooking.getBookingDetails().getSlotOffer().toString(requireContext()));
         getBinding().fragmentHomeBookingItem.bookingItemFullyTxtParkingName
                 .setText(upcomingBooking.getLotName());
         getBinding().fragmentHomeBookingItem.bookingItemFullyTxtStatus
@@ -478,7 +478,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
                     .forSupportFragment(HomeFragment.this)
                     .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
                     .setCameraId(0)
-                    .setPrompt("Please place the scanner on a booking generated QR Code.")
+                    .setPrompt(getString(R.string.qr_code_scanner_bottom_text))
                     .setBeepEnabled(true)
                     .setBarcodeImageEnabled(true)
                     .setCaptureActivity(PortraitCaptureActivity.class);

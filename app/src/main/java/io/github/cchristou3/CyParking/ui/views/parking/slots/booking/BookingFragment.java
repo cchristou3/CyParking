@@ -342,6 +342,13 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
         DropDownMenuHelper.setUpSlotOfferDropDownMenu(
                 requireContext(), getBinding().fragmentParkingBookingDropDown,
                 slotOffers, new DropDownMenuHelper.ItemHandler<SlotOffer>() {
+                    @NotNull
+                    @Override
+                    public String onOutput(SlotOffer item) {
+                        return item.toString(requireContext());
+                    }
+
+                    @NotNull
                     @Override
                     public SlotOffer castItem(@NotNull ListAdapter parent, int position) {
                         return (SlotOffer) parent.getItem(position);

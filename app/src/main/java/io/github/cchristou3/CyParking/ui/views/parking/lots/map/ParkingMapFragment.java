@@ -110,7 +110,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     // Constant variables
     public static final String TAG = ParkingMapFragment.class.getName() + "UniqueTag";
     private static final int DEFAULT_ZOOM_LEVEL = 16;
-    private static final String UNAVAILABLE = "Unavailable";
+    private final String UNAVAILABLE = getString(R.string.unavailable);
     private static final double UPDATE_LOCATION_THRESHOLD = 100.0D;
     private static final float MIN_ZOOM_LEVEL = 10.0f;
 
@@ -706,7 +706,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
             // Get the corresponding hash map object
             name = lot.getLotName();
             availability = lot.getLotAvailability(requireContext());
-            slotOffer = "Best offer: " + lot.getBestOffer().toString() + "";
+            slotOffer = getString(R.string.best_offer) + " " + lot.getBestOffer().toString() + "";
         }
         // Get a reference to the view and update each infoLayout field with the clicked marker's corresponding data
         getBinding().fragmentParkingMapTxtName.setText(name);

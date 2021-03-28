@@ -2,4 +2,5 @@
 <resources>
     <string name="payment_processing_error">There was an error processing your payment. Your credit card was not charged. Please contact support.</string>
     <string name="slot_already_booked">You have already booked this lot.</string>
+    <string name="card_ends_with">card ends with</string>
 </resources>

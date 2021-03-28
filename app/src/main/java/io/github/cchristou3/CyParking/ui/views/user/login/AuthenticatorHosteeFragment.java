@@ -435,6 +435,7 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
                         .goBack(getParentFragment().requireActivity());
             } catch (ClassCastException | NullPointerException e) {
                 Log.d(TAG, "updateUiWithUser - error transitioning back: " + e);
+                requireActivity().onBackPressed();
             }
         }
     }

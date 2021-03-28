@@ -216,7 +216,7 @@ internal object DataSourceRepository {
          * @return A [Task] of the above description.
          */
         @JvmDefault
-        fun callNearbyParkingLotsFunction(userLatitude: Double, userLongitude: Double): Task<HttpsCallableResult?>? {
+        fun callNearbyParkingLotsFunction(userLatitude: Double, userLongitude: Double): Task<HttpsCallableResult?> {
             return getCallableFunctionByName(GET_NEARBY_PARKING_LOTS)
                     .call(object : HashMap<String?, Double?>() {
                         init { // The request's data.

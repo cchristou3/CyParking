@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.ui.views.host;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -26,10 +28,13 @@ import io.github.cchristou3.CyParking.PaymentSessionHelper;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
+import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
 import io.github.cchristou3.CyParking.databinding.ActivityMainHostBinding;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.utilities.AnimationUtility;
 import io.github.cchristou3.CyParking.utils.ViewUtility;
+
+import static io.github.cchristou3.CyParking.utils.ViewUtility.showToast;
 
 /**
  * <p>Main host activity of the Application.
@@ -37,7 +42,7 @@ import io.github.cchristou3.CyParking.utils.ViewUtility;
  * of all fragments which it is the host of.</p>
  *
  * @author Charalambos Christou
- * @version 9.0 25/02/21
+ * @version 10.0 27/03/21
  */
 public class MainHostActivity extends AppCompatActivity {
 
@@ -92,13 +97,37 @@ public class MainHostActivity extends AppCompatActivity {
         mBinding = null; // Ready to be GCed
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case LocationManager.RC_CHECK_SETTINGS:
+                // TODO: 28/03/2021 Test whether the onActivityResult gets called device.
+                // Pass it down to the current active fragment
+                getActiveFragment().onActivityResult(requestCode, resultCode, data);
+                break;
+            case LocationManager.RC_USER_MANUAL_PERMISSION_CHECK:
+                // User returned from settings -> CyApplication -> Permissions
+                restartApp();
+                break;
+        }
+    }
+
+    /**
+     * Restarts the application.
+     */
+    private void restartApp() {
+        finish(); // kill the app
+        startActivity(new Intent(this, MainHostActivity.class)); // start another one
+    }
+
     /**
      * Shows or hides the loading bar based on the given flag.
      *
      * @param shouldShowLoadingBar Indicates whether to show or hide the loading bar.
      */
     private void updateLoadingBarVisibility(boolean shouldShowLoadingBar) {
-        ViewUtility.updateVisibilityOfLoadingBarTo(mBinding.activityMainHostCpiProgressBar, shouldShowLoadingBar);
+        ViewUtility.updateLoadingBarVisibilityTo(mBinding.activityMainHostCpiProgressBar, shouldShowLoadingBar);
     }
 
     /**
@@ -142,12 +171,10 @@ public class MainHostActivity extends AppCompatActivity {
      */
     private void addObserversToStates() {
         // Internet Connection state //
-        mGlobalStateViewModel.getConnectionState().observe(this, isConnected -> {
-            mGlobalStateViewModel
-                    .updateNoConnectionWarningState(
-                            isConnected ? View.GONE : View.VISIBLE
-                    );
-        });
+        mGlobalStateViewModel.getConnectionState().observe(this, isConnected ->
+                mGlobalStateViewModel
+                        .updateNoConnectionWarningState(isConnected ? View.GONE : View.VISIBLE)
+        );
 
         // Internet Connection Warning state //
         mGlobalStateViewModel.getNoConnectionWarningState().observe(
@@ -161,9 +188,10 @@ public class MainHostActivity extends AppCompatActivity {
         mGlobalStateViewModel.getLoadingBarState().observe(this, this::updateLoadingBarVisibility);
 
         // The current screen's label //
-        mGlobalStateViewModel.getLabelState().observe(this, s -> {
-            getSupportActionBar().setTitle(s);
-        });
+        mGlobalStateViewModel.getLabelState().observe(this, this::setActionBarTitle);
+
+        // Toast messages //
+        mGlobalStateViewModel.getToastMessage().observe(this, message -> showToast(this, message));
     }
 
     /**
@@ -260,11 +288,11 @@ public class MainHostActivity extends AppCompatActivity {
      * @param visibility Whether to the show (slide up) or hide (slide down) the above view.
      */
     private void changeNoConnectionWarningVisibilityTo(int visibility) {
-        AnimationUtility.slideVerticallyToBottom(
+        AnimationUtility.slideBottom(
                 mBinding.activityMainHostClLayout,
                 mBinding.activityMainHostTxtNoConnectionWarning,
                 visibility == View.GONE,
-                1000L
+                1000L, null
         );
     }
 
@@ -297,11 +325,21 @@ public class MainHostActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Update the visibility of drawer's name and email fields to the given flag.
+     *
+     * @param drawerName  The name field of the drawer.
+     * @param drawerEmail The email field of the drawer.
+     * @param visible     Indicate whether to dispolay of hide the above fields of the drawer.
+     */
     private void updateDrawerHeaderTextVisibilityTo(TextView drawerName, TextView drawerEmail, int visible) {
         ViewUtility.updateViewVisibilityTo(drawerName, visible);
         ViewUtility.updateViewVisibilityTo(drawerEmail, visible);
     }
 
+    /**
+     * Display drawer items that are accessible only by logged in users.
+     */
     private void enableLoggedInDestinations() {
         // Show 'view bookings' in drawer
         getDrawerMenu().findItem(R.id.nav_view_bookings).setVisible(true);
@@ -403,5 +441,15 @@ public class MainHostActivity extends AppCompatActivity {
      */
     public Menu getDrawerMenu() {
         return mBinding.activityMainHostNvNavView.getMenu();
+    }
+
+    /**
+     * Set the action bar's title to the given string resource id.
+     *
+     * @param s The label of the action bar.
+     */
+    private void setActionBarTitle(Integer s) {
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setTitle(s);
     }
 }

@@ -1,20 +1,20 @@
 package io.github.cchristou3.CyParking.data.manager.location;
 
-import android.content.Context;
-
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.viewbinding.ViewBinding;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.ref.WeakReference;
 
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
+import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 
 /**
  * Purpose: Provide <u>continuous</u> location requests. Refers to
@@ -28,19 +28,22 @@ import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
  * Besides, as a lifecycle observer, it handles it own cleanup in {@link #onStop(LifecycleOwner)}.
  * <p>
  * <b>Note:</b> it can only be constructed via
- * {@link LocationManager#createSubsequentUpdateHelper(Context, Fragment, LocationHandler)}.
+ * {@link LocationManager#createSubsequentUpdateHelper(BaseFragment, LocationHandler)}.
  * </p>
  *
+ * @param <T> Any subclass of [BaseFragment].
+ * @param <S> Any subclass of [ViewBinding].
  * @author Charalambos Christou
- * @version 1.0 23/01/21
+ * @version 2.0 27/03/21
  * @see androidx.lifecycle.DefaultLifecycleObserver
  * @see io.github.cchristou3.CyParking.data.manager.location.LocationManager
  */
-public class SubsequentUpdateHelper extends LocationManager implements DefaultLifecycleObserver {
+public class SubsequentUpdateHelper<T extends BaseFragment<S>, S extends ViewBinding>
+        extends LocationManager<T, S> implements DefaultLifecycleObserver {
 
     private static final long INTERVAL_TIME = 5000L;
+    private final WeakReference<T> mWeakFragment;
 
-    private final WeakReference<Fragment> mWeakFragment;
 
     /**
      * Public Constructor.
@@ -50,14 +53,13 @@ public class SubsequentUpdateHelper extends LocationManager implements DefaultLi
      * Also, it creates a {@link WeakReference} of the specified fragment and attaches
      * to its lifecycle the LocationManager instance.
      *
-     * @param context         The context to be used by the {@link FusedLocationProviderClient} of the parent
      * @param fragment        The fragment requesting location updates.
      * @param locationHandler The callback method to be invoked when location updates are received.
      */
     /*package-private*/ SubsequentUpdateHelper(
-            @NonNull Context context, @NonNull Fragment fragment, @NonNull LocationHandler locationHandler
+            @NonNull T fragment, @NonNull LocationHandler locationHandler
     ) {
-        super(context);
+        super(fragment.requireContext());
         setLocationCallback(new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -69,11 +71,20 @@ public class SubsequentUpdateHelper extends LocationManager implements DefaultLi
     }
 
     /**
+     * @return A {@link LocationRequest}.
+     * @see #getLocationRequest()
+     */
+    @NotNull
+    public static LocationRequest getRequest() {
+        return new LocationRequest().setInterval(INTERVAL_TIME);
+    }
+
+    /**
      * Notifies that {@code ON_RESUME} event occurred.
      * Registers the FusedLocationProviderClient instance for updates.
      *
      * @param owner the component, whose state was changed
-     * @see #requestUserLocationUpdates(Fragment)
+     * @see #requestUserLocationUpdates(BaseFragment)
      */
     @Override
     public void onResume(@NonNull LifecycleOwner owner) {
@@ -97,7 +108,7 @@ public class SubsequentUpdateHelper extends LocationManager implements DefaultLi
     /**
      * Notifies that {@code ON_STOP} event occurred.
      * <p>
-     * The observer added in {@link #SubsequentUpdateHelper(Context, Fragment, LocationHandler)}
+     * The observer added in {@link #SubsequentUpdateHelper(BaseFragment, LocationHandler)}
      * is removed.
      *
      * @param owner the component, whose state was changed
@@ -116,8 +127,24 @@ public class SubsequentUpdateHelper extends LocationManager implements DefaultLi
      * @see LocationRequest
      * @see #INTERVAL_TIME
      */
+    @NotNull
     @Override
     public LocationRequest getLocationRequest() {
-        return new LocationRequest().setInterval(INTERVAL_TIME);
+        return getRequest();
     }
+
+    /**
+     * @param fragment The current active fragment instance.
+     * @see LocationManager#beforeRequests(BaseFragment)
+     */
+    @Override
+    public void beforeRequests(@NotNull T fragment) { /* no extra preparation is needed */ }
+
+    /**
+     * Clean up resources whenever an error occurs.
+     *
+     * @param fragment any subclass of {@link BaseFragment}.
+     */
+    @Override
+    public void performErrorCleanUp(@NotNull T fragment) { /* no need to clean up */ }
 }

@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Contract
  * are accessible from everywhere in the application.
  *
  * @author Charalambos Christou
- * @since 1.0 01/03/21
+ * @since 2.0 27/03/21
  */
 
 /**
@@ -76,7 +76,7 @@ fun getCardViewColor(cardView: CardView): ColorDrawable {
 
 /**
  * Extension method for [Drawable]s.
- * Set color to the given color.
+ * Set the color of the calling drawable instance.
  *
  * @param color colorInt obtained by [Resources.getColor]
  */
@@ -85,4 +85,15 @@ fun Drawable.setColor(@ColorInt color: Int) {
             // Thus, the drawable shape will remain unchanged
             // and its color will be blended with the given color.
             BlendModeColorFilterCompat.createBlendModeColorFilterCompat(color, BlendModeCompat.SRC_IN)
+}
+
+/**
+ * Set color to the given drawable.
+ * Java implementation for the above method
+ *
+ * @param color colorInt obtained by [Resources.getColor]
+ */
+fun applyDrawableColor(drawable: Drawable, @ColorInt color: Int): Drawable {
+    drawable.setColor(color)
+    return drawable
 }

@@ -36,7 +36,7 @@ import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
  * </p>
  *
  * @author Charalambos Christou
- * @version 4.0 09/02/21
+ * @version 5.0 27/03/21
  */
 public class GlobalStateViewModel extends LoadingBarViewModel {
 
@@ -50,6 +50,7 @@ public class GlobalStateViewModel extends LoadingBarViewModel {
     private final MutableLiveData<Integer> mLabel = new MutableLiveData<>();
     // ViewModel's API
     private final AuthenticatorRepository mAuthenticatorRepository;
+
 
     /**
      * Initialize the ViewModel's AuthenticatorRepository instance
@@ -154,6 +155,7 @@ public class GlobalStateViewModel extends LoadingBarViewModel {
      * fetches them from the backend.
      *
      * @param context The context of the screen.
+     * @param user    the current instance of {@link FirebaseUser}.
      */
     public void getUserInfo(@NonNull Context context, @Nullable FirebaseUser user) {
         if (user == null) return; // If not logged in, then terminate method.
@@ -177,7 +179,8 @@ public class GlobalStateViewModel extends LoadingBarViewModel {
 
             @Override
             public void onRemoteDataNotFound(Exception exception) {
-                mUserState.setValue(null);
+                // No records found neither locally, nor remotely, so sign him/her out.
+                signOut();
             }
         });
     }

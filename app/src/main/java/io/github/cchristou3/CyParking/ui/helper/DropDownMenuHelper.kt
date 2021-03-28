@@ -13,7 +13,7 @@ import io.github.cchristou3.CyParking.R
  * that consist of [TextInputLayout] - [AutoCompleteTextView]'s.
  *
  * @author Charalambos Christou
- * @version 2.0 13/03/21
+ * @version 3.0 27/03/21
  */
 class DropDownMenuHelper {
 
@@ -92,6 +92,7 @@ class DropDownMenuHelper {
          */
         @JvmStatic
         fun cleanUp(textInputLayout: TextInputLayout) {
+            textInputLayout.isFocusable = false
             val autoCompleteTextView = textInputLayout.editText
             if (autoCompleteTextView is AutoCompleteTextView) {
                 autoCompleteTextView.setAdapter(null)

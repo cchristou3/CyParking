@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
  * Its single attribute is handling toast messages.
  *
  * @author Charalambos Christou
- * @since 1.0 06/03/21
+ * @since 2.0 27/03/21
  */
 open class ToastViewModel : ViewModel() {
 
@@ -24,11 +24,20 @@ open class ToastViewModel : ViewModel() {
         private set
 
     /**
-     * Access the [mToastMessage].
-     *
-     * @return The state of the [mToastMessage].
+     * Update the value the [mToastMessage] from the main
+     * thread.
+     * @param message The new value of [mToastMessage].
      */
     fun updateToastMessage(message: Int) {
         mToastMessage.value = message
+    }
+
+    /**
+     * Update the value the [mToastMessage] from a background
+     * thread.
+     * @param message The new value of [mToastMessage].
+     */
+    fun postToastMessage(message: Int) {
+        mToastMessage.postValue(message)
     }
 }

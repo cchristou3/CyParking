@@ -1,24 +1,30 @@
 package io.github.cchristou3.CyParking.ui.views.home;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.util.Consumer;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Query;
+import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
 
+import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
+import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorRepository;
+import io.github.cchristou3.CyParking.data.manager.EncryptionManager;
 
 /**
  * Purpose: <p>Data persistence when configuration changes.
  * Used when the operator is viewing/updating his/her parking lot.</p>
  *
  * @author Charalambos Christou
- * @version 3.0 24/02/21
+ * @version 5.0 27/03/21
  */
 public class OperatorViewModel extends ViewModel {
 
@@ -99,6 +105,39 @@ public class OperatorViewModel extends ViewModel {
      */
     public void receiveBooking(DocumentReference lotReference, String bookingDocId) {
         mDefaultOperatorRepository.updateBookingStatus(bookingDocId);
-        mDefaultOperatorRepository.decrementAvailableSpacesOf(lotReference);
+        incrementPersonCount(lotReference);
+    }
+
+    /**
+     * Handle the QR Code scanner's result.
+     *
+     * @param qRCodeResult The QR Code's intent data if there are any.
+     * @param lotReference The lot reference of the operator's parking lot.
+     * @param displayToast A handler for displaying toast messages.
+     */
+    public void handleQRCodeScannerContents(@Nullable IntentResult qRCodeResult, DocumentReference lotReference, Consumer<Integer> displayToast) {
+        if (lotReference == null || qRCodeResult == null)
+            return; // Method was called without initiating a QR Code scan
+
+        if (qRCodeResult.getContents() == null) { // User pressed the back button
+            displayToast.accept(R.string.cancelled);
+            return;
+        }
+        try {
+            // Access the qr code's payload
+            // Convert it to an array of bytes
+            byte[] encodedMessageInBytes = EncryptionManager.hexStringToByteArray(qRCodeResult.getContents());
+            // Decrypt it
+            String decodedMessage = new EncryptionManager().decrypt(encodedMessageInBytes);
+            receiveBooking(
+                    // Access the previously stored lot reference
+                    lotReference,
+                    // Convert the string into a Booking object and access its unique id
+                    Booking.toBooking(decodedMessage).generateDocumentId()
+            );
+        } catch (Exception ignored) {
+            // Display a message in case decryption failed (malformed/corrupted/outside of the application's bounds message)
+            displayToast.accept(R.string.invalid_qr_code);
+        }
     }
 }

@@ -2,8 +2,10 @@ package io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking;
 
 import android.util.Log;
 
+import androidx.core.util.Consumer;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -15,16 +17,15 @@ import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.BookingRepository;
 import io.github.cchristou3.CyParking.apiClient.utils.Utils;
-import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
 
 /**
  * Purpose: <p>Data persistence when configuration changes.
  * Used when the users try to view their bookings.</p>
  *
  * @author Charalambos Christou
- * @version 3.0 28/02/21
+ * @version 4.0 26/03/21
  */
-public class ViewBookingsViewModel extends ToastViewModel {
+public class ViewBookingsViewModel extends ViewModel {
 
     private static final String TAG = ViewBookingsViewModel.class.getName();
     // Data member
@@ -76,16 +77,17 @@ public class ViewBookingsViewModel extends ToastViewModel {
      * that are not completed. Also, if this method is called
      * more than one time, then the remaining calls are ignored.
      *
-     * @param userId The id of the Firebase user.
+     * @param userId       The id of the Firebase user.
+     * @param displayToast A handler for displaying toast messages.
      */
-    public void getUserBookings(String userId) {
+    public void getUserBookings(String userId, Consumer<Integer> displayToast) {
         if (!mWasDataLoaded) {
             this.mBookingRepository.getUserBookings(userId).get()
                     .addOnCompleteListener(task -> {
                         final Exception error = task.getException();
                         final QuerySnapshot value = task.getResult();
                         if (error != null || value == null) { // Check whether an error occurred
-                            updateToastMessage(R.string.load_booking_failed);
+                            displayToast.accept(R.string.load_booking_failed);
                             return;
                         }
 

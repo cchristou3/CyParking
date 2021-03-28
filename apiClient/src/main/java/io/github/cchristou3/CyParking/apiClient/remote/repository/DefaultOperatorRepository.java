@@ -1,9 +1,6 @@
 package io.github.cchristou3.CyParking.apiClient.remote.repository;
 
 import android.net.Uri;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
@@ -15,11 +12,6 @@ import com.google.firebase.storage.StorageReference;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import io.github.cchristou3.CyParking.apiClient.model.data.parking.Parking;
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
 
 /**
@@ -29,7 +21,7 @@ import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLo
  * for operator-role users.
  *
  * @author Charalambos Christou
- * @version 3.0 06/02/21
+ * @version 4.0 26/03/21
  */
 public class DefaultOperatorRepository implements OperatorRepository,
         DataSourceRepository.ParkingLotHandler,
@@ -55,12 +47,12 @@ public class DefaultOperatorRepository implements OperatorRepository,
         // Add the info to the database
         return checkIfAlreadyExists(parkingLotToBeStored)
                 .continueWithTask(checkResultTask -> {
-                    boolean lotAlreadyExist = checkResultTask.getResult();
+                    boolean lotAlreadyExist = checkResultTask.getResult() != null && checkResultTask.getResult();
                     if (lotAlreadyExist) {
                         return sendResponse(checkResultTask, false);
                     } else {
                         return checkResultTask // Upload the photo in Firebase Storage
-                                .continueWithTask(task -> uploadPhoto(selectedImageUri))
+                                .continueWithTask(task -> uploadPhoto(selectedImageUri, parkingLotToBeStored.getOperatorId()))
                                 // Add the lot to the database
                                 .continueWithTask(uploadPhotoTask -> {
                                     if (uploadPhotoTask.isSuccessful()) {
@@ -68,7 +60,8 @@ public class DefaultOperatorRepository implements OperatorRepository,
                                         Uri photoDownloadUri = uploadPhotoTask.getResult();
 
                                         // Set its photo url
-                                        parkingLotToBeStored.setLotPhotoUrl(photoDownloadUri.toString());
+                                        if (photoDownloadUri != null)
+                                            parkingLotToBeStored.setLotPhotoUrl(photoDownloadUri.toString());
 
                                         // Store to database
                                         return sendResponse(registerParkingLot(parkingLotToBeStored), true);
@@ -82,17 +75,27 @@ public class DefaultOperatorRepository implements OperatorRepository,
 
     }
 
+    /**
+     * Encapsulate code for creating boolean {@link Continuation}'s.
+     *
+     * @param checkResultTask The task responsible for checking whether a lot already exists
+     *                        with the same information.
+     * @param isSuccessful    True if it already exists. Otherwise false.
+     * @param <T>             The task result.
+     * @return A Task of type Boolean based on the given flag.
+     */
     @NotNull
     @Contract("_, _ -> !null")
     private <T> Task<Boolean> sendResponse(@NotNull Task<T> checkResultTask, boolean isSuccessful) {
-        return checkResultTask.continueWith(new Continuation<T, Boolean>() {
-            @Override
-            public Boolean then(@NonNull Task<T> task) throws Exception {
-                return isSuccessful;
-            }
-        });
+        return checkResultTask.continueWith(task -> isSuccessful);
     }
 
+    /**
+     * Check whether the given parking lot object already exists in the database.
+     *
+     * @param parkingLotToBeStored A parking lot instance.
+     * @return A Task of type Boolean based on the above condition.
+     */
     @NotNull
     @Contract("_ -> !null")
     private Task<Boolean> checkIfAlreadyExists(@NotNull ParkingLot parkingLotToBeStored) {
@@ -102,14 +105,9 @@ public class DefaultOperatorRepository implements OperatorRepository,
                 .continueWith(checkIfAlreadyExistTask -> {
                     // If the task was successful, then the document already exists
                     // within the database.
-                    if (checkIfAlreadyExistTask.isSuccessful()
-                            && checkIfAlreadyExistTask.getResult().getData() != null) {
-                        return true; // Do not do any more tasks - registration failed
-                        // TODO: what if the task failed?
-                    } else {
-                        Log.d(TAG, "registerParkingLot: " + parkingLotToBeStored);
-                        return false;
-                    }
+                    return (checkIfAlreadyExistTask.isSuccessful()
+                            && checkIfAlreadyExistTask.getResult() != null
+                            && checkIfAlreadyExistTask.getResult().getData() != null);
                 });
     }
 
@@ -180,42 +178,22 @@ public class DefaultOperatorRepository implements OperatorRepository,
      * Uploads the given file Uri to Firebase storage
      *
      * @param selectedImageUri The Uri of an image.
+     * @param operatorId       The id of the operator.
      * @return A {@link Task<Uri>} instance to be handled by the caller.
      */
     @Override
-    public Task<Uri> uploadPhoto(@NotNull Uri selectedImageUri) {
-        // TODO: 24/03/2021 Avoid using the photo's last path segment as it might confli ct with other users
-        //  use instead the user's uid.
-        // Get a reference to store file at LOT_PHOTOS/<FILENAME>
-        StorageReference photoRef = getLotPhotosStorageRef().child(selectedImageUri.getLastPathSegment());
+    public Task<Uri> uploadPhoto(@NotNull Uri selectedImageUri, String operatorId) {
+        // Get a reference to store file at LOT_PHOTOS/<OPERATOR_ID>:<FILENAME>
+        StorageReference photoRef = getLotPhotosStorageRef().child(operatorId + ":" + selectedImageUri.getLastPathSegment());
 
         // Upload file to Firebase storage
         return photoRef.putFile(selectedImageUri) // upload photo task
                 .continueWithTask(task -> {
-                    if (!task.isSuccessful()) throw task.getException();
+                    if (!task.isSuccessful() && task.getException() != null)
+                        throw task.getException();
 
                     // Continue with the task to get the URL
                     return photoRef.getDownloadUrl();
                 });
-    }
-
-    /**
-     * Adds hard-coded data to the firebase's PRIVATE_PARKING node.
-     * Used for testing.
-     */
-    public void addDummyParkingData() {
-        List<ParkingLot> parkingLotList = new ArrayList<>(Arrays.asList(
-                new ParkingLot(new Parking.Coordinates(34.9214056, 33.621935),
-                        "99999999", "A@gmail.com", "A name"),
-                new ParkingLot(new Parking.Coordinates(34.9214672,
-                        33.6227833), "88888888", "B@gmail.com", "Another name"),
-                new ParkingLot(new Parking.Coordinates(34.9210801,
-                        33.6236309), "77777777", "C@gmail.com", "And another name"),
-                new ParkingLot(new Parking.Coordinates(34.921800,
-                        33.623560), "66666666", "D@gmail.com", "A name again"))
-        );
-        for (ParkingLot parking : parkingLotList) {
-            registerParkingLot(parking);
-        }
     }
 }

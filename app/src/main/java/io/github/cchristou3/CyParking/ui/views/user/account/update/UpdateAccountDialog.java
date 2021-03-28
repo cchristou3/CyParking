@@ -43,6 +43,7 @@ import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.utils.ViewUtility;
 
 import static io.github.cchristou3.CyParking.ui.views.host.MainHostActivity.TAG;
+import static io.github.cchristou3.CyParking.utils.ViewUtility.getStringOrEmpty;
 
 /**
  * Purpose: Allows the users to update one of their attributes.
@@ -259,7 +260,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      * @param shouldShowLoadingBar Indicates whether to display or hide the loading bar.
      */
     public void updateLoadingBarVisibility(boolean shouldShowLoadingBar) {
-        ViewUtility.updateVisibilityOfLoadingBarTo(getBinding().dialogAccountUpdateClpbLoadingBar, shouldShowLoadingBar);
+        ViewUtility.updateLoadingBarVisibilityTo(getBinding().dialogAccountUpdateClpbLoadingBar, shouldShowLoadingBar);
     }
 
     /**
@@ -293,7 +294,8 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
     @Override
     public void onClick(View v) {
         // Access the field's info
-        final String updatedField = getBinding().dialogAccountUpdateEtInput.getText().toString();
+
+        final String updatedField = getStringOrEmpty(getBinding().dialogAccountUpdateEtInput);
         if (mUpdateViewModel.getDialogType() == UPDATE_DISPLAY_NAME
                 && mGlobalStateViewModel.getUser() != null
                 && updatedField.equals(mGlobalStateViewModel.getUser().getDisplayName())) {
@@ -324,7 +326,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
                     final String toastMsg = actionItem + " got updated.";
                     try {
                         // And display it to the user
-                        Toast.makeText(getParentFragment().requireContext(), toastMsg, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireActivity(), toastMsg, Toast.LENGTH_SHORT).show();
                         updateUserState(updatedField); // Update the user's state attribute
                     } catch (NullPointerException ignored) {
                     } finally {
@@ -347,6 +349,8 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
      */
     private void updateUserState(String updatedField)
             throws NullPointerException {
+        if (mGlobalStateViewModel.getUser() == null) return;
+
         switch (mUpdateViewModel.getDialogType()) {
             case UpdateAccountDialog.UPDATE_DISPLAY_NAME:
                 // Update the user state's display name
@@ -401,6 +405,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
                     + " already belongs to another user", Toast.LENGTH_SHORT).show();
         } else if (exception instanceof FirebaseTooManyRequestsException) {
             // Many requests from this device can cause unusual activity
+            if (getParentFragment() == null) return;
             final Snackbar tooManyRequestsSnackbar =
                     Snackbar.make(getParentFragment().requireView(), exception.getLocalizedMessage(), Snackbar.LENGTH_INDEFINITE);
             tooManyRequestsSnackbar.setAction(R.string.dismiss, v -> tooManyRequestsSnackbar.dismiss()).show();
@@ -408,10 +413,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         } else {
             Toast.makeText(requireContext(), exception.getLocalizedMessage(),
                     Toast.LENGTH_LONG).show();
-            // TODO: Add logger
         }
-
-        // TODO: Test all scenarios, and polish fragment.
     }
 
     /**

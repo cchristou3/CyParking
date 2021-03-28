@@ -2,9 +2,11 @@ package io.github.cchristou3.CyParking.ui.views.parking.slots.booking
 
 import android.content.Context
 import android.content.Intent
+import androidx.core.util.Consumer
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -21,7 +23,6 @@ import io.github.cchristou3.CyParking.data.manager.DatabaseObserver
 import io.github.cchristou3.CyParking.data.manager.EncryptionManager
 import io.github.cchristou3.CyParking.data.manager.EncryptionManager.Companion.hex
 import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent
-import io.github.cchristou3.CyParking.ui.components.ToastViewModel
 import io.github.cchristou3.CyParking.utils.Utility
 import org.jetbrains.annotations.Contract
 import java.text.ParseException
@@ -32,13 +33,13 @@ import java.util.*
  * Purpose: Data persistence during configuration changes.
  *
  * @author Charalambos Christou
- * @since 4.0 11/03/21
+ * @since 6.0 27/03/21
  * @constructor Initialize the [BookingViewModel]'s [BookingRepository] and [PaymentSessionHelper] instances.
  * @param mBookingRepository the ViewModel's data source
  * @param mPaymentSessionHelper the ViewModel's payment manager.
  */
 class BookingViewModel(private val mBookingRepository: BookingRepository, private val mPaymentSessionHelper: PaymentSessionHelper)
-    : ToastViewModel() {
+    : ViewModel() {
 
     // Data members
     private val mPickedDate = MutableLiveData(
@@ -51,8 +52,9 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
     private val mSnackBarState = SingleLiveEvent<String>()
     private val mPaymentMethod = SingleLiveEvent<String>()
     private val mAlertState = SingleLiveEvent<String>()
-    private val shouldStartPaymentFlow = SingleLiveEvent<Boolean>()
-    private val newParkingLotVersionState = MutableLiveData<ParkingLot>()
+    private val mShouldStartPaymentFlow = SingleLiveEvent<Boolean>()
+    private val mNewParkingLotVersionState = MutableLiveData<ParkingLot>()
+    private val mIsBookingCompleted = MutableLiveData<Boolean>(false)
 
     /**
      * Sets the value of [.mQRCodeMessage]
@@ -80,7 +82,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      * Updates the value of [.snackBarState]
      * with the given argument.
      */
-    public fun updateSnackBarState(bookingId: String) {
+    fun updateSnackBarState(bookingId: String) {
         mSnackBarState.value = bookingId
     }
 
@@ -164,9 +166,11 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
     val qRCodeButtonState: LiveData<Boolean>
         get() = mQRCodeButtonState
     val paymentFlow: LiveData<Boolean>
-        get() = shouldStartPaymentFlow
+        get() = mShouldStartPaymentFlow
     val newParkingLotVersion: LiveData<ParkingLot>
-        get() = newParkingLotVersionState
+        get() = mNewParkingLotVersionState
+    val isBookingCompleted: LiveData<Boolean>
+        get() = mIsBookingCompleted
 
 
     /**
@@ -196,7 +200,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
             return@EventListener
         }
         // Trigger observe update
-        newParkingLotVersionState.value = lot
+        mNewParkingLotVersionState.value = lot
     }
 
     /**
@@ -208,11 +212,16 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      * @param context the context to make use of.
      * @param selectedParking the selected parking lot.
      */
-    fun observeParkingLotToBeBooked(context: Context, selectedParking: ParkingLot): DatabaseObserver<DocumentReference, DocumentSnapshot> =
-            DatabaseObserver.createDocumentReferenceObserver(
-                    getParkingLotReference(selectedParking),  // The Document Reference
-                    getSnapShotListener(context)) // The event listener
-
+    fun observeParkingLotToBeBooked(context: Context, selectedParking: ParkingLot): DatabaseObserver<DocumentReference, DocumentSnapshot>? {
+        isBookingCompleted.value?.let {
+            if (it) {
+                return DatabaseObserver.createDocumentReferenceObserver(
+                        getParkingLotReference(selectedParking),  // The Document Reference
+                        getSnapShotListener(context)) // The event listener
+            }
+        }
+        return null
+    }
 
     /**
      * Validate the booking's data.
@@ -226,9 +235,10 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      * @param hideLoadingBar a [Runnable] responsible for hiding the Ui's loading bar.
      */
     fun bookParkingLot(
-            user: LoggedInUser?, selectedParking: ParkingLot, showLoadingBar: Runnable, hideLoadingBar: Runnable
+            user: LoggedInUser?, selectedParking: ParkingLot, showLoadingBar: Runnable,
+            hideLoadingBar: Runnable, displayToast: Consumer<Int>
     ) {
-        val isValid = validateData(user, selectedParking)
+        val isValid = validateData(user, selectedParking, displayToast)
         if (!isValid) return
 
         // TODO: 05/02/2021 Check time if the date is the same if the user picked today's date
@@ -244,7 +254,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
         val booking = buildBooking(user, date, selectedParking)
         // add QR code text to the booking object
         booking.qrCode = generateQRCodeText(booking)
-        bookParkingLot(booking, hideLoadingBar)
+        bookParkingLot(booking, hideLoadingBar, displayToast)
     }
 
     /**
@@ -283,31 +293,28 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      * @param selectedParking the parking lot the user wants to issue a booking for.
      * @return True, if all of the conditions above are true. Otherwise, false.
      */
-    private fun validateData(user: LoggedInUser?, selectedParking: ParkingLot): Boolean {
+    private fun validateData(user: LoggedInUser?, selectedParking: ParkingLot, displayToast: Consumer<Int>): Boolean {
         if (user == null) return false // If not logged in, exit the method
-
-        // Check whether there are available spaces
-        if (selectedParking.availableSpaces == 0) { // if not
-            // Display message to user and terminate the function.
-            updateToastMessage(R.string.no_space_msg)
+        getValidationError(selectedParking.availableSpaces)?.let {
+            displayToast.accept(it)
             return false
         }
-
-        // Check whether the user picked a payment method
-        if (paymentMethod.value == null) {
-            updateToastMessage(R.string.no_payment_method_selected)
-            return false
-        }
-
-        // Access parking operator's details via the Intent object
-        val pickedDate = date
-        if (pickedDate == null) {
-            // Display error message
-            updateToastMessage(R.string.parse_error_msg)
-            return false
-        }
-
         return true
+    }
+
+    /**
+     * Check for potential validation errors.
+     *
+     * @return True, if there are no available spaces or if the user did not
+     * selected a payment method, or if the given date cannot be parsed into a string (should never be the case).
+     */
+    private fun getValidationError(availableSpaces: Int): Int? {
+        // Check whether there are available spaces
+        if (availableSpaces == 0) return R.string.no_space_msg
+        // Check whether the user picked a payment method
+        if (paymentMethod.value == null) return R.string.no_payment_method_selected
+        if (date == null) return R.string.parse_error_msg
+        return null
     }
 
     /**
@@ -319,7 +326,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      * @param hideLoadingBar a [Runnable] responsible for hiding the Ui's loading bar.
      */
     private fun bookParkingLot(
-            booking: Booking, hideLoadingBar: Runnable
+            booking: Booking, hideLoadingBar: Runnable, displayToast: Consumer<Int>
     ) {
         mBookingRepository.checkIfAlreadyBookedBySameUser(booking)
                 // Attach an onComplete listener to handle the task's result
@@ -327,7 +334,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
                     if (task.isSuccessful && task.exception == null) {
                         val wasAlreadyBooked = task.result
                         if (wasAlreadyBooked) {
-                            onFlowFailure(hideLoadingBar)
+                            onFlowFailure(hideLoadingBar, displayToast)
                             return@addOnCompleteListener
                         }
 
@@ -339,16 +346,16 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
                             }
 
                             override fun onPaymentFailure(error: Int) {
-                                onFlowFailure(hideLoadingBar)
+                                onFlowFailure(hideLoadingBar, displayToast)
                             }
                         })
                         // Trigger payment flow
-                        this.shouldStartPaymentFlow.value = true
+                        this.mShouldStartPaymentFlow.value = true
 
                         return@addOnCompleteListener
                     }
                     // Otherwise, display an error message to the user
-                    onFlowFailure(hideLoadingBar)
+                    onFlowFailure(hideLoadingBar, displayToast)
                 }
     }
 
@@ -360,8 +367,8 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      *
      * @param hideLoadingBar a [Runnable] responsible for hiding the Ui's loading bar.
      */
-    fun onFlowFailure(hideLoadingBar: Runnable): Unit {
-        updateToastMessage(R.string.slot_already_booked)
+    fun onFlowFailure(hideLoadingBar: Runnable, displayToast: Consumer<Int>) {
+        displayToast.accept(R.string.slot_already_booked)
         mBookingButtonState.value = true
         hideLoadingBar.run() // hide loading bar
     }
@@ -389,6 +396,9 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
                     // Display undo option
                     updateSnackBarState(booking.generateDocumentId())
 
+                    // Disable any further Ui input
+                    mIsBookingCompleted.value = true
+
                     // Display the 'View QR Code' button
                     updateQRCodeButtonState(true)
 
@@ -413,11 +423,14 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
 
     /**
      * Deletes the specified document using the document ID
+     * and re-enables the UI for user input.
      *
      * @param idOfBookingToBeCancelled The id of the document which we want to delete
      */
     fun cancelBooking(idOfBookingToBeCancelled: String) {
         mBookingRepository.cancelParkingBooking(idOfBookingToBeCancelled)
+        mIsBookingCompleted.value = false
+        mBookingButtonState.value = true
     }
 
     /**
@@ -465,5 +478,15 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      */
     fun setUpPaymentSession(fragment: Fragment) {
         mPaymentSessionHelper.setUpPaymentSession(fragment)
+    }
+
+    fun handleSelectedItem(item: SlotOffer) {
+        isBookingCompleted.value?.let { isCompleted ->
+            if (!isCompleted) {
+                updateSlotOffer(item)
+                // and display the booking button
+                updateBookingButtonState(true)
+            }
+        }
     }
 }

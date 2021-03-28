@@ -11,8 +11,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.ColorInt
 import androidx.cardview.widget.CardView
+import androidx.transition.Fade
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
+import androidx.transition.Visibility
+import io.github.cchristou3.CyParking.utils.poko.OnTransitionEndListener
 
 /**
  * Purpose: <p>Contain all helper / utility methods which the application needs
@@ -20,7 +23,7 @@ import androidx.transition.TransitionManager
  * are accessible from everywhere in the application.
  *
  * @author Charalambos Christou
- * @version 2.0 06/03/21
+ * @version 3.0 26/03/21
  */
 
 /**
@@ -34,21 +37,93 @@ import androidx.transition.TransitionManager
  * @param childToBeAnimated The view we want to animate.
  * @param duration The duration of the animation.
  * @param hide Whether to hide or show the animating view.
+ * @param nextAnimation the next animation to perform once this transition has finished.
  */
-fun slideVerticallyToBottom(parent: ViewGroup, childToBeAnimated: View, hide: Boolean, duration: Long) {
-    // BOTTOM indicates that we want to push the view to the bottom of its container,
-    // without changing its size.
-    val transition = Slide(Gravity.BOTTOM)
+fun slideBottom(parent: ViewGroup, childToBeAnimated: View, hide: Boolean, duration: Long, nextAnimation: Runnable?) =
+        slide(parent, childToBeAnimated, hide, duration, Gravity.BOTTOM, nextAnimation)
+
+
+/**
+ * Perform a vertical sliding animation of the given [childToBeAnimated] view.
+ * If [hide] is true then it will slide the above view upwards till it is
+ * out of the screen.
+ * Otherwise, it will slide the view downwards to its destination starting from
+ * the top of the screen.
+ *
+ * @param parent The parent ViewGroup of the child we want to animate.
+ * @param childToBeAnimated The view we want to animate.
+ * @param duration The duration of the animation.
+ * @param hide Whether to hide or show the animating view.
+ * @param nextAnimation the next animation to perform once this transition has finished.
+ */
+fun slideTop(parent: ViewGroup, childToBeAnimated: View, hide: Boolean, duration: Long, nextAnimation: Runnable?) =
+        slide(parent, childToBeAnimated, hide, duration, Gravity.TOP, nextAnimation)
+
+
+/**
+ * Perform a vertical sliding animation of the given [childToBeAnimated] view.
+ * If [hide] is true then it will slide the above view towards the given gravity
+ * edge ([slideEdge]).
+ *
+ * @param parent The parent ViewGroup of the child we want to animate.
+ * @param childToBeAnimated The view we want to animate.
+ * @param duration The duration of the animation.
+ * @param hide Whether to hide or show the animating view.
+ * @param slideEdge indicates towards which direction to animate towards to.
+ * @param nextAnimation the next animation to perform once this transition has finished.
+ */
+fun slide(
+        parent: ViewGroup, childToBeAnimated: View, hide: Boolean,
+        duration: Long, @Slide.GravityFlag slideEdge: Int, nextAnimation: Runnable?
+) = animate(Slide(slideEdge), parent, childToBeAnimated, hide, duration, nextAnimation)
+
+
+/**
+ * Perform a fading animation of the given [childToBeAnimated] view.
+ * If [hide] is true then it will fade out the above view. Otherwise, it
+ * will fade it inside the screen.
+ *
+ * @param parent The parent ViewGroup of the child we want to animate.
+ * @param childToBeAnimated The view we want to animate.
+ * @param duration The duration of the animation.
+ * @param hide Whether to hide or show the animating view.
+ * @param mode indicates how to animate the given view.
+ * @param nextAnimation the next animation to perform once this transition has finished.
+ */
+fun fade(
+        parent: ViewGroup, childToBeAnimated: View, hide: Boolean,
+        duration: Long, mode: Int, nextAnimation: Runnable?
+) = animate(Fade(mode), parent, childToBeAnimated, hide, duration, nextAnimation)
+
+
+/**
+ * Perform an animation of the given [childToBeAnimated] view.
+ * If [hide] is true then it will animate the above view inside the
+ * screen. Otherwise, it will animate it out.
+ *
+ * @param transition The kind of transition to performed (e.g., [Fade], [Slide]]).
+ * @param parent The parent ViewGroup of the child we want to animate.
+ * @param childToBeAnimated The view we want to animate.
+ * @param duration The duration of the animation.
+ * @param hide Whether to hide or show the animating view.
+ * @param nextAnimation the next animation to perform once this transition has finished.
+ */
+fun animate(
+        transition: Visibility, parent: ViewGroup, childToBeAnimated: View, hide: Boolean,
+        duration: Long, nextAnimation: Runnable?
+) {
     transition.duration = duration // how long the animation will last
     // Add the id of the target view that this Transition is interested in
     transition.addTarget(childToBeAnimated.id)
+    // Start the next animation (if there is one) once this one finishes
+    nextAnimation?.let { transition.addListener(OnTransitionEndListener(nextAnimation)) }
 
     // The TransitionManager starts the animation and
     // handles updating the scene between the frames
     TransitionManager.beginDelayedTransition(parent, transition)
 
-    // If visibility set to VISIBLE, it will slide up
-    // Otherwise, it will slide down.
+    // If visibility set to VISIBLE, it will slide towards
+    // Otherwise, it will slide backwards.
     childToBeAnimated.visibility = if (hide) View.GONE else View.VISIBLE
 }
 

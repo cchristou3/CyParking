@@ -156,7 +156,7 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
                 resources.getColor(R.color.purple_700, activity?.theme))
         binding.bookingDetailsFragmentFabDirections.setOnClickListener {
             LocationManager.launchGoogleMaps(
-                    requireContext(),
+                    this,
                     lot.latitude,
                     lot.longitude,
                     lot.lotName

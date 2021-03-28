@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.util.Consumer;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewbinding.ViewBinding;
 
@@ -53,8 +52,8 @@ import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 
 import static android.view.View.GONE;
 import static io.github.cchristou3.CyParking.utilities.AnimationUtility.animateAvailabilityColorChanges;
-import static io.github.cchristou3.CyParking.utilities.AnimationUtility.slideVerticallyToBottom;
-import static io.github.cchristou3.CyParking.utils.ViewUtility.showToast;
+import static io.github.cchristou3.CyParking.utilities.AnimationUtility.slideBottom;
+import static io.github.cchristou3.CyParking.utilities.DrawableUtility.applyDrawableColor;
 
 /**
  * Purpose: <p>View all nearby parking.
@@ -73,7 +72,7 @@ import static io.github.cchristou3.CyParking.utils.ViewUtility.showToast;
  * </p>
  *
  * @author Charalambos Christou
- * @version 16.0 25/03/21
+ * @version 17.0 27/03/21
  * <p>
  * New changes:
  * <p><b>On server</b>: via a cloud function retrieve the document ids of all
@@ -121,7 +120,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
 
     // Location related variables
-    private SubsequentUpdateHelper mLocationManager;
+    private SubsequentUpdateHelper<ParkingMapFragment, FragmentParkingMapBinding> mLocationManager;
     private GoogleMap mGoogleMap;
     private LatLng mUserCurrentLatLng;
     private LatLng mInitialUserLatLng;
@@ -143,7 +142,8 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
         }
         // Initialize MarkerManager and provide it with the icon to be used to display the user's location on the map.
         mMarkerManager = new MarkerManager(
-                ResourcesCompat.getDrawable(getResources(), R.drawable.ic_user_location, requireActivity().getTheme())
+                applyDrawableColor(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_user_location, requireActivity().getTheme()),
+                        getResources().getColor(R.color.black, requireActivity().getTheme()))
         );
         initializeViewModel();
     }
@@ -193,7 +193,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     public void onStart() {
         super.onStart();
         // Initialize the LocationManager
-        mLocationManager = LocationManager.createSubsequentUpdateHelper(requireContext(), this, this);
+        mLocationManager = LocationManager.createSubsequentUpdateHelper(this, this);
         clearBackgroundMode();
     }
 
@@ -207,7 +207,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
-        mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
+        mLocationManager.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
     /**
@@ -296,7 +296,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      * Callback invoked when the user's location is received.
      *
      * @param locationResult The result of the user's requested location.
-     * @see LocationManager#requestUserLocationUpdates(Fragment)
+     * @see LocationManager#requestUserLocationUpdates(BaseFragment)
      */
     @Override
     public void onLocationResult(LocationResult locationResult) {
@@ -456,17 +456,13 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      */
     private void getDirections() {
         if (mMarkerManager.getSelectedParkingLot() == null) return;
-        // Access the coordinates of the selected marker
-        double selectedParkingLatitude = mMarkerManager.getSelectedMarkerLatitude();
-        double selectedParkingLongitude = mMarkerManager.getSelectedMarkerLongitude();
-
         LocationManager.launchGoogleMaps(
-                requireContext(),
-                selectedParkingLatitude,
-                selectedParkingLongitude,
+                this,
+                // Access the coordinates of the selected marker
+                mMarkerManager.getSelectedMarkerLatitude(),
+                mMarkerManager.getSelectedMarkerLongitude(),
                 mMarkerManager.getSelectedParkingLot().getLotName()
         );
-
     }
 
     /**
@@ -551,7 +547,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
             // If its info was showing, hide it and inform the user
             boolean wasVisibleBefore = mParkingMapViewModel.hideInfoLayoutWithStateCheck();
             if (wasVisibleBefore) {
-                mParkingMapViewModel.updateToastMessage(R.string.parking_got_removed);
+                getGlobalStateViewModel().updateToastMessage(R.string.parking_got_removed);
             }
         });
     }
@@ -623,10 +619,10 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      * Initializes the fragment's ViewModel ({@link #mParkingMapViewModel}).
      */
     private void initializeViewModel() {
-        // Initialize the mParkingMapViewModel and the mGlobalStateViewModel
+        // Initialize the mParkingMapViewModel
         mParkingMapViewModel = new ViewModelProvider(this, new ParkingMapViewModelFactory())
                 .get(ParkingMapViewModel.class);
-        mParkingMapViewModel.updateToastMessage(R.string.loading_map);
+        getGlobalStateViewModel().updateToastMessage(R.string.loading_map);
     }
 
     /**
@@ -655,7 +651,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
             Log.d(TAG, "IdsState observer: " + mDatabaseObserver + " ids: " + documentIds);
             if (documentIds == null || documentIds.isEmpty()) {
                 // Display message
-                mParkingMapViewModel.updateToastMessage(R.string.no_nearby_parking_lots);
+                getGlobalStateViewModel().updateToastMessage(R.string.no_nearby_parking_lots);
                 return;
             }
 
@@ -679,10 +675,6 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
             }
         });
 
-        // Display Toast messages whenever a message is set
-        mParkingMapViewModel.getToastMessage().observe(getViewLifecycleOwner(),
-                messageResId -> showToast(requireContext(), messageResId));
-
         mParkingMapViewModel.getPromptingState().observe(getViewLifecycleOwner(), timeToPromptTheUser -> {
             AlertBuilder.showSingleActionAlert(
                     getChildFragmentManager(),
@@ -691,12 +683,11 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
                     (v) -> goBack(requireActivity())); // go back to home screen
         });
 
-        mParkingMapViewModel.getNavigationToBookingState().observe(getViewLifecycleOwner(), selectedLot -> {
-            getNavController(requireActivity())
-                    .navigate(
-                            ParkingMapFragmentDirections.actionNavParkingMapFragmentToParkingBookingFragment(selectedLot)
-                    );
-        });
+        mParkingMapViewModel.getNavigationToBookingState().observe(getViewLifecycleOwner(), selectedLot ->
+                getNavController(requireActivity())
+                        .navigate(ParkingMapFragmentDirections
+                                .actionNavParkingMapFragmentToParkingBookingFragment(selectedLot))
+        );
     }
 
     /**
@@ -729,14 +720,15 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
      * @param visibility The state of the visibility (E.g. View.Gone / View.VISIBLE / View.INVISIBLE)
      */
     private void updateInfoLayoutVisibilityTo(final int visibility) {
-        slideVerticallyToBottom(getBinding().idFragmentParkingMap,
-                getBinding().fragmentParkingMapCvInfoLayout, visibility == GONE, 250L);
+        slideBottom(getBinding().idFragmentParkingMap,
+                getBinding().fragmentParkingMapCvInfoLayout, visibility == GONE, 250L, null);
     }
 
     /**
      * Navigate the user to the booking screen.
      */
     private void navigateToBookingScreen() {
-        mParkingMapViewModel.navigateToBookingScreen(getUser(), mMarkerManager.getSelectedParkingLot());
+        mParkingMapViewModel.navigateToBookingScreen(getUser(), mMarkerManager.getSelectedParkingLot(),
+                getGlobalStateViewModel()::updateToastMessage);
     }
 }

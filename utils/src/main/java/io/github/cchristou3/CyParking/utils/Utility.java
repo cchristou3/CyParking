@@ -1,5 +1,7 @@
 package io.github.cchristou3.CyParking.utils;
 
+import android.content.pm.PackageManager;
+
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +14,7 @@ import java.util.Locale;
  * Purpose: <p>Contain all helper / utility methods that the application needs.</p>
  *
  * @author Charalambos Christou
- * @version 7.0 05/02/21
+ * @version 8.0 27/03/21
  */
 public class Utility {
 
@@ -101,5 +103,17 @@ public class Utility {
             multiplier++;
         }
         return volumes;
+    }
+
+    /**
+     * Checks whether a permission was granted with the
+     * given grantResults.
+     *
+     * @param grantResults The results of a permission request.
+     * @return True if permission is granted. Otherwise, false.
+     */
+    @Contract(pure = true)
+    public static boolean isPermissionGranted(@NotNull int[] grantResults) {
+        return grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
     }
 }

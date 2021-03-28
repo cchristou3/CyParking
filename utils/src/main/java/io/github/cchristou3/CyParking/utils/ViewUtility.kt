@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.widget.ContentLoadingProgressBar
@@ -23,7 +24,7 @@ import com.google.android.material.textfield.TextInputLayout
  * related to the View.
  *
  * @author Charalambos Christou
- * @version 11.0 06/03/21
+ * @version 12.0 26/03/21
  */
 
 /**
@@ -157,7 +158,7 @@ fun updateViewVisibilityTo(view: View, visibility: Int): Boolean {
  *
  * @param shouldShowLoadingBar Indicates whether to display or hide the loading bar.
  */
-fun updateVisibilityOfLoadingBarTo(loadingBar: ContentLoadingProgressBar, shouldShowLoadingBar: Boolean) {
+fun updateLoadingBarVisibilityTo(loadingBar: ContentLoadingProgressBar, shouldShowLoadingBar: Boolean) {
     if (shouldShowLoadingBar) {
         loadingBar.show()
     } else {
@@ -171,10 +172,22 @@ fun updateVisibilityOfLoadingBarTo(loadingBar: ContentLoadingProgressBar, should
  *
  * @param shouldShowLoadingBar Indicates whether to display or hide the loading bar.
  */
-fun updateVisibilityOfLoadingBarTo(loadingBar: CircularProgressIndicator, shouldShowLoadingBar: Boolean) {
+fun updateLoadingBarVisibilityTo(loadingBar: CircularProgressIndicator, shouldShowLoadingBar: Boolean) {
     if (shouldShowLoadingBar) {
         loadingBar.show()
     } else {
         loadingBar.hide()
     }
+}
+
+/**
+ * Access the string object of the given editText, if there is one. Otherwise
+ * return an empty string.
+ *
+ * @param editText the edittext to extract its string from
+ */
+fun getStringOrEmpty(editText: EditText): String {
+    return if (editText.text != null) {
+        editText.text.toString()
+    } else ""
 }

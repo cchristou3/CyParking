@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
+import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
 import io.github.cchristou3.CyParking.ui.widgets.alertDialog.AppAlertDialog;
 import io.github.cchristou3.CyParking.ui.widgets.alertDialog.SingleActionBuilder;
 
@@ -17,7 +18,7 @@ import io.github.cchristou3.CyParking.ui.widgets.alertDialog.SingleActionBuilder
  * Purpose: Contain all logic related to creating an {@link AppAlertDialog}.
  *
  * @author Charalambos Christou
- * @version 3.0 07/02/21
+ * @version 4.0 27/03/21
  */
 public class AlertBuilder {
 
@@ -62,10 +63,44 @@ public class AlertBuilder {
             @NotNull FragmentManager fragmentManager, int title,
             int message, @Nullable View.OnClickListener neutralActionHandler
     ) {
+        showSingleActionAlert(fragmentManager, title, message, neutralActionHandler, android.R.string.ok);
+    }
 
-        getSingleActionBuilderWithoutTitle(message, neutralActionHandler)
+    /**
+     * Display an {@link AppAlertDialog} in the given context with the specified title,
+     * message, neutralButtonText, neutralActionHandler.
+     * This kind of alert supports only neutral
+     * responses, no positive and negative ones.
+     *
+     * @param fragmentManager      The fragmentManager of the fragment/activity.
+     * @param title                The title of the dialog.
+     * @param message              The message body of the dialog.
+     * @param neutralActionHandler The handler for the negative response.
+     * @param buttonText           The text of the button.
+     */
+    public static void showSingleActionAlert(
+            @NotNull FragmentManager fragmentManager, int title,
+            int message, @Nullable View.OnClickListener neutralActionHandler, int buttonText
+    ) {
+        getSingleActionBuilderWithoutTitle(message, neutralActionHandler, buttonText)
                 .setTitle(title)
                 .show(fragmentManager);
+    }
+
+    /**
+     * Display a dialog informing the user that a location service is not
+     * available.
+     *
+     * @param activity The activity to make use of.
+     */
+    public static void showLocationServiceErrorDialog(
+            @NotNull FragmentActivity activity
+    ) {
+        showSingleActionAlert(activity.getSupportFragmentManager(),
+                R.string.location_services_title_error,
+                R.string.location_services_body_error, v ->
+                        LocationManager.openAppPermissionSettings(activity),
+                R.string.go_to_settings);
     }
 
     /**
@@ -91,11 +126,26 @@ public class AlertBuilder {
     private static SingleActionBuilder getSingleActionBuilderWithoutTitle(
             int message, @Nullable View.OnClickListener neutralActionHandler
     ) {
+        return getSingleActionBuilderWithoutTitle(message, neutralActionHandler, android.R.string.ok);
+    }
+
+    /**
+     * Create a builder and set its message and neutral action handler to the given
+     * arguments.
+     *
+     * @param message              The message of the dialog.
+     * @param neutralActionHandler The action of the dialog.
+     * @param buttonText           The text of the button.
+     * @return A SingleActionBuilder instance.
+     */
+    private static SingleActionBuilder getSingleActionBuilderWithoutTitle(
+            int message, @Nullable View.OnClickListener neutralActionHandler, int buttonText
+    ) {
         return AppAlertDialog.getSingleActionBuilder()
                 .setBody(message)
                 .setNeutralButton(
                         neutralActionHandler, // listener
-                        android.R.string.ok // text
+                        buttonText // text
                 );
     }
 

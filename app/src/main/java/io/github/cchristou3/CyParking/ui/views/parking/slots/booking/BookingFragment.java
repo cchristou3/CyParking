@@ -3,11 +3,12 @@ package io.github.cchristou3.CyParking.ui.views.parking.slots.booking;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.transition.Fade;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AutoCompleteTextView;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 
@@ -43,7 +44,6 @@ import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.ui.widgets.QRCodeDialog;
 import io.github.cchristou3.CyParking.utilities.AnimationUtility;
 import io.github.cchristou3.CyParking.utils.Utility;
-import io.github.cchristou3.CyParking.utils.ViewUtility;
 
 /**
  * Purpose: <p>View parking details,
@@ -56,7 +56,7 @@ import io.github.cchristou3.CyParking.utils.ViewUtility;
  * <p>
  *
  * @author Charalambos Christou
- * @version 23.0 25/03/21
+ * @version 25.0 27/03/21
  */
 public class BookingFragment extends BaseFragment<FragmentBookingBinding> implements Navigable {
 
@@ -118,8 +118,14 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
     @Override
     public void onStart() {
         super.onStart();
-        mBookingViewModel.observeParkingLotToBeBooked(requireContext(), mSelectedParking)
-                .registerLifecycleObserver(getLifecycle());
+        try {
+            mBookingViewModel.observeParkingLotToBeBooked(requireContext(), mSelectedParking)
+                    .registerLifecycleObserver(getLifecycle());
+        } catch (NullPointerException e) {
+            // This should get triggered when the user has finished the booking, navigated to
+            // any other destination using the drawer and then pressed the back button to navigate back here
+            Log.d(TAG, "onStart: User returned! <> " + e.getMessage());
+        }
     }
 
     /**
@@ -136,11 +142,20 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
                 getBinding().fragmentParkingBtnBookingButton,
                 getBinding().fragmentParkingBookingBtnDisplayQrCode
         );
-        ((AutoCompleteTextView) getBinding().fragmentParkingBookingDropDown.getEditText())
-                .setOnItemSelectedListener(null);
+        DropDownMenuHelper.cleanUp(getBinding().fragmentParkingBookingDropDown);
         super.onDestroyView();
     }
 
+    /**
+     * Handle the previous activity's result.
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode  The integer result code returned by the child activity
+     *                    through its setResult().
+     * @param data        An Intent, which can return result data to the caller
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -196,11 +211,6 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
             if (show) setUpQRCodeButton();
         });
 
-        // Listen for new toast messages
-        mBookingViewModel.getToastMessage().observe(getViewLifecycleOwner(), message -> {
-            ViewUtility.showToast(requireContext(), message);
-        });
-
         // Listen for snack bars
         mBookingViewModel.getSnackBarState().observe(getViewLifecycleOwner(), this::displayUndoOption);
 
@@ -217,7 +227,10 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
         // When a payment method is selected display it
         mBookingViewModel.getPaymentMethod().observe(getViewLifecycleOwner(), paymentMethodDetails -> {
             getBinding().fragmentParkingBookingTxtSelectedPaymentMethod.setText(paymentMethodDetails);
-            getBinding().fragmentParkingBookingTxtSelectedPaymentMethod.setVisibility(View.VISIBLE);
+            if (!getBinding().fragmentParkingBookingTxtSelectedPaymentMethod.isShown()) {
+                AnimationUtility.fade(getBinding().getRoot(), getBinding().fragmentParkingBookingTxtSelectedPaymentMethod,
+                        false, 275L, Fade.IN, null);
+            }
         });
 
         // When a fatal error occurs display an alert
@@ -243,6 +256,8 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
             getBinding().fragmentParkingBookingTxtParkingAvailability.setText(availability);
             mSelectedParking = newParkingLotVersion; // Save a reference to the updated lot
         });
+
+        mBookingViewModel.isBookingCompleted().observe(getViewLifecycleOwner(), this::setUiInputEnabled);
     }
 
     /**
@@ -252,11 +267,11 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      */
     private void setUpQRCodeButton() {
         // Display the 'View QR code' button
-        AnimationUtility.slideVerticallyToBottom(
+        AnimationUtility.slideBottom(
                 getBinding().fragmentParkingBookingClMainCl, // ViewGroup / parent
                 getBinding().fragmentParkingBookingBtnDisplayQrCode, // child we want to animate
                 false, // we want to display it
-                1000L
+                1000L, null
         );
 
         // And hook it up with an click listener that will display the
@@ -295,7 +310,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
                 mBookingViewModel.getDateState().getValue()
         );
         getBinding().fragmentParkingBookingTxtStartingTime.setText(
-                mBookingViewModel.getPickedStartingTime().toString()
+                mBookingViewModel.getPickedStartingTime() != null ? mBookingViewModel.getPickedStartingTime().toString() : ""
         );
 
         // Set up time pickers' listeners
@@ -334,9 +349,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
 
                     @Override
                     public void onItemSelected(SlotOffer item) {
-                        mBookingViewModel.updateSlotOffer(item);
-                        // and display the booking button
-                        mBookingViewModel.updateBookingButtonState(true);
+                        mBookingViewModel.handleSelectedItem(item);
                     }
                 }
         );
@@ -350,8 +363,9 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      */
     public void bookParking() {
         mBookingViewModel.bookParkingLot(getUser(), mSelectedParking,
-                () -> getGlobalStateViewModel().showLoadingBar(),
-                () -> getGlobalStateViewModel().hideLoadingBar());
+                getGlobalStateViewModel()::showLoadingBar,
+                getGlobalStateViewModel()::hideLoadingBar,
+                getGlobalStateViewModel()::updateToastMessage);
     }
 
     /**
@@ -365,20 +379,18 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
             Snackbar.make(requireView(), getString(R.string.booking_success), Snackbar.LENGTH_LONG)
                     .setAction(R.string.undo,
                             v -> mBookingViewModel.cancelBooking(bookingId)).show();
-            disableUiInput();
         }
     }
 
     /**
      * Disable any input Ui.
      */
-    private void disableUiInput() {
-        getBinding().fragmentParkingBookingBtnStartingTimeButton.setClickable(false);
-        getBinding().fragmentParkingBookingBtnSelectPaymentMethod.setClickable(false);
-        getBinding().fragmentParkingBookingBtnDateButton.setClickable(false);
-        getBinding().fragmentParkingBtnBookingButton.setClickable(false);
-        getBinding().fragmentParkingBookingDropDown.setClickable(false);
-        DropDownMenuHelper.cleanUp(getBinding().fragmentParkingBookingDropDown);
+    private void setUiInputEnabled(boolean isBookingCompleted) {
+        getBinding().fragmentParkingBookingBtnStartingTimeButton.setClickable(!isBookingCompleted);
+        getBinding().fragmentParkingBookingBtnSelectPaymentMethod.setClickable(!isBookingCompleted);
+        getBinding().fragmentParkingBookingBtnDateButton.setClickable(!isBookingCompleted);
+        getBinding().fragmentParkingBtnBookingButton.setClickable(!isBookingCompleted);
+        getBinding().fragmentParkingBookingDropDown.setClickable(!isBookingCompleted);
     }
 
     /**

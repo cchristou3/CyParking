@@ -33,7 +33,6 @@ import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
 import io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment;
 import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment;
 import io.github.cchristou3.CyParking.utils.Utility;
-import io.github.cchristou3.CyParking.utils.ViewUtility;
 
 /**
  * Purpose: <p>Shows pending / completed bookings of the user / operator?</p>
@@ -43,7 +42,7 @@ import io.github.cchristou3.CyParking.utils.ViewUtility;
  * </p>
  *
  * @author Charalambos Christou
- * @version 9.0 24/03/21
+ * @version 10.0 26/03/21
  */
 public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBinding>
         implements Navigable, BaseFragment.UserStateUiHandler {
@@ -109,9 +108,6 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
             Log.d(TAG, "observe bookings: ");
             updateUi(bookings);
         });
-
-        mViewBookingsViewModel.getToastMessage().observe(getViewLifecycleOwner(),
-                message -> ViewUtility.showToast(requireContext(), message));
     }
 
     /**
@@ -323,6 +319,6 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
      * @param loggedInUser The user to fetch the bookings for.
      */
     private void loadBookings(@NotNull LoggedInUser loggedInUser) {
-        mViewBookingsViewModel.getUserBookings(loggedInUser.getUserId());
+        mViewBookingsViewModel.getUserBookings(loggedInUser.getUserId(), getGlobalStateViewModel()::updateToastMessage);
     }
 }

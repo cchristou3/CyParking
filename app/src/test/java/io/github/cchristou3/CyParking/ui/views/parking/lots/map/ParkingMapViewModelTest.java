@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.ParkingMapRepository;
@@ -172,21 +171,9 @@ public class ParkingMapViewModelTest extends InstantTaskRuler {
     }
 
     @Test
-    public void navigateToBookingScreen_nullUserNullLot() throws InterruptedException {
-        parkingMapViewModel.navigateToBookingScreen(null, null);
-        assertThat(getOrAwaitValue(parkingMapViewModel.getToastMessage()), is(R.string.no_booking_allowed_to_non_logged_in_users));
-    }
-
-    @Test
-    public void navigateToBookingScreen_nonNullUserNullLot() throws InterruptedException {
-        parkingMapViewModel.navigateToBookingScreen(new LoggedInUser(), null);
-        assertThat(getOrAwaitValue(parkingMapViewModel.getToastMessage()), is(R.string.unknown_error));
-    }
-
-    @Test
     public void navigateToBookingScreen_nonNullUserNonNullLot() throws InterruptedException {
         final ParkingLot lot = new ParkingLot();
-        parkingMapViewModel.navigateToBookingScreen(new LoggedInUser(), lot);
+        parkingMapViewModel.navigateToBookingScreen(new LoggedInUser(), lot, null);
         assertThat(getOrAwaitValue(parkingMapViewModel.getNavigationToBookingState()), is(lot));
     }
 }

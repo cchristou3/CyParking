@@ -3,8 +3,10 @@ package io.github.cchristou3.CyParking.ui.views.parking.lots.map;
 import android.util.Log;
 import android.view.View;
 
+import androidx.core.util.Consumer;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FieldPath;
@@ -23,7 +25,6 @@ import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLo
 import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.ParkingMapRepository;
 import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent;
-import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
 import io.github.cchristou3.CyParking.ui.views.parking.slots.booking.BookingFragment;
 
 /**
@@ -31,9 +32,9 @@ import io.github.cchristou3.CyParking.ui.views.parking.slots.booking.BookingFrag
  * Purpose: Data persistence during configuration changes.</p>
  *
  * @author Charalambos Christou
- * @version 3.0 25/03/21
+ * @version 5.0 27/03/21
  */
-public class ParkingMapViewModel extends ToastViewModel {
+public class ParkingMapViewModel extends ViewModel {
 
     // Static constant
     private static final String TAG = ParkingMapViewModel.class.getName();
@@ -164,7 +165,8 @@ public class ParkingMapViewModel extends ToastViewModel {
      * @return True, if the state is set to {@link View#VISIBLE}. Otherwise, false.
      */
     public boolean isInfoLayoutShown() {
-        return mInfoLayoutState.getValue() == View.VISIBLE;
+        // If null then it is still hidden
+        return mInfoLayoutState.getValue() != null && mInfoLayoutState.getValue() == View.VISIBLE;
     }
 
     /**
@@ -201,7 +203,8 @@ public class ParkingMapViewModel extends ToastViewModel {
      * true is returned. Otherwise, false.
      */
     public boolean hideInfoLayoutWithStateCheck() {
-        int previousState = mInfoLayoutState.getValue();
+        // If not set then it is still hidden
+        int previousState = mInfoLayoutState.getValue() != null ? mInfoLayoutState.getValue() : View.GONE;
         updateInfoLayoutStateTo(View.GONE);
         return previousState == View.VISIBLE;
     }
@@ -247,7 +250,7 @@ public class ParkingMapViewModel extends ToastViewModel {
                 if (exception == null) return;
                 // If there are no document ids on the cache then prompt the user
                 // about his/her internet connection
-                if (getCurrentParkingLotDocIds().isEmpty()) {
+                if (shouldPromptUser()) {
                     promptUser();
                 }
             }
@@ -259,6 +262,10 @@ public class ParkingMapViewModel extends ToastViewModel {
         });
     }
 
+    /**
+     * Inform the {@link #mPromptUser}'s observes that it is time
+     * to prompt the user.
+     */
     public void promptUser() {
         mPromptUser.setValue(null);
     }
@@ -273,29 +280,34 @@ public class ParkingMapViewModel extends ToastViewModel {
     }
 
     /**
-     * Reports error to the logcat.
+     * Check whether the user should be prompted.
      *
-     * @param exception The given exception.
+     * @return True if either the cached parking document ids are null or
+     * when its list is empty.
      */
-    private void logError(Exception exception) {
-        mParkingMapRepository.logError(exception);
+    private boolean shouldPromptUser() {
+        return getCurrentParkingLotDocIds() == null || getCurrentParkingLotDocIds().isEmpty();
     }
 
     /**
      * If the user is not logged in, a Toast message is displayed.
      * Otherwise, the user is navigated to {@link BookingFragment}.
+     *
+     * @param currentUser  the current instance of {@link LoggedInUser}.
+     * @param selectedLot  the selected parking lot.
+     * @param displayToast A handler for displaying toast messages.
      */
-    public void navigateToBookingScreen(LoggedInUser currentUser, ParkingLot selectedLot) {
+    public void navigateToBookingScreen(LoggedInUser currentUser, ParkingLot selectedLot, Consumer<Integer> displayToast) {
         // If the user is not logged in, display a Toast msg
         if (currentUser == null) {
-            updateToastMessage(R.string.no_booking_allowed_to_non_logged_in_users);
+            displayToast.accept(R.string.no_booking_allowed_to_non_logged_in_users);
             return;
         }
         if (selectedLot != null) {
             // Navigate to the Booking Fragment
             mNavigateToBooking.setValue(selectedLot);
         } else { // Otherwise, display a message
-            updateToastMessage(R.string.unknown_error);
+            displayToast.accept(R.string.unknown_error);
         }
     }
 }

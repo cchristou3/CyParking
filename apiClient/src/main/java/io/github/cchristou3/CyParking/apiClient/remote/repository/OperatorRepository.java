@@ -15,7 +15,7 @@ import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLo
  * functionality related to the operator's tasks.
  *
  * @author Charalambos Christou
- * @version 24/02/2021
+ * @version 2.0 26/03/2021
  * @see DefaultOperatorRepository
  */
 public interface OperatorRepository {
@@ -70,7 +70,8 @@ public interface OperatorRepository {
      * Uploads the given file Uri to Firebase storage
      *
      * @param selectedImageUri The Uri of an image.
-     * @return
+     * @param operatorId       the uid of the operator.
+     * @return A {@link Task} object to be handled by the caller.
      */
-    Task<Uri> uploadPhoto(Uri selectedImageUri);
+    Task<Uri> uploadPhoto(Uri selectedImageUri, String operatorId);
 }

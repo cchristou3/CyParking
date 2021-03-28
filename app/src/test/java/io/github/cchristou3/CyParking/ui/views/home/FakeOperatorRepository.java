@@ -34,7 +34,7 @@ public class FakeOperatorRepository implements OperatorRepository {
     @NotNull
     @Override
     public Task<Boolean> registerParkingLot(Uri selectedImageUri, @NotNull ParkingLot parkingLotToBeStored) {
-        return null;
+        return (Task<Boolean>) Mockito.mock(Task.class);
     }
 
     @NotNull
@@ -68,10 +68,13 @@ public class FakeOperatorRepository implements OperatorRepository {
      * Uploads the given file Uri to Firebase storage
      *
      * @param selectedImageUri The Uri of an image.
-     * @return
+     * @param operatorId       the uid of the operator.
+     * @return A {@link Task} object to be handled by the caller.
      */
     @Override
-    public Task<Uri> uploadPhoto(Uri selectedImageUri) {
+    public Task<Uri> uploadPhoto(Uri selectedImageUri, String operatorId) {
         return null;
     }
+
+
 }

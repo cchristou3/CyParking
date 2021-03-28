@@ -32,6 +32,8 @@ import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.widgets.DescriptionDialog;
 import io.github.cchristou3.CyParking.utils.ViewUtility;
 
+import static io.github.cchristou3.CyParking.utils.ViewUtility.getStringOrEmpty;
+
 /**
  * <p>A simple {@link Fragment} subclass.
  * Purpose: Use the {@link AuthenticatorHosteeFragment#newInstance} factory method to
@@ -40,7 +42,7 @@ import io.github.cchristou3.CyParking.utils.ViewUtility;
  * <p>
  *
  * @author Charalambos Christou
- * @version 8.0 24/03/21
+ * @version 9.0 27/03/21
  */
 public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthenticatorHosteeBinding> implements TextWatcher {
 
@@ -233,24 +235,10 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
      */
     private void notifyDataChanged() {
         mAuthenticatorViewModel.dataChanged(
-                getStringOrDefault(getBinding().fragmentHosteeAuthEtEmail), // Inputted email
-                getStringOrDefault(getBinding().fragmentHosteeAuthEtName), // Inputted name
-                getStringOrDefault(getBinding().fragmentHosteeAuthEtPassword) // Inputted password
+                getStringOrEmpty(getBinding().fragmentHosteeAuthEtEmail), // Inputted email
+                getStringOrEmpty(getBinding().fragmentHosteeAuthEtName), // Inputted name
+                getStringOrEmpty(getBinding().fragmentHosteeAuthEtPassword) // Inputted password
         ); // operator got checked
-    }
-
-    /**
-     * Access the string object of the given editText, if there is one. Otherwise
-     * return an empty string.
-     *
-     * @param editText the edittext to extract its string from
-     */
-    @NotNull
-    private String getStringOrDefault(@NotNull EditText editText) {
-        if (editText.getText() != null) {
-            return editText.getText().toString();
-        }
-        return "";
     }
 
     /**
@@ -335,8 +323,8 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
         getGlobalStateViewModel().showLoadingBar();
         ViewUtility.hideKeyboard(requireActivity(), view);
         mAuthenticatorViewModel.login(requireContext(),
-                getStringOrDefault(getBinding().fragmentHosteeAuthEtEmail),
-                getStringOrDefault(getBinding().fragmentHosteeAuthEtPassword));
+                getStringOrEmpty(getBinding().fragmentHosteeAuthEtEmail),
+                getStringOrEmpty(getBinding().fragmentHosteeAuthEtPassword));
     }
 
     /**
@@ -354,9 +342,9 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
             // will trigger immediately with the user's data.
             if (authResult == null || !this.isResumed()) return;
             if (authResult.getError() != null) showLoginFailed(authResult.getError());
-            if (authResult.getSuccess() != null) {
+            if (authResult.getSuccess() == null) {
                 if (this.mIsReauthenticating) {
-                    mAuthenticatorViewModel.reauthenticateUser(getBinding().fragmentHosteeAuthEtPassword.getText().toString())
+                    mAuthenticatorViewModel.reauthenticateUser(getStringOrEmpty(getBinding().fragmentHosteeAuthEtPassword))
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     updateUiWithUser(authResult.getSuccess());
@@ -466,6 +454,11 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
         }
     }
 
+    /**
+     * Access the fragment's checkbox.
+     *
+     * @return A reference to the fragment's only {@link CheckBox} widget.
+     */
     private CheckBox getCheckBox() {
         return getBinding().fragmentHosteeAuthCbRoleOperatorCheckbox;
     }

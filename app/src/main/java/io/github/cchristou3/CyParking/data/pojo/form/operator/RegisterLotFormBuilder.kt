@@ -4,7 +4,7 @@ package io.github.cchristou3.CyParking.data.pojo.form.operator
  * Purpose: isolate complex construction code of [RegisterLotFormState].
  *
  * @author Charalambos Christou
- * @since 1.0 12/03/21
+ * @since 2.0 27/03/21
  */
 class RegisterLotFormBuilder : RegisterLotFormStateBuilder {
 
@@ -45,7 +45,18 @@ class RegisterLotFormBuilder : RegisterLotFormStateBuilder {
         return this
     }
 
-    override fun build(): RegisterLotFormState = RegisterLotFormState(
+    /**
+     * If none of the errors is set then return a valid [RegisterLotFormState] instance.
+     * Otherwise, return an appropriate [RegisterLotFormState] instance with the set errors.
+     */
+    override fun build(): RegisterLotFormState = if (mMobileNumberError == null
+            && mLotNameError == null
+            && mLotCapacityError == null
+            && mSlotOfferError == null
+            && mLatLngError == null
+            && mPhotoError == null
+    ) RegisterLotFormState(true)
+    else RegisterLotFormState(
             mMobileNumberError, mLotNameError,
             mLotCapacityError, mSlotOfferError,
             mLatLngError, mPhotoError

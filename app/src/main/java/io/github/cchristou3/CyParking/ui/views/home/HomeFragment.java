@@ -1,7 +1,6 @@
 package io.github.cchristou3.CyParking.ui.views.home;
 
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,7 +10,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.FragmentNavigator;
 import androidx.viewbinding.ViewBinding;
@@ -22,9 +20,10 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
@@ -34,15 +33,18 @@ import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.LocationHandler;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.data.manager.DatabaseObserver;
-import io.github.cchristou3.CyParking.data.manager.EncryptionManager;
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
 import io.github.cchristou3.CyParking.data.manager.location.SingleUpdateHelper;
 import io.github.cchristou3.CyParking.databinding.FragmentHomeBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
+import io.github.cchristou3.CyParking.ui.components.LocationServiceViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
-import io.github.cchristou3.CyParking.utilities.AnimationUtility;
+
+import static io.github.cchristou3.CyParking.utilities.AnimationUtility.slideBottom;
+import static io.github.cchristou3.CyParking.utilities.AnimationUtility.slideTop;
+import static io.github.cchristou3.CyParking.utils.ViewUtility.updateViewVisibilityTo;
 
 /**
  * Purpose: <p>Show to the user all available action options</p>
@@ -56,17 +58,32 @@ import io.github.cchristou3.CyParking.utilities.AnimationUtility;
  * </p>
  *
  * @author Charalambos Christou
- * @version 14.0 25/03/21
+ * @version 16.0 27/03/21
  */
 public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements Navigable, LocationHandler {
 
     // Fragment variables
     private static final String TAG = HomeFragment.class.getName();
-    private SingleUpdateHelper mLocationManager;
+    private static final long TRANSITION_DURATION = 750L;
+    private static final String LOT_REFERENCE_KEY = "ref";
+    private final AtomicBoolean mWasLocationRequested = new AtomicBoolean(false);
+    private SingleUpdateHelper<HomeFragment, FragmentHomeBinding> mLocationManager;
     // Members related to the Operator
     private OperatorViewModel mOperatorViewModel;
+    private HomeViewModel mHomeViewModel;
     private DatabaseObserver<Query, QuerySnapshot> mDatabaseObserver;
     private IntentIntegrator mIntentIntegrator;
+
+    /**
+     * Initialize the fragment.
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     */
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mHomeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+    }
 
     /**
      * Inflates our fragment's view.
@@ -92,25 +109,23 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Listen to when the user should be navigated to the map
+        mHomeViewModel.getNavigationToMap().observe(getViewLifecycleOwner(), this::navigateToMap);
+
+        // Listen to when the location services fail
+        LocationServiceViewModel
+                .addObserverToLocationServicesError(mHomeViewModel, this);
+
+        // Listen to the user state
         observeUserState(this::updateUi);
+
         initializeButtonListeners();
+
+        // Each time the home screen becomes visible reset the map button back to normal
+        resetMapButton();
+
         // TODO: Add splash screen till the app has been initialized (FirebaseApp, Network broadcasters, validating user's data, etc.).
-    }
-
-    /**
-     * Called when the fragment is visible to the user and actively running.
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    /**
-     * Called when the Fragment is no longer resumed.
-     */
-    @Override
-    public void onPause() {
-        super.onPause();
     }
 
     /**
@@ -124,7 +139,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     @Override
     public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
         if (mLocationManager != null) {
-            mLocationManager.onRequestPermissionsResult(requireContext(), requestCode, grantResults);
+            mLocationManager.onRequestPermissionsResult(this, requestCode, grantResults);
         }
     }
 
@@ -166,31 +181,18 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            if (result.getContents() == null) { // Used pressed the back button
-                Toast.makeText(requireContext(), "Cancelled", Toast.LENGTH_LONG).show();
-            } else {
-                try {
-                    // Access the qr code's payload
-                    String hex = result.getContents();
-                    // Convert it to an array of bytes
-                    byte[] newEncodedBytes = EncryptionManager.hexStringToByteArray(hex);
-                    // Decrypt it
-                    String decodedWithHex = new EncryptionManager().decrypt(newEncodedBytes);
-                    mOperatorViewModel.receiveBooking(
-                            // Access the previously stored lot reference
-                            (DocumentReference) getIntentIntegrator().getMoreExtras().get("ref"),
-                            // Convert the string into a Booking object and access its unique id
-                            Booking.toBooking(decodedWithHex).generateDocumentId()
-                    );
-                } catch (Exception ignored) {
-                }
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult <> Home");
+        if (mLocationManager != null)
+            mLocationManager.onActivityResult(this, requestCode, resultCode, data);
 
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
+        mOperatorViewModel.handleQRCodeScannerContents(
+                // Access the qr code's payload
+                IntentIntegrator.parseActivityResult(requestCode, resultCode, data),
+                // Access the previously stored lot reference
+                (DocumentReference) getIntentIntegrator().getMoreExtras().get(LOT_REFERENCE_KEY),
+                getGlobalStateViewModel()::updateToastMessage // A handler for messages
+        );
     }
 
     /**
@@ -200,22 +202,53 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      */
     private void initializeButtonListeners() {
         // TODO: 10/02/2021 Implement the buttons and add descriptions below then
-        getBinding().fragmentHomeBtnScanLot.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Not implemented yet!", Toast.LENGTH_SHORT).show();
-        });
+        getBinding().fragmentHomeBtnScanLot.setOnClickListener(v ->
+                Toast.makeText(requireContext(), "Not implemented yet!", Toast.LENGTH_SHORT).show()
+        );
 
         // Attach listener to "Parking Map" button
-        getBinding().fragmentHomeBtnNavToMap.setOnClickListener(v -> {
-            // Initialize the SingleLocationManager object
-            if (mLocationManager == null) {
-                mLocationManager = LocationManager.createSingleUpdateHelper(requireContext(), this);
-            } else {
-                mLocationManager.prepareCallback();
-            }
-            // Request for the user's latest known location
-            Log.d(TAG, "requestUserLocationUpdates");
-            mLocationManager.requestUserLocationUpdates(this);
-        });
+        getBinding().fragmentHomeBtnNavToMap.setOnClickListener(v -> requestLocation());
+    }
+
+    /**
+     * Request the user's location.
+     * Ensures that only a single request is sent
+     * even when the user has clicked the button
+     * multiple consecutive times.
+     */
+    private void requestLocation() {
+        if (mWasLocationRequested.get()) return;
+        mWasLocationRequested.compareAndSet(false, true);
+        // Request for the user's latest known location
+        Log.d(TAG, "requestUserLocationUpdates");
+        getLocationManager().requestUserLocationUpdates(this);
+
+    }
+
+    /**
+     * Access and initialize the fragment's location manager when required.
+     * If the Location manager has already been initialized then prepare
+     * it to handle another callback/request.
+     *
+     * @return the fragment's {@link SingleUpdateHelper} instance.
+     */
+    public SingleUpdateHelper<HomeFragment, FragmentHomeBinding> getLocationManager() {
+        // Initialize the Location manager object
+        if (mLocationManager == null) {
+            mLocationManager = LocationManager.createSingleUpdateHelper(this, this,
+                    this::resetMapButton,
+                    mHomeViewModel::postLocationServicesError);
+        } else {
+            mLocationManager.prepareCallback(this);
+        }
+        return mLocationManager;
+    }
+
+    /**
+     * Enable the map button to accept further clicks.
+     */
+    public void resetMapButton() {
+        HomeFragment.this.mWasLocationRequested.set(false);
     }
 
     /**
@@ -229,14 +262,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         if (loggedInUser == null) {
             // If operator logged out, remove observer to its parking lot
             if (mDatabaseObserver != null) mDatabaseObserver.unregisterLifecycleObserver();
-            // Hide anything related to parking lot from the user
-            if (getBinding().fragmentHomeCvLotInfo.isShown()) {
-                AnimationUtility.slideVerticallyToBottom(getBinding().getRoot(), getBinding().fragmentHomeCvLotInfo, true, 1000L);
-            }
-            // Hide Ui related layout related to logged in users
-            if (getBinding().fragmentHomeCvUserBooking.isShown()) {
-                AnimationUtility.slideVerticallyToBottom(getBinding().getRoot(), getBinding().fragmentHomeCvUserBooking, true, 1000L);
-            }
+            cleanUpUi();
             return;
         }
 
@@ -247,13 +273,53 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         if (loggedInUser.isOperator()) {
             // Is an operator but not a user
             initializeOperator(loggedInUser);
-        } else {
-            // User is not an operator
+        } else { // User is not an operator
             // Hide anything related to parking lot from the user
             getBinding().fragmentHomeCvLotInfo.setVisibility(View.GONE);
-
             // And display an upcoming booking if there is one
             initializeUser(loggedInUser);
+        }
+    }
+
+    /**
+     * Removes any Views that are accessible to logged in users.
+     */
+    private void cleanUpUi() {
+        if (getBinding().fragmentHomeBtnScanBooking.isShown()) { // Operator has a lot
+            // Hide the QR Code scanner to be used to scan bookings via animation
+            slideTop(
+                    getBinding().getRoot(), getBinding().fragmentHomeBtnScanBooking, true, TRANSITION_DURATION,
+                    // Once that view is hidden, hide the lot info card view
+                    /* next animation */ () -> hide(getBinding().fragmentHomeCvLotInfo)
+            );
+        } else {
+            // This is the case when the user did not register a lot and only the register lot layout is shown
+            hide(getBinding().fragmentHomeCvLotInfo);
+        }
+
+        // Hide Ui related layout related to logged in users
+        hide(getBinding().fragmentHomeCvUserBooking);
+    }
+
+    /**
+     * Hide the given view if it is shown.
+     *
+     * @param view the view to hide.
+     */
+    private void hide(@NotNull View view) {
+        if (view.isShown()) {
+            slideBottom(getBinding().getRoot(), view, true, TRANSITION_DURATION, null);
+        }
+    }
+
+    /**
+     * Show the given view if it is hidden.
+     *
+     * @param view the view to show.
+     */
+    private void show(@NotNull View view) {
+        if (!view.isShown()) {
+            slideBottom(getBinding().getRoot(), view, false, TRANSITION_DURATION, null);
         }
     }
 
@@ -281,8 +347,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      */
     private void displayBooking(@NotNull Booking upcomingBooking) {
         // Make the user related CardView visible if it is not already
-        if (!getBinding().fragmentHomeCvUserBooking.isShown())
-            AnimationUtility.slideVerticallyToBottom(getBinding().getRoot(), getBinding().fragmentHomeCvUserBooking, false, 1000L);
+        show(getBinding().fragmentHomeCvUserBooking);
 
         // Update the contents if its children.
         getBinding().fragmentHomeBookingItem.bookingItemFullyTxtDate
@@ -329,6 +394,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         // Initialize the OperatorViewModel
         mOperatorViewModel = new ViewModelProvider(this,
                 new OperatorViewModelFactory()).get(OperatorViewModel.class);
+
         // Attach observer to update the view's parking lot info whenever it changes
         mOperatorViewModel.getParkingLotState().observe(getViewLifecycleOwner(),
                 this::updateLotContents); // Display the parking lot's contents
@@ -366,6 +432,8 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
                     // If the operator has registered a lot already, display its info
                     final ParkingLot userParkingLot = value.getDocuments().get(0).toObject(ParkingLot.class);
                     if (userParkingLot == null) return;
+                    if (getUser() != null && !userParkingLot.getOperatorId().equals(getUser().getUserId()))
+                        return;
 
                     // Get a reference to the document
                     final DocumentReference ref = value.getDocuments().get(0).getReference();
@@ -383,11 +451,17 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         mDatabaseObserver.registerLifecycleObserver(getLifecycle());
     }
 
+    /**
+     * Hook up the `scan booking` button with an on click listener.
+     * onclick: initialize the QR Code scanner.
+     *
+     * @param lotRef A document reference to the operator's parking lot.
+     */
     public void setUpScanBookingButton(DocumentReference lotRef) {
         getBinding().fragmentHomeBtnScanBooking.setOnClickListener(v -> {
             // Only available to operators
             getIntentIntegrator()
-                    .addExtra("ref", lotRef)
+                    .addExtra(LOT_REFERENCE_KEY, lotRef)
                     .initiateScan();
         });
     }
@@ -420,8 +494,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      */
     private void updateLotContents(@NotNull ParkingLot userParkingLot) {
         checkVisibilityOfAppropriateLayout(View.VISIBLE, View.GONE);
-        // Compose the TextViews' text that display the lot's name and capacity.
-        // Update their texts with the above ones
+        // Display the lot's details
         getBinding().fragmentHomeTxtLotCapacity.setText(userParkingLot.getLotAvailability(requireContext()));
         getBinding().fragmentHomeTxtLotName.setText(String.format(getString(R.string.lot_name), userParkingLot.getLotName()));
     }
@@ -451,33 +524,24 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      * @param registerLotVisibility The new visibility of register lot layout.
      */
     private void checkVisibilityOfAppropriateLayout(int lotInfoVisibility, int registerLotVisibility) {
-        updateVisibilityOf(getBinding().fragmentHomeClShowLotInfo, lotInfoVisibility); // showLotInfo
-        // Display the QR Code scanner to be used to scan bookings
-        // TODO: 25/03/2021 Animate it from the top
-        updateVisibilityOf(getBinding().fragmentHomeBtnScanBooking, lotInfoVisibility); // showLotInfo
+        updateViewVisibilityTo(getBinding().fragmentHomeClShowLotInfo, lotInfoVisibility); // showLotInfo layout
+        updateViewVisibilityTo(getBinding().fragmentHomeClRegisterLotInfo, registerLotVisibility); // registerLotInfo layout
 
-        updateVisibilityOf(getBinding().fragmentHomeClRegisterLotInfo, registerLotVisibility); // registerLotInfo
-
-        if (!getBinding().fragmentHomeCvLotInfo.isShown()) {
-            AnimationUtility.slideVerticallyToBottom(getBinding().getRoot(), getBinding().fragmentHomeCvLotInfo, false, 1000L);
+        if (lotInfoVisibility == View.VISIBLE) { // Operator has a lot
+            // Display the QR Code scanner to be used to scan bookings via animation
+            slideTop(
+                    getBinding().getRoot(), getBinding().fragmentHomeBtnScanBooking, false, TRANSITION_DURATION,
+                    // Once that view is shown, display the lot info card view
+                    /* next animation */ () -> slideBottom(getBinding().getRoot(),
+                            getBinding().fragmentHomeCvLotInfo, false, TRANSITION_DURATION, null)
+            );
+        } else {// Only show the lot info card view
+            show(getBinding().fragmentHomeCvLotInfo);
         }
     }
 
     /**
-     * Updates the visibility status of the given view with the
-     * specified visibility.
-     *
-     * @param view       The view to has its visibility updated.
-     * @param visibility The new visibility of the given view.
-     */
-    private void updateVisibilityOf(@NonNull View view, int visibility) {
-        if (view.getVisibility() != visibility) {
-            view.setVisibility(visibility); // showLotInfo
-        }
-    }
-
-    /**
-     * Hooks up both "increment" and "decrement" buttons with on click listeners.
+     * Hooks up "increment", "decrement", and "scan booking" buttons with on click listeners.
      *
      * @param ref            A DocumentReference of the parking lot in the database.
      * @param userParkingLot The latest retrieved parking lot of the database.
@@ -563,28 +627,25 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      * Callback invoked when the user's location is received.
      *
      * @param locationResult The result of the user's requested location.
-     * @see LocationManager#requestUserLocationUpdates(Fragment)
+     * @see LocationManager#requestUserLocationUpdates(BaseFragment)
      */
     @Override
     public void onLocationResult(LocationResult locationResult) {
-        Log.d(TAG, "onLocationResult");
-        if (locationResult != null) {
-            // Access the user's latest location
-            Location userLatestLocation = locationResult.getLastLocation();
-            Toast.makeText(requireContext(), userLatestLocation.toString(), Toast.LENGTH_SHORT).show();
+        mHomeViewModel.navigateToMap(locationResult, getGlobalStateViewModel()::updateToastMessage);
+    }
 
-            // Navigate to the ParkingMapFragment
-            getNavController(requireActivity())
-                    .navigate(
-                            HomeFragmentDirections.actionHomeToParkingMap(
-                                    new LatLng(
-                                            userLatestLocation.getLatitude(),
-                                            userLatestLocation.getLongitude())
-                            )
-                    );
-        } else {
-            // Inform the user something wrong happened
-            Toast.makeText(requireContext(), getString(R.string.error_retrieving_location), Toast.LENGTH_SHORT).show();
-        }
+    /**
+     * Navigate to the GoogleMaps fragment.
+     * Transfer the user's latest location.
+     *
+     * @param userLocation The user's latest known location.
+     */
+    private void navigateToMap(LatLng userLocation) {
+        getNavController(requireActivity())
+                .navigate(
+                        HomeFragmentDirections.actionHomeToParkingMap(
+                                userLocation
+                        )
+                );
     }
 }

@@ -2,6 +2,7 @@ package io.github.cchristou3.CyParking.ui.views.parking.lots.register;
 
 import android.net.Uri;
 
+import androidx.core.util.Consumer;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -20,8 +21,8 @@ import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorReposi
 import io.github.cchristou3.CyParking.data.pojo.form.FormState;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormBuilder;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormState;
+import io.github.cchristou3.CyParking.ui.components.LocationServiceViewModel;
 import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent;
-import io.github.cchristou3.CyParking.ui.components.ToastViewModel;
 import io.github.cchristou3.CyParking.utils.Utility;
 
 import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot.Availability.isCapacityValid;
@@ -36,9 +37,9 @@ import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.Pa
  * their parking lot onto the system.</p>
  *
  * @author Charalambos Christou
- * @version 3.0 13/03/21
+ * @version 5.0 27/03/21
  */
-public class RegisterLotViewModel extends ToastViewModel {
+public class RegisterLotViewModel extends LocationServiceViewModel {
 
     // Data members
     private final MutableLiveData<String> mOperatorMobileNumber = new MutableLiveData<>();
@@ -109,21 +110,22 @@ public class RegisterLotViewModel extends ToastViewModel {
     private RegisterLotFormState validateForm(final String operatorMobileNumber, final Integer lotCapacity,
                                               final String lotName, final LatLng lotLatLng,
                                               final List<SlotOffer> slotOfferList) {
+        RegisterLotFormBuilder builder = new RegisterLotFormBuilder();
         // Validate the input and set the RegisterLotFormState accordingly
-        if (!isValidPhoneNumber(operatorMobileNumber)) {
-            return new RegisterLotFormBuilder().setMobileNumberError(R.string.mobile_phone_error).build();
-        } else if (!isNameValid(lotName)) {
-            return new RegisterLotFormBuilder().setLotNameError(R.string.lot_name_error).build();
-        } else if (!isCapacityValid(lotCapacity)) {
-            return new RegisterLotFormBuilder().setLotCapacityError(R.string.lot_capacity_error).build();
-        } else if (!isLotLatLngValid(lotLatLng)) {
-            return new RegisterLotFormBuilder().setLatLngError(R.string.lot_lat_lng_error).build();
-        } else if (!isImageUriValid()) {
-            return new RegisterLotFormBuilder().setPhotoError(0).build();
-        } else if (!areSlotOffersValid(slotOfferList)) {
-            return new RegisterLotFormBuilder().setSlotOfferError(R.string.lot_slot_offer_error).build();
-        }
-        return new RegisterLotFormState(true);
+        if (!isValidPhoneNumber(operatorMobileNumber))
+            builder.setMobileNumberError(R.string.mobile_phone_error);
+        if (!isNameValid(lotName))
+            builder.setLotNameError(R.string.lot_name_error);
+        if (!isCapacityValid(lotCapacity))
+            builder.setLotCapacityError(R.string.lot_capacity_error);
+        if (!isLotLatLngValid(lotLatLng))
+            builder.setLatLngError(R.string.lot_lat_lng_error);
+        if (!isImageUriValid())
+            builder.setPhotoError(0);
+        if (!areSlotOffersValid(slotOfferList))
+            builder.setSlotOfferError(R.string.lot_slot_offer_error);
+
+        return builder.build(); //* If no error, returns a valid form. *//
     }
 
     /**
@@ -131,25 +133,25 @@ public class RegisterLotViewModel extends ToastViewModel {
      *
      * @param parkingLot     The lot to be added to the database.
      * @param hideLoadingBar a runnable responsible for hiding the loading bar.
+     * @param displayToast   A handler for displaying toast messages.
      */
-    public void registerParkingLot(ParkingLot parkingLot, Runnable hideLoadingBar) {
+    public void registerParkingLot(ParkingLot parkingLot, Runnable hideLoadingBar, Consumer<Integer> displayToast) {
         mOperatorRepository.registerParkingLot(getImageUri(), parkingLot)
                 .addOnCompleteListener((Task<Boolean> task) -> {
                     if (task.isSuccessful()) {
                         boolean wasRegistrationSuccessful = task.getResult();
                         if (wasRegistrationSuccessful) {
                             // Display message to user.
-                            updateToastMessage(R.string.success_lot_registration);
+                            displayToast.accept(R.string.success_lot_registration);
                             // Navigate back to home screen
                             navigateBack();
                         } else {
                             // Display error message to user that the parking lot already exists
-                            updateToastMessage(R.string.error_lot_already_exists);
+                            displayToast.accept(R.string.error_lot_already_exists);
                         }
                     }
                     hideLoadingBar.run();
                 });
-        ;
     }
 
     /**
@@ -310,8 +312,10 @@ public class RegisterLotViewModel extends ToastViewModel {
     /**
      * Create a {@link SlotOffer} object based on the selected price and duration,
      * validate it, and if valid add it to the list.
+     *
+     * @param displayToast A handler for displaying toast messages.
      */
-    public void addToList() {
+    public void addToList(Consumer<Integer> displayToast) {
         // Add to the adapter's list
         List<SlotOffer> newSlotOfferList = getSlotOfferList();
         if (newSlotOfferList == null) {
@@ -326,7 +330,7 @@ public class RegisterLotViewModel extends ToastViewModel {
         final SlotOffer newSlotOffer = new SlotOffer(mSelectedDuration.getValue(), mSelectedPrice.getValue());
 
         if (Utility.contains(newSlotOfferList, newSlotOffer)) {
-            updateToastMessage(R.string.slot_offer_already_exist);
+            displayToast.accept(R.string.slot_offer_already_exist);
             // TODO: 24/01/2021 Animate color to that item
             return;
         }

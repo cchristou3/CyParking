@@ -87,6 +87,8 @@
             android:layout_gravity="center"
             android:indeterminate="true"
             android:visibility="gone"
+            app:indicatorColor="@color/teal_700"
+            app:indicatorSize="150dp"
             app:layout_constraintBottom_toBottomOf="@+id/activity_main_host_fcv_nav_host_fragment"
             app:layout_constraintEnd_toEndOf="@+id/activity_main_host_fcv_nav_host_fragment"
             app:layout_constraintStart_toStartOf="parent"

@@ -2,21 +2,21 @@ package io.github.cchristou3.CyParking.ui.components;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 /**
  * Purpose: persists data related to the Loading Bar's state
- * when configuration changes.
+ * when configuration changes and dispatching toast messages.
  * The View simply observes its state and when updated it
  * deals with the visual representation of the Loading Bar
- * based on its new value.
+ * based on its new value. The same goes for any
+ * incoming the Toast messages.
  * Inherited by: {@link io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel}
  * and {@link io.github.cchristou3.CyParking.ui.views.user.account.update.UpdateViewModel}.
  *
  * @author Charalambos Christou
- * @version 1.0 28/01/21
+ * @version 2.0 27/02/21
  */
-public class LoadingBarViewModel extends ViewModel {
+public class LoadingBarViewModel extends ToastViewModel {
 
     // Loading bar state
     private final MutableLiveData<Boolean> mLoadingBarState = new MutableLiveData<>();
@@ -35,6 +35,7 @@ public class LoadingBarViewModel extends ViewModel {
      * true (to start displaying).
      */
     public void showLoadingBar() {
+        if (getLoadingBarState().getValue() != null && getLoadingBarState().getValue()) return;
         updateLoadingBarState(true);
     }
 
@@ -43,6 +44,7 @@ public class LoadingBarViewModel extends ViewModel {
      * false (to hide itself).
      */
     public void hideLoadingBar() {
+        if (getLoadingBarState().getValue() != null && !getLoadingBarState().getValue()) return;
         updateLoadingBarState(false);
     }
 

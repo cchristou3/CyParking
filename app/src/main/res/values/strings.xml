@@ -214,5 +214,6 @@
     <string name="log_out_text">You have been logged out!</string>
     <string name="nav_to_log_fail">Failed to navigate to login screen!</string>
     <string name="best_offer">Best offer:</string>
+    <string name="error">error</string>
 
 </resources>

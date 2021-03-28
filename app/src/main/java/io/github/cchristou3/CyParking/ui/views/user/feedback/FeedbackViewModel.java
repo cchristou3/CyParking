@@ -1,17 +1,17 @@
 package io.github.cchristou3.CyParking.ui.views.user.feedback;
 
 import androidx.annotation.Nullable;
+import androidx.core.util.Consumer;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.apiClient.model.data.user.Feedback;
 import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.apiClient.remote.repository.FeedbackRepository;
 import io.github.cchristou3.CyParking.data.pojo.form.feedback.FeedbackFormState;
+import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent;
 
 import static io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorViewModel.isEmailValid;
 
@@ -28,6 +28,7 @@ public class FeedbackViewModel extends ViewModel {
     final private MutableLiveData<String> mEmailState = new MutableLiveData<>();
     final private MutableLiveData<String> mFeedbackState = new MutableLiveData<>();
     final private MutableLiveData<FeedbackFormState> mFormState = new MutableLiveData<>();
+    final private MutableLiveData<Object> mGoBackState = new SingleLiveEvent<>();
 
     private final FeedbackRepository mFeedbackRepository;
 
@@ -70,11 +71,18 @@ public class FeedbackViewModel extends ViewModel {
     /**
      * Stores the given {@link Feedback} instance in the database.
      *
-     * @param feedback Feedback to be stored in the database.
-     * @return Task to be handled by the view.
+     * @param feedback     Feedback to be stored in the database.
+     * @param displayToast A handler to sending toast messages.
      */
-    public Task<DocumentReference> sendFeedback(Feedback feedback) {
-        return mFeedbackRepository.sendFeedback(feedback);
+    public void sendFeedback(Feedback feedback, Consumer<Integer> displayToast) {
+        mFeedbackRepository.sendFeedback(feedback).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                displayToast.accept(R.string.feedback_success);
+                mGoBackState.setValue(null);
+            } else {
+                displayToast.accept(R.string.feedback_failed);
+            }
+        });
     }
 
     /**
@@ -98,15 +106,19 @@ public class FeedbackViewModel extends ViewModel {
     /**
      * Getter to its data members
      */
-    public MutableLiveData<String> getEmailState() {
+    public LiveData<String> getEmailState() {
         return mEmailState;
     }
 
-    public MutableLiveData<String> getFeedbackState() {
+    public LiveData<String> getFeedbackState() {
         return mFeedbackState;
     }
 
-    public MutableLiveData<FeedbackFormState> getFormState() {
+    public LiveData<FeedbackFormState> getFormState() {
         return mFormState;
+    }
+
+    public LiveData<Object> getGoBackState() {
+        return mGoBackState;
     }
 }

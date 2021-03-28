@@ -160,4 +160,5 @@
     <string name="log_out_text">Εχετε αποσυνδεθεί!</string>
     <string name="nav_to_log_fail">Αποτυχία πλοήγησης στην οθόνη σύνδεσης!</string>
     <string name="best_offer">Καλύτερη προσφορά:</string>
+    <string name="error">σφάλμα</string>
 </resources>

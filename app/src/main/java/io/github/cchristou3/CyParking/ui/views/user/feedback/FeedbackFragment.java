@@ -7,7 +7,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -108,24 +107,17 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
     private void setUpButton() {
         // Hook up the send feedback button with an onClickListener and disable it initially
         getBinding().feedbackFragmentMbtnSendFeedback.setEnabled(false);
-        getBinding().feedbackFragmentMbtnSendFeedback.setOnClickListener(v -> {
-            // Store message to Firestore and (TODO) send notification to administrator via cloud function
-            mFeedbackViewModel.sendFeedback(
-                    new Feedback(
-                            ((getUser() != null) ? // If logged in
-                                    getUser().getEmail() // its email
-                                    : mFeedbackViewModel.getEmail()), // Otherwise, inputted email
-                            mFeedbackViewModel.getFeedback()
-                    )
-            ).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(requireContext(), getString(R.string.feedback_success), Toast.LENGTH_SHORT).show();
-                    goBack(requireActivity());
-                } else {
-                    Toast.makeText(requireContext(), getString(R.string.feedback_failed), Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
+        getBinding().feedbackFragmentMbtnSendFeedback.setOnClickListener(v ->
+                // Store message to Firestore and (TODO) send notification to administrator via cloud function
+                mFeedbackViewModel.sendFeedback(
+                        new Feedback(
+                                ((getUser() != null) ? // If logged in
+                                        getUser().getEmail() // its email
+                                        : mFeedbackViewModel.getEmail()), // Otherwise, inputted email
+                                mFeedbackViewModel.getFeedback()
+                        ), getGlobalStateViewModel()::updateToastMessage
+                )
+        );
     }
 
     /**
@@ -145,6 +137,10 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
                 ViewUtility.updateErrorOf(requireContext(), getBinding().feedbackFragmentTilEmailInput, feedbackFormState.getEmailError());
             }
         });
+
+        mFeedbackViewModel.getGoBackState().observe(getViewLifecycleOwner(), goBack ->
+                goBack(requireActivity())
+        );
     }
 
     /**
@@ -163,9 +159,18 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
     public void updateUI(@Nullable LoggedInUser user) {
         if (user != null) { // User is logged in
             updateUIWithUser(user);
+            cleanUpEmailErrors();
         } else {// User is NOT logged in
             updateUIWithoutUser();
         }
+    }
+
+    /**
+     * Remove any email related errors as the user is logged in and
+     * there is no need to input it.
+     */
+    private void cleanUpEmailErrors() {
+        ViewUtility.updateErrorOf(requireContext(), getBinding().feedbackFragmentTilEmailInput, null);
     }
 
     /**
@@ -181,8 +186,9 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
 
         // Show the edit text related to the email and add a listener
         getBinding().feedbackFragmentEtEmailInput.setVisibility(View.VISIBLE);
+        getBinding().feedbackFragmentTilEmailInput.setVisibility(View.VISIBLE);
         getBinding().feedbackFragmentEtEmailInput.addTextChangedListener(this);
-        getBinding().feedbackFragmentTxtEmailTitle.setVisibility(View.GONE);
+        getBinding().feedbackFragmentTxtEmailTitle.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -200,6 +206,7 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
 
         // Hide the edit text related to the email
         getBinding().feedbackFragmentEtEmailInput.setVisibility(View.GONE);
+        getBinding().feedbackFragmentTilEmailInput.setVisibility(View.GONE);
 
         // Display user info
         String userDisplayName = user.getDisplayName();

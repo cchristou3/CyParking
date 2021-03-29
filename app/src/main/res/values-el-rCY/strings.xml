@@ -163,4 +163,5 @@
     <string name="error">σφάλμα</string>
     <string name="update_field_not_same_as_previous">Δεν πρέπει να είναι το ίδιο με το προηγούμενο.</string>
     <string name="booking_completed">Η κράτηση ολοκληρώθηκε!</string>
+    <string name="invalid_time">Επιλέξτε μια έγκυρη ώρα</string>
 </resources>

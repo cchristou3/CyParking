@@ -132,6 +132,7 @@
     <string name="no_lot_found_title">Couldn\'t load the parking lot\'s info</string>
     <string name="no_index_slot_offer">There was an error whilst analysing the selected Slot offer. Please choose another one and try again.</string>
     <string name="navigate_back_msg">You will now be navigated back to the map.</string>
+    <string name="invalid_time">Please pick an appropriate time</string>
 
     <!-- Strings related to when the user logs out, while being at a screen that requires authentication -->
     <string name="log_in">Log In</string>

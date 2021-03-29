@@ -14,7 +14,7 @@ import java.util.Locale;
  * related to date and time.</p>
  *
  * @author Charalambos Christou
- * @version 1.0 05/02/21
+ * @version 2.0 29/03/21
  */
 public class DateTimeUtility {
 
@@ -139,6 +139,41 @@ public class DateTimeUtility {
     }
 
     /**
+     * Check if the given time is valid based on the specific date.
+     * It specifically checks for the following case:
+     * Same date -> check times (ensure that the given time is not earlier
+     * than the current time)
+     * E.g. current 12/12/12 12:00, given 12/12/12 11:30
+     * -> should return true
+     *
+     * @param pickedDateTime  the picked date.
+     * @param selectedHours   The selected time's hours.
+     * @param selectedMinutes The selected time's minutes.
+     * @return True or false based on the above conditions.
+     */
+    public static boolean isInValidTime(Date pickedDateTime, int selectedHours, int selectedMinutes) {
+        // Access current date
+        Calendar currentDate = reset(Calendar.getInstance().getTime());
+
+        // Access picked date without - time attributes
+        final Calendar pickedDate = reset(pickedDateTime);
+
+        // First check if the date is the same
+        if (currentDate.compareTo(pickedDate) == 0) {
+            // Now check for the time
+            currentDate = Calendar.getInstance();
+            currentDate.setTime(Calendar.getInstance().getTime());
+            int currentHours = currentDate.get(Calendar.HOUR_OF_DAY);
+            int currentMinutes = currentDate.get(Calendar.MINUTE);
+            if (selectedHours < currentHours) return true;
+            if (selectedHours == currentHours) {
+                return selectedMinutes < currentMinutes;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns an instance of {@link SimpleDateFormat}
      * that parses dates into the following format
      * DD/MM/YYYY.
@@ -150,5 +185,24 @@ public class DateTimeUtility {
     @Contract(" -> new")
     private static SimpleDateFormat getDateFormatter() {
         return new SimpleDateFormat(DATE_PATTERN, Locale.getDefault());
+    }
+
+    /**
+     * Set all the attributes of the given date to 0
+     * except of day, month and year.
+     *
+     * @param date the date tp reset.
+     * @return a calendar object that has the same day, month and year
+     * of the given date.
+     */
+    @NotNull
+    private static Calendar reset(Date date) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar;
     }
 }

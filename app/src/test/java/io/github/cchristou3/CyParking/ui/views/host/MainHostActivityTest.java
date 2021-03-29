@@ -3,7 +3,6 @@ package io.github.cchristou3.CyParking.ui.views.host;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -16,10 +15,10 @@ public class MainHostActivityTest {
 
     @Before
     public void setUp() {
-        activity = Robolectric.buildActivity(MainHostActivity.class)
-                .create()
-                .resume()
-                .get();
+//        activity = Robolectric.buildActivity(MainHostActivity.class)
+//                .create()
+//                .resume()
+//                .get();
     }
 
     @Test

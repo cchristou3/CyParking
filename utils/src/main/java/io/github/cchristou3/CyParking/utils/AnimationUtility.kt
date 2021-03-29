@@ -40,7 +40,19 @@ import io.github.cchristou3.CyParking.utils.poko.OnTransitionEndListener
  * @param nextAnimation the next animation to perform once this transition has finished.
  */
 fun slideBottom(parent: ViewGroup, childToBeAnimated: View, hide: Boolean, duration: Long, nextAnimation: Runnable?) =
-        slide(parent, childToBeAnimated, hide, duration, Gravity.BOTTOM, nextAnimation)
+        slide(parent, childToBeAnimated, hide, duration, Gravity.BOTTOM, nextAnimation, false)
+
+/**
+ * Overloaded version pf the above method.
+ *
+ * @param shouldBeInvisibleIfHidden Flag indicating whether the the view should be gone or invisible
+ * if [hide] is set to true.
+ */
+fun slideBottom(
+        parent: ViewGroup, childToBeAnimated: View, hide: Boolean,
+        duration: Long, nextAnimation: Runnable?, shouldBeInvisibleIfHidden: Boolean
+) =
+        slide(parent, childToBeAnimated, hide, duration, Gravity.BOTTOM, nextAnimation, shouldBeInvisibleIfHidden)
 
 
 /**
@@ -57,7 +69,7 @@ fun slideBottom(parent: ViewGroup, childToBeAnimated: View, hide: Boolean, durat
  * @param nextAnimation the next animation to perform once this transition has finished.
  */
 fun slideTop(parent: ViewGroup, childToBeAnimated: View, hide: Boolean, duration: Long, nextAnimation: Runnable?) =
-        slide(parent, childToBeAnimated, hide, duration, Gravity.TOP, nextAnimation)
+        slide(parent, childToBeAnimated, hide, duration, Gravity.TOP, nextAnimation, false)
 
 
 /**
@@ -74,8 +86,8 @@ fun slideTop(parent: ViewGroup, childToBeAnimated: View, hide: Boolean, duration
  */
 fun slide(
         parent: ViewGroup, childToBeAnimated: View, hide: Boolean,
-        duration: Long, @Slide.GravityFlag slideEdge: Int, nextAnimation: Runnable?
-) = animate(Slide(slideEdge), parent, childToBeAnimated, hide, duration, nextAnimation)
+        duration: Long, @Slide.GravityFlag slideEdge: Int, nextAnimation: Runnable?, shouldBeInvisibleIfHidden: Boolean
+) = animate(Slide(slideEdge), parent, childToBeAnimated, hide, duration, nextAnimation, shouldBeInvisibleIfHidden)
 
 
 /**
@@ -93,7 +105,7 @@ fun slide(
 fun fade(
         parent: ViewGroup, childToBeAnimated: View, hide: Boolean,
         duration: Long, mode: Int, nextAnimation: Runnable?
-) = animate(Fade(mode), parent, childToBeAnimated, hide, duration, nextAnimation)
+) = animate(Fade(mode), parent, childToBeAnimated, hide, duration, nextAnimation, false)
 
 
 /**
@@ -110,7 +122,7 @@ fun fade(
  */
 fun animate(
         transition: Visibility, parent: ViewGroup, childToBeAnimated: View, hide: Boolean,
-        duration: Long, nextAnimation: Runnable?
+        duration: Long, nextAnimation: Runnable?, shouldBeInvisibleIfHidden: Boolean
 ) {
     transition.duration = duration // how long the animation will last
     // Add the id of the target view that this Transition is interested in
@@ -124,7 +136,7 @@ fun animate(
 
     // If visibility set to VISIBLE, it will slide towards
     // Otherwise, it will slide backwards.
-    childToBeAnimated.visibility = if (hide) View.GONE else View.VISIBLE
+    childToBeAnimated.visibility = if (hide) (if (shouldBeInvisibleIfHidden) View.INVISIBLE else View.GONE) else View.VISIBLE
 }
 
 /**

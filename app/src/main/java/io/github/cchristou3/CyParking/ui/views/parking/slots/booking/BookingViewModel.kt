@@ -23,6 +23,7 @@ import io.github.cchristou3.CyParking.data.manager.DatabaseObserver
 import io.github.cchristou3.CyParking.data.manager.EncryptionManager
 import io.github.cchristou3.CyParking.data.manager.EncryptionManager.Companion.hex
 import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent
+import io.github.cchristou3.CyParking.utils.DateTimeUtility.isInValidTime
 import io.github.cchristou3.CyParking.utils.Utility
 import org.jetbrains.annotations.Contract
 import java.text.ParseException
@@ -45,7 +46,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
     private val mPickedDate = MutableLiveData(
             io.github.cchristou3.CyParking.utils.DateTimeUtility.dateToString(io.github.cchristou3.CyParking.utils.DateTimeUtility.getCurrentDate())
     )
-    private val pickedStartingTimeState = MutableLiveData(BookingDetails.Time.getCurrentTime())
+    private val mPickedStartingTimeState = MutableLiveData(BookingDetails.Time.getCurrentTime())
     private val mPickedSlotOffer = MutableLiveData<SlotOffer?>()
     private val mBookingButtonState = MutableLiveData(false) // Initially disabled
     private val mQRCodeButtonState = MutableLiveData(false) // Initially hidden
@@ -124,7 +125,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
      * @param minutes The selected minutes.
      */
     fun updateStartingTime(hours: Int, minutes: Int) {
-        pickedStartingTimeState.value = BookingDetails.Time(hours, minutes)
+        mPickedStartingTimeState.value = BookingDetails.Time(hours, minutes)
     }
 
     /**
@@ -146,9 +147,9 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
     val pickedDate: String?
         get() = mPickedDate.value
     val pickedStartingTime: BookingDetails.Time?
-        get() = pickedStartingTimeState.value
+        get() = mPickedStartingTimeState.value
     val startingTimeState: LiveData<BookingDetails.Time>
-        get() = pickedStartingTimeState
+        get() = mPickedStartingTimeState
     val slotOffer: SlotOffer?
         get() = mPickedSlotOffer.value
     val dateState: LiveData<String>
@@ -314,6 +315,11 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
         // Check whether the user picked a payment method
         if (paymentMethod.value == null) return R.string.no_payment_method_selected
         if (date == null) return R.string.parse_error_msg
+
+        if (pickedStartingTime != null) {
+            if (isInValidTime(date, pickedStartingTime!!.hour, pickedStartingTime!!.minute))
+                return R.string.invalid_time;
+        }
         return null
     }
 
@@ -404,7 +410,6 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
 
                     // Disable the 'book' button
                     updateBookingButtonState(false)
-                    updateSlotOffer(null) // and set offer to null
                 }
     }
 
@@ -431,6 +436,7 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
         mBookingRepository.cancelParkingBooking(idOfBookingToBeCancelled)
         mIsBookingCompleted.value = false
         mBookingButtonState.value = true
+        mQRCodeButtonState.value = false
     }
 
     /**
@@ -480,6 +486,12 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
         mPaymentSessionHelper.setUpPaymentSession(fragment)
     }
 
+    /**
+     * Update the value of appropriate livedata if the booking
+     * is not completed.
+     *
+     * @param item the selected slot offer.
+     */
     fun handleSelectedItem(item: SlotOffer) {
         isBookingCompleted.value?.let { isCompleted ->
             if (!isCompleted) {

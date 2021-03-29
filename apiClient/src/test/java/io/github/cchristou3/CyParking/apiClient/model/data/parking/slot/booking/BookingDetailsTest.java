@@ -58,16 +58,6 @@ public class BookingDetailsTest {
     ///////////////////////////////////////////////////////////////////////////
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkIfFieldsValid_greaterHour_throwsException() {
-        BookingDetails.Time.checkIfFieldsValid(24, 1);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void checkIfFieldsValid_smallerHour_throwsException() {
-        BookingDetails.Time.checkIfFieldsValid(-1, 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void checkIfFieldsValid_greaterMinute_throwsException() {
         BookingDetails.Time.checkIfFieldsValid(1, 60);
     }
@@ -122,14 +112,6 @@ public class BookingDetailsTest {
         String output = BookingDetails.Time.getTimeOf(hours, minutes);
         // Then
         Assert.assertEquals("10 : 12", output);
-    }
-
-    @Test(expected = IllegalArgumentException.class)// Then
-    public void getTimeOf_greaterHours_throwsException() {
-        // Given
-        int hours = 24, minutes = 12;
-        // When
-        String output = BookingDetails.Time.getTimeOf(hours, minutes);
     }
 
     @Test(expected = IllegalArgumentException.class)// Then

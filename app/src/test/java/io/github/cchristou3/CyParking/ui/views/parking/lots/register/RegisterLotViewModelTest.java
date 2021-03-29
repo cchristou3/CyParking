@@ -67,6 +67,10 @@ public class RegisterLotViewModelTest extends InstantTaskRuler {
 
     @Test
     public void lotRegistrationDataChanged_setNewValidValueToAllFields_returnsValidForm() throws InterruptedException {
+        // Ensure valid set up
+        registerLotViewModel.lotRegistrationDataChanged(validOperatorMobileNumber, validLotCapacity, validLotName, validLotLatLng, validSlotOfferList);
+        getOrAwaitValue(registerLotViewModel.getRegisterLotFormState());
+
         // Setting the mock uri first and triggering an update
         // as the Uri validation check is before the Slot offer check in lotRegistrationDataChanged
         registerLotViewModel.updateImageUri(mockUri);
@@ -210,14 +214,20 @@ public class RegisterLotViewModelTest extends InstantTaskRuler {
     }
 
     @Test
-    public void updateImageUri_setsNewValue() {
+    public void updateImageUri_setsNewValue() throws InterruptedException {
+        registerLotViewModel.lotRegistrationDataChanged(validOperatorMobileNumber, validLotCapacity, validLotName, validLotLatLng, validSlotOfferList);
+        getOrAwaitValue(registerLotViewModel.getRegisterLotFormState());
         registerLotViewModel.updateImageUri(mockUri);
         assertThat(registerLotViewModel.getImageUri(),
                 is(mockUri));
     }
 
     @Test
-    public void updateImageUri_setsNullValue() {
+    public void updateImageUri_setsNullValue() throws InterruptedException {
+        // Ensure valid set up
+        registerLotViewModel.lotRegistrationDataChanged(validOperatorMobileNumber, validLotCapacity, validLotName, validLotLatLng, validSlotOfferList);
+        getOrAwaitValue(registerLotViewModel.getRegisterLotFormState());
+
         registerLotViewModel.updateImageUri(null);
         assertThat(registerLotViewModel.getImageUri(),
                 is(nullValue()));

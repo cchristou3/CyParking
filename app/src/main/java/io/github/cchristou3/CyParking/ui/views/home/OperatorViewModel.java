@@ -104,6 +104,11 @@ public class OperatorViewModel extends ViewModel {
      * @param bookingDocId The document id of the booking.
      */
     public void receiveBooking(DocumentReference lotReference, String bookingDocId) {
+        // Could have checked if the booking was already scanned with a quick look up
+        // in the database. However, that would be one more overhead that would make
+        // updating the parking lot availability less real-time.
+        // Trade-off: speed <-> security and fraud
+
         mDefaultOperatorRepository.updateBookingStatus(bookingDocId);
         incrementPersonCount(lotReference);
     }

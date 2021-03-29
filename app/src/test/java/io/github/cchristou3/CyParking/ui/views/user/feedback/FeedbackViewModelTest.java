@@ -111,9 +111,4 @@ public class FeedbackViewModelTest extends InstantTaskRuler {
         assertThat(getOrAwaitValue(feedbackViewModel.getEmailState()), is(nullValue()));
         assertThat(feedbackViewModel.getEmail(), is(nullValue()));
     }
-
-    @Test
-    public void sendFeedback_returnsNonNull() {
-        assertThat(feedbackViewModel.sendFeedback(feedback), is(not(nullValue())));
-    }
 }

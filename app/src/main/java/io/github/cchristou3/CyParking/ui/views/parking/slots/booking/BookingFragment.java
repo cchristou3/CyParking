@@ -208,6 +208,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
         // Observe the visibility of the 'View QR Code' button
         mBookingViewModel.getQRCodeButtonState().observe(getViewLifecycleOwner(), show -> {
             if (show) setUpQRCodeButton();
+            else hideQRCodeButton();
         });
 
         // Listen for snack bars
@@ -260,6 +261,18 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
     }
 
     /**
+     * Hide the qr code button.
+     */
+    private void hideQRCodeButton() {
+        AnimationUtility.slideBottom(
+                getBinding().fragmentParkingBookingClMainCl, // ViewGroup / parent
+                getBinding().fragmentParkingBookingBtnDisplayQrCode, // child we want to animate
+                true, // we want to display it
+                1000L, null, true
+        );
+    }
+
+    /**
      * Displays the QR Code button by sliding it upwards from the screen's
      * bottom to the top of the 'book' button. Also, attaches an on click listener to
      * the button that will display the stored message as QR Code in a dialog.
@@ -286,6 +299,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
                     }
                 });
     }
+
 
     /**
      * Sets the initial values of the Ui with the values of {@link #mSelectedParking}

@@ -16,7 +16,7 @@
     <string name="email">Email</string>
     <string name="name_surname">Name &amp; Surname</string>
     <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Register</string>
+    <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="welcome">"Welcome! "</string>
     <string name="invalid_email">Not a valid email</string>
@@ -101,6 +101,7 @@
     <string name="upcoming_booking">Upcoming booking</string>
     <string name="cancelled">Cancelled</string>
     <string name="invalid_qr_code">The given QR Code has wrong format. Please use the provided QR Code scanner for this application exclusively.</string>
+    <string name="booking_completed">Booking has been completed!</string>
 
     <!-- Strings related to the shared Views of HomeFragment and BookingDetailsFragment -->
     <string name="shared_booking_card_view" translatable="false">bookingCardView</string>
@@ -151,6 +152,7 @@
     <string name="no_pending_bookings">No pending bookings at the moment!</string>
 
     <!-- Strings related to the Account and UpdateDialog fragments -->
+    <string name="update_field_not_same_as_previous">Must not be the same as the previous one.</string>
     <string name="prompt_name">Display name</string>
     <string name="action_update">Update</string>
     <string name="update_name">Update Name</string>

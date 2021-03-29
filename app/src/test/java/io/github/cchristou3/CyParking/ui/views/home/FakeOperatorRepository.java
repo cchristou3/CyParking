@@ -76,5 +76,14 @@ public class FakeOperatorRepository implements OperatorRepository {
         return null;
     }
 
-
+    /**
+     * Retrieve the booking that corresponds to the given document id.
+     *
+     * @param bookingId the document id of a booking
+     * @return A task with the booking with there was one.
+     */
+    @Override
+    public DocumentReference getBooking(String bookingId) {
+        return null;
+    }
 }

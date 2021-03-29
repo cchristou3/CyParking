@@ -80,10 +80,12 @@ public class ViewBookingsViewModel extends ViewModel {
      * @param userId       The id of the Firebase user.
      * @param displayToast A handler for displaying toast messages.
      */
-    public void getUserBookings(String userId, Consumer<Integer> displayToast) {
+    public void getUserBookings(String userId, Consumer<Integer> displayToast, Runnable showLoadingBar, Runnable hideLoadingBar) {
         if (!mWasDataLoaded) {
+            showLoadingBar.run();
             this.mBookingRepository.getUserBookings(userId).get()
                     .addOnCompleteListener(task -> {
+                        hideLoadingBar.run();
                         final Exception error = task.getException();
                         final QuerySnapshot value = task.getResult();
                         if (error != null || value == null) { // Check whether an error occurred

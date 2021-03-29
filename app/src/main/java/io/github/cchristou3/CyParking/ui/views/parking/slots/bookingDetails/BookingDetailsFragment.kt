@@ -34,7 +34,7 @@ import io.github.cchristou3.CyParking.utilities.setColor
  * Details include the booking's QR Code, the lot's location (directions), etc.
  *
  * @author Charalambos Christou
- * @since 2.0 24/03/21
+ * @since 3.0 29/03/21
  */
 class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Navigable {
 
@@ -44,6 +44,8 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
 
     private lateinit var viewModel: BookingDetailsViewModel
     private var mIsCreated: Boolean = true
+
+    private var mQrCodeDialog: QRCodeDialog? = null
 
 
     /**
@@ -84,6 +86,9 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
         viewModel = ViewModelProvider(this, BookingDetailsViewModelFactory())
                 .get(BookingDetailsViewModel::class.java)
 
+        // Listen for the booking status
+        viewModel.isCompleted.observe(viewLifecycleOwner, this::updateUi)
+
         // Observe the user's state
         observeUserState {
             it ?: run { // if logged out, then prompt to login
@@ -91,6 +96,21 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
             }
         }
         initializeUi()
+    }
+
+    /**
+     * Disable or enable the button based on the booking's status.
+     * Also, if the booking status is complete and the qr code
+     * dialog is shown, then hide it.
+     * @param completed the booking's status.
+     */
+    private fun updateUi(completed: Boolean) {
+        binding.bookingDetailsFragmentBtnQrCode.isEnabled = !completed
+        mQrCodeDialog?.let {
+            if (completed) {
+                it.dismiss()
+            }
+        }
     }
 
     /**
@@ -125,6 +145,7 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
                 loadPhoto(selectedBooking)
                 displayContents(selectedBooking)
                 setListenerToQRCodeButton(selectedBooking.qrCode)
+                viewModel.observeBookingStatus(it.generateDocumentId(), requireActivity())
             }
         }
     }
@@ -172,11 +193,11 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
     private fun setListenerToQRCodeButton(qrCode: String) {
         binding.bookingDetailsFragmentBtnQrCode.setOnClickListener {
             // Show a fragment that will display the QR code
-            QRCodeDialog(
+            mQrCodeDialog = QRCodeDialog(
                     requireContext(),
                     binding.bookingDetailsFragmentClMainCl,
                     qrCode)
-                    .show()
+            mQrCodeDialog?.show()
         }
     }
 

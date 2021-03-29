@@ -135,6 +135,7 @@ public class OperatorViewModel extends ViewModel {
                     // Convert the string into a Booking object and access its unique id
                     Booking.toBooking(decodedMessage).generateDocumentId()
             );
+            displayToast.accept(R.string.booking_completed);
         } catch (Exception ignored) {
             // Display a message in case decryption failed (malformed/corrupted/outside of the application's bounds message)
             displayToast.accept(R.string.invalid_qr_code);

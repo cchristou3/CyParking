@@ -319,6 +319,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
      * @param loggedInUser The user to fetch the bookings for.
      */
     private void loadBookings(@NotNull LoggedInUser loggedInUser) {
-        mViewBookingsViewModel.getUserBookings(loggedInUser.getUserId(), getGlobalStateViewModel()::updateToastMessage);
+        mViewBookingsViewModel.getUserBookings(loggedInUser.getUserId(), getGlobalStateViewModel()::updateToastMessage,
+                getGlobalStateViewModel()::showLoadingBar, getGlobalStateViewModel()::hideLoadingBar);
     }
 }

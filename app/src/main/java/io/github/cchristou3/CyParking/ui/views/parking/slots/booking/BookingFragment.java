@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -163,7 +162,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
             mBookingViewModel.handlePaymentData(requestCode, resultCode,
                     data == null ? new Intent() : data);
         } else if (resultCode == Activity.RESULT_CANCELED) {
-            Toast.makeText(requireContext(), "No payment method got selected.", Toast.LENGTH_SHORT).show();
+            getGlobalStateViewModel().updateToastMessage(R.string.no_payment_method_selected);
         }
     }
 

@@ -248,14 +248,14 @@ public class MainHostActivity extends AppCompatActivity {
                 mGlobalStateViewModel.signOut();
                 PaymentSessionHelper.endCustomerSession();
                 // Display a message to the user
-                Toast.makeText(this, R.string.log_out_text, Toast.LENGTH_SHORT).show();
+                mGlobalStateViewModel.updateToastMessage(R.string.log_out_text);
                 break;
             case SIGN_IN:
                 try {
                     getActiveNavigableFragment().toAuthenticator();
                 } catch (IllegalStateException e) {
                     Log.d(TAG, "onOptionsItemSelected: error: " + e.getMessage());
-                    Toast.makeText(this, R.string.nav_to_log_fail, Toast.LENGTH_SHORT).show();
+                    mGlobalStateViewModel.updateToastMessage(R.string.nav_to_log_fail);
                 }
                 break;
             default:

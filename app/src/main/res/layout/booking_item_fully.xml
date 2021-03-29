@@ -5,7 +5,7 @@
     android:layout_height="0dp"
     android:layout_gravity="center_horizontal"
     android:layout_marginLeft="15dp"
-    android:layout_marginTop="25dp"
+    android:layout_marginTop="15dp"
     android:layout_marginRight="15dp"
     android:transitionName="@string/shared_booking_card_view"
     app:cardCornerRadius="30dp"
@@ -50,9 +50,11 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:drawablePadding="10dp"
+            android:layout_marginEnd="30dp"
             android:textAppearance="?attr/textAppearanceBody1"
             app:drawableStartCompat="@drawable/ic_calendar"
             app:layout_constraintBottom_toBottomOf="@+id/booking_item_fully_txt_start_time"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/booking_item_fully_txt_start_time"
             app:layout_constraintTop_toTopOf="@+id/booking_item_fully_txt_start_time" />
 

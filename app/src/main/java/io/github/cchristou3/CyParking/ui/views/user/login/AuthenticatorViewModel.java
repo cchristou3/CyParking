@@ -154,7 +154,7 @@ public class AuthenticatorViewModel extends ViewModel {
                             storeRolesLocally(context, task.getResult().getUser().getUid(), roles);
 
                             final LoggedInUser loggedInUser = new LoggedInUser(task.getResult().getUser(), roles);
-                            loggedInUser.setDisplayName(mNameState.getValue());
+                            loggedInUser.setDisplayName(getName());
 
                             // Initialize the Repository's LoggedInUser instance
                             // and trigger loginResult observer update

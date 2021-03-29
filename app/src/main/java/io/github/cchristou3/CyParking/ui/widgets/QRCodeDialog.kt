@@ -15,11 +15,13 @@ import io.github.cchristou3.CyParking.databinding.DialogQrCodeBinding
  * the given message in its QR Code form.
  *
  * @author Charalambos Christou
- * @since 25/02/21
+ * @since 2.0  29/03/21
  */
 class QRCodeDialog(context: Context, parent: ConstraintLayout, message: String) {
 
-    private var dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
+    private var mDialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
+
+    private lateinit var mDialog: AlertDialog
 
     companion object {
         // How much space the dialog should occupy from its parent view
@@ -48,7 +50,7 @@ class QRCodeDialog(context: Context, parent: ConstraintLayout, message: String) 
         // Display it on the image view
         qrCodeViewBinding.dialogQrCodeIv.setImageBitmap(bitmap)
         // Set the dialog builder's view to our custom view
-        dialogBuilder.setView(qrCodeViewBinding.root)
+        mDialogBuilder.setView(qrCodeViewBinding.root)
     }
 
     /**
@@ -57,7 +59,13 @@ class QRCodeDialog(context: Context, parent: ConstraintLayout, message: String) 
      */
     fun show() {
         // Show the dialog
-        dialogBuilder.show()
+        mDialog = mDialogBuilder.show()
     }
 
+    /**
+     * Hides the previously created dialog.
+     */
+    fun dismiss() {
+        mDialog.dismiss()
+    }
 }

@@ -9,14 +9,14 @@
 
     <Button
         android:id="@+id/fragment_home_btn_scan_booking"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         android:text="@string/scan_a_booking"
+        android:visibility="gone"
         app:icon="@drawable/ic_qr_code_scanner"
         app:layout_constraintBottom_toTopOf="@+id/fragment_home_btn_nav_to_map"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/fragment_home_btn_scan_lot"
+        app:layout_constraintStart_toStartOf="@+id/fragment_home_btn_scan_lot"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
@@ -32,12 +32,13 @@
 
     <Button
         android:id="@+id/fragment_home_btn_nav_to_map"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="130dp"
         android:text="@string/parking_map"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/fragment_home_btn_scan_lot"
+        app:layout_constraintStart_toStartOf="@+id/fragment_home_btn_scan_lot"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout

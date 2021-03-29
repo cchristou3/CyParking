@@ -9,7 +9,7 @@
     <string name="email">Ηλεκτρονική διεύθυνση</string>
     <string name="name_surname">Ονομα &amp; Επίθετο</string>
     <string name="prompt_password">Κωδικός πρόσβασης</string>
-    <string name="action_sign_in">Εγγραφή</string>
+    <string name="action_sign_in">Σύνδεση</string>
     <string name="action_sign_in_short">Σύνδεση</string>
     <string name="welcome">Καλωσήρθατε!</string>
     <string name="invalid_email">Η ηλεκτρονική διεύθυνση είναι μη έγκυρη</string>
@@ -161,4 +161,6 @@
     <string name="nav_to_log_fail">Αποτυχία πλοήγησης στην οθόνη σύνδεσης!</string>
     <string name="best_offer">Καλύτερη προσφορά:</string>
     <string name="error">σφάλμα</string>
+    <string name="update_field_not_same_as_previous">Δεν πρέπει να είναι το ίδιο με το προηγούμενο.</string>
+    <string name="booking_completed">Η κράτηση ολοκληρώθηκε!</string>
 </resources>

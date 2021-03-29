@@ -353,8 +353,7 @@ public class BookingDetails implements Parcelable, Comparable<BookingDetails> {
          * @throws IllegalArgumentException When at least one of the fields are invalid.
          */
         static void checkIfFieldsValid(int hours, int minute) throws IllegalArgumentException {
-            if (!(hours >= 0 && hours <= 23) // Hours check
-                    || !(minute >= 0 && minute <= 59))
+            if (!(minute >= 0 && minute <= 59))
                 throw new IllegalArgumentException("The hours must be in range of 0..23 (inclusive)"
                         + " and the minutes in range of 0..59 (inclusive).");
         }

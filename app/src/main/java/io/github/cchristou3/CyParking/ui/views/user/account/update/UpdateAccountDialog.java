@@ -299,7 +299,7 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         if (mUpdateViewModel.getDialogType() == UPDATE_DISPLAY_NAME
                 && mGlobalStateViewModel.getUser() != null
                 && updatedField.equals(mGlobalStateViewModel.getUser().getDisplayName())) {
-            Toast.makeText(requireContext(), "Must not be the same as the previous one.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.update_field_not_same_as_previous, Toast.LENGTH_SHORT).show();
             return;
         }
 

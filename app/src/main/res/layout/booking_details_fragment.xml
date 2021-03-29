@@ -2,29 +2,54 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/booking_details_fragment_cl_main_cl"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:transitionName="@string/shared_parent"
-    tools:context=".ui.views.parking.slots.bookingDetails.BookingDetailsFragment">
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/booking_details_fragment_iv_lot_photo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:contentDescription="@string/parking_lot_photo"
-        android:padding="15dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <include
-        android:id="@+id/booking_item_fully_cv"
-        layout="@layout/booking_item_fully"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/booking_details_fragment_iv_lot_photo" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+
+            android:id="@+id/booking_details_fragment_cl_main_cl"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:transitionName="@string/shared_parent"
+            tools:context=".ui.views.parking.slots.bookingDetails.BookingDetailsFragment">
+
+            <ImageView
+                android:id="@+id/booking_details_fragment_iv_lot_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:contentDescription="@string/parking_lot_photo"
+                android:padding="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <include
+                android:id="@+id/booking_item_fully_cv"
+                layout="@layout/booking_item_fully"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/booking_details_fragment_iv_lot_photo" />
+
+
+            <Button
+                android:id="@+id/booking_details_fragment_btn_qr_code"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="20dp"
+                android:text="@string/view_qr_code"
+                app:layout_constraintEnd_toEndOf="@+id/booking_item_fully_cv"
+                app:layout_constraintStart_toStartOf="@+id/booking_item_fully_cv"
+                app:layout_constraintTop_toBottomOf="@+id/booking_item_fully_cv" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/booking_details_fragment_fab_directions"
@@ -35,22 +60,10 @@
         android:layout_marginBottom="16dp"
         android:backgroundTint="@color/white"
         android:contentDescription="@string/directions"
+        app:elevation="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:maxImageSize="30dp"
         app:srcCompat="@drawable/ic_directions"
         app:tint="@color/purple_700" />
-
-    <Button
-        android:id="@+id/booking_details_fragment_btn_qr_code"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
-        android:text="@string/view_qr_code"
-        app:layout_constraintEnd_toEndOf="@+id/booking_item_fully_cv"
-        app:layout_constraintStart_toStartOf="@+id/booking_item_fully_cv"
-        app:layout_constraintTop_toBottomOf="@+id/booking_item_fully_cv" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

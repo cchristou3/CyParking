@@ -1,6 +1,7 @@
 package io.github.cchristou3.CyParking.utils;
 
 import android.content.pm.PackageManager;
+import android.os.Looper;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -14,12 +15,21 @@ import java.util.Locale;
  * Purpose: <p>Contain all helper / utility methods that the application needs.</p>
  *
  * @author Charalambos Christou
- * @version 8.0 27/03/21
+ * @version 9.0 29/03/21
  */
 public class Utility {
 
     // No instances. Static utilities only.
     private Utility() {
+    }
+
+    /**
+     * Check whether the calling thread is the main thread.
+     *
+     * @return true, if the calling thread is the main thread. Otherwise, false.
+     */
+    public static boolean isInMainThread() {
+        return Looper.myLooper() == Looper.getMainLooper();
     }
 
     /**

@@ -263,7 +263,7 @@ open class PaymentSessionHelper(context: Context, val mUiPaymentSessionListener:
                             Log.d("PaymentSession", "PaymentMethod $it selected")
                             // Display the payment method to the user
                             mUiPaymentSessionListener.onPaymentMethodSelected(
-                                    it.card?.brand.toString() + cardText + it.card?.last4)
+                                    it.card?.brand.toString() + " " + cardText + " " + it.card?.last4)
                             mSelectedPaymentMethod = it
                         }
                     }

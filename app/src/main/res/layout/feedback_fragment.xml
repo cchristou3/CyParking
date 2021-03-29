@@ -178,6 +178,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:paddingBottom="10dp"
             android:text="@string/diagnostic_info_disclaimer"
             android:textSize="17sp"
             app:layout_constraintEnd_toEndOf="@+id/feedback_fragment_mbtn_send_feedback"

@@ -110,7 +110,7 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
     // Constant variables
     public static final String TAG = ParkingMapFragment.class.getName() + "UniqueTag";
     private static final int DEFAULT_ZOOM_LEVEL = 16;
-    private final String UNAVAILABLE = getString(R.string.unavailable);
+    private String UNAVAILABLE;
     private static final double UPDATE_LOCATION_THRESHOLD = 100.0D;
     private static final float MIN_ZOOM_LEVEL = 10.0f;
 
@@ -145,6 +145,9 @@ public class ParkingMapFragment extends BaseFragment<FragmentParkingMapBinding>
                 applyDrawableColor(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_user_location, requireActivity().getTheme()),
                         getResources().getColor(R.color.black, requireActivity().getTheme()))
         );
+
+        UNAVAILABLE = getString(R.string.unavailable);
+
         initializeViewModel();
     }
 

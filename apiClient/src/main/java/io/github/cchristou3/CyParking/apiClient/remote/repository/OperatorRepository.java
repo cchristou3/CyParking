@@ -74,4 +74,13 @@ public interface OperatorRepository {
      * @return A {@link Task} object to be handled by the caller.
      */
     Task<Uri> uploadPhoto(Uri selectedImageUri, String operatorId);
+
+
+    /**
+     * Retrieve the booking that corresponds to the given document id.
+     *
+     * @param bookingId the document id of a booking
+     * @return A task with the booking with there was one.
+     */
+    DocumentReference getBooking(String bookingId);
 }

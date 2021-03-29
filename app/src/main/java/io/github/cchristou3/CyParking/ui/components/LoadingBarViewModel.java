@@ -3,6 +3,8 @@ package io.github.cchristou3.CyParking.ui.components;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import static io.github.cchristou3.CyParking.utils.Utility.isInMainThread;
+
 /**
  * Purpose: persists data related to the Loading Bar's state
  * when configuration changes and dispatching toast messages.
@@ -36,7 +38,10 @@ public class LoadingBarViewModel extends ToastViewModel {
      */
     public void showLoadingBar() {
         if (getLoadingBarState().getValue() != null && getLoadingBarState().getValue()) return;
-        updateLoadingBarState(true);
+        if (!isInMainThread())
+            updateLoadingBarStateFromBackground(true);
+        else
+            updateLoadingBarState(true);
     }
 
     /**
@@ -45,7 +50,10 @@ public class LoadingBarViewModel extends ToastViewModel {
      */
     public void hideLoadingBar() {
         if (getLoadingBarState().getValue() != null && !getLoadingBarState().getValue()) return;
-        updateLoadingBarState(false);
+        if (!isInMainThread())
+            updateLoadingBarStateFromBackground(false);
+        else
+            updateLoadingBarState(false);
     }
 
     /**
@@ -66,5 +74,16 @@ public class LoadingBarViewModel extends ToastViewModel {
      */
     private void updateLoadingBarState(boolean shouldShowLoadingBar) {
         this.mLoadingBarState.setValue(shouldShowLoadingBar);
+    }
+
+
+    /**
+     * Assign the value of {@link #mLoadingBarState}
+     * the given argument.
+     *
+     * @param shouldShowLoadingBar the new value of {@link #mLoadingBarState}.
+     */
+    private void updateLoadingBarStateFromBackground(boolean shouldShowLoadingBar) {
+        this.mLoadingBarState.postValue(shouldShowLoadingBar);
     }
 }

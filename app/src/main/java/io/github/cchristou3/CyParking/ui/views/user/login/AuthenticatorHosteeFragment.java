@@ -128,7 +128,7 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
         super.onResume();
         Log.d(TAG, "onResume: " + mAuthenticatorViewModel.getEmailState().getValue());
         initializeFragment();
-
+        mAuthenticatorViewModel.isUserSigningIn(mPageType == AuthenticatorAdapter.LOGIN_TAB);
     }
 
     /**

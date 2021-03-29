@@ -16,7 +16,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -201,7 +200,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (mLocationManager != null)
-            mLocationManager.onActivityResult(this, resultCode, resultCode, data);
+            mLocationManager.onActivityResult(this, requestCode, resultCode, data);
 
         if (requestCode == RC_PHOTO_PICKER) {
             if (resultCode == RESULT_OK) {
@@ -211,7 +210,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
                     );
                 }
             } else if (resultCode == RESULT_CANCELED) {
-                Toast.makeText(requireContext(), R.string.photo_not_picked, Toast.LENGTH_SHORT).show();
+                getGlobalStateViewModel().updateToastMessage(R.string.photo_not_picked);
             }
         }
     }
@@ -308,7 +307,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
             }
             slotOfferCounter = slotOffers.size();
             // Display a message to the user
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            getGlobalStateViewModel().updateToastMessage(message);
         });
     }
 
@@ -509,11 +508,11 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
     private void prepareGetLocationButton() {
         // Hook up a listener to the "get location" button
         getBinding().registerLotFragmentMbtnGetLocation.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), R.string.get_location_with_gps, Toast.LENGTH_SHORT).show();
+            getGlobalStateViewModel().updateToastMessage(R.string.get_location_with_gps);
             // Initialize the SingleLocationManager object
             if (mLocationManager == null) {
                 mLocationManager = LocationManager.createSingleUpdateHelper(this, this, null,
-                        () -> getGlobalStateViewModel().postToastMessage(R.string.error));
+                        mRegisterLotViewModel::postLocationServicesError);
                 Log.d(TAG, "SingleUpdateHelper initialized");
             } else {
                 Log.d(TAG, "SingleUpdateHelper prepareCallback");
@@ -686,7 +685,8 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
         // Otherwise, finish registration
         getGlobalStateViewModel().showLoadingBar();
         mRegisterLotViewModel.registerParkingLot(lotToBeRegistered,
-                getGlobalStateViewModel()::hideLoadingBar, getGlobalStateViewModel()::updateToastMessage);
+                () -> getGlobalStateViewModel().hideLoadingBar(),
+                getGlobalStateViewModel()::updateToastMessage);
 
     }
 
@@ -723,7 +723,7 @@ public class RegisterLotFragment extends BaseFragment<RegisterLotFragmentBinding
             ViewUtility.hideKeyboard(requireActivity(), requireView());
         } else {
             // Inform the user something wrong happened
-            Toast.makeText(requireContext(), getString(R.string.error_retrieving_location), Toast.LENGTH_SHORT).show();
+            getGlobalStateViewModel().updateToastMessage(R.string.error_retrieving_location);
         }
     }
 

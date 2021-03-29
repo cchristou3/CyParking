@@ -1,5 +1,6 @@
 package io.github.cchristou3.CyParking.ui.views.parking.slots.bookingDetails
 
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -19,12 +20,17 @@ class BookingDetailsViewModel(private val repository: OperatorRepository) : View
 
     private val mlotOfBooking = MutableLiveData<ParkingLot>()
 
+    private val mIsCompleted = MutableLiveData<Boolean>()
+
     /**
      * A LiveData getter of [mlotOfBooking] to ensure that
      * its value cannot be changed outside of the ViewModel scope.
      * Whereas its setter is private.
      */
     var lotOfBooking: LiveData<ParkingLot> = mlotOfBooking
+        private set
+
+    var isCompleted: LiveData<Boolean> = mIsCompleted
         private set
 
     /**
@@ -40,5 +46,28 @@ class BookingDetailsViewModel(private val repository: OperatorRepository) : View
                         }
                     }
                 }
+    }
+
+    /**
+     * Observe the booking that has as a document id the given bookingId.
+     *
+     * @param bookingId the document id of a booking
+     * @param activity the activity to handle the eventlistener.
+     */
+    fun observeBookingStatus(bookingId: String?, activity: FragmentActivity) {
+        repository.getBooking(bookingId)
+                .addSnapshotListener(activity) { value, _ ->
+                    if (value == null || !value.exists()) {
+                        mIsCompleted.value = true // Does not exist. Do not allow the user to generate QR Code.
+                        return@addSnapshotListener
+                    }
+                    val booking = value.toObject(Booking::class.java)
+                    if (booking == null) {
+                        mIsCompleted.value = true // Does not exist. Do not allow the user to generate QR Code.
+                        return@addSnapshotListener
+                    }
+                    mIsCompleted.value = booking.isCompleted
+                }
+
     }
 }

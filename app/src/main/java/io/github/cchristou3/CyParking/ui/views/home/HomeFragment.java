@@ -186,13 +186,14 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
         if (mLocationManager != null)
             mLocationManager.onActivityResult(this, requestCode, resultCode, data);
 
-        mOperatorViewModel.handleQRCodeScannerContents(
-                // Access the qr code's payload
-                IntentIntegrator.parseActivityResult(requestCode, resultCode, data),
-                // Access the previously stored lot reference
-                (DocumentReference) getIntentIntegrator().getMoreExtras().get(LOT_REFERENCE_KEY),
-                getGlobalStateViewModel()::updateToastMessage // A handler for messages
-        );
+        if (mOperatorViewModel != null)
+            mOperatorViewModel.handleQRCodeScannerContents(
+                    // Access the qr code's payload
+                    IntentIntegrator.parseActivityResult(requestCode, resultCode, data),
+                    // Access the previously stored lot reference
+                    (DocumentReference) getIntentIntegrator().getMoreExtras().get(LOT_REFERENCE_KEY),
+                    getGlobalStateViewModel()::updateToastMessage // A handler for messages
+            );
     }
 
     /**
@@ -259,6 +260,13 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
      * @param loggedInUser The current {@link LoggedInUser} instance.
      */
     private void updateUi(LoggedInUser loggedInUser) {
+
+        // TODO: 29/03/2021 In the following cases:
+        //   - If the user is not logged in,
+        //   - The user is logged in but not as an operator and he/she has no upcoming bookings
+        //   Then the lower screen will be left blank (which looks ugly).
+        //   Instead of that, use that section to recommend to the user nearby parking lots, offers, etc.
+
         if (loggedInUser == null) {
             // If operator logged out, remove observer to its parking lot
             if (mDatabaseObserver != null) mDatabaseObserver.unregisterLifecycleObserver();
@@ -334,8 +342,34 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
 
         mUserViewModel.getUpcomingBooking().observe(getViewLifecycleOwner(), this::displayBooking);
 
-        mUserViewModel.getUpcomingBooking(loggedInUser.getUserId());
+        getUpcomingBooking(mUserViewModel, loggedInUser);
 
+        mUserViewModel.getHideBooking().observe(getViewLifecycleOwner(), hideBooking ->
+                hideBookingAndGetNext(mUserViewModel, loggedInUser)
+        );
+    }
+
+    /**
+     * @param mUserViewModel
+     * @param loggedInUser
+     */
+    private void hideBookingAndGetNext(UserViewModel mUserViewModel, LoggedInUser loggedInUser) {
+        slideBottom(getBinding().getRoot(),
+                getBinding().fragmentHomeCvUserBooking,
+                true, TRANSITION_DURATION, () -> { // This time we want to fetch the next upcoming booking
+                    // and not animate another view
+                    getUpcomingBooking(mUserViewModel, loggedInUser);
+                });
+    }
+
+    /**
+     * Retrieve the most recent upcoming booking of the given user.
+     *
+     * @param mUserViewModel Does the business logic.
+     * @param loggedInUser   The current instance of {@link LoggedInUser}.
+     */
+    private void getUpcomingBooking(@NotNull UserViewModel mUserViewModel, @NotNull LoggedInUser loggedInUser) {
+        mUserViewModel.getUpcomingBooking(loggedInUser.getUserId(), requireActivity(), getGlobalStateViewModel()::updateToastMessage);
     }
 
     /**

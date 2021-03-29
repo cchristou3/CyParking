@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="availability">Διαθεσιμότητα:</string>
+    <string name="completed">Ολοκληρώθηκε</string>
+    <string name="pending">Εκκρεμής</string>
+    <string name="hours">ώρες</string>
+    <string name="hour">ώρα</string>
+    <string name="for_res">για</string>
+</resources>

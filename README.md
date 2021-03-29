@@ -228,7 +228,7 @@ Project Link: [https://github.com/cchristou3/CyParking](https://github.com/cchri
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
-* [Volley](https://github.com/google/volley)
+* [Stripe](https://stripe.com/docs)
 * [Gson](https://github.com/google/gson)
 * [Java Code Conventions](http://www.edparrish.net/common/javadoc.html#:~:text=How%20To%20Document%20and%20Organize%20Your%20Java%20Code,placement%20of%20curly%20braces.%20...%20More%20items...%20)
 * [Cloud Firestore](https://firebase.google.com/docs/firestore/quickstart#:~:text=%20Create%20a%20Cloud%20Firestore%20database%20%201,getting%20started%20with...%204%20Click%20Done.%20More%20)

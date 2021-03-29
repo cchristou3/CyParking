@@ -29,13 +29,24 @@ class UserViewModel(private val mUserRepository: UserRepository) : ViewModel() {
     var hideBooking: LiveData<Any> = mHideBooking
         private set
 
+    /**
+     * Fetch the nearest pending booking of the user with the specified userId.
+     * Once fetched, listen for its updates.
+     *
+     * @param activity the handler for the event listener
+     * @param userId The is of the Firebase user
+     * @param displayToast a way to display toast messages.
+     */
     fun getUpcomingBooking(userId: String, activity: FragmentActivity, displayToast: Consumer<Int>) {
+        // Access the booking object of the database
         mUserRepository.getUpcomingBooking(userId).get()
                 .addOnCompleteListener { task ->
                     if (!task.isSuccessful) return@addOnCompleteListener
                     task.result?.let { querySnapshot ->
                         if (querySnapshot.documents.isEmpty()) return@addOnCompleteListener
                         val currentBooking = querySnapshot.documents[0].toObject(Booking::class.java)
+
+                        // Now observe it
                         mUserRepository.bookingsRef.document(querySnapshot.documents[0].id)
                                 .addSnapshotListener(activity) { value, _ ->
                                     value?.let { documentSnapshot ->

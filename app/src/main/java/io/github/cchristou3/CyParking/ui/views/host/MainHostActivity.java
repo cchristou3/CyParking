@@ -97,6 +97,9 @@ public class MainHostActivity extends AppCompatActivity {
         mBinding = null; // Ready to be GCed
     }
 
+    /**
+     * Handle results from other activities.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

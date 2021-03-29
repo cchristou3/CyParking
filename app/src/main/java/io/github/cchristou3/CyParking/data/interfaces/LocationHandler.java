@@ -1,8 +1,7 @@
 package io.github.cchristou3.CyParking.data.interfaces;
 
-import androidx.fragment.app.Fragment;
-
 import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
+import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.parking.lots.register.RegisterLotFragment;
 
@@ -22,7 +21,7 @@ public interface LocationHandler {
      * Callback invoked when the user's location is received.
      *
      * @param locationResult The result of the user's requested location.
-     * @see LocationManager#requestUserLocationUpdates(Fragment)
+     * @see LocationManager#requestUserLocationUpdates(BaseFragment)
      */
     void onLocationResult(com.google.android.gms.location.LocationResult locationResult);
 }

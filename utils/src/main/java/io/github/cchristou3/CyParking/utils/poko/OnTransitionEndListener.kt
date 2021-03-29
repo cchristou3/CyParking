@@ -15,6 +15,15 @@ class OnTransitionEndListener(private val nextAnimation: Runnable) : Transition.
     override fun onTransitionStart(transition: Transition) {
     }
 
+    /**
+     * Notification about the end of the transition. Canceled transitions
+     * will always notify listeners of both the cancellation and end
+     * events. That is, {@link #onTransitionEnd(Transition)} is always called,
+     * regardless of whether the transition was canceled or played
+     * through to completion.
+     *
+     * @param transition The transition which reached its end.
+     */
     override fun onTransitionEnd(transition: Transition) {
         nextAnimation.run()
     }

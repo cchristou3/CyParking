@@ -15,7 +15,7 @@ import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLo
  * functionality related to the operator's tasks.
  *
  * @author Charalambos Christou
- * @version 2.0 26/03/2021
+ * @version 3.0 29/03/21
  * @see DefaultOperatorRepository
  */
 public interface OperatorRepository {

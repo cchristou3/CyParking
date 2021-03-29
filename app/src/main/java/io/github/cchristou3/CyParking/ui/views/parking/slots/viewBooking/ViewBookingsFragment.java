@@ -176,7 +176,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
     }
 
     /**
-     * Hides/Diaplsy any list related Views and displays/hides a message to the user.
+     * Hides/Display any list related Views and displays/hides a message to the user.
      * based on the given flag.
      */
     private void updateMessage(boolean show) {

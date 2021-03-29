@@ -16,6 +16,13 @@ import io.github.cchristou3.CyParking.apiClient.remote.repository.StripeReposito
  */
 class FirebaseEphemeralKeyProvider(private val repository: StripeRepository) : EphemeralKeyProvider {
 
+    /**
+     * When called, talks to a client server that then communicates with Stripe's servers to
+     * create an [EphemeralKey].
+     *
+     * @param apiVersion the Stripe API Version being used
+     * @param keyUpdateListener a callback object to notify about results
+     */
     override fun createEphemeralKey(apiVersion: String, keyUpdateListener: EphemeralKeyUpdateListener) {
         repository.createEphemeralKey(apiVersion)
                 ?.continueWith { task ->

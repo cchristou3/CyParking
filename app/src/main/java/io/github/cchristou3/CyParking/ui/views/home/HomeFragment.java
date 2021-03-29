@@ -350,8 +350,10 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> implements N
     }
 
     /**
-     * @param mUserViewModel
-     * @param loggedInUser
+     * Hides the current booking, and fetches the next one.
+     *
+     * @param mUserViewModel the business logic handler.
+     * @param loggedInUser   the current instance of LoggedInUser.
      */
     private void hideBookingAndGetNext(UserViewModel mUserViewModel, LoggedInUser loggedInUser) {
         slideBottom(getBinding().getRoot(),

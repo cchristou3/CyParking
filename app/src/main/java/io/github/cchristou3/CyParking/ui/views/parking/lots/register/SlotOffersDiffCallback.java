@@ -31,7 +31,7 @@ public class SlotOffersDiffCallback extends DiffUtil.ItemCallback<SlotOffer> {
      */
     @Override
     public boolean areItemsTheSame(@NonNull SlotOffer oldItem, @NonNull SlotOffer newItem) {
-        return false;
+        return oldItem.compareTo(newItem) == 0;
     }
 
     /**
@@ -59,6 +59,6 @@ public class SlotOffersDiffCallback extends DiffUtil.ItemCallback<SlotOffer> {
      */
     @Override
     public boolean areContentsTheSame(@NonNull SlotOffer oldItem, @NonNull SlotOffer newItem) {
-        return false;
+        return oldItem.compareTo(newItem) == 0;
     }
 }

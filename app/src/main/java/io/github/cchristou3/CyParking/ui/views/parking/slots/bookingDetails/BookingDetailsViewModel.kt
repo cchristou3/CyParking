@@ -18,16 +18,16 @@ import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorReposi
  */
 class BookingDetailsViewModel(private val repository: OperatorRepository) : ViewModel() {
 
-    private val mlotOfBooking = MutableLiveData<ParkingLot>()
+    private val mLotOfBooking = MutableLiveData<ParkingLot>()
 
     private val mIsCompleted = MutableLiveData<Boolean>()
 
     /**
-     * A LiveData getter of [mlotOfBooking] to ensure that
+     * A LiveData getter of [mLotOfBooking] to ensure that
      * its value cannot be changed outside of the ViewModel scope.
      * Whereas its setter is private.
      */
-    var lotOfBooking: LiveData<ParkingLot> = mlotOfBooking
+    var lotOfBooking: LiveData<ParkingLot> = mLotOfBooking
         private set
 
     var isCompleted: LiveData<Boolean> = mIsCompleted
@@ -42,7 +42,7 @@ class BookingDetailsViewModel(private val repository: OperatorRepository) : View
                     if (task.isSuccessful) {
                         val lot = task.result?.documents?.get(0)?.toObject(ParkingLot::class.java)
                         lot?.let {
-                            mlotOfBooking.value = it
+                            mLotOfBooking.value = it
                         }
                     }
                 }

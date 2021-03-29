@@ -26,7 +26,7 @@ import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
  * maintains an in-memory cache of login status (TODO:) and user credentials information.</p>
  *
  * @author Charalambos Christou
- * @version 6.0 3.0 10/02/21
+ * @version 6.0 10/02/21
  */
 public class AuthenticatorRepository implements DataSourceRepository.UserHandler {
 

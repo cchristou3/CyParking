@@ -271,9 +271,9 @@ public class ParkingMapViewModel extends ViewModel {
     }
 
     /**
-     * Access the value of {@link #mPromptUser}.
+     * Access the value of {@link #mDocumentIdsOfNearbyLots}.
      *
-     * @return the value of {@link #mPromptUser}.
+     * @return the value of {@link #mDocumentIdsOfNearbyLots}.
      */
     public Set<String> getCurrentParkingLotDocIds() {
         return getDocumentIdsOfNearbyLots().getValue();

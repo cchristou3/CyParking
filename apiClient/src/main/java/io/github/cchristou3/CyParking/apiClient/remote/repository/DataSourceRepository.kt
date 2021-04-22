@@ -19,13 +19,14 @@ import com.google.firebase.storage.StorageReference
  * only the repository classes can access them.
  *
  * @author Charalambos Christou
- * @version 5.0 12/03/21
+ * @version 6.0 22/04/21
  * @see <a href='https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-default/'>Interface default implementation</a>
  */
 internal object DataSourceRepository {
 
     // Cloud functions
     private const val GET_NEARBY_PARKING_LOTS = "getNearbyParkingLots"
+    private const val UPDATE_EMAIL = "updateEmail"
     private const val CREATE_EPHEMERAL_KEY = "createEphemeralKey"
 
     // Firebase Firestore paths (nodes)
@@ -227,6 +228,26 @@ internal object DataSourceRepository {
         }
 
         /**
+         * Call a cloud function that will update the user's email in the database.
+         *
+         * @param newEmail The new email of the user
+         * @param oldEmail The old email of the user
+         * @param userId  The user id
+         * @return A [Task] of the above description.
+         */
+        @JvmDefault
+        fun callUpdateEmailFunction(userId: String, oldEmail: String, newEmail: String): Task<HttpsCallableResult?> {
+            return getCallableFunctionByName(UPDATE_EMAIL)
+                    .call(object : java.util.HashMap<String?, String?>() {
+                        init {
+                            put(NEW_EMAIL, newEmail)
+                            put(OLD_EMAIL, oldEmail)
+                            put(USER_ID, userId)
+                        }
+                    })
+        }
+
+        /**
          * Call a cloud function that will create an [EphemeralKey].
          *
          * @return A [Task] of the above description.
@@ -241,6 +262,10 @@ internal object DataSourceRepository {
             const val LATITUDE = "latitude"
             const val LONGITUDE = "longitude"
             const val API_VERSION = "api_version"
+            const val NEW_EMAIL = "newEmail"
+            const val OLD_EMAIL = "oldEmail"
+            const val USER_ID = "userId"
+
         }
     }
 

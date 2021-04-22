@@ -49,7 +49,7 @@ import static io.github.cchristou3.CyParking.utils.ViewUtility.getStringOrEmpty;
  * Purpose: Allows the users to update one of their attributes.
  *
  * @author Charalambos Christou
- * @version 6.0 02/02/21
+ * @version 7.0 22/04/21
  */
 public class UpdateAccountDialog extends DialogFragment implements View.OnClickListener, TextWatcher,
         Navigable {
@@ -322,8 +322,9 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
 
                 if (task.isSuccessful()) { // if successful
                     // Compose a message
-                    final String actionItem = getBinding().dialogAccountUpdateMtvFieldTitle.getText().toString();
-                    final String toastMsg = actionItem + " got updated.";
+                    final String actionItem = requireDialog().getWindow().getAttributes().getTitle().toString()
+                            .split(" ", 2)[1]; // Title: Updating [attribute]
+                    final String toastMsg = toCamelCase(actionItem) + " got updated.";
                     try {
                         // And display it to the user
                         Toast.makeText(requireActivity(), toastMsg, Toast.LENGTH_SHORT).show();
@@ -338,6 +339,16 @@ public class UpdateAccountDialog extends DialogFragment implements View.OnClickL
         } else {
             mUpdateViewModel.hideLoadingBar();
         }
+    }
+
+    /**
+     * Capitalizes the first letter of the word.
+     *
+     * @param word a word
+     * @return The given string in camel case
+     */
+    private String toCamelCase(String word) {
+        return word.substring(0, 1).toUpperCase().concat(word.substring(1)).trim();
     }
 
     /**

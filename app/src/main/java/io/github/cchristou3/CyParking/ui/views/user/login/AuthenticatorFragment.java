@@ -26,7 +26,7 @@ import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
  * acquire the same instance of {@link AuthenticatorViewModel}.
  *
  * @author Charalambos Christou
- * @version 5.0 11/02/21
+ * @version 6.0 22/04/21
  */
 public class AuthenticatorFragment extends Fragment implements Navigable {
 
@@ -66,7 +66,7 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
      * @see AccountFragment#toAuthenticator()
      */
     private void checkIfUserWantsToRegister(TabLayout tabLayout) {
-        if (getArguments() != null && getArguments().getBoolean(getString(R.string.email_arg))) {
+        if (getArguments() != null && getArguments().getBoolean(getString(R.string.sign_up_arg))) {
             tabLayout.selectTab(tabLayout
                             .getTabAt(1), // Sign up tab
                     true);

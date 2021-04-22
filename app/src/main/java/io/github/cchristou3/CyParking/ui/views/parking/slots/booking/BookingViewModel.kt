@@ -44,7 +44,8 @@ class BookingViewModel(private val mBookingRepository: BookingRepository, privat
 
     // Data members
     private val mPickedDate = MutableLiveData(
-            io.github.cchristou3.CyParking.utils.DateTimeUtility.dateToString(io.github.cchristou3.CyParking.utils.DateTimeUtility.getCurrentDate())
+            io.github.cchristou3.CyParking.utils.DateTimeUtility
+                    .dateToString(io.github.cchristou3.CyParking.utils.DateTimeUtility.getCurrentDate())
     )
     private val mPickedStartingTimeState = MutableLiveData(BookingDetails.Time.getCurrentTime())
     private val mPickedSlotOffer = MutableLiveData<SlotOffer?>()

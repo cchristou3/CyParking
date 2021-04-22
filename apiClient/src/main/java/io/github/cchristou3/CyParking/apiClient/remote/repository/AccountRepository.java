@@ -8,11 +8,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.functions.FirebaseFunctions;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
 
 import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 
@@ -23,9 +20,9 @@ import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
  * <p>- Update their password
  *
  * @author Charalambos Christou
- * @version 5.0 06/02/21
+ * @version 6.0 22/04/21
  */
-public class AccountRepository implements DataSourceRepository.UserHandler {
+public class AccountRepository implements DataSourceRepository.UserHandler, DataSourceRepository.CloudFunctionCaller {
 
     private final FirebaseUser mFirebaseUser;
     private static final String TAG = AccountRepository.class.getCanonicalName();
@@ -97,16 +94,12 @@ public class AccountRepository implements DataSourceRepository.UserHandler {
     /**
      * Updates the user's email in the database.
      *
-     * @param newEmail The new email of the user.
+     * @param newEmail The new email of the user
+     * @param oldEmail The old email of the user
+     * @param userId   The user id
      */
     public void updateUserEmail(String userId, String oldEmail, String newEmail) {
-        FirebaseFunctions.getInstance()
-                .getHttpsCallable("updateEmail")
-                .call(new HashMap<String, String>() {{
-                    put("newEmail", newEmail);
-                    put("oldEmail", oldEmail);
-                    put("userId", userId);
-                }});
+        callUpdateEmailFunction(userId, oldEmail, newEmail);
     }
 
     /**

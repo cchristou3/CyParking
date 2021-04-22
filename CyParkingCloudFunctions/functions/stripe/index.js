@@ -21,7 +21,7 @@ exports.createStripeCustomer = functions.auth.user().onCreate(async (user) => {
   const customer = await stripe.customers.create({
     email: user.email,
     metadata: { firebaseUID: user.uid }, // Allows for look up our firebase users 
-    // from the stripe dashboard via thier firebaseUid
+    // from the stripe dashboard via their firebaseUid
   });
 
   await admin.firestore().collection(STRIPE_CUSTOMERS).doc(user.uid).set({

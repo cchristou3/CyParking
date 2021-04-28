@@ -32,6 +32,9 @@
     <string name="op_item3">Provide real-time data about the parking lot</string>
     <string name="operator">Operator</string>
     <string name="password_helper">You should also include special characters (!, @, %, etc.) to make it difficult to be guessed</string>
+    <string name="forgot_password"><u>Forgot password?</u></string>
+    <string name="password_reset_link_sent">A reset password link has been sent to the given email.</string>
+    <string name="password_reset_link_failed">Failed to send a reset password link to the given email.</string>
 
     <!-- Strings related to the description dialog -->
     <string name="dial_intro">Privileges</string>

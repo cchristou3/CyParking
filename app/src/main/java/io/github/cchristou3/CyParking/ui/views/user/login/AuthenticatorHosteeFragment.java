@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.util.Consumer;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -42,13 +43,15 @@ import static io.github.cchristou3.CyParking.utils.ViewUtility.getStringOrEmpty;
  * <p>
  *
  * @author Charalambos Christou
- * @version 9.0 27/03/21
+ * @version 10.0 28/04/21
  */
 public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthenticatorHosteeBinding> implements TextWatcher {
 
     // Constant variables
     public static final String PAGE_TYPE_KEY = "PAGE_TYPE_KEY";
     private final String TAG = AuthenticatorHosteeFragment.this.getClass().getName() + "UniqueTag";
+    private static final int INITIAL_AUTH_BUTTON_TOP_MARGIN = 79;
+    private static final int LOGGING_IN_AUTH_BUTTON_TOP_MARGIN = 79 + 60;
     // Fragment variables
     private AuthenticatorViewModel mAuthenticatorViewModel;
     private boolean mIsReauthenticating = false;
@@ -166,6 +169,7 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
             );
         } else {
             getBinding().fragmentHosteeAuthEtPassword.setOnEditorActionListener(null);
+            getBinding().fragmentHosteeAuthTxtForgotPassword.setOnClickListener(null);
         }
         super.removeTextWatchers(
                 this,
@@ -248,6 +252,9 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
         // Add a text watcher to the name edit text
         getBinding().fragmentHosteeAuthEtName.addTextChangedListener(this);
 
+        // Hide the 'forgot password?' text
+        getBinding().fragmentHosteeAuthTxtForgotPassword.setVisibility(View.GONE);
+
         getCheckBox().setOnCheckedChangeListener( // Set an on checked changed listener to the checkbox
                 (buttonView, isChecked) -> mAuthenticatorViewModel
                         .updateIsOperatorChecked(getCheckBox().isChecked()) // Update the livedata's value
@@ -293,6 +300,20 @@ public class AuthenticatorHosteeFragment extends BaseFragment<FragmentAuthentica
         // Set up the UI and listeners for logging in
         // Hide the password hint
         getBinding().fragmentHosteeAuthTilPassword.setHelperText(null);
+
+        // Display the 'forgot password?' message
+        getBinding().fragmentHosteeAuthTxtForgotPassword.setVisibility(View.VISIBLE);
+        getBinding().fragmentHosteeAuthTxtForgotPassword.setOnClickListener(
+                v -> mAuthenticatorViewModel.sendPasswordResetLink(requireContext(), getStringOrEmpty(getBinding().fragmentHosteeAuthEtEmail),
+                        getGlobalStateViewModel()::updateToastMessage));
+
+        // It should change only once
+        int currentAuthButtonTopMargin = ((ConstraintLayout.LayoutParams) getBinding().fragmentHosteeAuthBtnAuthButton.getLayoutParams()).topMargin;
+        if (currentAuthButtonTopMargin == INITIAL_AUTH_BUTTON_TOP_MARGIN) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) getBinding().fragmentHosteeAuthBtnAuthButton.getLayoutParams();
+            params.topMargin = LOGGING_IN_AUTH_BUTTON_TOP_MARGIN;
+            getBinding().fragmentHosteeAuthBtnAuthButton.setLayoutParams(params);
+        }
 
         // Hide unnecessary UI elements, related to registration
         hideUnrelatedFields();

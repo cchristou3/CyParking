@@ -74,6 +74,7 @@ The application has the following features so far:
 * View all available private parking locations within a range [User]
 * View for each locations its available parking spaces [User]
 * Sign in/up/out [Everyone]
+* Reset password (takes around 1 minute to receive the reset password link) [Everyone]
 * Update name/email/password [Everyone]
 * Send Feedback [Everyone]
 * Register Parking Lot [Operator]

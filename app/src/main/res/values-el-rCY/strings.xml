@@ -164,4 +164,7 @@
     <string name="update_field_not_same_as_previous">Δεν πρέπει να είναι το ίδιο με το προηγούμενο.</string>
     <string name="booking_completed">Η κράτηση ολοκληρώθηκε!</string>
     <string name="invalid_time">Επιλέξτε μια έγκυρη ώρα</string>
+    <string name="forgot_password">Ξεχάσατε τον κωδικό;</string>
+    <string name="password_reset_link_sent">Ένας σύνδεσμος επαναφοράς κωδικού πρόσβασης έχει σταλεί στη δεδομένη ηλεκτρονική διεύθυνση</string>
+    <string name="password_reset_link_failed">Αποτυχία αποστολής συνδέσμου επαναφοράς κωδικού πρόσβασης στη συγκεκριμένη ηλεκτρονική διεύθυνση</string>
 </resources>

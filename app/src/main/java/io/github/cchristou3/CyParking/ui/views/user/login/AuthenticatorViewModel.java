@@ -2,8 +2,10 @@ package io.github.cchristou3.CyParking.ui.views.user.login;
 
 import android.content.Context;
 import android.util.Patterns;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.util.Consumer;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -34,7 +36,7 @@ import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.Pa
  * Used when the user tries to login/register.</p>
  *
  * @author Charalambos Christou
- * @version 4.0 24/03/21
+ * @version 5.0 28/04/21
  */
 public class AuthenticatorViewModel extends ViewModel {
 
@@ -203,6 +205,33 @@ public class AuthenticatorViewModel extends ViewModel {
     @NotNull
     public Task<com.google.firebase.auth.AuthResult> reauthenticateUser(String credentials) {
         return mAuthenticatorRepository.reauthenticateUser(credentials);
+    }
+
+    /**
+     * Sends a password reset link to the given email address.
+     *
+     * @param context                      the context to make use of
+     * @param emailToSendPasswordResetLink The email to send the password reset link to
+     * @param displayToast                 a handler for sending toast messages
+     */
+    public void sendPasswordResetLink(Context context, String emailToSendPasswordResetLink, Consumer<Integer> displayToast) {
+        if (!isEmailValid(emailToSendPasswordResetLink)) {
+            displayToast.accept(R.string.invalid_email);
+            return;
+        }
+        FirebaseAuth.getInstance().sendPasswordResetEmail(emailToSendPasswordResetLink)
+                .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                displayToast.accept(R.string.password_reset_link_sent);
+                                return;
+                            }
+                            // TODO: 28/04/2021 Create a generic toast object that would handle both id based and string based messages
+                            // to avoid inconsistency such as this one.
+                            if (task.getException() != null) {
+                                Toast.makeText(context, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                );
     }
 
     /**

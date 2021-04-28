@@ -11,6 +11,7 @@
     tools:context=".ui.views.user.login.AuthenticatorHosteeFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fragment_hostee_auth_cl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -92,6 +93,16 @@
                 android:maxLines="1"
                 android:selectAllOnFocus="true" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/fragment_hostee_auth_txt_forgot_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/forgot_password"
+            android:textColor="@color/teal_700"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@+id/fragment_hostee_auth_til_password"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_hostee_auth_til_password" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fragment_hostee_auth_cl_role_section"

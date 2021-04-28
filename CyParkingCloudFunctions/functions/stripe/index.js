@@ -107,7 +107,6 @@ exports.createStripePayment = functions.firestore
       return;
     }
 
-
     // Sort the list in ascending order based on the offer's price.
     slotOfferList = slotOfferList.sort(function (a, b) { return a.price - b.price });
 

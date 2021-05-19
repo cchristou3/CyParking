@@ -10,7 +10,7 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+[![License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 
@@ -248,7 +248,7 @@ Project Link: [https://github.com/cchristou3/CyParking](https://github.com/cchri
 [issues-shield]: https://img.shields.io/github/issues/cchristou3/CyParking
 [issues-url]: https://github.com/cchristou3/CyParking/issues
 
-[license-shield]: https://img.shields.io/github/license/cchristou3/CyParking
+[license-shield]: https://img.shields.io/badge/license-Apache--2%3A0-green
 [license-url]: https://github.com/cchristou3/CyParking/blob/main/LICENSE
 
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555

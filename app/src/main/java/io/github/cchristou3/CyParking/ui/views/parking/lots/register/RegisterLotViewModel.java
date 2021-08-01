@@ -5,6 +5,7 @@ import android.net.Uri;
 import androidx.core.util.Consumer;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
@@ -21,7 +22,6 @@ import io.github.cchristou3.CyParking.apiClient.remote.repository.OperatorReposi
 import io.github.cchristou3.CyParking.data.pojo.form.FormState;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormBuilder;
 import io.github.cchristou3.CyParking.data.pojo.form.operator.RegisterLotFormState;
-import io.github.cchristou3.CyParking.ui.components.LocationServiceViewModel;
 import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent;
 import io.github.cchristou3.CyParking.utils.Utility;
 
@@ -39,7 +39,7 @@ import static io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.Pa
  * @author Charalambos Christou
  * @version 5.0 27/03/21
  */
-public class RegisterLotViewModel extends LocationServiceViewModel {
+public class RegisterLotViewModel extends ViewModel {
 
     // Data members
     private final MutableLiveData<String> mOperatorMobileNumber = new MutableLiveData<>();

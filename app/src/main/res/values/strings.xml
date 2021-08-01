@@ -221,5 +221,7 @@
     <string name="nav_to_log_fail">Failed to navigate to login screen!</string>
     <string name="best_offer">Best offer:</string>
     <string name="error">error</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

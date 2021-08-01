@@ -29,6 +29,7 @@ allprojects {
         gradlePluginPortal()
         google()
         jcenter()
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -73,6 +74,7 @@ ext {
     glideVersion = '4.12.0'
     navigationRuntimeKtxVersion = '2.3.3'
     workRuntimeKtxVersion = '2.5.0'
+    airLocationVersion = '2.5.2'
 
     // Shared Testing Dependencies
     androidXTestExtRunnerVersion = '1.1.2'

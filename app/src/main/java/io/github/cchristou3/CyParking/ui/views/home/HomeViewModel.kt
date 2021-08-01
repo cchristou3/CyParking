@@ -1,12 +1,10 @@
 package io.github.cchristou3.CyParking.ui.views.home
 
+import android.location.Location
 import android.util.Log
-import androidx.core.util.Consumer
 import androidx.lifecycle.LiveData
-import com.google.android.gms.location.LocationResult
+import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
-import io.github.cchristou3.CyParking.R
-import io.github.cchristou3.CyParking.ui.components.LocationServiceViewModel
 import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent
 
 /**
@@ -16,7 +14,7 @@ import io.github.cchristou3.CyParking.ui.components.SingleLiveEvent
  * @author Charalambos Christou
  * @since 1.0 27/03/21
  */
-class HomeViewModel : LocationServiceViewModel() {
+class HomeViewModel : ViewModel() {
 
     companion object {
         private val TAG = HomeViewModel::class.java.name
@@ -32,20 +30,14 @@ class HomeViewModel : LocationServiceViewModel() {
      * Based on the given location result, either trigger an event to
      * navigate to the parking map fragment or display an error toast message.
      *
-     * @param locationResult the location result of a request.
-     * @param displayToast an interface for displaying toast messages.
+     * @param locations an list of the retrieved locations
      */
-    fun navigateToMap(locationResult: LocationResult?, displayToast: Consumer<Int>) {
-        Log.d(TAG, "onLocationResult: $locationResult")
-        if (locationResult != null) {
-            // Access the user's latest location
-            // and navigate to the ParkingMapFragment
+    fun navigateToMap(locations: ArrayList<Location>) {
+        Log.d(TAG, "onLocationResult: $locations")
+        locations[0].let {
             mNavigateToMap.value = LatLng(
-                    locationResult.lastLocation.latitude,
-                    locationResult.lastLocation.longitude)
-        } else {
-            // Inform the user something wrong happened
-            displayToast.accept(R.string.error_retrieving_location)
+                    it.latitude,
+                    it.longitude)
         }
     }
 }

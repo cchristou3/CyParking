@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
-import io.github.cchristou3.CyParking.data.manager.location.LocationManager;
 import io.github.cchristou3.CyParking.ui.widgets.alertDialog.AppAlertDialog;
 import io.github.cchristou3.CyParking.ui.widgets.alertDialog.SingleActionBuilder;
 
@@ -85,22 +84,6 @@ public class AlertBuilder {
         getSingleActionBuilderWithoutTitle(message, neutralActionHandler, buttonText)
                 .setTitle(title)
                 .show(fragmentManager);
-    }
-
-    /**
-     * Display a dialog informing the user that a location service is not
-     * available.
-     *
-     * @param activity The activity to make use of.
-     */
-    public static void showLocationServiceErrorDialog(
-            @NotNull FragmentActivity activity
-    ) {
-        showSingleActionAlert(activity.getSupportFragmentManager(),
-                R.string.location_services_title_error,
-                R.string.location_services_body_error, v ->
-                        LocationManager.openAppPermissionSettings(activity),
-                R.string.go_to_settings);
     }
 
     /**

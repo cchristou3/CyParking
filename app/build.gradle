@@ -115,6 +115,9 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:' + glideVersion
     annotationProcessor 'com.github.bumptech.glide:compiler:' + glideVersion
 
+    // Location library
+    implementation 'com.github.mumayank:AirLocation:' + airLocationVersion
+
     implementation project(':stripe')
     implementation project(':apiClient')
 }

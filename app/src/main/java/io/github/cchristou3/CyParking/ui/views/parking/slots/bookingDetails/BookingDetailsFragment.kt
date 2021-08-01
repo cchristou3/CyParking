@@ -20,9 +20,9 @@ import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLo
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.Booking
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.slot.booking.BookingDetails
 import io.github.cchristou3.CyParking.data.interfaces.Navigable
-import io.github.cchristou3.CyParking.data.manager.location.LocationManager
 import io.github.cchristou3.CyParking.databinding.BookingDetailsFragmentBinding
 import io.github.cchristou3.CyParking.ui.components.BaseFragment
+import io.github.cchristou3.CyParking.ui.components.LocationFragment
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder
 import io.github.cchristou3.CyParking.ui.widgets.QRCodeDialog
 import io.github.cchristou3.CyParking.utilities.scaleToMatchParent
@@ -176,7 +176,7 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
         binding.bookingDetailsFragmentFabDirections.drawable.setColor(
                 resources.getColor(R.color.purple_700, activity?.theme))
         binding.bookingDetailsFragmentFabDirections.setOnClickListener {
-            LocationManager.launchGoogleMaps(
+            LocationFragment.launchGoogleMaps(
                     this,
                     lot.latitude,
                     lot.longitude,

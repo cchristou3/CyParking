@@ -42,6 +42,7 @@
   * [Installation](#installation)
 * [Usage](#usage)
 * [Roadmap](#roadmap)
+* [Milestones](#milestones)
 * [Contributing](#contributing)
 * [License](#license)
 * [Contact](#contact)
@@ -195,6 +196,11 @@ _For more examples, please refer to the [Documentation](https://github.com/cchri
 
 See the [open issues](https://github.com/cchristou3/CyParking/issues) for a list of proposed features (and known issues).
 
+<!-- MILESTONES -->
+## Milestones
+
+1. First version (submitted one) since [this commit](https://github.com/cchristou3/CyParking/tree/e90aa4fb023dcc79f5bf208d854545095c1a4c88)
+2. Improved performance (for location) since [this commit](https://github.com/cchristou3/CyParking/tree/65d6d7f6a2ea8388a3dbd43a27afb39570391319)
 
 
 <!-- CONTRIBUTING -->

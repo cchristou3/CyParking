@@ -18,6 +18,7 @@ import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.databinding.FragmentAccountBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
+import io.github.cchristou3.CyParking.ui.components.NavigatorFragment;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.user.account.update.UpdateAccountDialog;
@@ -29,7 +30,7 @@ import io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorHosteeFra
  * @author Charalambos Christou
  * @version 8.0 24/03/21
  */
-public class AccountFragment extends BaseFragment<FragmentAccountBinding> implements Navigable {
+public class AccountFragment extends NavigatorFragment<FragmentAccountBinding> {
 
     // Fragment's data members
     private final String TAG = AccountFragment.this.getClass().getName();
@@ -192,7 +193,7 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding> implem
         } else if (signUpWasClicked) {
             directions.setSignUp(true);
         }
-        getNavController(requireActivity()).navigate(directions);
+        navigateTo(directions);
     }
 
     /**
@@ -201,8 +202,7 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding> implem
      */
     @Override
     public void toBookings() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         AccountFragmentDirections.actionNavAccountToNavViewBookings()
                 );
     }
@@ -222,8 +222,7 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding> implem
      */
     @Override
     public void toFeedback() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         AccountFragmentDirections.actionNavAccountToNavFeedback()
                 );
     }
@@ -234,8 +233,7 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding> implem
      */
     @Override
     public void toHome() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         AccountFragmentDirections.actionNavAccountToNavHome()
                 );
     }

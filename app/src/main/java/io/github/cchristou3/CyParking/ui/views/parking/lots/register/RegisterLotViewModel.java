@@ -112,18 +112,12 @@ public class RegisterLotViewModel extends ViewModel {
                                               final List<SlotOffer> slotOfferList) {
         RegisterLotFormBuilder builder = new RegisterLotFormBuilder();
         // Validate the input and set the RegisterLotFormState accordingly
-        if (!isValidPhoneNumber(operatorMobileNumber))
-            builder.setMobileNumberError(R.string.mobile_phone_error);
-        if (!isNameValid(lotName))
-            builder.setLotNameError(R.string.lot_name_error);
-        if (!isCapacityValid(lotCapacity))
-            builder.setLotCapacityError(R.string.lot_capacity_error);
-        if (!isLotLatLngValid(lotLatLng))
-            builder.setLatLngError(R.string.lot_lat_lng_error);
-        if (!isImageUriValid())
-            builder.setPhotoError(0);
-        if (!areSlotOffersValid(slotOfferList))
-            builder.setSlotOfferError(R.string.lot_slot_offer_error);
+        if (!isValidPhoneNumber(operatorMobileNumber)) builder.setMobileNumberError(R.string.mobile_phone_error);
+        if (!isNameValid(lotName)) builder.setLotNameError(R.string.lot_name_error);
+        if (!isCapacityValid(lotCapacity)) builder.setLotCapacityError(R.string.lot_capacity_error);
+        if (!isLotLatLngValid(lotLatLng)) builder.setLatLngError(R.string.lot_lat_lng_error);
+        if (!isImageUriValid()) builder.setPhotoError(0);
+        if (!areSlotOffersValid(slotOfferList)) builder.setSlotOfferError(R.string.lot_slot_offer_error);
 
         return builder.build(); //* If no error, returns a valid form. *//
     }
@@ -316,16 +310,14 @@ public class RegisterLotViewModel extends ViewModel {
      * @param displayToast A handler for displaying toast messages.
      */
     public void addToList(Consumer<Integer> displayToast) {
+        // Terminate method if either is null
+        if (mSelectedDuration.getValue() == null || mSelectedPrice.getValue() == null) return;
+
         // Add to the adapter's list
         List<SlotOffer> newSlotOfferList = getSlotOfferList();
         if (newSlotOfferList == null) {
             newSlotOfferList = new ArrayList<>();
-        } else {
-            newSlotOfferList = Utility.cloneList(newSlotOfferList);
         }
-
-        // Terminate method if either is null
-        if (mSelectedDuration.getValue() == null || mSelectedPrice.getValue() == null) return;
 
         final SlotOffer newSlotOffer = new SlotOffer(mSelectedDuration.getValue(), mSelectedPrice.getValue());
 

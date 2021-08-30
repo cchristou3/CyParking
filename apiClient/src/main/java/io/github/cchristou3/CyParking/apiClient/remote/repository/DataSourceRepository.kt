@@ -138,6 +138,7 @@ internal object DataSourceRepository {
             const val AVAILABILITY = "availability"
             const val OPERATOR_ID = "operatorId"
             const val AVAILABLE_SPACES = "availableSpaces"
+            const val SLOT_OFFERS_LIST = "slotOfferList"
         }
     }
 

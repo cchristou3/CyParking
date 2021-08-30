@@ -6,8 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.LayoutRes
+import androidx.core.util.Consumer
 import com.google.android.material.textfield.TextInputLayout
 import io.github.cchristou3.CyParking.R
+import io.github.cchristou3.CyParking.ui.views.parking.lots.register.RegisterLotViewModel
+import io.github.cchristou3.CyParking.utils.Utility
 
 /**
  * Purpose: Initialize and set up the drop-down menus
@@ -100,6 +103,37 @@ class DropDownMenuHelper {
                 autoCompleteTextView.onItemClickListener = null
                 autoCompleteTextView.isClickable = false
             }
+        }
+
+        /**
+         * Initialize the values of the given [Spinner]. Also, hook it up with an [AdapterView.OnItemSelectedListener].
+         * Whenever the listener gets triggered, set the value of the current spinner to the value of the
+         * [.mRegisterLotViewModel]'s corresponding LiveData member
+         * ([RegisterLotViewModel.updateSelectedDuration]/[RegisterLotViewModel.updateSelectedPrice]).
+         *
+         * @param textInputLayout    A reference of the spinner to be set up.
+         * @param consumer           The interface's method to act as a callback inside the listener.
+         * @param volumeMultiplicand A float determining the sequence of values of the spinner.
+         */
+        @JvmStatic
+        fun setUpSpinner(textInputLayout: TextInputLayout, consumer: Consumer<Float>, volumeMultiplicand: Float) {
+            // Create an array that will hold all the values of the spinner, based on a multiplicand
+            val volume = Utility.getVolume(volumeMultiplicand, 1, 10)
+            setUpSlotOfferDropDownMenu(textInputLayout.rootView.context, textInputLayout, volume,
+                    object : ItemHandler<String> {
+                        override fun onOutput(item: String): String {
+                            return item
+                        }
+
+                        override fun castItem(parent: ListAdapter, position: Int): String {
+                            return parent.getItem(position).toString()
+                        }
+
+                        override fun onItemSelected(item: String) {
+                            // Convert the spinner's value into a float and pass it in, to the consumer's method.
+                            consumer.accept(item.toFloat())
+                        }
+                    })
         }
     }
 

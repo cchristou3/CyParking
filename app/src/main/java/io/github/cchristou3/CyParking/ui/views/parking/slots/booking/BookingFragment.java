@@ -30,6 +30,7 @@ import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.databinding.FragmentBookingBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
+import io.github.cchristou3.CyParking.ui.components.NavigatorFragment;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.ui.helper.DateTimePicker;
 import io.github.cchristou3.CyParking.ui.helper.DropDownMenuHelper;
@@ -57,7 +58,7 @@ import io.github.cchristou3.CyParking.utils.Utility;
  * @author Charalambos Christou
  * @version 25.0 27/03/21
  */
-public class BookingFragment extends BaseFragment<FragmentBookingBinding> implements Navigable {
+public class BookingFragment extends NavigatorFragment<FragmentBookingBinding> {
 
     // Fragment variables
     private static final String TAG = BookingFragment.class.getName() + "UniqueTag";
@@ -239,7 +240,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
                         getChildFragmentManager(),
                         errorMessage,
                         R.string.navigate_back_msg,
-                        (v) -> goBack(requireActivity()))
+                        (v) -> goBack())
         );
 
         // Listen to changes (spaces) to the current parking lot.
@@ -440,8 +441,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
     public void toAuthenticator() {
         // The user must be logged in to be in this fragment (Booking screen).
         // However, the method will be needed, in case the user logs out while being in this screen.
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         BookingFragmentDirections
                                 .actionNavParkingBookingFragmentToNavAuthenticatorFragment()
                 );
@@ -453,8 +453,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      */
     @Override
     public void toBookings() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         BookingFragmentDirections.actionNavParkingBookingFragmentToNavViewBookings()
                 );
     }
@@ -465,8 +464,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      */
     @Override
     public void toAccount() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         BookingFragmentDirections.actionNavParkingBookingFragmentToNavAccount()
                 );
     }
@@ -477,8 +475,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      */
     @Override
     public void toFeedback() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         BookingFragmentDirections.actionNavParkingBookingFragmentToNavFeedback()
                 );
     }
@@ -489,8 +486,7 @@ public class BookingFragment extends BaseFragment<FragmentBookingBinding> implem
      */
     @Override
     public void toHome() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         BookingFragmentDirections.actionNavParkingBookingFragmentToNavHome()
                 );
     }

@@ -21,6 +21,7 @@ import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.databinding.FeedbackFragmentBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
+import io.github.cchristou3.CyParking.ui.components.NavigatorFragment;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.MainHostActivity;
@@ -39,7 +40,7 @@ import static io.github.cchristou3.CyParking.utils.ViewUtility.getStringOrEmpty;
  * @author Charalambos Christou
  * @version 9.0 24/03/21
  */
-public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> implements Navigable, TextWatcher {
+public class FeedbackFragment extends NavigatorFragment<FeedbackFragmentBinding> implements TextWatcher {
 
     // Fragment data members
     private FeedbackViewModel mFeedbackViewModel;
@@ -138,9 +139,7 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
             }
         });
 
-        mFeedbackViewModel.getGoBackState().observe(getViewLifecycleOwner(), goBack ->
-                goBack(requireActivity())
-        );
+        mFeedbackViewModel.getGoBackState().observe(getViewLifecycleOwner(), x -> goBack());
     }
 
     /**
@@ -246,8 +245,7 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
      */
     @Override
     public void toAuthenticator() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         FeedbackFragmentDirections
                                 .actionNavFeedbackToNavAuthenticatorFragment()
                 );
@@ -259,8 +257,7 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
      */
     @Override
     public void toBookings() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         FeedbackFragmentDirections.actionNavFeedbackToNavViewBookings()
                 );
     }
@@ -271,8 +268,7 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
      */
     @Override
     public void toAccount() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         FeedbackFragmentDirections.actionNavFeedbackToNavAccount()
                 );
     }
@@ -292,8 +288,7 @@ public class FeedbackFragment extends BaseFragment<FeedbackFragmentBinding> impl
      */
     @Override
     public void toHome() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         FeedbackFragmentDirections.actionNavFeedbackToNavHome()
                 );
     }

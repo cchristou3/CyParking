@@ -171,3 +171,26 @@ fun animateColorChange(cardViewParent: CardView, child: View, @ColorInt to: Int)
     child.background = transitionDrawable
     transitionDrawable.startTransition(2000)
 }
+
+
+/**
+ * Hide the given view if it is shown.
+ *
+ * @param view the view to hide.
+ */
+fun hide(binding: androidx.viewbinding.ViewBinding, view: View, transitionDuration: Long) {
+    if (view.isShown) {
+        slideBottom(binding.root as ViewGroup, view, true, transitionDuration, null)
+    }
+}
+
+/**
+ * Show the given view if it is hidden.
+ *
+ * @param view the view to show.
+ */
+fun show(binding: androidx.viewbinding.ViewBinding, view: View, transitionDuration: Long) {
+    if (!view.isShown) {
+        slideBottom(binding!!.root as ViewGroup, view, false, transitionDuration, null)
+    }
+}

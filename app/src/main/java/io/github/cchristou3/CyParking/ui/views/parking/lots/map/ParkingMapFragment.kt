@@ -101,7 +101,7 @@ import java.lang.ref.WeakReference
  *
  *
  */
-class ParkingMapFragment : LocationFragment<FragmentParkingMapBinding>(), OnMapReadyCallback, OnMapClickListener, OnMarkerClickListener, Navigable {
+class ParkingMapFragment : LocationFragment<FragmentParkingMapBinding>(), OnMapReadyCallback, OnMapClickListener, OnMarkerClickListener{
     private var UNAVAILABLE: String? = null
 
     // Fragment's variables
@@ -299,8 +299,7 @@ class ParkingMapFragment : LocationFragment<FragmentParkingMapBinding>(), OnMapR
      * [AuthenticatorFragment].
      */
     override fun toAuthenticator() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         ParkingMapFragmentDirections
                                 .actionNavParkingMapFragmentToNavAuthenticatorFragment()
                 )
@@ -311,8 +310,7 @@ class ParkingMapFragment : LocationFragment<FragmentParkingMapBinding>(), OnMapR
      * [ViewBookingsFragment].
      */
     override fun toBookings() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         ParkingMapFragmentDirections.actionNavParkingMapFragmentToNavViewBookings()
                 )
     }
@@ -322,8 +320,7 @@ class ParkingMapFragment : LocationFragment<FragmentParkingMapBinding>(), OnMapR
      * [AccountFragment].
      */
     override fun toAccount() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         ParkingMapFragmentDirections.actionNavParkingMapFragmentToNavAccount()
                 )
     }
@@ -333,8 +330,7 @@ class ParkingMapFragment : LocationFragment<FragmentParkingMapBinding>(), OnMapR
      * [FeedbackFragment].
      */
     override fun toFeedback() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         ParkingMapFragmentDirections.actionNavParkingMapFragmentToNavFeedback()
                 )
     }
@@ -344,8 +340,7 @@ class ParkingMapFragment : LocationFragment<FragmentParkingMapBinding>(), OnMapR
      * [HomeFragment].
      */
     override fun toHome() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         ParkingMapFragmentDirections.actionNavParkingMapFragmentToNavHome()
                 )
     }
@@ -514,7 +509,7 @@ class ParkingMapFragment : LocationFragment<FragmentParkingMapBinding>(), OnMapR
      * @param latLng The latest recorded latitude and longitude of the user.
      * @see .onDestroyView
      */
-    fun fetchParkingLots(latLng: LatLng) {
+    private fun fetchParkingLots(latLng: LatLng) {
         globalStateViewModel.showLoadingBar()
         Log.d(TAG, "fetchParkingLots: Loading Bar ON")
         mParkingMapViewModel!!.fetchParkingLots(latLng.latitude, latLng.longitude
@@ -527,10 +522,10 @@ class ParkingMapFragment : LocationFragment<FragmentParkingMapBinding>(), OnMapR
      */
     private fun attachButtonListeners() {
         // Hook up the "directions" button with an on click listener
-        binding!!.fragmentParkingMapImgbtnDirections.setOnClickListener { v: View? -> directions }
+        binding!!.fragmentParkingMapImgbtnDirections.setOnClickListener {  directions }
 
         // Hook up the "book" button with an onClick listener
-        binding!!.fragmentParkingMapBtnBooking.setOnClickListener { v: View? -> navigateToBookingScreen() }
+        binding!!.fragmentParkingMapBtnBooking.setOnClickListener { navigateToBookingScreen() }
     }
 
     /**
@@ -594,11 +589,10 @@ class ParkingMapFragment : LocationFragment<FragmentParkingMapBinding>(), OnMapR
                     childFragmentManager,
                     R.string.volley_error_title,
                     R.string.volley_error_body
-            ) { v: View? -> goBack(requireActivity()) } // go back to home screen
+            ) { goBack() } // go back to home screen
         })
         mParkingMapViewModel!!.navigationToBookingState.observe(viewLifecycleOwner, { selectedLot: ParkingLot? ->
-            getNavController(requireActivity())
-                    .navigate(ParkingMapFragmentDirections
+            navigateTo(ParkingMapFragmentDirections
                             .actionNavParkingMapFragmentToParkingBookingFragment(selectedLot!!))
         }
         )

@@ -27,5 +27,6 @@
     <!-- Padding for TextViews inside a CardView -->
     <dimen name="text_view_in_card_view_padding">10dp</dimen>
     <dimen name="text_view_in_card_view_radius">5dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 
 </resources>

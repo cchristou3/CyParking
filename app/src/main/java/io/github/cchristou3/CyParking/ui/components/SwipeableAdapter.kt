@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
  * @version 1.0 08/02/21
  */
 abstract class SwipeableAdapter<T, S : RecyclerView.ViewHolder>(
-        private val mDiffCallback: DiffUtil.ItemCallback<T>,
+        mDiffCallback: DiffUtil.ItemCallback<T>,
         private val mItemTouchHelper: ItemTouchHelper
 ) :
         ListAdapter<T, S>(mDiffCallback) {

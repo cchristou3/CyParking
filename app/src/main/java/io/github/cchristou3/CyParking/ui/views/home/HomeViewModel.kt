@@ -22,9 +22,17 @@ class HomeViewModel : ViewModel() {
 
     private val mNavigateToMap = SingleLiveEvent<LatLng>()
 
+    private val mNavigateToOperator = SingleLiveEvent<Any>()
+
     val navigationToMap: LiveData<LatLng>
         get() = mNavigateToMap
 
+    val navigationToOperator: LiveData<Any>
+        get() = mNavigateToOperator
+
+    fun navigateToOperator(){
+        mNavigateToOperator.value = null
+    }
 
     /**
      * Based on the given location result, either trigger an event to

@@ -92,7 +92,7 @@
     <string name="lot_capacity_error">The capacity must not be empty!</string>
     <string name="lot_name_error">Not a valid name!</string>
     <string name="lot_lat_lng_error">Invalid coordinates!</string>
-    <string name="lot_slot_offer_error">There must be at least 1 Slot Offer!</string>
+    <string name="lot_slot_offer_error">There must be at least 1 Slot Offer.</string>
     <string name="add_at_least_one_slot_offer">Add at least one Slot Offer</string>
     <string name="error_retrieving_location">Your location could not be processed! Check your GPS settings!</string>
     <string name="error_lot_registration">Oops! Something went wrong! Please check your details and try again.</string>
@@ -105,6 +105,13 @@
     <string name="cancelled">Cancelled</string>
     <string name="invalid_qr_code">The given QR Code has wrong format. Please use the provided QR Code scanner for this application exclusively.</string>
     <string name="booking_completed">Booking has been completed!</string>
+    <string name="my_parking_lot">My Parking Lot</string>
+
+    <!-- Strings related to the operator fragment -->
+    <string name="operator_label">Parking Operator</string>
+
+    <!-- Strings related to the slot offers fragment -->
+    <string name="slot_offers_label">My Slot Offers</string>
 
     <!-- Strings related to the shared Views of HomeFragment and BookingDetailsFragment -->
     <string name="shared_booking_card_view" translatable="false">bookingCardView</string>
@@ -221,7 +228,5 @@
     <string name="nav_to_log_fail">Failed to navigate to login screen!</string>
     <string name="best_offer">Best offer:</string>
     <string name="error">error</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

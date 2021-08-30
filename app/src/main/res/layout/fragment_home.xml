@@ -8,27 +8,16 @@
     tools:context=".ui.views.home.HomeFragment">
 
     <Button
-        android:id="@+id/fragment_home_btn_scan_booking"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/scan_a_booking"
-        android:visibility="gone"
-        app:icon="@drawable/ic_qr_code_scanner"
-        app:layout_constraintBottom_toTopOf="@+id/fragment_home_btn_nav_to_map"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_home_btn_scan_lot"
-        app:layout_constraintStart_toStartOf="@+id/fragment_home_btn_scan_lot"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
         android:id="@+id/fragment_home_btn_scan_lot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/scan_a_lot"
+        android:layout_marginTop="60dp"
         app:icon="@drawable/ic_qr_code_scanner"
         app:layout_constraintBottom_toTopOf="@+id/fragment_home_btn_nav_to_map"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_home_btn_scan_booking" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/fragment_home_btn_nav_to_map"
@@ -40,6 +29,18 @@
         app:layout_constraintEnd_toEndOf="@+id/fragment_home_btn_scan_lot"
         app:layout_constraintStart_toStartOf="@+id/fragment_home_btn_scan_lot"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/fragment_home_btn_my_lot"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="60dp"
+        android:text="@string/my_parking_lot"
+        app:icon="@drawable/ic_parking_lot"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/fragment_home_btn_nav_to_map"
+        app:layout_constraintStart_toStartOf="@+id/fragment_home_btn_nav_to_map"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_home_btn_nav_to_map" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/fragment_home_cv_user_booking"
@@ -75,107 +76,5 @@
             app:layout_constraintTop_toBottomOf="@+id/fragment_home_tv_headline" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/fragment_home_cv_lot_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:layout_marginEnd="50dp"
-        android:visibility="gone"
-        app:cardCornerRadius="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_home_btn_nav_to_map">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/fragment_home_cl_show_lot_info"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="10dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/fragment_home_txt_lot_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text="Lot name: name..."
-                android:textSize="20sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/fragment_home_txt_lot_capacity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text="Availability: 20/40"
-                android:textSize="20sp"
-                app:layout_constraintEnd_toEndOf="@+id/fragment_home_txt_lot_name"
-                app:layout_constraintStart_toStartOf="@+id/fragment_home_txt_lot_name"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_home_txt_lot_name" />
-
-            <Button
-                android:id="@+id/fragment_home_btn_increment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text="@string/increment_by_one"
-                app:icon="@drawable/ic_add_to_lot"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_home_txt_lot_capacity" />
-
-            <Button
-                android:id="@+id/fragment_home_btn_decrement"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text="@string/decrement_by_one"
-                app:icon="@drawable/ic_remove_from_lot"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_home_btn_increment" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/fragment_home_cl_register_lot_info"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="10dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/fragment_home_txt_lot_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:gravity="center"
-                android:text="@string/no_parking_lots_text"
-                android:textColor="@color/red"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/fragment_home_mbtn_register_parking_lot"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/fragment_home_mbtn_register_parking_lot"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/register_parking_lot"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,7 +7,7 @@ plugins {
 
 android {
     compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion "30.0.2"
+    buildToolsVersion "30.0.3"
 
     testOptions {
         unitTests.includeAndroidResources = true // Required for Robolectric
@@ -62,9 +62,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:' + viewmodelVersion
     implementation 'androidx.legacy:legacy-support-v4:' + legacySupportVersion
     implementation 'androidx.annotation:annotation:' + annotationVersion
-    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:' + legacySupportVersion
+    implementation 'androidx.recyclerview:recyclerview:' + rvVersion
 
     // Junit testing framework - imported by default
     testImplementation 'junit:junit:' + junitVersion

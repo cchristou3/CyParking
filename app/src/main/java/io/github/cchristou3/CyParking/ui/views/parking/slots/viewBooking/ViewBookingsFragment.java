@@ -25,6 +25,7 @@ import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.databinding.FragmentViewBookingsBinding;
 import io.github.cchristou3.CyParking.ui.components.BaseFragment;
 import io.github.cchristou3.CyParking.ui.components.BaseItemTouchHelper;
+import io.github.cchristou3.CyParking.ui.components.NavigatorFragment;
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
@@ -44,8 +45,8 @@ import io.github.cchristou3.CyParking.utils.Utility;
  * @author Charalambos Christou
  * @version 10.0 26/03/21
  */
-public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBinding>
-        implements Navigable, BaseFragment.UserStateUiHandler {
+public class ViewBookingsFragment extends NavigatorFragment<FragmentViewBookingsBinding>
+        implements BaseFragment.UserStateUiHandler {
 
     // Fragment variables
     private static final String TAG = ViewBookingsFragment.class.getCanonicalName() + "UniqueTag";
@@ -209,7 +210,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
         if (mBookingAdapter == null)
             mBookingAdapter = new BookingAdapter(new BookingsDiffCallback(), getItemTouchHelper());
         BookingAdapter.setOnItemClickListener(v ->
-                getNavController(requireActivity()).navigate(
+                navigateTo(
                         ViewBookingsFragmentDirections.actionNavViewBookingsToNavBookingDetailsFragment(
                                 // get the booking that got clicked from the list
                                 mBookingAdapter.getCurrentList().get((
@@ -243,8 +244,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
          *  If a user is logged in, the action bar option to "sign in" is hidden.
          *  However, in case the user is in this screen and decides to logout,
          *  an alert will be displayed. */
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         ViewBookingsFragmentDirections
                                 .actionNavViewBookingsToNavAuthenticatorFragment()
                 );
@@ -265,8 +265,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
      */
     @Override
     public void toAccount() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         ViewBookingsFragmentDirections.actionNavViewBookingsToNavAccount()
                 );
     }
@@ -277,8 +276,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
      */
     @Override
     public void toFeedback() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         ViewBookingsFragmentDirections.actionNavViewBookingsToNavFeedback()
                 );
     }
@@ -289,8 +287,7 @@ public class ViewBookingsFragment extends BaseFragment<FragmentViewBookingsBindi
      */
     @Override
     public void toHome() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         ViewBookingsFragmentDirections.actionNavViewBookingsToNavHome()
                 );
     }

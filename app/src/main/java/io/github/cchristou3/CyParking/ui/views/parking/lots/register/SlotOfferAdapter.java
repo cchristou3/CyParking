@@ -6,14 +6,21 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.SlotOffer;
+import io.github.cchristou3.CyParking.databinding.SlotOfferItemBinding;
 import io.github.cchristou3.CyParking.ui.components.SwipeableAdapter;
+import io.github.cchristou3.CyParking.utils.Utility;
 
 /**
  * Purpose: <p> Handles how each item of the RecyclerView will look like. </p>
@@ -21,7 +28,7 @@ import io.github.cchristou3.CyParking.ui.components.SwipeableAdapter;
  * their current Slot Offers.
  *
  * @author Charalambos Christou
- * @version 3.0 09/02/21
+ * @version 4.0 30/08/21
  */
 public class SlotOfferAdapter extends SwipeableAdapter<SlotOffer, SlotOfferAdapter.SlotOfferViewHolder> {
 
@@ -31,10 +38,11 @@ public class SlotOfferAdapter extends SwipeableAdapter<SlotOffer, SlotOfferAdapt
      *
      * @param diffCallback The callback to be used to compare the items of both lists.
      */
-    protected SlotOfferAdapter(
+    public SlotOfferAdapter(
             @NonNull DiffUtil.ItemCallback<SlotOffer> diffCallback, @NonNull ItemTouchHelper itemTouchHelper
     ) {
         super(diffCallback, itemTouchHelper);
+        setHasStableIds(true);
     }
 
     /**
@@ -50,8 +58,9 @@ public class SlotOfferAdapter extends SwipeableAdapter<SlotOffer, SlotOfferAdapt
     @Override
     public SlotOfferViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // create and return a new view
-        return new SlotOfferViewHolder(LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.slot_offer_item, parent, false));
+        return new SlotOfferViewHolder(
+                SlotOfferItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false)
+        );
     }
 
     /**
@@ -69,9 +78,35 @@ public class SlotOfferAdapter extends SwipeableAdapter<SlotOffer, SlotOfferAdapt
         final SlotOffer slotOfferInThisPosition = getItem(position);
         // - replace the contents of the view with that element
         final String duration = Float.toString(slotOfferInThisPosition.getDuration());
-        holder.mDuration.setText(duration);
+        holder.mBinding.slotOfferItemTxtDuration.setText(duration);
         final String price = Float.toString(slotOfferInThisPosition.getPrice());
-        holder.mPrice.setText(price);
+        holder.mBinding.slotOfferItemTxtPrice.setText(price);
+    }
+
+    /**
+     * Return the view type of the item at <code>position</code> for the purposes
+     * of view recycling.
+     *
+     * @param position position to query
+     * @return integer value identifying the type of the view needed to represent the item at
+     * <code>position</code>. Type codes need not be contiguous.
+     */
+    @Override
+    public int getItemViewType(int position) {
+        return R.layout.slot_offer_item;
+    }
+
+    /**
+     * Submits a new list to be diffed, and displayed.
+     * <p>
+     * If a list is already being displayed, a diff will be computed on a background thread, which
+     * will dispatch Adapter.notifyItem events on the main thread.
+     *
+     * @param list The new list to be displayed.
+     */
+    @Override
+    public void submitList(@Nullable List<SlotOffer> list) {
+        super.submitList(Utility.cloneList(list));
     }
 
     /**
@@ -82,18 +117,21 @@ public class SlotOfferAdapter extends SwipeableAdapter<SlotOffer, SlotOfferAdapt
     public static class SlotOfferViewHolder extends RecyclerView.ViewHolder {
 
         // Public data members
-        public TextView mDuration;
-        public TextView mPrice;
+        public SlotOfferItemBinding mBinding;
 
         /**
          * Public Constructor. Gets the necessary references from the UI.
          *
-         * @param view The UI for a single item.
+         * @param binding The UI for a single item.
          */
-        public SlotOfferViewHolder(View view) {
-            super(view);
-            mDuration = view.findViewById(R.id.slot_offer_item_txt_duration);
-            mPrice = view.findViewById(R.id.slot_offer_item_txt_price);
+        public SlotOfferViewHolder(@NotNull SlotOfferItemBinding binding) {
+            super(binding.getRoot().getRootView());
+            mBinding = binding;
+        }
+
+        @Override
+        public String toString() {
+            return mBinding.slotOfferItemTxtPrice.getText() + " & " +mBinding.slotOfferItemTxtDuration.getText();
         }
     }
 }

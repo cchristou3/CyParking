@@ -23,6 +23,7 @@ import io.github.cchristou3.CyParking.data.interfaces.Navigable
 import io.github.cchristou3.CyParking.databinding.BookingDetailsFragmentBinding
 import io.github.cchristou3.CyParking.ui.components.BaseFragment
 import io.github.cchristou3.CyParking.ui.components.LocationFragment
+import io.github.cchristou3.CyParking.ui.components.NavigatorFragment
 import io.github.cchristou3.CyParking.ui.helper.AlertBuilder
 import io.github.cchristou3.CyParking.ui.widgets.QRCodeDialog
 import io.github.cchristou3.CyParking.utilities.scaleToMatchParent
@@ -36,7 +37,7 @@ import io.github.cchristou3.CyParking.utilities.setColor
  * @author Charalambos Christou
  * @since 3.0 29/03/21
  */
-class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Navigable {
+class BookingDetailsFragment : NavigatorFragment<BookingDetailsFragmentBinding>() {
 
     companion object {
         // static methods should be placed here
@@ -283,25 +284,21 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
      * [io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment].
      */
     override fun toAuthenticator() {
-        getNavController(requireActivity())
-                .navigate(BookingDetailsFragmentDirections.actionNavBookingDetailsFragmentToNavAuthenticatorFragment())
+        navigateTo(BookingDetailsFragmentDirections.actionNavBookingDetailsFragmentToNavAuthenticatorFragment())
     }
 
     /**
      * Navigates from the current Fragment subclass to the
      * [io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking.ViewBookingsFragment].
      */
-    override fun toBookings() {
-        goBack(requireActivity())
-    }
+    override fun toBookings() = goBack()
 
     /**
      * Navigates from the current Fragment subclass to the
      * [AccountFragment].
      */
     override fun toAccount() {
-        getNavController(requireActivity())
-                .navigate(BookingDetailsFragmentDirections.actionNavBookingDetailsFragmentToNavAccount())
+        navigateTo(BookingDetailsFragmentDirections.actionNavBookingDetailsFragmentToNavAccount())
     }
 
     /**
@@ -309,8 +306,7 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
      * [io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment].
      */
     override fun toFeedback() {
-        getNavController(requireActivity())
-                .navigate(BookingDetailsFragmentDirections.actionNavBookingDetailsFragmentToNavFeedback())
+        navigateTo(BookingDetailsFragmentDirections.actionNavBookingDetailsFragmentToNavFeedback())
     }
 
     /**
@@ -318,7 +314,6 @@ class BookingDetailsFragment : BaseFragment<BookingDetailsFragmentBinding>(), Na
      * [HomeFragment].
      */
     override fun toHome() {
-        getNavController(requireActivity())
-                .navigate(BookingDetailsFragmentDirections.actionNavBookingDetailsFragmentToNavHome())
+        navigateTo(BookingDetailsFragmentDirections.actionNavBookingDetailsFragmentToNavHome())
     }
 }

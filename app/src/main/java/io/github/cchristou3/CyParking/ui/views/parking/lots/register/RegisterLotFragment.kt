@@ -41,6 +41,7 @@ import io.github.cchristou3.CyParking.ui.helper.AlertBuilder
 import io.github.cchristou3.CyParking.ui.helper.DropDownMenuHelper
 import io.github.cchristou3.CyParking.ui.helper.DropDownMenuHelper.Companion.cleanUp
 import io.github.cchristou3.CyParking.ui.helper.DropDownMenuHelper.Companion.setUpSlotOfferDropDownMenu
+import io.github.cchristou3.CyParking.ui.helper.DropDownMenuHelper.Companion.setUpSpinner
 import io.github.cchristou3.CyParking.utils.*
 import mumayank.com.airlocationlibrary.AirLocation
 import org.jetbrains.annotations.Contract
@@ -54,7 +55,7 @@ import org.jetbrains.annotations.Contract
  * @author Charalambos Christou
  * @version 12.0 27/03/21
  */
-class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navigable, TextWatcher, View.OnClickListener {
+class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), TextWatcher, View.OnClickListener {
     // Fragment's members
     private var mRegisterLotViewModel: RegisterLotViewModel? = null
     private var mSlotOfferAdapter: SlotOfferAdapter? = null
@@ -194,7 +195,7 @@ class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navi
      */
     private fun addObserverToNavigatingBack() {
         mRegisterLotViewModel!!.navigateBackState.observe(viewLifecycleOwner,
-                { goBack(requireActivity()) })
+                { goBack() })
     }
 
     /**
@@ -287,25 +288,18 @@ class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navi
             binding!!.registerLotFragmentBtnRegisterLot.isEnabled = registerLotFormState.isDataValid
 
             // Update the view's related to the lot's info
-            if (updateErrorOf(requireContext(),
-                            binding!!.registerLotFragmentTilPhoneBody, registerLotFormState.mobileNumberError)) {
-                return@observe
-            }
-            if (updateErrorOf(requireContext(),
-                            binding!!.registerLotFragmentTilLotName, registerLotFormState.lotNameError)) {
-                return@observe
-            }
-            if (updateErrorOf(requireContext(),
-                            binding!!.registerLotFragmentTilCapacity, registerLotFormState.lotCapacityError)) {
-                return@observe
-            }
-            // Update the view's related to the lot's location
-            if (updateErrorOf(requireContext(),
-                            binding!!.registerLotFragmentTilLocationLat, registerLotFormState.latLngError)) {
-                return@observe
-            }
-            if (updateErrorOf(requireContext(),
-                            binding!!.registerLotFragmentTilLocationLng, registerLotFormState.latLngError)) {
+            if (
+                    updateErrorOf(requireContext(),
+                            binding!!.registerLotFragmentTilPhoneBody, registerLotFormState.mobileNumberError)
+                    || updateErrorOf(requireContext(),
+                            binding!!.registerLotFragmentTilLotName, registerLotFormState.lotNameError)
+                    || updateErrorOf(requireContext(),
+                            binding!!.registerLotFragmentTilCapacity, registerLotFormState.lotCapacityError)
+                    || updateErrorOf(requireContext(),
+                            binding!!.registerLotFragmentTilLocationLat, registerLotFormState.latLngError)
+                    || updateErrorOf(requireContext(),
+                            binding!!.registerLotFragmentTilLocationLng, registerLotFormState.latLngError)
+            ) {
                 return@observe
             }
             if (registerLotFormState.photoError != null) {
@@ -371,7 +365,7 @@ class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navi
 
         // Initially the button is disabled
         binding!!.registerLotFragmentBtnRegisterLot.isEnabled = false
-        binding!!.registerLotFragmentTxtPrice.text = getString(R.string.price) + " (" + Utility.getCurrency().symbol + ")"
+        binding!!.registerLotFragmentTxtPrice.text = getString(R.string.price) + " (" + Utility.currency.symbol + ")"
 
         // Set the user's current email
         binding!!.registerLotFragmentTxtEmail.text = user!!.email
@@ -472,10 +466,8 @@ class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navi
         // If recyclerView is inside a ScrollView then there is an issue while scrolling recyclerView’s inner contents.
         // So, when touching the recyclerView forbid the ScrollView from intercepting touch events.
         disableParentScrollingInterferenceOf(recyclerView)
-    }// Access the current list - with a new reference
-    // Remove the booking fro the list
-    // Cast to primitive to trigger appropriate method
-    // Update the adapter's list
+    }
+
     /**
      * Returns an instance of [ItemTouchHelper].
      * onSwipeLeft: Remove the item from the list
@@ -484,17 +476,21 @@ class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navi
      * @return An instance of [ItemTouchHelper].
      */
     @get:Contract(" -> new")
-    private val itemTouchHelper: ItemTouchHelper
-        private get() = ItemTouchHelper(BaseItemTouchHelper(
-                { itemPosition: Int ->
-                    // Access the current list - with a new reference
-                    val newOffers = Utility.cloneList(mRegisterLotViewModel!!.slotOfferList)
-                    // Remove the booking fro the list
-                    newOffers.removeAt(itemPosition) // Cast to primitive to trigger appropriate method
-                    // Update the adapter's list
-                    mRegisterLotViewModel!!.updateSlotOfferList(newOffers)
-                }, resources, R.id.slot_offer_item__cv
+    private val itemTouchHelper by lazy {
+        ItemTouchHelper(BaseItemTouchHelper(
+               object : BaseItemTouchHelper.Swipeable<Int>{
+                   override fun onSwipeLeft(itemPosition: Int) {
+                           // Access the current list - with a new reference
+                           val newOffers = io.github.cchristou3.CyParking.utils.Utility.cloneList(mRegisterLotViewModel!!.slotOfferList)
+                           // Remove the offer from the list
+                           newOffers.removeAt(itemPosition) // Cast to primitive to trigger appropriate method
+                           // Update the adapter's list
+                           mRegisterLotViewModel!!.updateSlotOfferList(newOffers)
+
+                   }
+               }, resources, R.id.slot_offer_item_cv
         ))
+    }
 
     /**
      * Gather all inputted information into a single ParkingLot object
@@ -559,37 +555,6 @@ class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navi
     }
 
     /**
-     * Based on the given view find the [Spinner] with the given spinnerId
-     * and initialize its values. Also, hook it up with an [AdapterView.OnItemSelectedListener].
-     * Whenever the listener gets triggered, set the value of the current spinner to the value of the
-     * [.mRegisterLotViewModel]'s corresponding LiveData member
-     * ([RegisterLotViewModel.updateSelectedDuration]/[RegisterLotViewModel.updateSelectedPrice]).
-     *
-     * @param textInputLayout    A reference of the spinner to be set up.
-     * @param consumer           The interface's method to act as a callback inside the listener.
-     * @param volumeMultiplicand A float determining the sequence of values of the spinner.
-     */
-    private fun setUpSpinner(textInputLayout: TextInputLayout, consumer: Consumer<Float>, volumeMultiplicand: Float) {
-        // Create an array that will hold all the values of the spinner, based on a multiplicand
-        val volume = Utility.getVolume(volumeMultiplicand, 1, 10)
-        setUpSlotOfferDropDownMenu<String>(requireContext(), textInputLayout, volume,
-                object : DropDownMenuHelper.ItemHandler<String> {
-                    override fun onOutput(item: String): String {
-                        return item
-                    }
-
-                    override fun castItem(parent: ListAdapter, position: Int): String {
-                        return parent.getItem(position).toString()
-                    }
-
-                    override fun onItemSelected(item: String) {
-                        // Convert the spinner's value into a float and pass it in, to the consumer's method.
-                        consumer.accept(item.toFloat())
-                    }
-                })
-    }
-
-    /**
      * Called when the "register" button has been clicked.
      *
      * @param v The view that was clicked.
@@ -627,8 +592,7 @@ class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navi
      * [io.github.cchristou3.CyParking.ui.views.user.login.AuthenticatorFragment].
      */
     override fun toAuthenticator() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         RegisterLotFragmentDirections
                                 .actionNavRegisterLotFragmentToNavAuthenticatorFragment()
                 )
@@ -639,8 +603,7 @@ class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navi
      * [io.github.cchristou3.CyParking.ui.views.parking.slots.viewBooking.ViewBookingsFragment].
      */
     override fun toBookings() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         RegisterLotFragmentDirections.actionNavRegisterLotFragmentToNavViewBookings()
                 )
     }
@@ -650,8 +613,7 @@ class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navi
      * [AccountFragment].
      */
     override fun toAccount() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         RegisterLotFragmentDirections.actionNavRegisterLotFragmentToNavAccount()
                 )
     }
@@ -661,8 +623,7 @@ class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navi
      * [io.github.cchristou3.CyParking.ui.views.user.feedback.FeedbackFragment].
      */
     override fun toFeedback() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         RegisterLotFragmentDirections.actionNavRegisterLotFragmentToNavFeedback()
                 )
     }
@@ -672,8 +633,7 @@ class RegisterLotFragment : LocationFragment<RegisterLotFragmentBinding>(), Navi
      * [HomeFragment].
      */
     override fun toHome() {
-        getNavController(requireActivity())
-                .navigate(
+        navigateTo(
                         RegisterLotFragmentDirections.actionNavRegisterLotFragmentToNavHome()
                 )
     }

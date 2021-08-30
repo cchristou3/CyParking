@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 
 import io.github.cchristou3.CyParking.apiClient.model.data.parking.lot.ParkingLot;
 import io.github.cchristou3.CyParking.ui.InstantTaskRuler;
+import io.github.cchristou3.CyParking.ui.views.operator.OperatorViewModel;
 
 import static io.github.cchristou3.CyParking.ui.LiveDataTestUtil.getOrAwaitValue;
 import static org.hamcrest.CoreMatchers.is;

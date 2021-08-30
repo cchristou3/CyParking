@@ -8,10 +8,8 @@ import android.content.Context
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
+import androidx.core.util.Consumer
 import androidx.core.widget.ContentLoadingProgressBar
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.progressindicator.CircularProgressIndicator
@@ -190,4 +188,21 @@ fun getStringOrEmpty(editText: EditText): String {
     return if (editText.text != null) {
         editText.text.toString()
     } else ""
+}
+
+/**
+ * Sets the given [View.OnClickListener] to the caller,
+ * if there is no listener already set.
+ */
+fun View.checkAndSetOnClickListener(listener: View.OnClickListener){
+    if (this.hasOnClickListeners()) return
+    this.setOnClickListener(listener)
+}
+
+/**
+ * Removes the callers [View.OnClickListener] if it has one attached to it.
+ */
+fun View.checkAndRemoveOnClickListener(){
+    if (!this.hasOnClickListeners()) return
+    this.setOnClickListener(null)
 }

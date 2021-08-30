@@ -1,4 +1,4 @@
-package io.github.cchristou3.CyParking.ui.views.home;
+package io.github.cchristou3.CyParking.ui.views.operator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

@@ -7,12 +7,16 @@ import android.widget.EditText;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
 
 import io.github.cchristou3.CyParking.apiClient.model.data.user.LoggedInUser;
+import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModel;
 import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModelFactory;
 
@@ -46,7 +50,7 @@ import io.github.cchristou3.CyParking.ui.views.host.GlobalStateViewModelFactory;
  * @see ViewBinding
  * @see GlobalStateViewModel
  */
-public class BaseFragment<T extends ViewBinding> extends Fragment {
+public abstract class BaseFragment<T extends ViewBinding> extends Fragment {
 
     private T mViewBinding;
     private GlobalStateViewModel mGlobalStateViewModel;

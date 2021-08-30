@@ -16,6 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import io.github.cchristou3.CyParking.R;
 import io.github.cchristou3.CyParking.data.interfaces.Navigable;
 import io.github.cchristou3.CyParking.databinding.FragmentAuthenticationBinding;
+import io.github.cchristou3.CyParking.ui.components.BaseFragment;
+import io.github.cchristou3.CyParking.ui.components.NavigatorFragment;
 import io.github.cchristou3.CyParking.ui.helper.TabHelper;
 import io.github.cchristou3.CyParking.ui.views.home.HomeFragment;
 import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
@@ -28,7 +30,7 @@ import io.github.cchristou3.CyParking.ui.views.user.account.AccountFragment;
  * @author Charalambos Christou
  * @version 6.0 22/04/21
  */
-public class AuthenticatorFragment extends Fragment implements Navigable {
+public class AuthenticatorFragment extends NavigatorFragment<FragmentAuthenticationBinding> {
 
     public AuthenticatorFragment() {/* Required empty public constructor */}
 
@@ -89,11 +91,7 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
      */
     @Override
     public void toBookings() {
-        getNavController(requireActivity())
-                .navigate(
-                        AuthenticatorFragmentDirections
-                                .actionNavAuthenticatorFragmentToNavViewBookings()
-                );
+        navigateTo(AuthenticatorFragmentDirections.actionNavAuthenticatorFragmentToNavViewBookings());
     }
 
     /**
@@ -102,10 +100,7 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
      */
     @Override
     public void toAccount() {
-        getNavController(requireActivity())
-                .navigate(
-                        AuthenticatorFragmentDirections.actionNavAuthenticatorFragmentToNavAccount()
-                );
+        navigateTo(AuthenticatorFragmentDirections.actionNavAuthenticatorFragmentToNavAccount());
     }
 
     /**
@@ -114,10 +109,7 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
      */
     @Override
     public void toFeedback() {
-        getNavController(requireActivity())
-                .navigate(
-                        AuthenticatorFragmentDirections.actionNavAuthenticatorFragmentToNavFeedback()
-                );
+        navigateTo(AuthenticatorFragmentDirections.actionNavAuthenticatorFragmentToNavFeedback());
     }
 
     /**
@@ -126,9 +118,6 @@ public class AuthenticatorFragment extends Fragment implements Navigable {
      */
     @Override
     public void toHome() {
-        getNavController(requireActivity())
-                .navigate(
-                        AuthenticatorFragmentDirections.actionNavAuthenticatorFragmentToNavHome()
-                );
+        navigateTo(AuthenticatorFragmentDirections.actionNavAuthenticatorFragmentToNavHome());
     }
 }

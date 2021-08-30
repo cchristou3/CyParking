@@ -25,7 +25,7 @@ import io.github.cchristou3.CyParking.utils.Utility;
  * parking lot.
  *
  * @author Charalambos Christou
- * @version 5.0 06/02/21
+ * @version 6.0 30/08/21
  */
 public class SlotOffer implements Parcelable, Comparable<SlotOffer> {
 
@@ -40,6 +40,10 @@ public class SlotOffer implements Parcelable, Comparable<SlotOffer> {
             return new SlotOffer[size];
         }
     };
+
+    public enum SlotOfferAttribute {
+        PRICE, DURATION
+    }
 
     // Data members
     @SerializedName("duration")
@@ -68,6 +72,16 @@ public class SlotOffer implements Parcelable, Comparable<SlotOffer> {
     protected SlotOffer(@NotNull Parcel in) {
         durationInHours = in.readFloat();
         price = in.readFloat();
+    }
+
+    /**
+     * Copy Constructor.
+     *
+     * @param offer the object to copy its data members' values from.
+     */
+    public SlotOffer(@NotNull SlotOffer offer) {
+        durationInHours = offer.durationInHours;
+        price = offer.price;
     }
 
     /**

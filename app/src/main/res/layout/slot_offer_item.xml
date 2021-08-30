@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/slot_offer_item__cv"
+    android:id="@+id/slot_offer_item_cv"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="5dp"
     app:cardCornerRadius="15dp"
     app:cardElevation="2dp"
-    tools:viewBindingIgnore="true">
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
+        android:id="@+id/slot_offer_item_cl"
         android:layout_height="wrap_content"
         android:background="@color/placeholder_bg"
         android:padding="10dp">

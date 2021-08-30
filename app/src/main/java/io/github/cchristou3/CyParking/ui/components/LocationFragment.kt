@@ -13,7 +13,7 @@ import mumayank.com.airlocationlibrary.AirLocation
  * @author Charalambos Christou
  * @since 01/08/21
  */
-abstract class LocationFragment<T : ViewBinding> : BaseFragment<T>() {
+abstract class LocationFragment<T : ViewBinding> : NavigatorFragment<T>() {
 
     private val airLocation by lazy {
         initializeLocationApi()

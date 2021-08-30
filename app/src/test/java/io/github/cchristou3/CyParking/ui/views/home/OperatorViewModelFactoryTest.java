@@ -2,6 +2,8 @@ package io.github.cchristou3.CyParking.ui.views.home;
 
 import org.junit.Test;
 
+import io.github.cchristou3.CyParking.ui.views.operator.OperatorViewModel;
+import io.github.cchristou3.CyParking.ui.views.operator.OperatorViewModelFactory;
 import io.github.cchristou3.CyParking.ui.views.parking.slots.booking.BookingViewModel;
 
 import static org.hamcrest.CoreMatchers.is;

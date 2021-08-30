@@ -81,6 +81,7 @@ The application has the following features so far:
 * Register Parking Lot [Operator]
 * Manually update lot availability [Operator]
 * Update lot availability and booking status when scanning QR Codes [Operator]
+* Update a parking lot's slot offers [Operator]
 
 Note: Operators have the same access rights as Users. In this application context, a User is a any user that is logged in. Any non-logged in user
 is refered to a an anonymous user or guest.

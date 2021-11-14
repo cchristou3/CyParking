@@ -29,8 +29,6 @@
   </p>
 </p>
 
-
-
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
 
@@ -86,6 +84,9 @@ The application has the following features so far:
 Note: Operators have the same access rights as Users. In this application context, a User is a any user that is logged in. Any non-logged in user
 is refered to a an anonymous user or guest.
 A list of commonly used resources that I find helpful are listed in the acknowledgements.
+
+### Demo
+[![CyParking Demo](https://gifs.com/gif/cyparking-demo-79DM2j)](https://youtu.be/xREyRybajCQ)
 
 ### Built With
 * [Android Java & Kotlin](https://developer.android.com/)

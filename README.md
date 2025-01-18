@@ -92,6 +92,7 @@ A list of commonly used resources that I find helpful are listed in the acknowle
 * [Android Java & Kotlin](https://developer.android.com/)
 * [Firebase](https://firebase.google.com/)
 * [Node.js](https://nodejs.org/en/)
+* [Stripe](https://stripe.com/docs)
 
 
 
